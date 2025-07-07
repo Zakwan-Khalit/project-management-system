@@ -106,14 +106,18 @@ function togglePassword() {
 
 // Use window.onload to ensure all scripts are loaded
 window.addEventListener('load', function() {
-    console.log('Window loaded, checking jQuery...');
+    console.log('=== Login Form Initialization ===');
+    console.log('Window loaded, checking libraries...');
+    console.log('jQuery:', typeof $ !== 'undefined' ? '✓ Available (v' + $.fn.jquery + ')' : '✗ Not available');
+    console.log('SweetAlert2:', typeof Swal !== 'undefined' ? '✓ Available' : '✗ Not available');
     
     if (typeof $ !== 'undefined') {
-        console.log('jQuery available, version:', $.fn.jquery);
+        console.log('Setting up AJAX login form...');
         
         $('#loginForm').off('submit').on('submit', function(e) {
             e.preventDefault();
             e.stopImmediatePropagation();
+            console.log('=== Login Form Submitted ===');
             console.log('Form submitted via jQuery - AJAX mode');
             
             const $form = $(this);
@@ -124,21 +128,32 @@ window.addEventListener('load', function() {
             $submitButton.html('<i class="fas fa-spinner fa-spin" style="margin-right: 8px;"></i>Signing In...');
             $submitButton.prop('disabled', true);
             
-            console.log('Making AJAX request to:', '<?= base_url('login') ?>');
+            const loginUrl = '<?= base_url('login') ?>';
+            console.log('Making AJAX request to:', loginUrl);
+            console.log('Form data:', $form.serialize());
             
             $.ajax({
-                url: '<?= base_url('login') ?>',
+                url: loginUrl,
                 type: 'POST',
                 data: $form.serialize(),
                 dataType: 'json',
                 headers: {
                     'X-Requested-With': 'XMLHttpRequest'
                 },
+                timeout: 10000, // 10 second timeout
                 success: function(data) {
-                    console.log('AJAX Success:', data);
+                    console.log('=== AJAX Success Response ===');
+                    console.log('Raw response:', data);
+                    console.log('Response type:', typeof data);
+                    console.log('Success property:', data.success);
+                    console.log('Message:', data.message);
+                    console.log('Redirect:', data.redirect);
+                    
                     if (data.success) {
-                        console.log('Login successful, showing success message...');
+                        console.log('Login successful, handling redirect...');
+                        
                         if (typeof Swal !== 'undefined') {
+                            console.log('Using SweetAlert2 for success message...');
                             Swal.fire({
                                 icon: 'success',
                                 title: 'Login Successful!',
@@ -146,18 +161,25 @@ window.addEventListener('load', function() {
                                 confirmButtonText: 'Continue',
                                 confirmButtonColor: '#667eea',
                                 allowOutsideClick: false,
-                                allowEscapeKey: false
+                                allowEscapeKey: false,
+                                timer: 3000,
+                                timerProgressBar: true
                             }).then((result) => {
-                                if (result.isConfirmed) {
-                                    console.log('User clicked OK, redirecting to dashboard...');
-                                    window.location.href = '<?= base_url('dashboard') ?>';
-                                }
+                                console.log('SweetAlert result:', result);
+                                console.log('Redirecting to dashboard...');
+                                const redirectUrl = '<?= base_url('dashboard') ?>';
+                                console.log('Redirect URL:', redirectUrl);
+                                window.location.href = redirectUrl;
                             });
                         } else {
+                            console.log('SweetAlert2 not available, using alert and immediate redirect...');
                             alert('Login successful! Redirecting to dashboard...');
-                            window.location.href = '<?= base_url('dashboard') ?>';
+                            const redirectUrl = '<?= base_url('dashboard') ?>';
+                            console.log('Redirect URL:', redirectUrl);
+                            window.location.href = redirectUrl;
                         }
                     } else {
+                        console.log('Login failed:', data.message);
                         if (typeof Swal !== 'undefined') {
                             Swal.fire({
                                 icon: 'error',
@@ -171,7 +193,13 @@ window.addEventListener('load', function() {
                     }
                 },
                 error: function(xhr, status, error) {
-                    console.error('AJAX Error:', status, error, xhr.responseText);
+                    console.error('=== AJAX Error ===');
+                    console.error('XHR Status:', xhr.status);
+                    console.error('Status Text:', status);
+                    console.error('Error:', error);
+                    console.error('Response Text:', xhr.responseText);
+                    console.error('Ready State:', xhr.readyState);
+                    
                     if (typeof Swal !== 'undefined') {
                         Swal.fire({
                             icon: 'error',
@@ -184,6 +212,7 @@ window.addEventListener('load', function() {
                     }
                 },
                 complete: function() {
+                    console.log('AJAX request completed, resetting button...');
                     // Reset button
                     $submitButton.html(originalText);
                     $submitButton.prop('disabled', false);
@@ -193,9 +222,17 @@ window.addEventListener('load', function() {
             return false;
         });
         
-        console.log('Form handler attached successfully');
+        console.log('✓ AJAX form handler attached successfully');
     } else {
-        console.error('jQuery not available!');
+        console.error('✗ jQuery not available! Form will use standard submission');
+        
+        // Fallback for when jQuery is not available
+        document.getElementById('loginForm').addEventListener('submit', function(e) {
+            console.log('Using fallback form submission (no AJAX)');
+            // Let the form submit normally
+        });
     }
+    
+    console.log('=== Login Form Initialization Complete ===');
 });
 </script>

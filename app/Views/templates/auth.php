@@ -66,22 +66,26 @@
     <!-- Bootstrap JS -->
     <script src="<?= base_url('assets/js/bootstrap/bootstrap.bundle.min.js') ?>"></script>
     
-    <!-- jQuery -->
-    <script src="<?= base_url('assets/js/jquery/jquery.min.js') ?>"></script>
+    <!-- jQuery - Force CDN for now -->
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
     <script>
-    // jQuery fallback
-    if (typeof $ === 'undefined') {
-        document.write('<script src="https://code.jquery.com/jquery-3.6.0.min.js"><\/script>');
-    }
+    console.log('jQuery loaded from CDN, version:', $.fn.jquery);
     </script>
     
-    <!-- SweetAlert2 -->
-    <script src="<?= base_url('assets/js/sweetalert2/sweetalert2.min.js') ?>"></script>
+    <!-- SweetAlert2 - Force CDN for now -->
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
     <script>
-    // SweetAlert2 fallback
-    if (typeof Swal === 'undefined') {
-        document.write('<script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"><\/script>');
-    }
+    console.log('SweetAlert2 loaded from CDN');
+    </script>
+    
+    <!-- Library verification -->
+    <script>
+    window.addEventListener('load', function() {
+        console.log('=== Library Status Check ===');
+        console.log('jQuery:', typeof $ !== 'undefined' ? '✓ Available (v' + $.fn.jquery + ')' : '✗ Not available');
+        console.log('SweetAlert2:', typeof Swal !== 'undefined' ? '✓ Available' : '✗ Not available');
+        console.log('===============================');
+    });
     </script>
     
     <?php if (isset($additional_js)): ?>

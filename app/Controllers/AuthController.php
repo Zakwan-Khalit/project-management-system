@@ -3,18 +3,24 @@
 namespace App\Controllers;
 
 use App\Models\UserModel;
+use App\Models\UserProfileModel;
+use App\Models\UserRoleModel;
 use App\Models\RoleModel;
 use App\Models\ActivityLogModel;
 
 class AuthController extends BaseController
 {
     protected $userModel;
+    protected $userProfileModel;
+    protected $userRoleModel;
     protected $roleModel;
     protected $activityLog;
     
     public function __construct()
     {
         $this->userModel = new UserModel();
+        $this->userProfileModel = new UserProfileModel();
+        $this->userRoleModel = new UserRoleModel();
         $this->roleModel = new RoleModel();
         $this->activityLog = new ActivityLogModel();
     }
@@ -30,44 +36,53 @@ class AuthController extends BaseController
             
             log_message('info', 'Attempting login for email: ' . $email);
             
-            $user = $this->userModel->getUserByEmail($email);
-            
-            if ($user && password_verify($password, $user['password'])) {
-                if ($user['is_active']) {
-                    log_message('info', 'Login successful for user ID: ' . $user['id']);
-                    
-                    // Update last login
-                    $this->userModel->updateLastLogin($user['id']);
-                    
-                    // Set session data
-                    $sessionData = [
-                        'id' => $user['id'],
-                        'email' => $user['email'],
-                        'first_name' => $user['first_name'],
-                        'last_name' => $user['last_name'],
-                        'role_id' => $user['role_id'] ?? null,
-                        'avatar' => $user['avatar'] ?? null,
-                        'is_logged_in' => true
-                    ];
-                    
-                    session()->set('userdata', $sessionData);
-                    session()->set('is_logged_in', true);
-                    
-                    return $this->response->setJSON([
-                        'success' => true,
-                        'message' => 'Login successful',
-                        'redirect' => base_url('dashboard')
-                    ]);
+            try {
+                $user = $this->userModel->getUserByEmail($email);
+                
+                if ($user && password_verify($password, $user['password'])) {
+                    if ($user['is_active']) {
+                        log_message('info', 'Login successful for user ID: ' . $user['id']);
+                        
+                        // Update last login
+                        $this->userModel->updateLastLogin($user['id']);
+                        
+                        // Set session data
+                        $sessionData = [
+                            'id' => $user['id'],
+                            'email' => $user['email'],
+                            'first_name' => $user['first_name'] ?? '',
+                            'last_name' => $user['last_name'] ?? '',
+                            'role_id' => $user['role_id'] ?? null,
+                            'role_name' => $user['role_name'] ?? '',
+                            'avatar' => $user['avatar'] ?? null,
+                            'is_logged_in' => true
+                        ];
+                        
+                        session()->set('userdata', $sessionData);
+                        session()->set('is_logged_in', true);
+                        
+                        return $this->response->setJSON([
+                            'success' => true,
+                            'message' => 'Login successful',
+                            'redirect' => base_url('dashboard')
+                        ]);
+                    } else {
+                        return $this->response->setJSON([
+                            'success' => false,
+                            'message' => 'Account is deactivated'
+                        ]);
+                    }
                 } else {
                     return $this->response->setJSON([
                         'success' => false,
-                        'message' => 'Account is deactivated'
+                        'message' => 'Invalid email or password'
                     ]);
                 }
-            } else {
+            } catch (\Exception $e) {
+                log_message('error', 'Login error: ' . $e->getMessage());
                 return $this->response->setJSON([
                     'success' => false,
-                    'message' => 'Invalid email or password'
+                    'message' => 'Unable to connect to server. Please check your connection and try again.'
                 ]);
             }
         }
