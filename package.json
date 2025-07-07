@@ -1,0 +1,46 @@
+{
+  "name": "project-management-system",
+  "version": "1.0.0",
+  "description": "A comprehensive project management system built with CodeIgniter 4",
+  "main": "index.js",
+  "scripts": {
+    "dev": "php spark serve",
+    "build": "echo 'Build process for production'",
+    "install-deps": "npm install",
+    "migrate": "php spark migrate",
+    "migrate:rollback": "php spark migrate:rollback",
+    "migrate:refresh": "php spark migrate:refresh",
+    "serve": "php spark serve --host 0.0.0.0 --port 8080"
+  },
+  "dependencies": {
+    "bootstrap": "^5.3.0",
+    "sweetalert2": "^11.7.0",
+    "chart.js": "^4.3.0",
+    "sortablejs": "^1.15.0",
+    "@fortawesome/fontawesome-free": "^6.4.0",
+    "apexcharts": "^3.41.0"
+  },
+  "devDependencies": {},
+  "keywords": [
+    "codeigniter4",
+    "php",
+    "project-management",
+    "bootstrap",
+    "sweetalert2",
+    "chartjs",
+    "task-management",
+    "team-collaboration",
+    "dashboard",
+    "kanban"
+  ],
+  "author": "Project Management System Team",
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/your-username/project-management-system.git"
+  },
+  "bugs": {
+    "url": "https://github.com/your-username/project-management-system/issues"
+  },
+  "homepage": "https://github.com/your-username/project-management-system#readme"
+}
