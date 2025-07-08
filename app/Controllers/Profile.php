@@ -9,11 +9,13 @@ class Profile extends BaseController
 {
     protected $userModel;
     protected $activityLogModel;
+    protected $template;
 
     public function __construct()
     {
         $this->userModel = new UserModel();
         $this->activityLogModel = new ActivityLogModel();
+        $this->template = new \App\Libraries\Template();
     }
 
     public function index()
@@ -30,10 +32,7 @@ class Profile extends BaseController
         }
 
         // Get recent activity for the user
-        $recentActivity = $this->activityLogModel->where('user_id', $userId)
-            ->orderBy('created_at', 'DESC')
-            ->limit(10)
-            ->findAll();
+        $recentActivity = $this->activityLogModel->getUserActivity($userId, 10);
 
         $data = [
             'title' => 'My Profile',

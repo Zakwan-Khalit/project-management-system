@@ -995,9 +995,13 @@
                 <i class="fas fa-project-diagram"></i>
                 <span>Projects</span>
             </a>
-            <a href="<?= base_url('tasks') ?>" class="nav-link <?= strpos(current_url(), 'tasks') !== false ? 'active' : '' ?>" data-tooltip="Tasks">
+            <a href="<?= base_url('tasks') ?>" class="nav-link <?= strpos(current_url(), 'tasks') !== false && strpos(current_url(), 'myTasks') === false ? 'active' : '' ?>" data-tooltip="Tasks">
                 <i class="fas fa-tasks"></i>
                 <span>Tasks</span>
+            </a>
+            <a href="<?= base_url('tasks/myTasks') ?>" class="nav-link <?= strpos(current_url(), 'myTasks') !== false ? 'active' : '' ?>" data-tooltip="My Tasks">
+                <i class="fas fa-user-tasks"></i>
+                <span>My Tasks</span>
             </a>
             <a href="<?= base_url('tasks/kanban_select') ?>" class="nav-link <?= strpos(current_url(), 'kanban') !== false ? 'active' : '' ?>" data-tooltip="Kanban">
                 <i class="fas fa-columns"></i>

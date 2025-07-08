@@ -38,39 +38,44 @@ class Home extends BaseController
         $userData = session('userdata');
         $userId = $userData['id'] ?? null;
         
-        // Ensure user is logged in and has valid user ID
-        if (!$userId || !is_numeric($userId)) {
+        if (!$userId) {
             return redirect()->to(base_url('login'));
         }
         
-        // Ensure user ID is integer
-        $userId = (int)$userId;
-        
         try {
-            // Get dashboard data with error handling
-            $projects = $this->projectModel->getUserProjects($userId);
-            $myTasks = $this->taskModel->getUserTasks($userId);
-            $overdueTasks = $this->taskModel->getOverdueTasks();
-            $recentActivities = $this->activityLog->getRecentActivities(10);
-            
-            // Get statistics
+            // Get dashboard stats
             $stats = $this->getDashboardStats($userId);
             
+            // Get recent projects
+            $projects = $this->projectModel->getUserProjects($userId, 5);
+            
+            // Get user's tasks
+            $myTasks = $this->taskModel->getUserTasks($userId, 5);
+            
+            // Get recent activities
+            $recentActivities = $this->activityLog->getRecentActivity(10);
+            
             $data = [
-                'title' => 'Dashboard',
-                'user' => $userData, // Pass the entire userdata array
-                'projects' => $projects,
-                'myTasks' => $myTasks,
-                'overdueTasks' => $overdueTasks,
-                'recentActivities' => $recentActivities,
-                'stats' => $stats
+                'stats' => $stats,
+                'projects' => $projects ?? [],
+                'myTasks' => $myTasks ?? [],
+                'recentActivities' => $recentActivities ?? [],
+                'teamCount' => $this->userModel->countAll()
             ];
             
-            $this->template->member('dashboard', $data);
+            return $this->template->member('dashboard', $data);
         } catch (\Exception $e) {
             log_message('error', 'Dashboard error: ' . $e->getMessage());
-            // Redirect to login if there's a database error (might be session issue)
-            return redirect()->to(base_url('login'));
+            
+            // Return dashboard with empty data on error
+            $data = [
+                'stats' => [],
+                'projects' => [],
+                'myTasks' => [],
+                'recentActivities' => []
+            ];
+            
+            return $this->template->member('dashboard', $data);
         }
     }
     
@@ -96,32 +101,11 @@ class Home extends BaseController
         }
         
         $userId = (int)$userId;
-        $db = \Config\Database::connect();
         
         try {
-            // Project stats - projects table doesn't have is_deleted field
-            $projectStats = $db->query("
-                SELECT 
-                    COUNT(*) as total_projects,
-                    COUNT(CASE WHEN status = 'active' THEN 1 END) as active_projects,
-                    COUNT(CASE WHEN status = 'completed' THEN 1 END) as completed_projects,
-                    COUNT(CASE WHEN status = 'on_hold' THEN 1 END) as on_hold_projects
-                FROM projects p
-                JOIN project_members pm ON pm.project_id = p.id
-                WHERE pm.user_id = ?
-            ", [$userId])->getRowArray();
-            
-            // Task stats
-            $taskStats = $db->query("
-                SELECT 
-                    COUNT(*) as total_tasks,
-                    COUNT(CASE WHEN status = 'completed' THEN 1 END) as completed_tasks,
-                    COUNT(CASE WHEN status = 'in_progress' THEN 1 END) as in_progress_tasks,
-                    COUNT(CASE WHEN status = 'pending' THEN 1 END) as pending_tasks,
-                    COUNT(CASE WHEN due_date < CURDATE() AND status != 'completed' THEN 1 END) as overdue_tasks
-                FROM tasks 
-                WHERE assigned_to = ? AND is_delete = 0
-            ", [$userId])->getRowArray();
+            // Use model methods instead of direct database queries
+            $projectStats = $this->projectModel->getDashboardProjectStats($userId);
+            $taskStats = $this->taskModel->getDashboardTaskStats($userId);
             
             return [
                 'projects' => $projectStats ?: [
@@ -186,36 +170,17 @@ class Home extends BaseController
     
     private function getTaskStatusChart($userId)
     {
-        $db = \Config\Database::connect();
-        
-        $data = $db->query("
-            SELECT 
-                status,
-                COUNT(*) as count
-            FROM tasks 
-            WHERE assigned_to = ? AND is_delete = 0
-            GROUP BY status
-        ", [$userId])->getResultArray();
-        
-        $labels = [];
-        $values = [];
-        $colors = [
-            'pending' => '#ffc107',
-            'in_progress' => '#007bff',
-            'review' => '#fd7e14',
-            'completed' => '#28a745'
-        ];
-        
-        foreach ($data as $row) {
-            $labels[] = ucfirst(str_replace('_', ' ', $row['status']));
-            $values[] = $row['count'];
+        try {
+            // Use model method instead of direct database query
+            return $this->taskModel->getTaskStatusChartData($userId);
+        } catch (\Exception $e) {
+            log_message('error', 'getTaskStatusChart error: ' . $e->getMessage());
+            return $this->response->setJSON([
+                'labels' => [],
+                'data' => [],
+                'colors' => []
+            ]);
         }
-        
-        return $this->response->setJSON([
-            'labels' => $labels,
-            'data' => $values,
-            'colors' => array_values($colors)
-        ]);
     }
     
     private function getProjectProgressChart($userId)
@@ -238,36 +203,17 @@ class Home extends BaseController
     
     private function getTaskPriorityChart($userId)
     {
-        $db = \Config\Database::connect();
-        
-        $data = $db->query("
-            SELECT 
-                priority,
-                COUNT(*) as count
-            FROM tasks 
-            WHERE assigned_to = ? AND is_delete = 0
-            GROUP BY priority
-        ", [$userId])->getResultArray();
-        
-        $labels = [];
-        $values = [];
-        $colors = [
-            'low' => '#28a745',
-            'medium' => '#ffc107',
-            'high' => '#fd7e14',
-            'critical' => '#dc3545'
-        ];
-        
-        foreach ($data as $row) {
-            $labels[] = ucfirst($row['priority']);
-            $values[] = $row['count'];
+        try {
+            // Use model method instead of direct database query
+            return $this->taskModel->getTaskPriorityChartData($userId);
+        } catch (\Exception $e) {
+            log_message('error', 'getTaskPriorityChart error: ' . $e->getMessage());
+            return $this->response->setJSON([
+                'labels' => [],
+                'data' => [],
+                'colors' => []
+            ]);
         }
-        
-        return $this->response->setJSON([
-            'labels' => $labels,
-            'data' => $values,
-            'colors' => array_values($colors)
-        ]);
     }
     
     public function refresh()
@@ -288,11 +234,19 @@ class Home extends BaseController
     
     public function activityFeed()
     {
-        $userId = user_id();
+        $userData = session('userdata');
+        $userId = $userData['id'] ?? null;
+        
+        if (!$userId) {
+            return $this->response->setJSON([
+                'success' => false,
+                'message' => 'Session expired'
+            ]);
+        }
         
         try {
-            // Get recent activities - simplified for demo
-            $activities = $this->activityLog->getRecentActivities($userId, 10);
+            // Get recent activities - use getUserActivity for user-specific activities
+            $activities = $this->activityLog->getUserActivity($userId, 10);
             
             return $this->response->setJSON([
                 'success' => true,

@@ -14,7 +14,7 @@
 
         <!-- Login Form -->
         <div style="padding: 40px 30px;">
-            <form id="loginForm" method="post" action="#" novalidate>
+            <form id="loginForm" method="post" novalidate>
                 <!-- Email Input -->
                 <div style="margin-bottom: 25px;">
                     <label style="display: block; margin-bottom: 8px; color: #333; font-weight: 500; font-size: 0.9rem;">
@@ -116,13 +116,40 @@ window.addEventListener('load', function() {
         
         $('#loginForm').off('submit').on('submit', function(e) {
             e.preventDefault();
+            e.stopPropagation();
             e.stopImmediatePropagation();
+            
             console.log('=== Login Form Submitted ===');
             console.log('Form submitted via jQuery - AJAX mode');
+            console.log('Event prevented:', e.isDefaultPrevented());
             
             const $form = $(this);
             const $submitButton = $form.find('button[type="submit"]');
             const originalText = $submitButton.html();
+            
+            // Get form data
+            const formData = {
+                email: $form.find('input[name="email"]').val(),
+                password: $form.find('input[name="password"]').val(),
+                remember: $form.find('input[name="remember"]').is(':checked')
+            };
+            
+            console.log('Form data:', formData);
+            
+            // Basic validation
+            if (!formData.email || !formData.password) {
+                if (typeof Swal !== 'undefined') {
+                    Swal.fire({
+                        icon: 'warning',
+                        title: 'Missing Information',
+                        text: 'Please enter both email and password.',
+                        confirmButtonColor: '#667eea'
+                    });
+                } else {
+                    alert('Please enter both email and password.');
+                }
+                return false;
+            }
             
             // Show loading state
             $submitButton.html('<i class="fas fa-spinner fa-spin" style="margin-right: 8px;"></i>Signing In...');
@@ -130,17 +157,17 @@ window.addEventListener('load', function() {
             
             const loginUrl = '<?= base_url('login') ?>';
             console.log('Making AJAX request to:', loginUrl);
-            console.log('Form data:', $form.serialize());
             
             $.ajax({
                 url: loginUrl,
                 type: 'POST',
-                data: $form.serialize(),
+                data: formData,
                 dataType: 'json',
                 headers: {
-                    'X-Requested-With': 'XMLHttpRequest'
+                    'X-Requested-With': 'XMLHttpRequest',
+                    'Content-Type': 'application/x-www-form-urlencoded'
                 },
-                timeout: 10000, // 10 second timeout
+                timeout: 15000, // 15 second timeout
                 success: function(data) {
                     console.log('=== AJAX Success Response ===');
                     console.log('Raw response:', data);
@@ -149,47 +176,56 @@ window.addEventListener('load', function() {
                     console.log('Message:', data.message);
                     console.log('Redirect:', data.redirect);
                     
-                    if (data.success) {
+                    if (data && data.success === true) {
                         console.log('Login successful, handling redirect...');
+                        
+                        // Prevent any further form submissions
+                        $form.off('submit');
+                        $submitButton.prop('disabled', true);
                         
                         if (typeof Swal !== 'undefined') {
                             console.log('Using SweetAlert2 for success message...');
                             Swal.fire({
                                 icon: 'success',
                                 title: 'Login Successful!',
-                                text: 'Welcome back! You will be redirected to the dashboard.',
+                                text: 'Welcome back! Redirecting to dashboard...',
                                 confirmButtonText: 'Continue',
                                 confirmButtonColor: '#667eea',
                                 allowOutsideClick: false,
                                 allowEscapeKey: false,
-                                timer: 3000,
-                                timerProgressBar: true
+                                timer: 1500,
+                                timerProgressBar: true,
+                                showConfirmButton: false
                             }).then((result) => {
-                                console.log('SweetAlert result:', result);
-                                console.log('Redirecting to dashboard...');
-                                const redirectUrl = '<?= base_url('dashboard') ?>';
+                                console.log('SweetAlert completed, redirecting...');
+                                const redirectUrl = data.redirect || '<?= base_url('dashboard') ?>';
                                 console.log('Redirect URL:', redirectUrl);
                                 window.location.href = redirectUrl;
                             });
                         } else {
-                            console.log('SweetAlert2 not available, using alert and immediate redirect...');
-                            alert('Login successful! Redirecting to dashboard...');
-                            const redirectUrl = '<?= base_url('dashboard') ?>';
+                            console.log('SweetAlert2 not available, using immediate redirect...');
+                            const redirectUrl = data.redirect || '<?= base_url('dashboard') ?>';
                             console.log('Redirect URL:', redirectUrl);
-                            window.location.href = redirectUrl;
+                            setTimeout(function() {
+                                window.location.href = redirectUrl;
+                            }, 500);
                         }
                     } else {
-                        console.log('Login failed:', data.message);
+                        console.log('Login failed:', data.message || 'Unknown error');
                         if (typeof Swal !== 'undefined') {
                             Swal.fire({
                                 icon: 'error',
                                 title: 'Login Failed',
-                                text: data.message || 'Invalid credentials',
+                                text: data.message || 'Invalid credentials. Please check your email and password.',
                                 confirmButtonColor: '#667eea'
                             });
                         } else {
                             alert('Login Failed: ' + (data.message || 'Invalid credentials'));
                         }
+                        
+                        // Reset button
+                        $submitButton.html(originalText);
+                        $submitButton.prop('disabled', false);
                     }
                 },
                 error: function(xhr, status, error) {
@@ -200,25 +236,35 @@ window.addEventListener('load', function() {
                     console.error('Response Text:', xhr.responseText);
                     console.error('Ready State:', xhr.readyState);
                     
+                    // Try to parse response as JSON in case server returned JSON error
+                    let errorMessage = 'Unable to connect to server. Please check your connection and try again.';
+                    try {
+                        const response = JSON.parse(xhr.responseText);
+                        if (response.message) {
+                            errorMessage = response.message;
+                        }
+                    } catch (e) {
+                        console.log('Response is not JSON:', xhr.responseText);
+                    }
+                    
                     if (typeof Swal !== 'undefined') {
                         Swal.fire({
                             icon: 'error',
                             title: 'Connection Error',
-                            text: 'Unable to connect to server. Please check your connection and try again.',
+                            text: errorMessage,
                             confirmButtonColor: '#667eea'
                         });
                     } else {
-                        alert('Connection error. Please try again.');
+                        alert('Error: ' + errorMessage);
                     }
-                },
-                complete: function() {
-                    console.log('AJAX request completed, resetting button...');
+                    
                     // Reset button
                     $submitButton.html(originalText);
                     $submitButton.prop('disabled', false);
                 }
             });
             
+            // Absolutely prevent any form submission
             return false;
         });
         
@@ -229,7 +275,7 @@ window.addEventListener('load', function() {
         // Fallback for when jQuery is not available
         document.getElementById('loginForm').addEventListener('submit', function(e) {
             console.log('Using fallback form submission (no AJAX)');
-            // Let the form submit normally
+            // Let the form submit normally to the server
         });
     }
     

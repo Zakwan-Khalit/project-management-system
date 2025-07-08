@@ -43,41 +43,61 @@ class Projects extends BaseController
             ]
         ];
         
-        $this->template->member('projects/index', $data);
+        return $this->template->member('projects/index', $data);
     }
     
     public function create()
     {
+        $userData = session('userdata');
+        $userId = $userData['id'] ?? null;
+        
+        if (!$userId) {
+            return redirect()->to(base_url('login'));
+        }
+
         if ($this->request->getMethod() === 'POST') {
-            $data = [
+            // Get lookup IDs for status and priority
+            $statusLookup = $this->db->table('status_lookup')
+                                   ->where('type', 'project')
+                                   ->where('code', $this->request->getPost('status') ?: 'planning')
+                                   ->get()->getRowArray();
+            
+            $priorityLookup = $this->db->table('priority_lookup')
+                                     ->where('type', 'project')
+                                     ->where('code', $this->request->getPost('priority') ?: 'medium')
+                                     ->get()->getRowArray();
+            
+            $projectData = [
                 'name' => $this->request->getPost('name'),
+                'code' => $this->request->getPost('code'),
                 'description' => $this->request->getPost('description'),
-                'status' => $this->request->getPost('status') ?: 'planning',
-                'priority' => $this->request->getPost('priority') ?: 'medium',
                 'start_date' => $this->request->getPost('start_date'),
                 'end_date' => $this->request->getPost('end_date'),
                 'budget' => $this->request->getPost('budget'),
-                'created_by' => user_id(),
                 'progress' => 0
             ];
             
-            if ($projectId = $this->projectModel->insert($data)) {
-                // Add creator as project lead
-                $db = \Config\Database::connect();
-                $db->table('project_members')->insert([
-                    'project_id' => $projectId,
-                    'user_id' => user_id(),
-                    'role' => 'lead',
-                    'joined_at' => date('Y-m-d H:i:s'),
-                    'created_at' => date('Y-m-d H:i:s')
-                ]);
+            if ($projectId = $this->projectModel->createProject($projectData)) {
+                // Set project status
+                if ($statusLookup) {
+                    $this->projectModel->setProjectStatus($projectId, $statusLookup['id'], $userId);
+                }
+                
+                // Set project priority
+                if ($priorityLookup) {
+                    $this->projectModel->setProjectPriority($projectId, $priorityLookup['id'], $userId);
+                }
+                
+                // Add creator as project manager
+                $this->projectModel->addProjectMember($projectId, $userId, 'manager', $userId);
                 
                 // Log activity
                 $this->activityLog->logActivity([
-                    'user_id' => user_id(),
-                    'project_id' => $projectId,
+                    'user_id' => $userId,
                     'action' => 'project_created',
-                    'description' => 'Created project: ' . $data['name']
+                    'table_name' => 'projects',
+                    'record_id' => $projectId,
+                    'new_values' => json_encode($projectData)
                 ]);
                 
                 return $this->response->setJSON([
@@ -88,8 +108,7 @@ class Projects extends BaseController
             } else {
                 return $this->response->setJSON([
                     'success' => false,
-                    'message' => 'Failed to create project',
-                    'errors' => $this->projectModel->errors()
+                    'message' => 'Failed to create project'
                 ]);
             }
         }
@@ -99,7 +118,7 @@ class Projects extends BaseController
     
     public function view($id)
     {
-        $project = $this->projectModel->find($id);
+        $project = $this->projectModel->getProjectById($id);
         if (!$project) {
             throw \CodeIgniter\Exceptions\PageNotFoundException::forPageNotFound();
         }
@@ -107,9 +126,10 @@ class Projects extends BaseController
         $tasks = $this->taskModel->getKanbanTasks($id);
         $members = $this->userModel->getProjectMembers($id);
         $stats = $this->projectModel->getProjectStats($id);
-        $activities = $this->activityLog->getProjectActivities($id, 10);
+        $activities = $this->activityLog->getProjectActivity($id, 10);
         
         $data = [
+            'title' => $project['name'],
             'project' => $project,
             'tasks' => $tasks,
             'members' => $members,
@@ -121,40 +141,68 @@ class Projects extends BaseController
             ]
         ];
         
-        return $this->template
-            ->set('title', $project['name'] . ' - Project Management System')
-            ->set('page_title', 'Project: ' . $project['name'])
-            ->set($data)
-            ->member('projects/view');
+        return $this->template->member('projects/view', $data);
     }
     
     public function edit($id)
     {
-        $project = $this->projectModel->find($id);
+        $userData = session('userdata');
+        $userId = $userData['id'] ?? null;
+        
+        if (!$userId) {
+            return redirect()->to(base_url('login'));
+        }
+
+        $project = $this->projectModel->getProjectById($id);
         if (!$project) {
             throw \CodeIgniter\Exceptions\PageNotFoundException::forPageNotFound();
         }
         
         if ($this->request->getMethod() === 'POST') {
-            $data = [
+            $oldData = $project;
+            
+            $projectData = [
                 'name' => $this->request->getPost('name'),
+                'code' => $this->request->getPost('code'),
                 'description' => $this->request->getPost('description'),
-                'status' => $this->request->getPost('status'),
-                'priority' => $this->request->getPost('priority'),
                 'start_date' => $this->request->getPost('start_date'),
                 'end_date' => $this->request->getPost('end_date'),
                 'budget' => $this->request->getPost('budget')
             ];
             
-            if ($this->projectModel->update($id, $data)) {
+            if ($this->projectModel->updateProject($id, $projectData)) {
+                // Update status if provided
+                $newStatus = $this->request->getPost('status');
+                if ($newStatus) {
+                    $statusLookup = $this->db->table('status_lookup')
+                                           ->where('type', 'project')
+                                           ->where('code', $newStatus)
+                                           ->get()->getRowArray();
+                    if ($statusLookup) {
+                        $this->projectModel->setProjectStatus($id, $statusLookup['id'], $userId);
+                    }
+                }
+                
+                // Update priority if provided
+                $newPriority = $this->request->getPost('priority');
+                if ($newPriority) {
+                    $priorityLookup = $this->db->table('priority_lookup')
+                                             ->where('type', 'project')
+                                             ->where('code', $newPriority)
+                                             ->get()->getRowArray();
+                    if ($priorityLookup) {
+                        $this->projectModel->setProjectPriority($id, $priorityLookup['id'], $userId);
+                    }
+                }
+                
                 // Log activity
                 $this->activityLog->logActivity([
-                    'user_id' => session('user_id'),
-                    'project_id' => $id,
+                    'user_id' => $userId,
                     'action' => 'project_updated',
-                    'description' => 'Updated project: ' . $data['name'],
-                    'old_values' => $project,
-                    'new_values' => $data
+                    'table_name' => 'projects',
+                    'record_id' => $id,
+                    'old_values' => json_encode($oldData),
+                    'new_values' => json_encode($projectData)
                 ]);
                 
                 return $this->response->setJSON([
@@ -164,8 +212,7 @@ class Projects extends BaseController
             } else {
                 return $this->response->setJSON([
                     'success' => false,
-                    'message' => 'Failed to update project',
-                    'errors' => $this->projectModel->errors()
+                    'message' => 'Failed to update project'
                 ]);
             }
         }
@@ -175,7 +222,17 @@ class Projects extends BaseController
     
     public function delete($id)
     {
-        $project = $this->projectModel->find($id);
+        $userData = session('userdata');
+        $userId = $userData['id'] ?? null;
+        
+        if (!$userId) {
+            return $this->response->setJSON([
+                'success' => false,
+                'message' => 'Session expired'
+            ]);
+        }
+
+        $project = $this->projectModel->getProjectById($id);
         if (!$project) {
             return $this->response->setJSON([
                 'success' => false,
@@ -183,13 +240,14 @@ class Projects extends BaseController
             ]);
         }
         
-        if ($this->projectModel->delete($id)) {
+        if ($this->projectModel->deleteProject($id)) {
             // Log activity
             $this->activityLog->logActivity([
-                'user_id' => session('user_id'),
-                'project_id' => $id,
+                'user_id' => $userId,
                 'action' => 'project_deleted',
-                'description' => 'Deleted project: ' . $project['name']
+                'table_name' => 'projects',
+                'record_id' => $id,
+                'old_values' => json_encode($project)
             ]);
             
             return $this->response->setJSON([
@@ -206,43 +264,38 @@ class Projects extends BaseController
     
     public function addMember($projectId)
     {
-        $userId = $this->request->getPost('user_id');
+        $userData = session('userdata');
+        $userId = $userData['id'] ?? null;
+        
+        if (!$userId) {
+            return $this->response->setJSON([
+                'success' => false,
+                'message' => 'Session expired'
+            ]);
+        }
+
+        $memberUserId = $this->request->getPost('user_id');
         $role = $this->request->getPost('role') ?: 'member';
         
-        $db = \Config\Database::connect();
-        
-        // Check if user is already a member
-        $existing = $db->table('project_members')
-                      ->where('project_id', $projectId)
-                      ->where('user_id', $userId)
-                      ->get()
-                      ->getRowArray();
-        
-        if ($existing) {
+        // Check if user is already a member using model method
+        if ($this->projectModel->checkProjectMemberExists($projectId, $memberUserId)) {
             return $this->response->setJSON([
                 'success' => false,
                 'message' => 'User is already a member of this project'
             ]);
         }
         
-        $data = [
-            'project_id' => $projectId,
-            'user_id' => $userId,
-            'role' => $role,
-            'joined_at' => date('Y-m-d H:i:s'),
-            'created_at' => date('Y-m-d H:i:s')
-        ];
-        
-        if ($db->table('project_members')->insert($data)) {
-            $user = $this->userModel->find($userId);
-            $project = $this->projectModel->find($projectId);
+        // Add member using model method
+        if ($this->projectModel->addProjectMember($projectId, $memberUserId, $role, $userId)) {
+            $user = $this->userModel->getUserById($memberUserId);
             
             // Log activity
             $this->activityLog->logActivity([
-                'user_id' => session('user_id'),
-                'project_id' => $projectId,
+                'user_id' => $userId,
                 'action' => 'member_added',
-                'description' => 'Added ' . $user['first_name'] . ' ' . $user['last_name'] . ' to project'
+                'table_name' => 'project_members',
+                'record_id' => $projectId,
+                'new_values' => json_encode(['user_id' => $memberUserId, 'role' => $role])
             ]);
             
             return $this->response->setJSON([
@@ -257,23 +310,29 @@ class Projects extends BaseController
         }
     }
     
-    public function removeMember($projectId, $userId)
+    public function removeMember($projectId, $memberUserId)
     {
-        $db = \Config\Database::connect();
+        $userData = session('userdata');
+        $userId = $userData['id'] ?? null;
         
-        if ($db->table('project_members')
-              ->where('project_id', $projectId)
-              ->where('user_id', $userId)
-              ->delete()) {
-            
-            $user = $this->userModel->find($userId);
+        if (!$userId) {
+            return $this->response->setJSON([
+                'success' => false,
+                'message' => 'Session expired'
+            ]);
+        }
+
+        // Remove member using model method
+        if ($this->projectModel->removeProjectMember($projectId, $memberUserId)) {
+            $user = $this->userModel->getUserById($memberUserId);
             
             // Log activity
             $this->activityLog->logActivity([
-                'user_id' => session('user_id'),
-                'project_id' => $projectId,
+                'user_id' => $userId,
                 'action' => 'member_removed',
-                'description' => 'Removed ' . $user['first_name'] . ' ' . $user['last_name'] . ' from project'
+                'table_name' => 'project_members',
+                'record_id' => $projectId,
+                'old_values' => json_encode(['user_id' => $memberUserId])
             ]);
             
             return $this->response->setJSON([
@@ -301,78 +360,15 @@ class Projects extends BaseController
             ]);
         }
 
-        $status = $this->request->getGet('status');
-        $priority = $this->request->getGet('priority');
-        $search = $this->request->getGet('search');
+        // Get filter parameters
+        $filters = [
+            'status' => $this->request->getGet('status'),
+            'priority' => $this->request->getGet('priority'),
+            'search' => $this->request->getGet('search')
+        ];
 
-        // Get projects with detailed information using simpler approach
-        $builder = $this->projectModel->select('
-            projects.*, 
-            creator.first_name as creator_first_name,
-            creator.last_name as creator_last_name
-        ')
-        ->join('users as creator', 'creator.id = projects.created_by')
-        ->where('projects.is_delete', 0);
-
-        // Apply filters
-        if ($status && $status !== '') {
-            $builder->where('projects.status', $status);
-        }
-        
-        if ($priority && $priority !== '') {
-            $builder->where('projects.priority', $priority);
-        }
-        
-        if ($search) {
-            $builder->groupStart()
-                   ->like('projects.name', $search)
-                   ->orLike('projects.description', $search)
-                   ->groupEnd();
-        }
-
-        // Get projects that the user has access to (created by or member of)
-        $builder->groupStart()
-               ->where('projects.created_by', $userId);
-        
-        // Add OR condition for project members
-        $memberProjectIds = $this->db->table('project_members')
-                                   ->select('project_id')
-                                   ->where('user_id', $userId)
-                                   ->get()
-                                   ->getResultArray();
-        
-        if (!empty($memberProjectIds)) {
-            $projectIds = array_column($memberProjectIds, 'project_id');
-            $builder->orWhereIn('projects.id', $projectIds);
-        }
-        
-        $builder->groupEnd();
-
-        $projects = $builder->orderBy('projects.created_at', 'DESC')
-                           ->findAll();
-
-        // Add task and member counts separately to avoid complex subqueries
-        foreach ($projects as &$project) {
-            // Get task counts
-            $totalTasks = $this->db->table('tasks')
-                                 ->where('project_id', $project['id'])
-                                 ->where('is_delete', 0)
-                                 ->countAllResults();
-            
-            $completedTasks = $this->db->table('tasks')
-                                     ->where('project_id', $project['id'])
-                                     ->where('status', 'completed')
-                                     ->where('is_delete', 0)
-                                     ->countAllResults();
-            
-            $memberCount = $this->db->table('project_members')
-                                  ->where('project_id', $project['id'])
-                                  ->countAllResults();
-            
-            $project['total_tasks'] = $totalTasks;
-            $project['completed_tasks'] = $completedTasks;
-            $project['member_count'] = $memberCount;
-        }
+        // Use model method to get projects with details
+        $projects = $this->projectModel->getProjectsWithDetails($userId, $filters);
 
         return $this->response->setJSON([
             'success' => true,

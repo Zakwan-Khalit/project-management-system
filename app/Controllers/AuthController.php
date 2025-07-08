@@ -3,41 +3,40 @@
 namespace App\Controllers;
 
 use App\Models\UserModel;
-use App\Models\UserProfileModel;
-use App\Models\UserRoleModel;
-use App\Models\RoleModel;
 use App\Models\ActivityLogModel;
 
 class AuthController extends BaseController
 {
     protected $userModel;
-    protected $userProfileModel;
-    protected $userRoleModel;
-    protected $roleModel;
     protected $activityLog;
     
     public function __construct()
     {
         $this->userModel = new UserModel();
-        $this->userProfileModel = new UserProfileModel();
-        $this->userRoleModel = new UserRoleModel();
-        $this->roleModel = new RoleModel();
         $this->activityLog = new ActivityLogModel();
     }
     
     public function login()
     {
-        // Handle POST request (AJAX login)
+        // Check if this is a POST request
         if ($this->request->getMethod() === 'POST') {
             log_message('info', 'Login POST request received');
+            log_message('info', 'Request headers: ' . json_encode($this->request->headers()));
+            log_message('info', 'Is AJAX: ' . ($this->request->isAJAX() ? 'Yes' : 'No'));
+            log_message('info', 'X-Requested-With: ' . $this->request->getHeaderLine('X-Requested-With'));
             
             $email = $this->request->getPost('email');
             $password = $this->request->getPost('password');
             
-            log_message('info', 'Attempting login for email: ' . $email);
+            log_message('info', 'Email received: ' . $email);
+            log_message('info', 'Password received: ' . (empty($password) ? 'No' : 'Yes'));
+            
+            // Always return JSON for POST requests, regardless of AJAX detection
+            $this->response->setContentType('application/json');
             
             try {
                 $user = $this->userModel->getUserByEmail($email);
+                log_message('info', 'User found: ' . ($user ? 'Yes (ID: ' . $user['id'] . ')' : 'No'));
                 
                 if ($user && password_verify($password, $user['password'])) {
                     if ($user['is_active']) {
@@ -58,8 +57,19 @@ class AuthController extends BaseController
                             'is_logged_in' => true
                         ];
                         
+                        // Start session and set data
+                        session()->start();
                         session()->set('userdata', $sessionData);
                         session()->set('is_logged_in', true);
+                        session()->set('user_id', $user['id']); // Also set user_id separately
+                        
+                        // Force session save
+                        session()->markAsFlashdata(''); // This forces session write
+                        
+                        log_message('info', 'Session data set successfully');
+                        log_message('info', 'Session ID: ' . session_id());
+                        log_message('info', 'Session userdata: ' . json_encode(session('userdata')));
+                        log_message('info', 'Session is_logged_in: ' . (session('is_logged_in') ? 'true' : 'false'));
                         
                         return $this->response->setJSON([
                             'success' => true,
@@ -67,12 +77,14 @@ class AuthController extends BaseController
                             'redirect' => base_url('dashboard')
                         ]);
                     } else {
+                        log_message('info', 'User account is inactive');
                         return $this->response->setJSON([
                             'success' => false,
                             'message' => 'Account is deactivated'
                         ]);
                     }
                 } else {
+                    log_message('info', 'Invalid credentials provided');
                     return $this->response->setJSON([
                         'success' => false,
                         'message' => 'Invalid email or password'
@@ -89,7 +101,7 @@ class AuthController extends BaseController
         
         // Handle GET request (show login form)
         $data = [];
-        $this->template->auth("auth/login", $data);
+        return $this->template->auth("auth/login", $data);
     }
     
     public function register()

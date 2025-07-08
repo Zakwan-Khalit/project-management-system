@@ -1,161 +1,119 @@
-<!-- Modern Projects Page -->
-<div style="background: linear-gradient(135deg, #f8fafc 0%, #e2e8f0 100%); min-height: 100vh; font-family: 'Roboto', sans-serif;">
+<!-- Projects Header -->
+<div style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white; border-radius: 1.5rem; padding: 2rem; margin-bottom: 2rem; box-shadow: 0 20px 60px rgba(102,126,234,0.2); position: relative; overflow: hidden;">
+    <!-- Decorative Elements -->
+    <div style="position: absolute; top: -50px; right: -50px; width: 200px; height: 200px; background: rgba(255,255,255,0.1); border-radius: 50%; opacity: 0.3;"></div>
+    <div style="position: absolute; bottom: -30px; left: -30px; width: 120px; height: 120px; background: rgba(255,255,255,0.05); border-radius: 50%;"></div>
     
-    <!-- Beautiful Header Section -->
-    <div style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white; padding: 4rem 0; position: relative; overflow: hidden; box-shadow: 0 10px 30px rgba(102, 126, 234, 0.3);">
-        <!-- Floating decorative elements -->
-        <div style="position: absolute; top: -50px; right: -50px; width: 200px; height: 200px; background: rgba(255,255,255,0.1); border-radius: 50%; opacity: 0.6;"></div>
-        <div style="position: absolute; bottom: -30px; left: -30px; width: 150px; height: 150px; background: rgba(255,255,255,0.05); border-radius: 50%;"></div>
-        <div style="position: absolute; top: 20%; right: 20%; width: 60px; height: 60px; background: rgba(255,255,255,0.1); border-radius: 50%; animation: pulse 3s infinite;"></div>
-        
-        <div class="container">
-            <div class="row align-items-center">
-                <div class="col-lg-8">
-                    <h1 style="font-size: 3.5rem; font-weight: 800; margin-bottom: 1rem; font-family: 'Poppins', sans-serif; text-shadow: 0 4px 20px rgba(0,0,0,0.2);">
-                        <i class="fas fa-project-diagram" style="margin-right: 1rem; color: rgba(255,255,255,0.9);"></i>
-                        My Projects
-                    </h1>
-                    <p style="font-size: 1.3rem; opacity: 0.95; font-weight: 400; margin-bottom: 0;">
-                        Manage, track, and collaborate on your projects with style
-                    </p>
-                </div>
-                <div class="col-lg-4 text-end">
-                    <button onclick="createNewProject()" style="background: rgba(255,255,255,0.2); border: 2px solid rgba(255,255,255,0.4); color: white; border-radius: 15px; padding: 1rem 2rem; font-weight: 700; font-size: 1.1rem; cursor: pointer; transition: all 0.3s ease; backdrop-filter: blur(20px); margin-right: 1rem;" onmouseover="this.style.background='rgba(255,255,255,0.3)'; this.style.transform='translateY(-3px)'; this.style.boxShadow='0 15px 35px rgba(0,0,0,0.2)';" onmouseout="this.style.background='rgba(255,255,255,0.2)'; this.style.transform='translateY(0)'; this.style.boxShadow='none';">
-                        <i class="fas fa-plus" style="margin-right: 0.7rem;"></i>
-                        New Project
-                    </button>
-                    <button onclick="toggleView()" id="viewToggleBtn" style="background: rgba(255,255,255,0.15); border: 2px solid rgba(255,255,255,0.3); color: white; border-radius: 15px; padding: 1rem; font-weight: 600; cursor: pointer; transition: all 0.3s ease; backdrop-filter: blur(20px);" onmouseover="this.style.background='rgba(255,255,255,0.25)';" onmouseout="this.style.background='rgba(255,255,255,0.15)';">
-                        <i class="fas fa-th" id="viewToggleIcon" style="font-size: 1.2rem;"></i>
-                    </button>
-                </div>
-            </div>
+    <div style="display: flex; justify-content: space-between; align-items: center; position: relative; z-index: 2;">
+        <div>
+            <h1 style="color: white; font-size: 2.5rem; font-weight: 800; margin-bottom: 0.5rem; font-family: 'Poppins', sans-serif; text-shadow: 0 2px 4px rgba(0,0,0,0.1);">
+                <i class="fas fa-project-diagram" style="margin-right: 1rem; color: rgba(255,255,255,0.9);"></i>
+                My Projects
+            </h1>
+            <p style="color: rgba(255,255,255,0.95); font-size: 1.1rem; margin-bottom: 0; font-weight: 400;">
+                Manage and track your projects efficiently
+            </p>
+        </div>
+        <div style="display: flex; gap: 1rem;">
+            <button onclick="createNewProject()" style="background: rgba(255,255,255,0.2); border: 2px solid rgba(255,255,255,0.3); color: white; border-radius: 1rem; padding: 0.75rem 1.5rem; font-weight: 600; font-size: 1rem; cursor: pointer; transition: all 0.3s ease; backdrop-filter: blur(10px);" onmouseover="this.style.background='rgba(255,255,255,0.3)'; this.style.transform='translateY(-2px)'; this.style.boxShadow='0 10px 25px rgba(0,0,0,0.2)';" onmouseout="this.style.background='rgba(255,255,255,0.2)'; this.style.transform='translateY(0)'; this.style.boxShadow='none';">
+                <i class="fas fa-plus" style="margin-right: 0.5rem;"></i>
+                New Project
+            </button>
+            <button onclick="toggleView()" id="viewToggleBtn" style="background: rgba(255,255,255,0.15); border: 2px solid rgba(255,255,255,0.3); color: white; border-radius: 1rem; padding: 0.75rem; font-weight: 600; cursor: pointer; transition: all 0.3s ease; backdrop-filter: blur(10px);" onmouseover="this.style.background='rgba(255,255,255,0.25)';" onmouseout="this.style.background='rgba(255,255,255,0.15)';">
+                <i class="fas fa-th" id="viewToggleIcon"></i>
+            </button>
+        </div>
+    </div>
+</div>
+
+<!-- 4 Stats Cards in a Row -->
+<div class="row" style="display: flex; gap: 1.5rem; margin-bottom: 2rem;">
+    <!-- Total Projects Card -->
+    <div class="col" style="flex: 1; min-width: 0;">
+        <div style="background: #fff; border-radius: 1.25rem; box-shadow: 0 4px 24px rgba(102,126,234,0.08); padding: 1.5rem; text-align: center;">
+            <i class="fas fa-project-diagram" style="font-size: 2rem; color: #667eea; margin-bottom: 0.75rem;"></i>
+            <h3 style="font-family: 'Poppins', sans-serif; font-weight: 700; margin-bottom: 0.25rem; font-size: 1.1rem;">Total</h3>
+            <div style="font-size: 1.75rem; font-weight: 800; color: #4a5568; margin-bottom: 0.25rem;" id="totalProjects">0</div>
+            <div style="color: #6b7280; font-size: 0.85rem;">Projects</div>
+        </div>
+    </div>
+    <!-- Active Projects Card -->
+    <div class="col" style="flex: 1; min-width: 0;">
+        <div style="background: #fff; border-radius: 1.25rem; box-shadow: 0 4px 24px rgba(245,158,11,0.08); padding: 1.5rem; text-align: center;">
+            <i class="fas fa-play" style="font-size: 2rem; color: #f59e0b; margin-bottom: 0.75rem;"></i>
+            <h3 style="font-family: 'Poppins', sans-serif; font-weight: 700; margin-bottom: 0.25rem; font-size: 1.1rem;">Active</h3>
+            <div style="font-size: 1.75rem; font-weight: 800; color: #4a5568; margin-bottom: 0.25rem;" id="inProgressProjects">0</div>
+            <div style="color: #6b7280; font-size: 0.85rem;">In Progress</div>
+        </div>
+    </div>
+    <!-- Completed Projects Card -->
+    <div class="col" style="flex: 1; min-width: 0;">
+        <div style="background: #fff; border-radius: 1.25rem; box-shadow: 0 4px 24px rgba(16,185,129,0.08); padding: 1.5rem; text-align: center;">
+            <i class="fas fa-check-circle" style="font-size: 2rem; color: #10b981; margin-bottom: 0.75rem;"></i>
+            <h3 style="font-family: 'Poppins', sans-serif; font-weight: 700; margin-bottom: 0.25rem; font-size: 1.1rem;">Completed</h3>
+            <div style="font-size: 1.75rem; font-weight: 800; color: #4a5568; margin-bottom: 0.25rem;" id="completedProjects">0</div>
+            <div style="color: #6b7280; font-size: 0.85rem;">Finished</div>
+        </div>
+    </div>
+    <!-- Delayed Projects Card -->
+    <div class="col" style="flex: 1; min-width: 0;">
+        <div style="background: #fff; border-radius: 1.25rem; box-shadow: 0 4px 24px rgba(239,68,68,0.08); padding: 1.5rem; text-align: center;">
+            <i class="fas fa-exclamation-triangle" style="font-size: 2rem; color: #ef4444; margin-bottom: 0.75rem;"></i>
+            <h3 style="font-family: 'Poppins', sans-serif; font-weight: 700; margin-bottom: 0.25rem; font-size: 1.1rem;">Delayed</h3>
+            <div style="font-size: 1.75rem; font-weight: 800; color: #4a5568; margin-bottom: 0.25rem;" id="delayedProjects">0</div>
+            <div style="color: #6b7280; font-size: 0.85rem;">Overdue</div>
+        </div>
+    </div>
+</div>
+
+<!-- Compact Filters and Controls -->
+<div style="background: white; border-radius: 1rem; padding: 1rem; margin-bottom: 1.5rem; box-shadow: 0 4px 6px rgba(0,0,0,0.05);">
+    <!-- Filter Tabs -->
+    <div style="display: flex; flex-wrap: wrap; align-items: center; gap: 0.5rem; margin-bottom: 0.75rem;">
+        <div style="display: flex; gap: 0.3rem; flex-wrap: wrap;">
+            <button onclick="filterProjects('all')" data-filter="all" style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white; border: none; border-radius: 0.5rem; padding: 0.4rem 0.8rem; font-weight: 600; font-size: 0.8rem; cursor: pointer; transition: all 0.3s ease;">
+                <i class="fas fa-th-large" style="margin-right: 0.3rem;"></i>All
+            </button>
+            <button onclick="filterProjects('planning')" data-filter="planning" style="background: rgba(159, 122, 234, 0.1); color: #9f7aea; border: 1px solid #9f7aea; border-radius: 0.5rem; padding: 0.4rem 0.8rem; font-weight: 600; font-size: 0.8rem; cursor: pointer; transition: all 0.3s ease;" onmouseover="this.style.background='#9f7aea'; this.style.color='white';" onmouseout="this.style.background='rgba(159, 122, 234, 0.1)'; this.style.color='#9f7aea';">
+                <i class="fas fa-lightbulb" style="margin-right: 0.3rem;"></i>Planning
+            </button>
+            <button onclick="filterProjects('active')" data-filter="active" style="background: rgba(237, 137, 54, 0.1); color: #ed8936; border: 1px solid #ed8936; border-radius: 0.5rem; padding: 0.4rem 0.8rem; font-weight: 600; font-size: 0.8rem; cursor: pointer; transition: all 0.3s ease;" onmouseover="this.style.background='#ed8936'; this.style.color='white';" onmouseout="this.style.background='rgba(237, 137, 54, 0.1)'; this.style.color='#ed8936';">
+                <i class="fas fa-play" style="margin-right: 0.3rem;"></i>Active
+            </button>
+            <button onclick="filterProjects('completed')" data-filter="completed" style="background: rgba(72, 187, 120, 0.1); color: #48bb78; border: 1px solid #48bb78; border-radius: 0.5rem; padding: 0.4rem 0.8rem; font-weight: 600; font-size: 0.8rem; cursor: pointer; transition: all 0.3s ease;" onmouseover="this.style.background='#48bb78'; this.style.color='white';" onmouseout="this.style.background='rgba(72, 187, 120, 0.1)'; this.style.color='#48bb78';">
+                <i class="fas fa-check-circle" style="margin-right: 0.3rem;"></i>Completed
+            </button>
+        </div>
+
+        <!-- Search Box -->
+        <div style="margin-left: auto; position: relative;">
+            <input type="text" id="searchInput" placeholder="Search projects..." style="background: #f8fafc; border: 1px solid #e2e8f0; border-radius: 0.5rem; padding: 0.4rem 2.5rem 0.4rem 0.75rem; color: #4a5568; font-size: 0.85rem; outline: none; transition: all 0.3s ease; width: 200px; font-weight: 500;" onfocus="this.style.borderColor='#667eea'; this.style.background='white';" onblur="this.style.borderColor='#e2e8f0'; this.style.background='#f8fafc';">
+            <i class="fas fa-search" style="position: absolute; right: 0.75rem; top: 50%; transform: translateY(-50%); color: #9ca3af; font-size: 0.8rem;"></i>
         </div>
     </div>
 
-    <!-- Statistics Dashboard -->
-    <div class="container" style="margin-top: -2rem; position: relative; z-index: 10;">
-        <div class="row g-4">
-            <!-- Total Projects Card -->
-            <div class="col-lg-3 col-md-6">
-                <div style="background: linear-gradient(135deg, #ffffff 0%, #f8fafc 100%); border-radius: 20px; padding: 2rem; box-shadow: 0 15px 35px rgba(102, 126, 234, 0.15); border-left: 5px solid #667eea; transition: all 0.4s ease; cursor: pointer; border: 1px solid rgba(255,255,255,0.2);" onmouseover="this.style.transform='translateY(-10px)'; this.style.boxShadow='0 25px 50px rgba(102, 126, 234, 0.25)';" onmouseout="this.style.transform='translateY(0)'; this.style.boxShadow='0 15px 35px rgba(102, 126, 234, 0.15)';">
-                    <div style="display: flex; align-items: center; justify-content: space-between;">
-                        <div>
-                            <h2 style="color: #667eea; font-size: 3rem; font-weight: 800; margin-bottom: 0.5rem; font-family: 'Poppins', sans-serif;" id="totalProjects">0</h2>
-                            <p style="color: #6b7280; font-size: 1.1rem; margin-bottom: 0; font-weight: 600;">Total Projects</p>
-                            <p style="color: #9ca3af; font-size: 0.9rem; margin-top: 0.5rem;">All your projects</p>
-                        </div>
-                        <div style="width: 70px; height: 70px; background: linear-gradient(135deg, #667eea, #764ba2); border-radius: 50%; display: flex; align-items: center; justify-content: center; box-shadow: 0 10px 25px rgba(102, 126, 234, 0.3);">
-                            <i class="fas fa-project-diagram" style="color: white; font-size: 1.8rem;"></i>
-                        </div>
-                    </div>
-                </div>
-            </div>
-
-            <!-- Completed Projects Card -->
-            <div class="col-lg-3 col-md-6">
-                <div style="background: linear-gradient(135deg, #ffffff 0%, #f8fafc 100%); border-radius: 20px; padding: 2rem; box-shadow: 0 15px 35px rgba(16, 185, 129, 0.15); border-left: 5px solid #10b981; transition: all 0.4s ease; cursor: pointer; border: 1px solid rgba(255,255,255,0.2);" onmouseover="this.style.transform='translateY(-10px)'; this.style.boxShadow='0 25px 50px rgba(16, 185, 129, 0.25)';" onmouseout="this.style.transform='translateY(0)'; this.style.boxShadow='0 15px 35px rgba(16, 185, 129, 0.15)';">
-                    <div style="display: flex; align-items: center; justify-content: space-between;">
-                        <div>
-                            <h2 style="color: #10b981; font-size: 3rem; font-weight: 800; margin-bottom: 0.5rem; font-family: 'Poppins', sans-serif;" id="completedProjects">0</h2>
-                            <p style="color: #6b7280; font-size: 1.1rem; margin-bottom: 0; font-weight: 600;">Completed</p>
-                            <p style="color: #9ca3af; font-size: 0.9rem; margin-top: 0.5rem;">Successfully finished</p>
-                        </div>
-                        <div style="width: 70px; height: 70px; background: linear-gradient(135deg, #10b981, #059669); border-radius: 50%; display: flex; align-items: center; justify-content: center; box-shadow: 0 10px 25px rgba(16, 185, 129, 0.3);">
-                            <i class="fas fa-check-circle" style="color: white; font-size: 1.8rem;"></i>
-                        </div>
-                    </div>
-                </div>
-            </div>
-
-            <!-- Active Projects Card -->
-            <div class="col-lg-3 col-md-6">
-                <div style="background: linear-gradient(135deg, #ffffff 0%, #f8fafc 100%); border-radius: 20px; padding: 2rem; box-shadow: 0 15px 35px rgba(245, 158, 11, 0.15); border-left: 5px solid #f59e0b; transition: all 0.4s ease; cursor: pointer; border: 1px solid rgba(255,255,255,0.2);" onmouseover="this.style.transform='translateY(-10px)'; this.style.boxShadow='0 25px 50px rgba(245, 158, 11, 0.25)';" onmouseout="this.style.transform='translateY(0)'; this.style.boxShadow='0 15px 35px rgba(245, 158, 11, 0.15)';">
-                    <div style="display: flex; align-items: center; justify-content: space-between;">
-                        <div>
-                            <h2 style="color: #f59e0b; font-size: 3rem; font-weight: 800; margin-bottom: 0.5rem; font-family: 'Poppins', sans-serif;" id="inProgressProjects">0</h2>
-                            <p style="color: #6b7280; font-size: 1.1rem; margin-bottom: 0; font-weight: 600;">Active</p>
-                            <p style="color: #9ca3af; font-size: 0.9rem; margin-top: 0.5rem;">Currently working</p>
-                        </div>
-                        <div style="width: 70px; height: 70px; background: linear-gradient(135deg, #f59e0b, #d97706); border-radius: 50%; display: flex; align-items: center; justify-content: center; box-shadow: 0 10px 25px rgba(245, 158, 11, 0.3);">
-                            <i class="fas fa-clock" style="color: white; font-size: 1.8rem;"></i>
-                        </div>
-                    </div>
-                </div>
-            </div>
-
-            <!-- Delayed Projects Card -->
-            <div class="col-lg-3 col-md-6">
-                <div style="background: linear-gradient(135deg, #ffffff 0%, #f8fafc 100%); border-radius: 20px; padding: 2rem; box-shadow: 0 15px 35px rgba(239, 68, 68, 0.15); border-left: 5px solid #ef4444; transition: all 0.4s ease; cursor: pointer; border: 1px solid rgba(255,255,255,0.2);" onmouseover="this.style.transform='translateY(-10px)'; this.style.boxShadow='0 25px 50px rgba(239, 68, 68, 0.25)';" onmouseout="this.style.transform='translateY(0)'; this.style.boxShadow='0 15px 35px rgba(239, 68, 68, 0.15)';">
-                    <div style="display: flex; align-items: center; justify-content: space-between;">
-                        <div>
-                            <h2 style="color: #ef4444; font-size: 3rem; font-weight: 800; margin-bottom: 0.5rem; font-family: 'Poppins', sans-serif;" id="delayedProjects">0</h2>
-                            <p style="color: #6b7280; font-size: 1.1rem; margin-bottom: 0; font-weight: 600;">Delayed</p>
-                            <p style="color: #9ca3af; font-size: 0.9rem; margin-top: 0.5rem;">Needs attention</p>
-                        </div>
-                        <div style="width: 70px; height: 70px; background: linear-gradient(135deg, #ef4444, #dc2626); border-radius: 50%; display: flex; align-items: center; justify-content: center; box-shadow: 0 10px 25px rgba(239, 68, 68, 0.3);">
-                            <i class="fas fa-exclamation-triangle" style="color: white; font-size: 1.8rem;"></i>
-                        </div>
-                    </div>
-                </div>
-            </div>
-        </div>
+    <!-- Additional Filters -->
+    <div style="display: flex; gap: 0.5rem; flex-wrap: wrap; align-items: center;">
+        <select id="priorityFilter" style="background: #f8fafc; border: 1px solid #e2e8f0; border-radius: 0.5rem; padding: 0.4rem 0.6rem; color: #4a5568; font-size: 0.8rem; outline: none; font-weight: 600; cursor: pointer;" onfocus="this.style.borderColor='#667eea'; this.style.background='white';" onblur="this.style.borderColor='#e2e8f0'; this.style.background='#f8fafc';">
+            <option value="">All Priorities</option>
+            <option value="low">Low Priority</option>
+            <option value="medium">Medium Priority</option>
+            <option value="high">High Priority</option>
+            <option value="critical">Critical Priority</option>
+        </select>
+        <button onclick="clearFilters()" style="background: linear-gradient(135deg, #f56565, #e53e3e); color: white; border: none; border-radius: 0.5rem; padding: 0.4rem 0.8rem; font-weight: 600; font-size: 0.8rem; cursor: pointer; transition: all 0.3s ease;">
+            <i class="fas fa-times" style="margin-right: 0.3rem;"></i>Clear
+        </button>
     </div>
-
-    <!-- Filters and Controls -->
-    <div class="container" style="margin-top: 1.5rem; margin-bottom: 1rem;">
-        <div style="background: white; border-radius: 12px; padding: 1rem; box-shadow: 0 3px 10px rgba(0,0,0,0.05); border: 1px solid rgba(255,255,255,0.2);">
-            <!-- Filter Tabs -->
-            <div style="display: flex; flex-wrap: wrap; align-items: center; gap: 0.75rem; margin-bottom: 1rem;">
-                <div style="display: flex; gap: 0.4rem; flex-wrap: wrap;">
-                    <button onclick="filterProjects('all')" data-filter="all" style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white; border: none; border-radius: 20px; padding: 0.6rem 1.2rem; font-weight: 600; font-size: 0.85rem; cursor: pointer; transition: all 0.3s ease; box-shadow: 0 2px 8px rgba(102, 126, 234, 0.3);" onmouseover="this.style.transform='translateY(-1px)'; this.style.boxShadow='0 4px 12px rgba(102, 126, 234, 0.4)';" onmouseout="this.style.transform='translateY(0)'; this.style.boxShadow='0 2px 8px rgba(102, 126, 234, 0.3)';">
-                        <i class="fas fa-th-large" style="margin-right: 0.4rem;"></i>
-                        All Projects
-                    </button>
-                    <button onclick="filterProjects('planning')" data-filter="planning" style="background: rgba(159, 122, 234, 0.1); color: #9f7aea; border: 2px solid #9f7aea; border-radius: 20px; padding: 0.6rem 1.2rem; font-weight: 600; font-size: 0.85rem; cursor: pointer; transition: all 0.3s ease;" onmouseover="this.style.background='#9f7aea'; this.style.color='white';" onmouseout="this.style.background='rgba(159, 122, 234, 0.1)'; this.style.color='#9f7aea';">
-                        <i class="fas fa-lightbulb" style="margin-right: 0.4rem;"></i>
-                        Planning
-                    </button>
-                    <button onclick="filterProjects('active')" data-filter="active" style="background: rgba(237, 137, 54, 0.1); color: #ed8936; border: 2px solid #ed8936; border-radius: 20px; padding: 0.6rem 1.2rem; font-weight: 600; font-size: 0.85rem; cursor: pointer; transition: all 0.3s ease;" onmouseover="this.style.background='#ed8936'; this.style.color='white';" onmouseout="this.style.background='rgba(237, 137, 54, 0.1)'; this.style.color='#ed8936';">
-                        <i class="fas fa-play" style="margin-right: 0.4rem;"></i>
-                        Active
-                    </button>
-                    <button onclick="filterProjects('completed')" data-filter="completed" style="background: rgba(72, 187, 120, 0.1); color: #48bb78; border: 2px solid #48bb78; border-radius: 20px; padding: 0.6rem 1.2rem; font-weight: 600; font-size: 0.85rem; cursor: pointer; transition: all 0.3s ease;" onmouseover="this.style.background='#48bb78'; this.style.color='white';" onmouseout="this.style.background='rgba(72, 187, 120, 0.1)'; this.style.color='#48bb78';">
-                        <i class="fas fa-check-circle" style="margin-right: 0.4rem;"></i>
-                        Completed
-                    </button>
-                </div>
-
-                <!-- Search Box -->
-                <div style="margin-left: auto; position: relative;">
-                    <input type="text" id="searchInput" placeholder="Search projects..." style="background: #f8fafc; border: 2px solid #e2e8f0; border-radius: 12px; padding: 0.6rem 3rem 0.6rem 1rem; color: #4a5568; font-size: 0.9rem; outline: none; transition: all 0.3s ease; width: 280px; font-weight: 500;" onfocus="this.style.borderColor='#667eea'; this.style.background='white'; this.style.boxShadow='0 0 0 3px rgba(102,126,234,0.1)';" onblur="this.style.borderColor='#e2e8f0'; this.style.background='#f8fafc'; this.style.boxShadow='none';">
-                    <i class="fas fa-search" style="position: absolute; right: 1rem; top: 50%; transform: translateY(-50%); color: #9ca3af; font-size: 0.9rem;"></i>
-                </div>
-            </div>
-
-            <!-- Additional Filters -->
-            <div style="display: flex; gap: 0.75rem; flex-wrap: wrap; align-items: center;">
-                <select id="priorityFilter" style="background: #f8fafc; border: 2px solid #e2e8f0; border-radius: 10px; padding: 0.5rem 0.8rem; color: #4a5568; font-size: 0.9rem; outline: none; font-weight: 600; cursor: pointer; transition: all 0.3s ease;" onfocus="this.style.borderColor='#667eea'; this.style.background='white';" onblur="this.style.borderColor='#e2e8f0'; this.style.background='#f8fafc';">
-                    <option value="">All Priorities</option>
-                    <option value="low">🟢 Low Priority</option>
-                    <option value="medium">🟡 Medium Priority</option>
-                    <option value="high">🟠 High Priority</option>
-                    <option value="critical">🔴 Critical Priority</option>
-                </select>
-                <button onclick="clearFilters()" style="background: linear-gradient(135deg, #f56565, #e53e3e); color: white; border: none; border-radius: 10px; padding: 0.5rem 1rem; font-weight: 600; font-size: 0.9rem; cursor: pointer; transition: all 0.3s ease;" onmouseover="this.style.transform='translateY(-1px)'; this.style.boxShadow='0 4px 12px rgba(245, 101, 101, 0.3)';" onmouseout="this.style.transform='translateY(0)'; this.style.boxShadow='none';">
-                    <i class="fas fa-times" style="margin-right: 0.4rem;"></i>
-                    Clear Filters
-                </button>
-            </div>
-        </div>
-    </div>
+</div>
 
     <!-- Projects Container -->
-    <div class="container" style="margin-bottom: 2rem;">
+    <div style="margin-bottom: 2rem;">
         <!-- Loading State -->
         <div id="loadingContainer" style="text-align: center; padding: 2rem;">
-            <div style="width: 50px; height: 50px; border: 4px solid #e2e8f0; border-top: 4px solid #667eea; border-radius: 50%; margin: 0 auto 1rem auto; animation: spin 1s linear infinite;"></div>
-            <h4 style="color: #6b7280; font-weight: 600; font-family: 'Poppins', sans-serif; margin-bottom: 0.5rem;">Loading your projects...</h4>
-            <p style="color: #9ca3af; margin: 0; font-size: 0.9rem;">Please wait while we fetch your data</p>
+            <div style="width: 40px; height: 40px; border: 3px solid #e2e8f0; border-top: 3px solid #667eea; border-radius: 50%; margin: 0 auto 1rem auto; animation: spin 1s linear infinite;"></div>
+            <h4 style="color: #6b7280; font-weight: 600; font-family: 'Poppins', sans-serif; margin-bottom: 0.5rem; font-size: 1.1rem;">Loading projects...</h4>
+            <p style="color: #9ca3af; margin: 0; font-size: 0.9rem;">Please wait</p>
         </div>
 
         <style>
@@ -409,142 +367,89 @@ function renderTableView() {
     tableBody.innerHTML = filteredProjects.map(project => createProjectRow(project)).join('');
 }
 
-// Create modern horizontal project card HTML
+// Create compact horizontal project card HTML
 function createHorizontalProjectCard(project) {
     const progressPercentage = project.total_tasks > 0 ? Math.round((project.completed_tasks / project.total_tasks) * 100) : 0;
     const statusBadge = getStatusBadge(project.status);
     const priorityBadge = getPriorityBadge(project.priority);
     const dueDate = project.end_date ? formatDate(project.end_date) : 'No due date';
     
-    // Generate beautiful gradient for each card
-    const gradients = [
-        'linear-gradient(135deg, #667eea 0%, #764ba2 100%)',
-        'linear-gradient(135deg, #f093fb 0%, #f5576c 100%)',
-        'linear-gradient(135deg, #4facfe 0%, #00f2fe 100%)',
-        'linear-gradient(135deg, #43e97b 0%, #38f9d7 100%)',
-        'linear-gradient(135deg, #fa709a 0%, #fee140 100%)',
-        'linear-gradient(135deg, #a8edea 0%, #fed6e3 100%)',
-        'linear-gradient(135deg, #ff9a9e 0%, #fecfef 100%)',
-        'linear-gradient(135deg, #a18cd1 0%, #fbc2eb 100%)'
-    ];
-    const cardGradient = gradients[project.id % gradients.length];
-    
     return `
-        <div class="horizontal-project-card" style="background: white; border-radius: 16px; overflow: hidden; box-shadow: 0 8px 25px rgba(0,0,0,0.08); transition: all 0.3s ease; border: 1px solid rgba(255,255,255,0.2);" onmouseover="this.style.transform='translateY(-4px)'; this.style.boxShadow='0 12px 35px rgba(0,0,0,0.12)';" onmouseout="this.style.transform='translateY(0)'; this.style.boxShadow='0 8px 25px rgba(0,0,0,0.08)';">
-            <div style="display: flex; align-items: stretch; min-height: 140px;">
+        <div class="horizontal-project-card" style="background: white; border-radius: 1rem; overflow: hidden; box-shadow: 0 4px 6px rgba(0,0,0,0.05); transition: all 0.3s ease; border: 1px solid #f1f3f4;" onmouseover="this.style.transform='translateY(-2px)'; this.style.boxShadow='0 8px 15px rgba(0,0,0,0.1)';" onmouseout="this.style.transform='translateY(0)'; this.style.boxShadow='0 4px 6px rgba(0,0,0,0.05)';">
+            <div style="display: flex; align-items: center; padding: 1rem; gap: 1rem;">
                 
-                <!-- Left Gradient Section -->
-                <div style="background: ${cardGradient}; width: 240px; padding: 1.25rem; color: white; position: relative; overflow: hidden; display: flex; flex-direction: column; justify-content: center;">
-                    <!-- Floating decorative elements -->
-                    <div style="position: absolute; top: -15px; right: -15px; width: 60px; height: 60px; background: rgba(255,255,255,0.1); border-radius: 50%; opacity: 0.6;"></div>
-                    <div style="position: absolute; bottom: -8px; left: -8px; width: 45px; height: 45px; background: rgba(255,255,255,0.05); border-radius: 50%;"></div>
+                <!-- Project Info Section -->
+                <div style="flex: 1; min-width: 0;">
+                    <div style="display: flex; align-items: start; justify-content: space-between; margin-bottom: 0.5rem;">
+                        <h4 style="margin: 0; font-size: 1.1rem; font-weight: 600; color: #1a202c; font-family: 'Poppins', sans-serif; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; max-width: 200px;">${project.name}</h4>
+                        <div style="display: flex; gap: 0.5rem; align-items: center;">
+                            ${statusBadge}
+                            ${priorityBadge}
+                        </div>
+                    </div>
+                    <p style="margin: 0; color: #6b7280; font-size: 0.85rem; line-height: 1.4; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden;">${project.description || 'No description available'}</p>
+                </div>
+                
+                <!-- Stats Section -->
+                <div style="display: flex; gap: 1rem; align-items: center; flex-shrink: 0;">
+                    <!-- Progress -->
+                    <div style="text-align: center; min-width: 60px;">
+                        <div style="position: relative; width: 45px; height: 45px; margin: 0 auto 0.25rem;">
+                            <svg width="45" height="45" style="transform: rotate(-90deg);">
+                                <circle cx="22.5" cy="22.5" r="18" stroke="#e2e8f0" stroke-width="3" fill="none"></circle>
+                                <circle cx="22.5" cy="22.5" r="18" stroke="#48bb78" stroke-width="3" fill="none" stroke-dasharray="${(progressPercentage / 100) * 113} 113" stroke-linecap="round"></circle>
+                            </svg>
+                            <div style="position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); font-size: 0.7rem; font-weight: 600; color: #4a5568;">${progressPercentage}%</div>
+                        </div>
+                        <div style="font-size: 0.7rem; color: #6b7280;">Progress</div>
+                    </div>
                     
-                    <div style="position: relative; z-index: 2;">
-                        <div style="margin-bottom: 0.6rem;">
-                            ${statusBadge.replace(/background: rgba\([^)]+\)/g, 'background: rgba(255, 255, 255, 0.2)').replace(/color: #[^;]+/g, 'color: white').replace(/border: 1px solid rgba\([^)]+\)/g, 'border: 1px solid rgba(255, 255, 255, 0.3)')}
+                    <!-- Tasks -->
+                    <div style="text-align: center; min-width: 50px;">
+                        <div style="font-size: 1.25rem; font-weight: 700; color: #4a5568; font-family: 'Poppins', sans-serif;">${project.total_tasks || 0}</div>
+                        <div style="font-size: 0.7rem; color: #6b7280;">Tasks</div>
+                    </div>
+                    
+                    <!-- Team -->
+                    <div style="text-align: center; min-width: 50px;">
+                        <div style="font-size: 1.25rem; font-weight: 700; color: #4a5568; font-family: 'Poppins', sans-serif;">${project.member_count || 0}</div>
+                        <div style="font-size: 0.7rem; color: #6b7280;">Team</div>
+                    </div>
+                    
+                    <!-- Due Date -->
+                    <div style="text-align: center; min-width: 80px;">
+                        <div style="font-size: 0.8rem; font-weight: 600; color: #4a5568;">
+                            <i class="fas fa-calendar-alt" style="margin-right: 0.25rem; color: #9ca3af;"></i>
+                            ${dueDate}
                         </div>
-                        <h4 style="font-size: 1.3rem; font-weight: 700; margin-bottom: 0.5rem; font-family: 'Poppins', sans-serif; line-height: 1.2;">${project.name}</h4>
-                        <p style="opacity: 0.9; font-size: 0.85rem; margin-bottom: 1rem; line-height: 1.3;">${project.description || 'No description available'}</p>
-                        
-                        <!-- Progress Circle -->
-                        <div style="display: flex; align-items: center; gap: 0.8rem;">
-                            <div style="position: relative; width: 45px; height: 45px;">
-                                <svg width="45" height="45" style="transform: rotate(-90deg);">
-                                    <circle cx="22.5" cy="22.5" r="18" stroke="rgba(255,255,255,0.3)" stroke-width="3" fill="none"></circle>
-                                    <circle cx="22.5" cy="22.5" r="18" stroke="white" stroke-width="3" fill="none" stroke-dasharray="${(progressPercentage / 100) * 113} 113" stroke-linecap="round"></circle>
-                                </svg>
-                                <div style="position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); font-size: 0.75rem; font-weight: 600;">${progressPercentage}%</div>
-                            </div>
-                            <div>
-                                <div style="font-size: 0.8rem; opacity: 0.9;">Progress</div>
-                                <div style="font-size: 0.7rem; opacity: 0.7;">${project.completed_tasks || 0}/${project.total_tasks || 0} tasks</div>
-                            </div>
-                        </div>
+                        <div style="font-size: 0.7rem; color: #6b7280;">Due Date</div>
                     </div>
                 </div>
                 
-                <!-- Right Content Section -->
-                <div style="flex: 1; padding: 1.25rem; display: flex; flex-direction: column; justify-content: space-between;">
-                    
-                    <!-- Top Section - Stats -->
-                    <div>
-                        <div style="display: grid; grid-template-columns: repeat(3, 1fr); gap: 1rem; margin-bottom: 1.25rem;" class="stats-grid">
-                            <!-- Total Tasks -->
-                            <div style="text-align: center; padding: 0.75rem; background: linear-gradient(135deg, #f8fafc 0%, #e2e8f0 100%); border-radius: 12px; border-left: 3px solid #667eea;">
-                                <div style="width: 35px; height: 35px; background: linear-gradient(135deg, #667eea, #764ba2); border-radius: 50%; display: flex; align-items: center; justify-content: center; margin: 0 auto 0.5rem;">
-                                    <i class="fas fa-tasks" style="color: white; font-size: 0.9rem;"></i>
-                                </div>
-                                <div style="font-size: 1.5rem; font-weight: 700; color: #4a5568; font-family: 'Poppins', sans-serif;">${project.total_tasks || 0}</div>
-                                <div style="font-size: 0.75rem; color: #6b7280; font-weight: 600;">Total Tasks</div>
-                            </div>
-                            
-                            <!-- Completed Tasks -->
-                            <div style="text-align: center; padding: 0.75rem; background: linear-gradient(135deg, #f8fafc 0%, #e2e8f0 100%); border-radius: 12px; border-left: 3px solid #10b981;">
-                                <div style="width: 35px; height: 35px; background: linear-gradient(135deg, #10b981, #059669); border-radius: 50%; display: flex; align-items: center; justify-content: center; margin: 0 auto 0.5rem;">
-                                    <i class="fas fa-check-circle" style="color: white; font-size: 0.9rem;"></i>
-                                </div>
-                                <div style="font-size: 1.5rem; font-weight: 700; color: #4a5568; font-family: 'Poppins', sans-serif;">${project.completed_tasks || 0}</div>
-                                <div style="font-size: 0.75rem; color: #6b7280; font-weight: 600;">Completed</div>
-                            </div>
-                            
-                            <!-- Team Members -->
-                            <div style="text-align: center; padding: 0.75rem; background: linear-gradient(135deg, #f8fafc 0%, #e2e8f0 100%); border-radius: 12px; border-left: 3px solid #f59e0b;">
-                                <div style="width: 35px; height: 35px; background: linear-gradient(135deg, #f59e0b, #d97706); border-radius: 50%; display: flex; align-items: center; justify-content: center; margin: 0 auto 0.5rem;">
-                                    <i class="fas fa-users" style="color: white; font-size: 0.9rem;"></i>
-                                </div>
-                                <div style="font-size: 1.5rem; font-weight: 700; color: #4a5568; font-family: 'Poppins', sans-serif;">${project.member_count || 0}</div>
-                                <div style="font-size: 0.75rem; color: #6b7280; font-weight: 600;">Team Members</div>
-                            </div>
-                        </div>
-                    </div>
-                    
-                    <!-- Bottom Section - Info & Actions -->
-                    <div>
-                        <!-- Priority and Due Date -->
-                        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1rem; padding: 0.75rem; background: #f8fafc; border-radius: 10px;">
-                            <div>
-                                <div style="font-size: 0.75rem; color: #6b7280; margin-bottom: 0.2rem;">Priority Level</div>
-                                ${priorityBadge}
-                            </div>
-                            <div style="text-align: right;">
-                                <div style="font-size: 0.75rem; color: #6b7280; margin-bottom: 0.2rem;">Due Date</div>
-                                <div style="font-size: 0.85rem; font-weight: 600; color: #4a5568;">
-                                    <i class="fas fa-calendar-alt" style="margin-right: 0.3rem; color: #9ca3af;"></i>
-                                    ${dueDate}
-                                </div>
-                            </div>
-                        </div>
-                        
-                        <!-- Action Buttons -->
-                        <div style="display: flex; gap: 0.75rem;" class="action-buttons">
-                            <button onclick="viewProject(${project.id})" style="flex: 1; background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white; border: none; border-radius: 10px; padding: 0.6rem; font-weight: 600; font-size: 0.85rem; cursor: pointer; transition: all 0.3s ease;" onmouseover="this.style.transform='translateY(-1px)'; this.style.boxShadow='0 6px 15px rgba(102, 126, 234, 0.3)';" onmouseout="this.style.transform='translateY(0)'; this.style.boxShadow='none';">
-                                <i class="fas fa-eye" style="margin-right: 0.4rem;"></i>
-                                View Details
-                            </button>
-                            <button onclick="kanbanView(${project.id})" style="flex: 1; background: rgba(102, 126, 234, 0.1); color: #667eea; border: 2px solid #667eea; border-radius: 10px; padding: 0.6rem; font-weight: 600; font-size: 0.85rem; cursor: pointer; transition: all 0.3s ease;" onmouseover="this.style.background='#667eea'; this.style.color='white';" onmouseout="this.style.background='rgba(102, 126, 234, 0.1)'; this.style.color='#667eea';">
-                                <i class="fas fa-columns" style="margin-right: 0.4rem;"></i>
-                                Kanban Board
-                            </button>
-                            
-                            <!-- Dropdown Menu -->
-                            <div class="dropdown">
-                                <button style="background: #f8fafc; border: 2px solid #e2e8f0; border-radius: 10px; padding: 0.6rem; color: #6b7280; cursor: pointer; transition: all 0.3s ease;" data-bs-toggle="dropdown" onmouseover="this.style.background='#e2e8f0';" onmouseout="this.style.background='#f8fafc';">
-                                    <i class="fas fa-ellipsis-v"></i>
-                                </button>
-                                <ul class="dropdown-menu shadow-lg" style="border-radius: 12px; border: none; padding: 0.4rem;">
-                                    <li><a class="dropdown-item" href="#" onclick="editProject(${project.id})" style="border-radius: 8px; padding: 0.6rem 0.8rem; margin: 0.1rem;">
-                                        <i class="fas fa-edit me-2 text-warning"></i>Edit Project
-                                    </a></li>
-                                    <li><a class="dropdown-item" href="#" onclick="duplicateProject(${project.id})" style="border-radius: 8px; padding: 0.6rem 0.8rem; margin: 0.1rem;">
-                                        <i class="fas fa-copy me-2 text-info"></i>Duplicate
-                                    </a></li>
-                                    <li><hr class="dropdown-divider" style="margin: 0.3rem;"></li>
-                                    <li><a class="dropdown-item text-danger" href="#" onclick="deleteProject(${project.id})" style="border-radius: 8px; padding: 0.6rem 0.8rem; margin: 0.1rem;">
-                                        <i class="fas fa-trash me-2"></i>Delete Project
-                                    </a></li>
-                                </ul>
-                            </div>
-                        </div>
+                <!-- Actions Section -->
+                <div style="display: flex; gap: 0.5rem; flex-shrink: 0;">
+                    <button onclick="viewProject(${project.id})" style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white; border: none; border-radius: 0.5rem; padding: 0.5rem; font-weight: 600; font-size: 0.8rem; cursor: pointer; transition: all 0.3s ease;" onmouseover="this.style.transform='translateY(-1px)';" onmouseout="this.style.transform='translateY(0)';" title="View Project">
+                        <i class="fas fa-eye"></i>
+                    </button>
+                    <button onclick="kanbanView(${project.id})" style="background: rgba(102, 126, 234, 0.1); color: #667eea; border: 1px solid #667eea; border-radius: 0.5rem; padding: 0.5rem; font-weight: 600; font-size: 0.8rem; cursor: pointer; transition: all 0.3s ease;" onmouseover="this.style.background='#667eea'; this.style.color='white';" onmouseout="this.style.background='rgba(102, 126, 234, 0.1)'; this.style.color='#667eea';" title="Kanban Board">
+                        <i class="fas fa-columns"></i>
+                    </button>
+                    <div class="dropdown">
+                        <button style="background: #f8fafc; border: 1px solid #e2e8f0; border-radius: 0.5rem; padding: 0.5rem; color: #6b7280; cursor: pointer; transition: all 0.3s ease;" data-bs-toggle="dropdown" onmouseover="this.style.background='#e2e8f0';" onmouseout="this.style.background='#f8fafc';" title="More Options">
+                            <i class="fas fa-ellipsis-v"></i>
+                        </button>
+                        <ul class="dropdown-menu shadow-lg" style="border-radius: 0.75rem; border: none; padding: 0.25rem;">
+                            <li><a class="dropdown-item" href="#" onclick="editProject(${project.id})" style="border-radius: 0.5rem; padding: 0.5rem; margin: 0.1rem; font-size: 0.85rem;">
+                                <i class="fas fa-edit me-2 text-warning"></i>Edit
+                            </a></li>
+                            <li><a class="dropdown-item" href="#" onclick="duplicateProject(${project.id})" style="border-radius: 0.5rem; padding: 0.5rem; margin: 0.1rem; font-size: 0.85rem;">
+                                <i class="fas fa-copy me-2 text-info"></i>Duplicate
+                            </a></li>
+                            <li><hr class="dropdown-divider" style="margin: 0.25rem;"></li>
+                            <li><a class="dropdown-item text-danger" href="#" onclick="deleteProject(${project.id})" style="border-radius: 0.5rem; padding: 0.5rem; margin: 0.1rem; font-size: 0.85rem;">
+                                <i class="fas fa-trash me-2"></i>Delete
+                            </a></li>
+                        </ul>
                     </div>
                 </div>
             </div>
@@ -621,31 +526,31 @@ function createProjectRow(project) {
     `;
 }
 
-// Get status badge HTML - Enhanced Design with Inline Styles
+// Get status badge HTML - Compact Design
 function getStatusBadge(status) {
-    const baseStyle = "padding: 0.5rem 1rem; border-radius: 20px; font-size: 0.8rem; font-weight: 600; text-transform: uppercase; letter-spacing: 0.5px; display: inline-flex; align-items: center; backdrop-filter: blur(10px);";
+    const baseStyle = "padding: 0.25rem 0.6rem; border-radius: 0.5rem; font-size: 0.7rem; font-weight: 600; text-transform: uppercase; letter-spacing: 0.5px; display: inline-flex; align-items: center;";
     
     const badges = {
-        planning: `<span style="${baseStyle} background: rgba(159, 122, 234, 0.2); color: #9f7aea; border: 1px solid rgba(159, 122, 234, 0.3);"><i class="fas fa-lightbulb me-1"></i>Planning</span>`,
-        active: `<span style="${baseStyle} background: rgba(237, 137, 54, 0.2); color: #ed8936; border: 1px solid rgba(237, 137, 54, 0.3);"><i class="fas fa-play me-1"></i>Active</span>`,
-        completed: `<span style="${baseStyle} background: rgba(72, 187, 120, 0.2); color: #48bb78; border: 1px solid rgba(72, 187, 120, 0.3);"><i class="fas fa-check-circle me-1"></i>Completed</span>`,
-        on_hold: `<span style="${baseStyle} background: rgba(49, 151, 149, 0.2); color: #319795; border: 1px solid rgba(49, 151, 149, 0.3);"><i class="fas fa-pause me-1"></i>On Hold</span>`,
-        cancelled: `<span style="${baseStyle} background: rgba(245, 101, 101, 0.2); color: #f56565; border: 1px solid rgba(245, 101, 101, 0.3);"><i class="fas fa-times-circle me-1"></i>Cancelled</span>`
+        planning: `<span style="${baseStyle} background: rgba(159, 122, 234, 0.2); color: #9f7aea; border: 1px solid rgba(159, 122, 234, 0.3);"><i class="fas fa-lightbulb me-1" style="font-size: 0.6rem;"></i>Planning</span>`,
+        active: `<span style="${baseStyle} background: rgba(237, 137, 54, 0.2); color: #ed8936; border: 1px solid rgba(237, 137, 54, 0.3);"><i class="fas fa-play me-1" style="font-size: 0.6rem;"></i>Active</span>`,
+        completed: `<span style="${baseStyle} background: rgba(72, 187, 120, 0.2); color: #48bb78; border: 1px solid rgba(72, 187, 120, 0.3);"><i class="fas fa-check-circle me-1" style="font-size: 0.6rem;"></i>Completed</span>`,
+        on_hold: `<span style="${baseStyle} background: rgba(49, 151, 149, 0.2); color: #319795; border: 1px solid rgba(49, 151, 149, 0.3);"><i class="fas fa-pause me-1" style="font-size: 0.6rem;"></i>On Hold</span>`,
+        cancelled: `<span style="${baseStyle} background: rgba(245, 101, 101, 0.2); color: #f56565; border: 1px solid rgba(245, 101, 101, 0.3);"><i class="fas fa-times-circle me-1" style="font-size: 0.6rem;"></i>Cancelled</span>`
     };
-    return badges[status] || `<span style="${baseStyle} background: rgba(113, 128, 150, 0.2); color: #718096; border: 1px solid rgba(113, 128, 150, 0.3);"><i class="fas fa-question me-1"></i>Unknown</span>`;
+    return badges[status] || `<span style="${baseStyle} background: rgba(113, 128, 150, 0.2); color: #718096; border: 1px solid rgba(113, 128, 150, 0.3);"><i class="fas fa-question me-1" style="font-size: 0.6rem;"></i>Unknown</span>`;
 }
 
-// Get priority badge HTML - Enhanced Design with Inline Styles
+// Get priority badge HTML - Compact Design
 function getPriorityBadge(priority) {
-    const baseStyle = "padding: 0.5rem 1rem; border-radius: 15px; font-size: 0.9rem; font-weight: 600; display: inline-flex; align-items: center; box-shadow: 0 2px 8px rgba(0,0,0,0.1);";
+    const baseStyle = "padding: 0.25rem 0.6rem; border-radius: 0.5rem; font-size: 0.7rem; font-weight: 600; display: inline-flex; align-items: center;";
     
     const badges = {
-        low: `<span style="${baseStyle} background: linear-gradient(135deg, #c6f6d5 0%, #9ae6b4 100%); color: #22543d;"><i class="fas fa-arrow-down me-1"></i>Low Priority</span>`,
-        medium: `<span style="${baseStyle} background: linear-gradient(135deg, #bee3f8 0%, #90cdf4 100%); color: #2a4365;"><i class="fas fa-minus me-1"></i>Medium Priority</span>`,
-        high: `<span style="${baseStyle} background: linear-gradient(135deg, #fed7aa 0%, #f6ad55 100%); color: #744210;"><i class="fas fa-arrow-up me-1"></i>High Priority</span>`,
-        critical: `<span style="${baseStyle} background: linear-gradient(135deg, #fed7d7 0%, #fc8181 100%); color: #742a2a;"><i class="fas fa-exclamation me-1"></i>Critical Priority</span>`
+        low: `<span style="${baseStyle} background: linear-gradient(135deg, #c6f6d5 0%, #9ae6b4 100%); color: #22543d;"><i class="fas fa-arrow-down me-1" style="font-size: 0.6rem;"></i>Low</span>`,
+        medium: `<span style="${baseStyle} background: linear-gradient(135deg, #bee3f8 0%, #90cdf4 100%); color: #2a4365;"><i class="fas fa-minus me-1" style="font-size: 0.6rem;"></i>Medium</span>`,
+        high: `<span style="${baseStyle} background: linear-gradient(135deg, #fed7aa 0%, #f6ad55 100%); color: #744210;"><i class="fas fa-arrow-up me-1" style="font-size: 0.6rem;"></i>High</span>`,
+        critical: `<span style="${baseStyle} background: linear-gradient(135deg, #fed7d7 0%, #fc8181 100%); color: #742a2a;"><i class="fas fa-exclamation me-1" style="font-size: 0.6rem;"></i>Critical</span>`
     };
-    return badges[priority] || `<span style="${baseStyle} background: linear-gradient(135deg, #e2e8f0 0%, #cbd5e0 100%); color: #4a5568;"><i class="fas fa-circle me-1"></i>Normal Priority</span>`;
+    return badges[priority] || `<span style="${baseStyle} background: linear-gradient(135deg, #e2e8f0 0%, #cbd5e0 100%); color: #4a5568;"><i class="fas fa-circle me-1" style="font-size: 0.6rem;"></i>Normal</span>`;
 }
 
 // Filter projects by status

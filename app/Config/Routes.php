@@ -13,8 +13,8 @@ $routes->setAutoRoute(true);
 $routes->get('/', 'Home::index');
 
 // Explicit auth routes to ensure proper routing
-$routes->match(['get', 'post'], 'login', 'AuthController::login');
-$routes->match(['get', 'post'], 'register', 'AuthController::register');
+$routes->match(['GET', 'POST'], 'login', 'AuthController::login');
+$routes->match(['GET', 'POST'], 'register', 'AuthController::register');
 $routes->get('logout', 'AuthController::logout');
 // Note: profile route moved to Profile controller section below
 $routes->get('settings', 'AuthController::settings');

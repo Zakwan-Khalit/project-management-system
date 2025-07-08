@@ -60,13 +60,8 @@ class Template
         // Load and return template
         $output = view('templates/' . $this->template_name, $template_data);
         
-        if ($return_output) {
-            return $output;
-        }
-        
-        // Echo the output for immediate display
-        echo $output;
-        return $this;
+        // Always return the output - let CodeIgniter handle the response
+        return $output;
     }
     
     /**

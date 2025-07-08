@@ -6,6 +6,21 @@ use CodeIgniter\Model;
 
 class ActivityLogModel extends Model
 {
+    protected $table = 'activity_log';
+    protected $primaryKey = 'id';
+    protected $allowedFields = ['user_id', 'entity_type', 'entity_id', 'action', 'description', 'ip_address', 'user_agent', 'created_at', 'is_delete'];
+    protected $useTimestamps = true;
+    protected $createdField = 'created_at';
+    protected $updatedField = false; // Activity logs don't get updated
+    protected $deletedField = 'is_delete';
+    protected $db;
+
+    public function __construct()
+    {
+        parent::__construct();
+        $this->db = \Config\Database::connect();
+    }
+
     public function logActivity($data)
     {
         // Validate required fields
@@ -90,15 +105,12 @@ class ActivityLogModel extends Model
         return $builder->get()->getResultArray();
     }
     
-    public function getUserActivity($userId, $limit = 20)
+    public function getUserActivity($userId, $limit = 10)
     {
-        $builder = $this->db->table('activity_logs');
-        $builder->select('*');
-        $builder->where('user_id', $userId);
-        $builder->where('is_delete', 0);
-        $builder->orderBy('created_at', 'DESC');
-        $builder->limit($limit);
-        return $builder->get()->getResultArray();
+        return $this->where('user_id', $userId)
+            ->orderBy('created_at', 'DESC')
+            ->limit($limit)
+            ->findAll();
     }
     
     public function getProjectActivity($projectId, $limit = 50)
@@ -152,6 +164,15 @@ class ActivityLogModel extends Model
         $builder->orderBy('activity_logs.created_at', 'DESC');
         $builder->limit($limit);
         return $builder->get()->getResultArray();
+    }
+    
+    public function getRecentActivityWithUsers($limit = 15)
+    {
+        return $this->select('activity_logs.*, CONCAT(users.first_name, " ", users.last_name) as user_name, users.email')
+            ->join('users', 'users.id = activity_logs.user_id')
+            ->orderBy('activity_logs.created_at', 'DESC')
+            ->limit($limit)
+            ->findAll();
     }
     
     public function deleteOldLogs($daysOld = 365)

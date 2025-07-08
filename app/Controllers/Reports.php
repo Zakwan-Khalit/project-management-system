@@ -13,6 +13,7 @@ class Reports extends BaseController
     protected $taskModel;
     protected $userModel;
     protected $activityLogModel;
+    protected $template;
 
     public function __construct()
     {
@@ -20,6 +21,7 @@ class Reports extends BaseController
         $this->taskModel = new TaskModel();
         $this->userModel = new UserModel();
         $this->activityLogModel = new ActivityLogModel();
+        $this->template = new \App\Libraries\Template();
     }
 
     public function index()
@@ -28,85 +30,42 @@ class Reports extends BaseController
             return redirect()->to(base_url('login'));
         }
 
-        // Get overall statistics
-        $totalProjects = $this->projectModel->countAll();
-        $activeProjects = $this->projectModel->where('status', 'active')->countAllResults();
-        $completedProjects = $this->projectModel->where('status', 'completed')->countAllResults();
-        
-        $totalTasks = $this->taskModel->countAll();
-        $completedTasks = $this->taskModel->where('status', 'completed')->countAllResults();
-        $pendingTasks = $this->taskModel->where('status', 'pending')->countAllResults();
-        $inProgressTasks = $this->taskModel->where('status', 'in_progress')->countAllResults();
-
+        // Get overall statistics using model methods
+        $projectStats = $this->projectModel->getStatistics();
+        $taskStats = $this->taskModel->getStatistics();
         $totalUsers = $this->userModel->countAll();
 
         // Get projects with task completion rates
-        $projects = $this->projectModel->findAll();
-        $projectStats = [];
-        
-        foreach ($projects as $project) {
-            $projectTasks = $this->taskModel->where('project_id', $project['id'])->countAllResults();
-            $completedProjectTasks = $this->taskModel->where(['project_id' => $project['id'], 'status' => 'completed'])->countAllResults();
-            
-            $completionRate = $projectTasks > 0 ? round(($completedProjectTasks / $projectTasks) * 100, 2) : 0;
-            
-            $projectStats[] = [
-                'project' => $project,
-                'total_tasks' => $projectTasks,
-                'completed_tasks' => $completedProjectTasks,
-                'completion_rate' => $completionRate
-            ];
-        }
+        $projectsWithStats = $this->projectModel->getProjectsWithTaskStats();
 
         // Get task status distribution
-        $taskStatusData = [
-            'pending' => $pendingTasks,
-            'in_progress' => $inProgressTasks,
-            'completed' => $completedTasks
-        ];
+        $taskStatusData = $this->taskModel->getTaskStatusDistribution();
 
         // Get project status distribution
         $projectStatusData = [
-            'active' => $activeProjects,
-            'completed' => $completedProjects,
-            'on_hold' => $this->projectModel->where('status', 'on_hold')->countAllResults(),
-            'cancelled' => $this->projectModel->where('status', 'cancelled')->countAllResults()
+            'active' => $projectStats['active'],
+            'completed' => $projectStats['completed'],
+            'on_hold' => $projectStats['on_hold'],
+            'cancelled' => $projectStats['cancelled']
         ];
 
         // Get recent activity
-        $recentActivity = $this->activityLogModel->select('activity_logs.*, CONCAT(users.first_name, " ", users.last_name) as user_name, users.email')
-            ->join('users', 'users.id = activity_logs.user_id')
-            ->orderBy('activity_logs.created_at', 'DESC')
-            ->limit(15)
-            ->findAll();
+        $recentActivity = $this->activityLogModel->getRecentActivityWithUsers(15);
 
         // Get monthly task completion data for the last 6 months
-        $monthlyData = [];
-        for ($i = 5; $i >= 0; $i--) {
-            $month = date('Y-m', strtotime("-$i months"));
-            $monthName = date('M Y', strtotime("-$i months"));
-            
-            $completedInMonth = $this->taskModel->where('status', 'completed')
-                ->where("DATE_FORMAT(updated_at, '%Y-%m')", $month)
-                ->countAllResults();
-            
-            $monthlyData[] = [
-                'month' => $monthName,
-                'completed_tasks' => $completedInMonth
-            ];
-        }
+        $monthlyData = $this->taskModel->getMonthlyCompletionData(6);
 
         $data = [
             'title' => 'Reports & Analytics',
-            'totalProjects' => $totalProjects,
-            'activeProjects' => $activeProjects,
-            'completedProjects' => $completedProjects,
-            'totalTasks' => $totalTasks,
-            'completedTasks' => $completedTasks,
-            'pendingTasks' => $pendingTasks,
-            'inProgressTasks' => $inProgressTasks,
+            'totalProjects' => $projectStats['total'],
+            'activeProjects' => $projectStats['active'],
+            'completedProjects' => $projectStats['completed'],
+            'totalTasks' => $taskStats['total'],
+            'completedTasks' => $taskStats['completed'],
+            'pendingTasks' => $taskStats['pending'],
+            'inProgressTasks' => $taskStats['in_progress'],
             'totalUsers' => $totalUsers,
-            'projectStats' => $projectStats,
+            'projectStats' => $projectsWithStats,
             'taskStatusData' => $taskStatusData,
             'projectStatusData' => $projectStatusData,
             'recentActivity' => $recentActivity,

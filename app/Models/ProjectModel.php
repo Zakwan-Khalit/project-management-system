@@ -6,6 +6,18 @@ use CodeIgniter\Model;
 
 class ProjectModel extends Model
 {
+    protected $table = 'projects';
+    protected $primaryKey = 'id';
+    protected $allowedFields = ['name', 'description', 'start_date', 'end_date', 'created_by', 'created_at', 'updated_at', 'is_delete'];
+    protected $useTimestamps = true;
+    protected $deletedField = 'is_delete';
+    protected $db;
+
+    public function __construct()
+    {
+        parent::__construct();
+        $this->db = \Config\Database::connect();
+    }
     
     public function getProjectById($projectId)
     {
@@ -354,5 +366,196 @@ class ProjectModel extends Model
         
         $result = $builder->get()->getResultArray();
         return $result;
+    }
+    
+    public function getDashboardProjectStats($userId)
+    {
+        $builder = $this->db->table('projects p');
+        $builder->select('
+            COUNT(*) as total_projects,
+            COUNT(CASE WHEN sl.code = "active" THEN 1 END) as active_projects,
+            COUNT(CASE WHEN sl.code = "completed" THEN 1 END) as completed_projects,
+            COUNT(CASE WHEN sl.code = "on_hold" THEN 1 END) as on_hold_projects
+        ');
+        $builder->join('project_members pm', 'pm.project_id = p.id AND pm.is_active = 1 AND pm.is_delete = 0');
+        $builder->join('project_status ps', 'ps.project_id = p.id AND ps.is_current = 1 AND ps.is_delete = 0', 'left');
+        $builder->join('status_lookup sl', 'sl.id = ps.status_id AND sl.type = "project" AND sl.is_delete = 0', 'left');
+        $builder->where('pm.user_id', $userId);
+        $builder->where('p.is_delete', 0);
+        $builder->where('p.is_active', 1);
+        
+        $result = $builder->get()->getRowArray();
+        return $result ?: [
+            'total_projects' => 0,
+            'active_projects' => 0,
+            'completed_projects' => 0,
+            'on_hold_projects' => 0
+        ];
+    }
+    
+    // Simple project member methods for current database structure
+    public function addSimpleProjectMember($projectId, $userId, $role = 'member')
+    {
+        // Check if already a member
+        $builder = $this->db->table('project_members');
+        $builder->where('project_id', $projectId);
+        $builder->where('user_id', $userId);
+        $existing = $builder->get()->getRowArray();
+        
+        if ($existing) {
+            return false; // Already a member
+        }
+        
+        $data = [
+            'project_id' => $projectId,
+            'user_id' => $userId,
+            'role' => $role,
+            'joined_at' => date('Y-m-d H:i:s'),
+            'created_at' => date('Y-m-d H:i:s')
+        ];
+        
+        return $this->db->table('project_members')->insert($data);
+    }
+    
+    public function removeSimpleProjectMember($projectId, $userId)
+    {
+        return $this->db->table('project_members')
+                        ->where('project_id', $projectId)
+                        ->where('user_id', $userId)
+                        ->delete();
+    }
+    
+    public function checkProjectMemberExists($projectId, $userId)
+    {
+        $builder = $this->db->table('project_members');
+        $builder->where('project_id', $projectId);
+        $builder->where('user_id', $userId);
+        $result = $builder->get()->getRowArray();
+        
+        return !empty($result);
+    }
+    
+    // Method to get user project IDs (for access control)
+    public function getUserProjectIds($userId)
+    {
+        $memberProjectIds = $this->db->table('project_members')
+                                   ->select('project_id')
+                                   ->where('user_id', $userId)
+                                   ->get()
+                                   ->getResultArray();
+        
+        return array_column($memberProjectIds, 'project_id');
+    }
+    
+    // Method to get project counts for a specific project
+    public function getProjectCounts($projectId)
+    {
+        $totalTasks = $this->db->table('tasks')
+                             ->where('project_id', $projectId)
+                             ->where('is_delete', 0)
+                             ->countAllResults();
+        
+        $completedTasks = $this->db->table('tasks')
+                                 ->where('project_id', $projectId)
+                                 ->where('status', 'completed')
+                                 ->where('is_delete', 0)
+                                 ->countAllResults();
+        
+        $memberCount = $this->db->table('project_members')
+                              ->where('project_id', $projectId)
+                              ->countAllResults();
+        
+        return [
+            'total_tasks' => $totalTasks,
+            'completed_tasks' => $completedTasks,
+            'member_count' => $memberCount
+        ];
+    }
+    
+    // Method to get projects with filters and counts for a user
+    public function getProjectsWithDetails($userId, $filters = [])
+    {
+        // Get projects with detailed information
+        $builder = $this->select('
+            projects.*, 
+            creator.first_name as creator_first_name,
+            creator.last_name as creator_last_name
+        ')
+        ->join('users as creator', 'creator.id = projects.created_by')
+        ->where('projects.is_delete', 0);
+
+        // Apply filters
+        if (!empty($filters['status'])) {
+            $builder->where('projects.status', $filters['status']);
+        }
+        
+        if (!empty($filters['priority'])) {
+            $builder->where('projects.priority', $filters['priority']);
+        }
+        
+        if (!empty($filters['search'])) {
+            $builder->groupStart()
+                   ->like('projects.name', $filters['search'])
+                   ->orLike('projects.description', $filters['search'])
+                   ->groupEnd();
+        }
+
+        // Get projects that the user has access to (created by or member of)
+        $builder->groupStart()
+               ->where('projects.created_by', $userId);
+        
+        // Add OR condition for project members
+        $memberProjectIds = $this->getUserProjectIds($userId);
+        
+        if (!empty($memberProjectIds)) {
+            $builder->orWhereIn('projects.id', $memberProjectIds);
+        }
+        
+        $builder->groupEnd();
+
+        $projects = $builder->orderBy('projects.created_at', 'DESC')
+                           ->findAll();
+
+        // Add task and member counts to each project
+        foreach ($projects as &$project) {
+            $counts = $this->getProjectCounts($project['id']);
+            $project = array_merge($project, $counts);
+        }
+
+        return $projects;
+    }
+    
+    public function getStatistics()
+    {
+        return [
+            'total' => $this->countAll(),
+            'active' => $this->where('status', 'active')->countAllResults(),
+            'completed' => $this->where('status', 'completed')->countAllResults(),
+            'on_hold' => $this->where('status', 'on_hold')->countAllResults(),
+            'cancelled' => $this->where('status', 'cancelled')->countAllResults()
+        ];
+    }
+
+    public function getProjectsWithTaskStats()
+    {
+        $projects = $this->findAll();
+        $taskModel = new TaskModel();
+        $projectStats = [];
+        
+        foreach ($projects as $project) {
+            $projectTasks = $taskModel->where('project_id', $project['id'])->countAllResults();
+            $completedProjectTasks = $taskModel->where(['project_id' => $project['id'], 'status' => 'completed'])->countAllResults();
+            
+            $completionRate = $projectTasks > 0 ? round(($completedProjectTasks / $projectTasks) * 100, 2) : 0;
+            
+            $projectStats[] = [
+                'project' => $project,
+                'total_tasks' => $projectTasks,
+                'completed_tasks' => $completedProjectTasks,
+                'completion_rate' => $completionRate
+            ];
+        }
+        
+        return $projectStats;
     }
 }

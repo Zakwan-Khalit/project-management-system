@@ -6,6 +6,19 @@ use CodeIgniter\Model;
 
 class TaskModel extends Model
 {
+    protected $table = 'tasks';
+    protected $primaryKey = 'id';
+    protected $allowedFields = ['title', 'description', 'project_id', 'assigned_to', 'due_date', 'created_by', 'created_at', 'updated_at', 'is_delete'];
+    protected $useTimestamps = true;
+    protected $deletedField = 'is_delete';
+    protected $db;
+
+    public function __construct()
+    {
+        parent::__construct();
+        $this->db = \Config\Database::connect();
+    }
+
     public function getTaskById($taskId)
     {
         $builder = $this->db->table('tasks');
@@ -369,5 +382,183 @@ class TaskModel extends Model
         $builder->orderBy('level', 'DESC');
         $builder->orderBy('name', 'ASC');
         return $builder->get()->getResultArray();
+    }
+    
+    public function getDashboardTaskStats($userId)
+    {
+        $builder = $this->db->table('tasks t');
+        $builder->select('
+            COUNT(*) as total_tasks,
+            COUNT(CASE WHEN sl.code = "completed" THEN 1 END) as completed_tasks,
+            COUNT(CASE WHEN sl.code = "in_progress" THEN 1 END) as in_progress_tasks,
+            COUNT(CASE WHEN sl.code = "pending" THEN 1 END) as pending_tasks,
+            COUNT(CASE WHEN t.due_date < CURDATE() AND sl.code != "completed" THEN 1 END) as overdue_tasks
+        ');
+        $builder->join('task_ownership to', 'to.task_id = t.id AND to.is_current = 1 AND to.is_delete = 0', 'left');
+        $builder->join('task_status ts', 'ts.task_id = t.id AND ts.is_current = 1 AND ts.is_delete = 0', 'left');
+        $builder->join('status_lookup sl', 'sl.id = ts.status_id AND sl.type = "task" AND sl.is_delete = 0', 'left');
+        $builder->where('to.owned_by', $userId);
+        $builder->where('t.is_delete', 0);
+        $builder->where('t.is_active', 1);
+        
+        $result = $builder->get()->getRowArray();
+        return $result ?: [
+            'total_tasks' => 0,
+            'completed_tasks' => 0,
+            'in_progress_tasks' => 0,
+            'pending_tasks' => 0,
+            'overdue_tasks' => 0
+        ];
+    }
+    
+    public function getOverdueTasks()
+    {
+        $builder = $this->db->table('tasks t');
+        $builder->select('
+            t.*,
+            p.name as project_name,
+            sl.name as status_name,
+            sl.color as status_color,
+            up.first_name,
+            up.last_name,
+            up.avatar
+        ');
+        $builder->join('projects p', 'p.id = t.project_id AND p.is_delete = 0', 'left');
+        $builder->join('task_ownership to', 'to.task_id = t.id AND to.is_current = 1 AND to.is_delete = 0', 'left');
+        $builder->join('user_profile up', 'up.user_id = to.owned_by AND up.is_delete = 0', 'left');
+        $builder->join('task_status ts', 'ts.task_id = t.id AND ts.is_current = 1 AND ts.is_delete = 0', 'left');
+        $builder->join('status_lookup sl', 'sl.id = ts.status_id AND sl.type = "task" AND sl.is_delete = 0', 'left');
+        $builder->where('t.due_date <', date('Y-m-d'));
+        $builder->where('sl.code !=', 'completed');
+        $builder->where('t.is_delete', 0);
+        $builder->where('t.is_active', 1);
+        $builder->orderBy('t.due_date', 'ASC');
+        $builder->limit(10);
+        
+        return $builder->get()->getResultArray();
+    }
+    
+    public function getTaskStatusChartData($userId)
+    {
+        $builder = $this->db->table('tasks t');
+        $builder->select('sl.code as status, COUNT(*) as count');
+        $builder->join('task_ownership to', 'to.task_id = t.id AND to.is_current = 1 AND to.is_delete = 0', 'left');
+        $builder->join('task_status ts', 'ts.task_id = t.id AND ts.is_current = 1 AND ts.is_delete = 0', 'left');
+        $builder->join('status_lookup sl', 'sl.id = ts.status_id AND sl.type = "task" AND sl.is_delete = 0', 'left');
+        $builder->where('to.owned_by', $userId);
+        $builder->where('t.is_delete', 0);
+        $builder->where('t.is_active', 1);
+        $builder->groupBy('sl.code');
+        
+        return $builder->get()->getResultArray();
+    }
+    
+    public function getTaskPriorityChartData($userId)
+    {
+        $builder = $this->db->table('tasks t');
+        $builder->select('pl.code as priority, COUNT(*) as count');
+        $builder->join('task_ownership to', 'to.task_id = t.id AND to.is_current = 1 AND to.is_delete = 0', 'left');
+        $builder->join('task_priority tp', 'tp.task_id = t.id AND tp.is_current = 1 AND tp.is_delete = 0', 'left');
+        $builder->join('priority_lookup pl', 'pl.id = tp.priority_id AND pl.type = "task" AND pl.is_delete = 0', 'left');
+        $builder->where('to.owned_by', $userId);
+        $builder->where('t.is_delete', 0);
+        $builder->where('t.is_active', 1);
+        $builder->groupBy('pl.code');
+        
+        return $builder->get()->getResultArray();
+    }
+
+    // Task comment methods
+    public function addTaskComment($taskId, $userId, $comment)
+    {
+        $data = [
+            'task_id' => $taskId,
+            'user_id' => $userId,
+            'comment' => $comment,
+            'created_at' => date('Y-m-d H:i:s'),
+            'updated_at' => date('Y-m-d H:i:s')
+        ];
+        
+        return $this->db->table('task_comments')->insert($data);
+    }
+    
+    public function getTaskComments($taskId)
+    {
+        $builder = $this->db->table('task_comments tc');
+        $builder->select('tc.*, u.email, up.first_name, up.last_name, up.avatar');
+        $builder->join('users u', 'u.id = tc.user_id', 'left');
+        $builder->join('user_profile up', 'up.user_id = u.id', 'left');
+        $builder->where('tc.task_id', $taskId);
+        $builder->orderBy('tc.created_at', 'DESC');
+        
+        return $builder->get()->getResultArray();
+    }
+
+    public function updateTaskPosition($taskId, $statusCode, $position)
+    {
+        // Get status ID from code
+        $statusLookup = $this->db->table('status_lookup')
+                                ->where('type', 'task')
+                                ->where('code', $statusCode)
+                                ->get()->getRowArray();
+        
+        if (!$statusLookup) {
+            return false;
+        }
+        
+        // Update task status
+        $this->setTaskStatus($taskId, $statusLookup['id']);
+        
+        // Update task position
+        return $this->updateTask($taskId, ['order_index' => $position]);
+    }
+    
+    public function getSubTasks($parentTaskId)
+    {
+        // Note: Based on schema, there's no parent_task_id field in the current structure
+        // This would need to be added to the tasks table if sub-tasks are required
+        return [];
+    }
+
+    public function getStatistics()
+    {
+        return [
+            'total' => $this->countAll(),
+            'completed' => $this->where('status', 'completed')->countAllResults(),
+            'pending' => $this->where('status', 'pending')->countAllResults(),
+            'in_progress' => $this->where('status', 'in_progress')->countAllResults(),
+            'review' => $this->where('status', 'review')->countAllResults()
+        ];
+    }
+
+    public function getTaskStatusDistribution()
+    {
+        $stats = $this->getStatistics();
+        return [
+            'pending' => $stats['pending'],
+            'in_progress' => $stats['in_progress'],
+            'review' => $stats['review'],
+            'completed' => $stats['completed']
+        ];
+    }
+
+    public function getMonthlyCompletionData($months = 6)
+    {
+        $monthlyData = [];
+        for ($i = $months - 1; $i >= 0; $i--) {
+            $month = date('Y-m', strtotime("-$i months"));
+            $monthName = date('M Y', strtotime("-$i months"));
+            
+            $completedInMonth = $this->where('status', 'completed')
+                ->where("DATE_FORMAT(updated_at, '%Y-%m')", $month)
+                ->countAllResults();
+            
+            $monthlyData[] = [
+                'month' => $monthName,
+                'completed_tasks' => $completedInMonth
+            ];
+        }
+        
+        return $monthlyData;
     }
 }
