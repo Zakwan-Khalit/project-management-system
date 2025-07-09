@@ -18,23 +18,46 @@ Desktop.ini
 # Recycle Bin used on file shares
 $RECYCLE.BIN/
 
-# Windows Installer files
-*.cab
-*.msi
-*.msm
-*.msp
+#-------------------------
+# Debug and Test Files
+#-------------------------
 
-# Windows shortcuts
-*.lnk
+# Debug and test files
+debug_*.php
+test_*.php
+fix_*.php
+generate_*.php
+connection_test.php
+*_test.php
+*_debug.php
 
-# Linux
-*~
+# Test HTML files
+*.test.html
+library_test.html
 
-# KDE directory preferences
-.directory
+# PHPInfo files
+phpinfo.php
 
-# Linux trash folder which might appear on any partition or disk
-.Trash-*
+# Environment test files
+public/test_*.php
+public/debug_*.php
+public/check_*.php
+public/phpinfo.php
+public/simple_*.html
+
+# Null or empty directories
+public/null/
+
+# Obsolete model files (if recreated)
+app/Models/DepartmentLookupModel.php
+app/Models/PositionLookupModel.php
+app/Models/ProjectMembersModel.php
+app/Models/ProjectPriorityModel.php
+app/Models/ProjectStatusModel.php
+app/Models/TaskAssignmentModel.php
+app/Models/TaskOwnershipModel.php
+app/Models/TaskPriorityModel.php
+app/Models/TaskStatusModel.php
 
 #-------------------------
 # Environment Files
