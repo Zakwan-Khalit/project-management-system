@@ -83,6 +83,9 @@
             <button onclick="filterProjects('completed')" data-filter="completed" style="background: rgba(72, 187, 120, 0.1); color: #48bb78; border: 1px solid #48bb78; border-radius: 0.5rem; padding: 0.4rem 0.8rem; font-weight: 600; font-size: 0.8rem; cursor: pointer; transition: all 0.3s ease;" onmouseover="this.style.background='#48bb78'; this.style.color='white';" onmouseout="this.style.background='rgba(72, 187, 120, 0.1)'; this.style.color='#48bb78';">
                 <i class="fas fa-check-circle" style="margin-right: 0.3rem;"></i>Completed
             </button>
+            <button onclick="filterProjects('on_hold')" data-filter="on_hold" style="background: rgba(49, 151, 149, 0.1); color: #319795; border: 1px solid #319795; border-radius: 0.5rem; padding: 0.4rem 0.8rem; font-weight: 600; font-size: 0.8rem; cursor: pointer; transition: all 0.3s ease;" onmouseover="this.style.background='#319795'; this.style.color='white';" onmouseout="this.style.background='rgba(49, 151, 149, 0.1)'; this.style.color='#319795';">
+                <i class="fas fa-pause" style="margin-right: 0.3rem;"></i>On Hold
+            </button>
         </div>
 
         <!-- Search Box -->
@@ -129,7 +132,7 @@
         </style>
 
         <!-- Modern Horizontal Cards View -->
-        <div id="gridView" style="display: none;">
+        <div id="gridView" style="display: block;">
             <div id="projectsGrid" style="display: flex; flex-direction: column; gap: 1rem;">
                 <!-- Projects will be loaded here as horizontal cards -->
             </div>
@@ -177,6 +180,28 @@
 </div>
 
 <script>
+// Utility functions
+function debounce(func, wait) {
+    let timeout;
+    return function executedFunction(...args) {
+        const later = () => {
+            clearTimeout(timeout);
+            func(...args);
+        };
+        clearTimeout(timeout);
+        timeout = setTimeout(later, wait);
+    };
+}
+
+function formatDate(dateString) {
+    const date = new Date(dateString);
+    return date.toLocaleDateString('en-US', { 
+        year: 'numeric', 
+        month: 'short', 
+        day: 'numeric' 
+    });
+}
+
 // Global variables
 let currentView = 'grid';
 let currentFilter = 'all';
@@ -185,97 +210,176 @@ let filteredProjects = [];
 
 // Initialize page when DOM is loaded
 document.addEventListener('DOMContentLoaded', function() {
-    loadProjectStats();
-    loadProjects();
+    // Wait for jQuery to be available
+    function waitForJQuery() {
+        if (typeof $ !== 'undefined') {
+            console.log('jQuery is now available');
+            initializePage();
+        } else {
+            console.log('Waiting for jQuery...');
+            setTimeout(waitForJQuery, 100);
+        }
+    }
+    
+    waitForJQuery();
+});
+
+function initializePage() {
+    console.log('Initializing page...');
+    
+    // Initialize the view toggle button
+    const viewToggleIcon = document.getElementById('viewToggleIcon');
+    if (viewToggleIcon) {
+        viewToggleIcon.className = currentView === 'grid' ? 'fas fa-th' : 'fas fa-th-list';
+    }
     
     // Setup search functionality
     const searchInput = document.getElementById('searchInput');
     const priorityFilter = document.getElementById('priorityFilter');
     
-    searchInput.addEventListener('input', debounce(function() {
-        applyFilters();
-    }, 300));
+    if (searchInput) {
+        searchInput.addEventListener('input', debounce(function() {
+            applyFilters();
+        }, 300));
+    }
     
-    priorityFilter.addEventListener('change', function() {
-        applyFilters();
-    });
-});
+    if (priorityFilter) {
+        priorityFilter.addEventListener('change', function() {
+            applyFilters();
+        });
+    }
+    
+    // Setup select all checkbox functionality
+    const selectAllCheckbox = document.getElementById('selectAllProjects');
+    if (selectAllCheckbox) {
+        selectAllCheckbox.addEventListener('change', function() {
+            const projectCheckboxes = document.querySelectorAll('.project-checkbox');
+            projectCheckboxes.forEach(checkbox => {
+                checkbox.checked = this.checked;
+            });
+        });
+    }
+    
+    // Load data
+    console.log('Starting to load data...');
+    loadProjectStats();
+    loadProjects();
+}
 
 // Load project statistics
-async function loadProjectStats() {
-    try {
-        const response = await fetch('<?= base_url('projects/getProjectStats') ?>', {
-            method: 'GET',
-            headers: {
-                'X-Requested-With': 'XMLHttpRequest'
+function loadProjectStats() {
+    if (typeof $ === 'undefined') {
+        console.error('jQuery is not available! Cannot make AJAX calls.');
+        return;
+    }
+    
+    console.log('Calling loadProjectStats()');
+    console.log('URL:', '<?= base_url('projects/getProjectStats') ?>');
+    
+    $.ajax({
+        url: '<?= base_url('projects/getProjectStats') ?>',
+        type: 'GET',
+        dataType: 'json',
+        headers: {
+            'X-Requested-With': 'XMLHttpRequest'
+        },
+        success: function(data) {
+            console.log('Stats response:', data);
+            if (data.success && data.stats) {
+                console.log('Stats data:', data.stats);
+                updateStats(data.stats);
+            } else {
+                console.error('Failed to load stats:', data.message);
+                updateStats({ total: 0, completed: 0, in_progress: 0, delayed: 0 });
             }
-        });
-        
-        if (!response.ok) {
-            throw new Error('Network response was not ok');
-        }
-        
-        const data = await response.json();
-        console.log('Stats response:', data);
-        
-        if (data.success && data.stats) {
-            updateStats(data.stats);
-        } else {
-            console.error('Failed to load stats:', data.message);
+        },
+        error: function(xhr, status, error) {
+            console.error('Error loading project stats:', error);
+            console.error('Status:', status);
+            console.error('Response:', xhr.responseText);
+            console.error('XHR:', xhr);
             updateStats({ total: 0, completed: 0, in_progress: 0, delayed: 0 });
         }
-    } catch (error) {
-        console.error('Error loading project stats:', error);
-        updateStats({ total: 0, completed: 0, in_progress: 0, delayed: 0 });
-    }
+    });
 }
 
 // Update statistics display
 function updateStats(stats) {
-    document.getElementById('totalProjects').textContent = stats.total || 0;
-    document.getElementById('completedProjects').textContent = stats.completed || 0;
-    document.getElementById('inProgressProjects').textContent = stats.in_progress || 0;
-    document.getElementById('delayedProjects').textContent = stats.delayed || 0;
+    const elements = {
+        totalProjects: document.getElementById('totalProjects'),
+        completedProjects: document.getElementById('completedProjects'),
+        inProgressProjects: document.getElementById('inProgressProjects'),
+        delayedProjects: document.getElementById('delayedProjects')
+    };
+    
+    if (elements.totalProjects) elements.totalProjects.textContent = stats.total || 0;
+    if (elements.completedProjects) elements.completedProjects.textContent = stats.completed || 0;
+    if (elements.inProgressProjects) elements.inProgressProjects.textContent = stats.in_progress || 0;
+    if (elements.delayedProjects) elements.delayedProjects.textContent = stats.delayed || 0;
 }
 
 // Load projects from server
-async function loadProjects() {
+function loadProjects() {
+    if (typeof $ === 'undefined') {
+        console.error('jQuery is not available! Cannot make AJAX calls.');
+        return;
+    }
+    console.log('Loading projects...');
     try {
         showLoading();
-        
-        const response = await fetch('<?= base_url('projects/getProjects') ?>', {
-            method: 'GET',
-            headers: {
-                'X-Requested-With': 'XMLHttpRequest'
-            }
-        });
-        
-        if (!response.ok) {
-            throw new Error('Network response was not ok');
-        }
-        
-        const data = await response.json();
-        console.log('Projects response:', data);
-        
-        if (data.success && data.projects) {
-            projects = data.projects;
-            applyFilters();
-        } else {
-            console.error('Failed to load projects:', data.message);
-            showEmptyState();
-        }
-    } catch (error) {
-        console.error('Error loading projects:', error);
-        showEmptyState();
-    } finally {
-        hideLoading();
+    } catch (e) {
+        console.error('showLoading() failed:', e);
     }
+    console.log('Calling loadProjects()');
+    console.log('URL:', '<?= base_url('projects/getProjects') ?>');
+    
+    $.ajax({
+        url: '<?= base_url('projects/getProjects') ?>',
+        type: 'GET',
+        dataType: 'json',
+        headers: {
+            'X-Requested-With': 'XMLHttpRequest'
+        },
+        success: function(data) {
+            console.log('Projects response:', data);
+            if (data.success && data.projects) {
+                projects = data.projects;
+                console.log('Projects loaded:', projects.length);
+                console.log('Sample project:', projects[0]);
+                applyFilters();
+            } else {
+                console.error('Failed to load projects:', data.message);
+                showEmptyState();
+            }
+        },
+        error: function(xhr, status, error) {
+            console.error('Error loading projects:', error);
+            console.error('Status:', status);
+            console.error('Response:', xhr.responseText);
+            console.error('XHR:', xhr);
+            showEmptyState();
+        },
+        complete: function() {
+            hideLoading();
+        }
+    });
 }
 
 // Apply current filters to projects
 function applyFilters() {
-    const searchTerm = document.getElementById('searchInput').value.toLowerCase();
-    const priorityFilter = document.getElementById('priorityFilter').value;
+    console.log('Applying filters...');
+    console.log('Total projects:', projects.length);
+    console.log('Current filter:', currentFilter);
+    console.log('Current view:', currentView);
+    
+    const searchInput = document.getElementById('searchInput');
+    const priorityFilterElement = document.getElementById('priorityFilter');
+    
+    const searchTerm = searchInput ? searchInput.value.toLowerCase() : '';
+    const priorityFilter = priorityFilterElement ? priorityFilterElement.value : '';
+    
+    console.log('Search term:', searchTerm);
+    console.log('Priority filter:', priorityFilter);
     
     filteredProjects = projects.filter(project => {
         // Status filter
@@ -303,11 +407,31 @@ function applyFilters() {
         return true;
     });
     
+    console.log('Filtered projects:', filteredProjects.length);
+
     if (currentView === 'grid') {
+        console.log('Rendering grid view');
         renderGridView();
     } else {
+        console.log('Rendering table view');
         renderTableView();
     }
+
+    // Ensure the correct view is visible
+    const gridView = document.getElementById('gridView');
+    const tableView = document.getElementById('tableView');
+    
+    if (gridView && tableView) {
+        if (currentView === 'grid') {
+            tableView.style.display = 'none';
+            gridView.style.display = 'block';
+        } else {
+            gridView.style.display = 'none';
+            tableView.style.display = 'block';
+        }
+    }
+    
+    console.log('View display updated');
 }
 
 // Render projects in grid view - Modern Horizontal Cards
@@ -315,6 +439,11 @@ function renderGridView() {
     const gridView = document.getElementById('gridView');
     const projectsGrid = document.getElementById('projectsGrid');
     const emptyState = document.getElementById('emptyState');
+    
+    if (!gridView || !projectsGrid || !emptyState) {
+        console.error('Required DOM elements not found for grid view');
+        return;
+    }
     
     if (filteredProjects.length === 0) {
         gridView.style.display = 'none';
@@ -351,20 +480,53 @@ function renderGridView() {
 
 // Render projects in table view
 function renderTableView() {
+    console.log('renderTableView called with', filteredProjects.length, 'projects');
+    
     const tableView = document.getElementById('tableView');
     const tableBody = document.getElementById('projectsTableBody');
     const emptyState = document.getElementById('emptyState');
     
+    console.log('DOM elements found:', {
+        tableView: !!tableView,
+        tableBody: !!tableBody,
+        emptyState: !!emptyState
+    });
+    
+    if (!tableView || !tableBody || !emptyState) {
+        console.error('Required DOM elements not found for table view');
+        return;
+    }
+    
     if (filteredProjects.length === 0) {
+        console.log('No projects to show, showing empty state');
         tableView.style.display = 'none';
         emptyState.style.display = 'block';
         return;
     }
     
+    console.log('Showing table with projects');
     emptyState.style.display = 'none';
     tableView.style.display = 'block';
     
-    tableBody.innerHTML = filteredProjects.map(project => createProjectRow(project)).join('');
+    const tableRows = filteredProjects.map(project => {
+        console.log('Creating row for project:', project.name);
+        return createProjectRow(project);
+    });
+    
+    tableBody.innerHTML = tableRows.join('');
+    console.log('Table body updated with', tableRows.length, 'rows');
+    
+    // Re-setup select all functionality after rendering table
+    const selectAllCheckbox = document.getElementById('selectAllProjects');
+    if (selectAllCheckbox) {
+        selectAllCheckbox.checked = false; // Reset the checkbox
+        selectAllCheckbox.addEventListener('change', function() {
+            const projectCheckboxes = document.querySelectorAll('.project-checkbox');
+            projectCheckboxes.forEach(checkbox => {
+                checkbox.checked = this.checked;
+            });
+        });
+    }
 }
 
 // Create compact horizontal project card HTML
@@ -375,7 +537,7 @@ function createHorizontalProjectCard(project) {
     const dueDate = project.end_date ? formatDate(project.end_date) : 'No due date';
     
     return `
-        <div class="horizontal-project-card" style="background: white; border-radius: 1rem; overflow: hidden; box-shadow: 0 4px 6px rgba(0,0,0,0.05); transition: all 0.3s ease; border: 1px solid #f1f3f4;" onmouseover="this.style.transform='translateY(-2px)'; this.style.boxShadow='0 8px 15px rgba(0,0,0,0.1)';" onmouseout="this.style.transform='translateY(0)'; this.style.boxShadow='0 4px 6px rgba(0,0,0,0.05)';">
+        <div class="horizontal-project-card" style="background: white; border-radius: 1rem; overflow: visible; box-shadow: 0 4px 6px rgba(0,0,0,0.05); transition: all 0.3s ease; border: 1px solid #f1f3f4;">
             <div style="display: flex; align-items: center; padding: 1rem; gap: 1rem;">
                 
                 <!-- Project Info Section -->
@@ -407,13 +569,13 @@ function createHorizontalProjectCard(project) {
                     <!-- Tasks -->
                     <div style="text-align: center; min-width: 50px;">
                         <div style="font-size: 1.25rem; font-weight: 700; color: #4a5568; font-family: 'Poppins', sans-serif;">${project.total_tasks || 0}</div>
-                        <div style="font-size: 0.7rem; color: #6b7280;">Tasks</div>
+                        <div style="color: #6b7280; font-size: 0.7rem;">Tasks</div>
                     </div>
                     
                     <!-- Team -->
                     <div style="text-align: center; min-width: 50px;">
                         <div style="font-size: 1.25rem; font-weight: 700; color: #4a5568; font-family: 'Poppins', sans-serif;">${project.member_count || 0}</div>
-                        <div style="font-size: 0.7rem; color: #6b7280;">Team</div>
+                        <div style="color: #6b7280; font-size: 0.7rem;">Team</div>
                     </div>
                     
                     <!-- Due Date -->
@@ -434,11 +596,12 @@ function createHorizontalProjectCard(project) {
                     <button onclick="kanbanView(${project.id})" style="background: rgba(102, 126, 234, 0.1); color: #667eea; border: 1px solid #667eea; border-radius: 0.5rem; padding: 0.5rem; font-weight: 600; font-size: 0.8rem; cursor: pointer; transition: all 0.3s ease;" onmouseover="this.style.background='#667eea'; this.style.color='white';" onmouseout="this.style.background='rgba(102, 126, 234, 0.1)'; this.style.color='#667eea';" title="Kanban Board">
                         <i class="fas fa-columns"></i>
                     </button>
-                    <div class="dropdown">
-                        <button style="background: #f8fafc; border: 1px solid #e2e8f0; border-radius: 0.5rem; padding: 0.5rem; color: #6b7280; cursor: pointer; transition: all 0.3s ease;" data-bs-toggle="dropdown" onmouseover="this.style.background='#e2e8f0';" onmouseout="this.style.background='#f8fafc';" title="More Options">
+                    <div class="dropdown" style="overflow: visible; position: relative;">
+                        <button style="background: #f8fafc; border: 1px solid #e2e8f0; border-radius: 0.5rem; padding: 0.5rem; color: #6b7280; cursor: pointer; transition: all 0.3s ease;" data-bs-toggle="dropdown" onmouseover="this.style.background='#e2e8f0';" onmouseout="this.style.background='#f8fafc';">
                             <i class="fas fa-ellipsis-v"></i>
                         </button>
-                        <ul class="dropdown-menu shadow-lg" style="border-radius: 0.75rem; border: none; padding: 0.25rem;">
+                        <ul class="dropdown-menu shadow-lg"
+                            style="border-radius: 0.75rem; border: none; padding: 0.25rem; min-width: 180px; right: 0; left: auto; top: 110%; position: absolute; z-index: 9999; overflow: visible;">
                             <li><a class="dropdown-item" href="#" onclick="editProject(${project.id})" style="border-radius: 0.5rem; padding: 0.5rem; margin: 0.1rem; font-size: 0.85rem;">
                                 <i class="fas fa-edit me-2 text-warning"></i>Edit
                             </a></li>
@@ -456,28 +619,6 @@ function createHorizontalProjectCard(project) {
         </div>
     `;
 }
-                            </div>
-                            <div class="due-date-info">
-                                <i class="fas fa-calendar-alt me-1"></i>
-                                <span>${dueDate}</span>
-                            </div>
-                        </div>
-                    </div>
-                    
-                    <!-- Action Buttons -->
-                    <div class="action-buttons">
-                        <button class="btn-action btn-primary-action" onclick="viewProject(${project.id})">
-                            <i class="fas fa-eye me-2"></i>View
-                        </button>
-                        <button class="btn-action btn-secondary-action" onclick="kanbanView(${project.id})">
-                            <i class="fas fa-columns me-2"></i>Kanban
-                        </button>
-                    </div>
-                </div>
-            </div>
-        </div>
-    `;
-}
 
 // Create project row HTML for table view
 function createProjectRow(project) {
@@ -488,37 +629,50 @@ function createProjectRow(project) {
     
     return `
         <tr>
-            <td><input type="checkbox" class="project-checkbox" value="${project.id}"></td>
-            <td>
-                <div class="d-flex align-items-center">
+            <td style="padding: 1rem;"><input type="checkbox" class="project-checkbox" value="${project.id}" style="cursor: pointer; transform: scale(1.2);"></td>
+            <td style="padding: 1rem;">
+                <div style="display: flex; align-items: center;">
                     <div>
-                        <div class="fw-bold">${project.name}</div>
-                        <small class="text-muted">${project.description || 'No description'}</small>
+                        <div style="font-weight: 600; color: #1a202c; margin-bottom: 0.25rem;">${project.name}</div>
+                        <small style="color: #6b7280;">${project.description || 'No description'}</small>
                     </div>
                 </div>
             </td>
-            <td>${statusBadge}</td>
-            <td>${priorityBadge}</td>
-            <td>
-                <div class="d-flex align-items-center">
-                    <div class="progress me-2" style="width: 100px; height: 6px;">
-                        <div class="progress-bar" style="width: ${progressPercentage}%"></div>
+            <td style="padding: 1rem;">${statusBadge}</td>
+            <td style="padding: 1rem;">${priorityBadge}</td>
+            <td style="padding: 1rem;">
+                <div style="display: flex; align-items: center;">
+                    <div style="background: #f1f5f9; border-radius: 1rem; overflow: hidden; width: 100px; height: 8px; margin-right: 0.5rem;">
+                        <div style="background: linear-gradient(90deg, #48bb78, #38a169); height: 100%; width: ${progressPercentage}%; transition: width 0.3s ease;"></div>
                     </div>
-                    <small>${progressPercentage}%</small>
+                    <small style="font-weight: 600; color: #4a5568;">${progressPercentage}%</small>
                 </div>
             </td>
-            <td>${dueDate}</td>
-            <td>
+            <td style="padding: 1rem;">
+                <div style="font-size: 0.85rem; color: #4a5568;">
+                    <i class="fas fa-calendar-alt" style="margin-right: 0.25rem; color: #9ca3af;"></i>
+                    ${dueDate}
+                </div>
+            </td>
+            <td style="padding: 1rem;">
                 <div class="dropdown">
-                    <button class="btn btn-sm btn-outline-secondary" data-bs-toggle="dropdown">
+                    <button style="background: #f8fafc; border: 1px solid #e2e8f0; border-radius: 0.5rem; padding: 0.5rem; color: #6b7280; cursor: pointer; transition: all 0.3s ease;" data-bs-toggle="dropdown" onmouseover="this.style.background='#e2e8f0';" onmouseout="this.style.background='#f8fafc';">
                         <i class="fas fa-ellipsis-v"></i>
                     </button>
-                    <ul class="dropdown-menu">
-                        <li><a class="dropdown-item" href="#" onclick="viewProject(${project.id})"><i class="fas fa-eye me-2"></i>View</a></li>
-                        <li><a class="dropdown-item" href="#" onclick="editProject(${project.id})"><i class="fas fa-edit me-2"></i>Edit</a></li>
-                        <li><a class="dropdown-item" href="#" onclick="kanbanView(${project.id})"><i class="fas fa-columns me-2"></i>Kanban</a></li>
-                        <li><hr class="dropdown-divider"></li>
-                        <li><a class="dropdown-item text-danger" href="#" onclick="deleteProject(${project.id})"><i class="fas fa-trash me-2"></i>Delete</a></li>
+                    <ul class="dropdown-menu shadow-lg" style="border-radius: 0.75rem; border: none; padding: 0.25rem;">
+                        <li><a class="dropdown-item" href="#" onclick="viewProject(${project.id})" style="border-radius: 0.5rem; padding: 0.5rem; margin: 0.1rem; font-size: 0.85rem;">
+                            <i class="fas fa-eye me-2 text-primary"></i>View
+                        </a></li>
+                        <li><a class="dropdown-item" href="#" onclick="editProject(${project.id})" style="border-radius: 0.5rem; padding: 0.5rem; margin: 0.1rem; font-size: 0.85rem;">
+                            <i class="fas fa-edit me-2 text-warning"></i>Edit
+                        </a></li>
+                        <li><a class="dropdown-item" href="#" onclick="kanbanView(${project.id})" style="border-radius: 0.5rem; padding: 0.5rem; margin: 0.1rem; font-size: 0.85rem;">
+                            <i class="fas fa-columns me-2 text-info"></i>Kanban
+                        </a></li>
+                        <li><hr class="dropdown-divider" style="margin: 0.25rem;"></li>
+                        <li><a class="dropdown-item text-danger" href="#" onclick="deleteProject(${project.id})" style="border-radius: 0.5rem; padding: 0.5rem; margin: 0.1rem; font-size: 0.85rem;">
+                            <i class="fas fa-trash me-2"></i>Delete
+                        </a></li>
                     </ul>
                 </div>
             </td>
@@ -557,47 +711,94 @@ function getPriorityBadge(priority) {
 function filterProjects(status) {
     currentFilter = status;
     
-    // Update active tab
-    document.querySelectorAll('.filter-tab').forEach(tab => {
-        tab.classList.remove('active', 'btn-primary');
-        tab.classList.add('btn-outline-primary');
+    // Update active tab - reset all filter buttons
+    document.querySelectorAll('[data-filter]').forEach(tab => {
+        const tabStatus = tab.getAttribute('data-filter');
+        
+        if (tabStatus === status) {
+            // Active tab styling
+            if (tabStatus === 'all') {
+                tab.style.background = 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)';
+                tab.style.color = 'white';
+                tab.style.border = 'none';
+            } else {
+                // Get the color for specific status tabs
+                const colors = {
+                    planning: { bg: '#9f7aea', border: '#9f7aea' },
+                    active: { bg: '#ed8936', border: '#ed8936' },
+                    completed: { bg: '#48bb78', border: '#48bb78' },
+                    on_hold: { bg: '#319795', border: '#319795' }
+                };
+                const color = colors[tabStatus] || { bg: '#667eea', border: '#667eea' };
+                tab.style.background = color.bg;
+                tab.style.color = 'white';
+                tab.style.border = `1px solid ${color.border}`;
+            }
+        } else {
+            // Inactive tab styling
+            if (tabStatus === 'all') {
+                tab.style.background = 'rgba(102, 126, 234, 0.1)';
+                tab.style.color = '#667eea';
+                tab.style.border = '1px solid #667eea';
+            } else {
+                const colors = {
+                    planning: { bg: 'rgba(159, 122, 234, 0.1)', color: '#9f7aea', border: '#9f7aea' },
+                    active: { bg: 'rgba(237, 137, 54, 0.1)', color: '#ed8936', border: '#ed8936' },
+                    completed: { bg: 'rgba(72, 187, 120, 0.1)', color: '#48bb78', border: '#48bb78' },
+                    on_hold: { bg: 'rgba(49, 151, 149, 0.1)', color: '#319795', border: '#319795' }
+                };
+                const color = colors[tabStatus] || { bg: 'rgba(102, 126, 234, 0.1)', color: '#667eea', border: '#667eea' };
+                tab.style.background = color.bg;
+                tab.style.color = color.color;
+                tab.style.border = `1px solid ${color.border}`;
+            }
+        }
     });
-    
-    const activeTab = document.querySelector(`[data-filter="${status}"]`);
-    if (activeTab) {
-        activeTab.classList.remove('btn-outline-primary');
-        activeTab.classList.add('active', 'btn-primary');
-    }
     
     applyFilters();
 }
 
 // Clear all filters
 function clearFilters() {
-    document.getElementById('searchInput').value = '';
-    document.getElementById('priorityFilter').value = '';
+    const searchInput = document.getElementById('searchInput');
+    const priorityFilter = document.getElementById('priorityFilter');
+    
+    if (searchInput) searchInput.value = '';
+    if (priorityFilter) priorityFilter.value = '';
+    
     filterProjects('all');
 }
 
 // Toggle between grid and table view
 function toggleView() {
+    console.log('toggleView called, current view:', currentView);
+    
     const gridView = document.getElementById('gridView');
     const tableView = document.getElementById('tableView');
     const toggleIcon = document.getElementById('viewToggleIcon');
+    
+    if (!gridView || !tableView || !toggleIcon) {
+        console.error('Required elements for view toggle not found');
+        return;
+    }
     
     if (currentView === 'grid') {
         currentView = 'table';
         gridView.style.display = 'none';
         tableView.style.display = 'block';
         toggleIcon.className = 'fas fa-th-list';
+        console.log('Switched to table view');
         renderTableView();
     } else {
         currentView = 'grid';
         tableView.style.display = 'none';
-        gridView.style.display = 'flex';
+        gridView.style.display = 'block';
         toggleIcon.className = 'fas fa-th';
+        console.log('Switched to grid view');
         renderGridView();
     }
+    
+    console.log('View toggled to:', currentView);
 }
 
 // Project actions
@@ -618,6 +819,11 @@ function createNewProject() {
 }
 
 function duplicateProject(projectId) {
+    if (typeof Swal === 'undefined') {
+        alert('SweetAlert2 is not loaded');
+        return;
+    }
+    
     Swal.fire({
         title: 'Duplicate Project',
         text: "This will create a copy of the project with all tasks.",
@@ -628,33 +834,47 @@ function duplicateProject(projectId) {
         confirmButtonText: 'Yes, duplicate it!'
     }).then((result) => {
         if (result.isConfirmed) {
+            if (typeof $ === 'undefined') {
+                Swal.fire('Error!', 'jQuery is not available.', 'error');
+                return;
+            }
+            
             // Make AJAX call to duplicate project
-            fetch(`<?= base_url('projects/duplicate/') ?>${projectId}`, {
-                method: 'POST',
+            $.ajax({
+                url: '<?= base_url('projects/duplicate/') ?>' + projectId,
+                type: 'POST',
+                dataType: 'json',
                 headers: {
                     'Content-Type': 'application/json',
                     'X-Requested-With': 'XMLHttpRequest'
+                },
+                success: function(data) {
+                    if (data.success) {
+                        Swal.fire('Duplicated!', 'Project has been duplicated successfully.', 'success');
+                        loadProjects();
+                        loadProjectStats();
+                    } else {
+                        Swal.fire('Error!', 'Failed to duplicate project.', 'error');
+                    }
+                },
+                error: function(xhr, status, error) {
+                    console.error('Error:', error);
+                    Swal.fire('Error!', 'An error occurred while duplicating the project.', 'error');
                 }
-            })
-            .then(response => response.json())
-            .then(data => {
-                if (data.success) {
-                    Swal.fire('Duplicated!', 'Project has been duplicated successfully.', 'success');
-                    loadProjects();
-                    loadProjectStats();
-                } else {
-                    Swal.fire('Error!', 'Failed to duplicate project.', 'error');
-                }
-            })
-            .catch(error => {
-                console.error('Error:', error);
-                Swal.fire('Error!', 'An error occurred while duplicating the project.', 'error');
             });
         }
     });
 }
 
 function deleteProject(projectId) {
+    if (typeof Swal === 'undefined') {
+        if (confirm('Are you sure you want to delete this project?')) {
+            // Fallback without SweetAlert
+            window.location.href = '<?= base_url('projects/delete/') ?>' + projectId;
+        }
+        return;
+    }
+    
     Swal.fire({
         title: 'Are you sure?',
         text: "This action cannot be undone!",
@@ -665,70 +885,70 @@ function deleteProject(projectId) {
         confirmButtonText: 'Yes, delete it!'
     }).then((result) => {
         if (result.isConfirmed) {
+            if (typeof $ === 'undefined') {
+                Swal.fire('Error!', 'jQuery is not available.', 'error');
+                return;
+            }
+            
             // Make AJAX call to delete project
-            fetch(`<?= base_url('projects/delete/') ?>${projectId}`, {
-                method: 'POST',
+            $.ajax({
+                url: '<?= base_url('projects/delete/') ?>' + projectId,
+                type: 'POST',
+                dataType: 'json',
                 headers: {
                     'Content-Type': 'application/json',
                     'X-Requested-With': 'XMLHttpRequest'
+                },
+                success: function(data) {
+                    if (data.success) {
+                        Swal.fire('Deleted!', 'Project has been deleted.', 'success');
+                        loadProjects();
+                        loadProjectStats();
+                    } else {
+                        Swal.fire('Error!', 'Failed to delete project.', 'error');
+                    }
+                },
+                error: function(xhr, status, error) {
+                    console.error('Error:', error);
+                    Swal.fire('Error!', 'An error occurred while deleting the project.', 'error');
                 }
-            })
-            .then(response => response.json())
-            .then(data => {
-                if (data.success) {
-                    Swal.fire('Deleted!', 'Project has been deleted.', 'success');
-                    loadProjects();
-                    loadProjectStats();
-                } else {
-                    Swal.fire('Error!', 'Failed to delete project.', 'error');
-                }
-            })
-            .catch(error => {
-                console.error('Error:', error);
-                Swal.fire('Error!', 'An error occurred while deleting the project.', 'error');
             });
         }
     });
 }
 
-// Utility functions
+// Utility functions for UI
 function showLoading() {
-    document.getElementById('loadingContainer').style.display = 'block';
-    document.getElementById('gridView').style.display = 'none';
-    document.getElementById('tableView').style.display = 'none';
-    document.getElementById('emptyState').style.display = 'none';
+    // Defensive: Only operate on known containers, never touch button.innerHTML
+    var loadingContainer = document.getElementById('loadingContainer');
+    var gridView = document.getElementById('gridView');
+    var tableView = document.getElementById('tableView');
+    var emptyState = document.getElementById('emptyState');
+
+    if (loadingContainer) loadingContainer.style.display = 'block';
+    if (gridView) gridView.style.display = 'none';
+    if (tableView) tableView.style.display = 'none';
+    if (emptyState) emptyState.style.display = 'none';
+    // Never reference any button or button.innerHTML here
 }
 
 function hideLoading() {
-    document.getElementById('loadingContainer').style.display = 'none';
+    const loadingContainer = document.getElementById('loadingContainer');
+    if (loadingContainer) loadingContainer.style.display = 'none';
 }
 
 function showEmptyState() {
-    document.getElementById('loadingContainer').style.display = 'none';
-    document.getElementById('gridView').style.display = 'none';
-    document.getElementById('tableView').style.display = 'none';
-    document.getElementById('emptyState').style.display = 'block';
-}
-
-function formatDate(dateString) {
-    const date = new Date(dateString);
-    return date.toLocaleDateString('en-US', { 
-        year: 'numeric', 
-        month: 'short', 
-        day: 'numeric' 
-    });
-}
-
-function debounce(func, wait) {
-    let timeout;
-    return function executedFunction(...args) {
-        const later = () => {
-            clearTimeout(timeout);
-            func(...args);
-        };
-        clearTimeout(timeout);
-        timeout = setTimeout(later, wait);
+    const elements = {
+        loadingContainer: document.getElementById('loadingContainer'),
+        gridView: document.getElementById('gridView'),
+        tableView: document.getElementById('tableView'),
+        emptyState: document.getElementById('emptyState')
     };
+    
+    if (elements.loadingContainer) elements.loadingContainer.style.display = 'none';
+    if (elements.gridView) elements.gridView.style.display = 'none';
+    if (elements.tableView) elements.tableView.style.display = 'none';
+    if (elements.emptyState) elements.emptyState.style.display = 'block';
 }
 
 // Initialize Masonry Layout for Vertical Cards

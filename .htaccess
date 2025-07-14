@@ -1,4 +1,13 @@
 RewriteEngine On
+
+# Directly serve static assets - handle /assets/ requests
+RewriteRule ^assets/(.*)$ public/assets/$1 [L]
+
+# Serve static file types directly without routing through CodeIgniter
+RewriteCond %{REQUEST_URI} \.(css|js|png|jpg|jpeg|gif|ico|svg|woff|woff2|ttf|eot|map)$ [NC]
+RewriteRule ^(.*)$ public/$1 [L]
+
+# Standard CodeIgniter routing for everything else
 RewriteCond %{REQUEST_FILENAME} !-f
 RewriteCond %{REQUEST_FILENAME} !-d
 RewriteRule ^(.*)$ public/index.php/$1 [QSA,L]

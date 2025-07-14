@@ -11,10 +11,10 @@
             <div>
                 <h1 style="color: white; font-size: 2.5rem; font-weight: 800; margin-bottom: 0.75rem; font-family: 'Poppins', sans-serif; text-shadow: 0 2px 4px rgba(0,0,0,0.1);">
                     <i class="fas fa-tasks" style="margin-right: 0.75rem; color: rgba(255,255,255,0.9);"></i>
-                    My Tasks
+                    <?= isset($is_my_tasks) && $is_my_tasks ? 'My Tasks' : (isset($is_all_tasks) && $is_all_tasks ? 'All Tasks' : 'Tasks') ?>
                 </h1>
                 <p style="color: rgba(255,255,255,0.95); font-size: 1.1rem; margin-bottom: 0; font-weight: 400;">
-                    Manage and track your assigned tasks efficiently
+                    <?= isset($is_my_tasks) && $is_my_tasks ? 'Manage and track your assigned tasks efficiently' : 'View and manage all system tasks' ?>
                 </p>
             </div>
             <div style="display: flex; gap: 1rem; flex-wrap: wrap;">
@@ -31,6 +31,23 @@
 
     <!-- Filters and Search -->
     <div style="background: white; border-radius: 1rem; padding: 1.5rem 2rem; margin-bottom: 2rem; box-shadow: 0 4px 6px rgba(0,0,0,0.05);">
+        <!-- View Info Banner -->
+        <?php if (isset($is_all_tasks) && $is_all_tasks): ?>
+            <div style="background: linear-gradient(135deg, #eff6ff 0%, #dbeafe 100%); border: 1px solid #bfdbfe; color: #1e40af; padding: 1rem; border-radius: 0.75rem; margin-bottom: 1.5rem;">
+                <div style="display: flex; align-items: center; gap: 0.5rem;">
+                    <i class="fas fa-info-circle"></i>
+                    <strong>All Tasks View:</strong> You are viewing all tasks in the system. This includes tasks assigned to all team members.
+                </div>
+            </div>
+        <?php elseif (isset($is_my_tasks) && $is_my_tasks): ?>
+            <div style="background: linear-gradient(135deg, #f0fdf4 0%, #dcfce7 100%); border: 1px solid #bbf7d0; color: #166534; padding: 1rem; border-radius: 0.75rem; margin-bottom: 1.5rem;">
+                <div style="display: flex; align-items: center; gap: 0.5rem;">
+                    <i class="fas fa-user-check"></i>
+                    <strong>My Tasks View:</strong> You are viewing only tasks assigned to you.
+                </div>
+            </div>
+        <?php endif; ?>
+        
         <div style="display: flex; align-items: center; gap: 1rem; flex-wrap: wrap; margin-bottom: 1rem;">
             <!-- Status Filter Tabs -->
             <div style="display: flex; gap: 0.5rem; flex-wrap: wrap;">
@@ -230,9 +247,11 @@ function loadTasks() {
         ...currentFilters
     });
 
-    fetch(`<?= base_url('tasks/getTasks') ?>?${params}`)
-        .then(response => response.json())
-        .then(data => {
+    $.ajax({
+        url: `<?= base_url('tasks/getTasks') ?>?${params}`,
+        method: 'GET',
+        dataType: 'json',
+        success: function(data) {
             if (data.success) {
                 tasksData = data.tasks;
                 renderTasks(data.tasks);
@@ -240,11 +259,12 @@ function loadTasks() {
             } else {
                 showError('Failed to load tasks');
             }
-        })
-        .catch(error => {
+        },
+        error: function(xhr, status, error) {
             console.error('Error loading tasks:', error);
             showError('Failed to load tasks');
-        });
+        }
+    });
 }
 
 function renderTasks(tasks) {
@@ -594,9 +614,11 @@ function debounce(func, wait) {
 
 function loadFilterOptions() {
     // Load filter options from controller
-    fetch('<?= base_url('tasks/getFilterOptions') ?>')
-        .then(response => response.json())
-        .then(data => {
+    $.ajax({
+        url: '<?= base_url('tasks/getFilterOptions') ?>',
+        method: 'GET',
+        dataType: 'json',
+        success: function(data) {
             if (data.success) {
                 // Populate project filter
                 const projectFilter = document.getElementById('projectFilter');
@@ -609,7 +631,6 @@ function loadFilterOptions() {
                         projectFilter.appendChild(option);
                     });
                 }
-
                 // Populate assignee filter
                 const assigneeFilter = document.getElementById('assigneeFilter');
                 if (assigneeFilter) {
@@ -622,7 +643,10 @@ function loadFilterOptions() {
                     });
                 }
             }
-        })
-        .catch(error => console.error('Error loading filter options:', error));
+        },
+        error: function(error) {
+            console.error('Error loading filter options:', error);
+        }
+    });
 }
 </script>

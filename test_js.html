@@ -1,0 +1,94 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>JavaScript Test</title>
+</head>
+<body>
+    <h1>JavaScript Function Test</h1>
+    <div id="test-results"></div>
+    
+    <script>
+        // Test JavaScript structure similar to projects/index.php
+        
+        // Utility functions (should be defined first)
+        function debounce(func, wait) {
+            let timeout;
+            return function executedFunction(...args) {
+                const later = () => {
+                    clearTimeout(timeout);
+                    func(...args);
+                };
+                clearTimeout(timeout);
+                timeout = setTimeout(later, wait);
+            };
+        }
+
+        function formatDate(dateString) {
+            const date = new Date(dateString);
+            return date.toLocaleDateString('en-US', { 
+                year: 'numeric', 
+                month: 'short', 
+                day: 'numeric' 
+            });
+        }
+
+        // Global variables
+        let currentView = 'grid';
+        let currentFilter = 'all';
+        let projects = [];
+        let filteredProjects = [];
+
+        // Test functions that would be called by onclick
+        function createNewProject() {
+            console.log('createNewProject called');
+            return 'createNewProject works!';
+        }
+
+        function toggleView() {
+            console.log('toggleView called');
+            return 'toggleView works!';
+        }
+
+        function filterProjects(status) {
+            console.log('filterProjects called with status:', status);
+            return 'filterProjects works!';
+        }
+
+        // Initialize page when DOM is loaded
+        document.addEventListener('DOMContentLoaded', function() {
+            console.log('DOM Content Loaded');
+            
+            // Test if functions are accessible
+            const testResults = document.getElementById('test-results');
+            
+            try {
+                const results = [];
+                results.push('debounce function: ' + (typeof debounce === 'function' ? 'DEFINED' : 'NOT DEFINED'));
+                results.push('formatDate function: ' + (typeof formatDate === 'function' ? 'DEFINED' : 'NOT DEFINED'));
+                results.push('createNewProject function: ' + (typeof createNewProject === 'function' ? 'DEFINED' : 'NOT DEFINED'));
+                results.push('toggleView function: ' + (typeof toggleView === 'function' ? 'DEFINED' : 'NOT DEFINED'));
+                results.push('filterProjects function: ' + (typeof filterProjects === 'function' ? 'DEFINED' : 'NOT DEFINED'));
+                
+                // Test debounce function
+                const testFunc = debounce(() => console.log('Debounce test'), 100);
+                results.push('debounce test: ' + (typeof testFunc === 'function' ? 'WORKS' : 'FAILS'));
+                
+                testResults.innerHTML = '<ul><li>' + results.join('</li><li>') + '</li></ul>';
+                
+                // Test onclick functionality
+                setTimeout(() => {
+                    testResults.innerHTML += '<h3>Testing onclick functions:</h3>';
+                    testResults.innerHTML += '<button onclick="createNewProject()">Test createNewProject</button><br>';
+                    testResults.innerHTML += '<button onclick="toggleView()">Test toggleView</button><br>';
+                    testResults.innerHTML += '<button onclick="filterProjects(\'test\')">Test filterProjects</button><br>';
+                }, 1000);
+                
+            } catch (error) {
+                testResults.innerHTML = '<div style="color: red;">Error: ' + error.message + '</div>';
+            }
+        });
+    </script>
+</body>
+</html>

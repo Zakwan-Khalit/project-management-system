@@ -6,19 +6,6 @@ use CodeIgniter\Model;
 
 class TaskModel extends Model
 {
-    protected $table = 'tasks';
-    protected $primaryKey = 'id';
-    protected $allowedFields = ['title', 'description', 'project_id', 'assigned_to', 'due_date', 'created_by', 'created_at', 'updated_at', 'is_delete'];
-    protected $useTimestamps = true;
-    protected $deletedField = 'is_delete';
-    protected $db;
-
-    public function __construct()
-    {
-        parent::__construct();
-        $this->db = \Config\Database::connect();
-    }
-
     public function getTaskById($taskId)
     {
         $builder = $this->db->table('tasks');
@@ -522,24 +509,69 @@ class TaskModel extends Model
 
     public function getStatistics()
     {
+        $builder = $this->db->table('tasks');
+        $builder->join('task_status', 'task_status.task_id = tasks.id AND task_status.is_current = 1 AND task_status.is_delete = 0', 'left');
+        $builder->join('status_lookup', 'status_lookup.id = task_status.status_id AND status_lookup.type = "task" AND status_lookup.is_delete = 0', 'left');
+        $builder->where('tasks.is_delete', 0);
+        
+        $total = $builder->countAllResults(false);
+        
+        $completedBuilder = clone $builder;
+        $completed = $completedBuilder->where('status_lookup.code', 'completed')->countAllResults();
+        
+        $pendingBuilder = clone $builder;  
+        $pending = $pendingBuilder->where('status_lookup.code', 'pending')->countAllResults();
+        
+        $inProgressBuilder = clone $builder;
+        $in_progress = $inProgressBuilder->where('status_lookup.code', 'in_progress')->countAllResults();
+        
+        $reviewBuilder = clone $builder;
+        $review = $reviewBuilder->where('status_lookup.code', 'review')->countAllResults();
+        
         return [
-            'total' => $this->countAll(),
-            'completed' => $this->where('status', 'completed')->countAllResults(),
-            'pending' => $this->where('status', 'pending')->countAllResults(),
-            'in_progress' => $this->where('status', 'in_progress')->countAllResults(),
-            'review' => $this->where('status', 'review')->countAllResults()
+            'total' => $total,
+            'completed' => $completed,
+            'pending' => $pending,
+            'in_progress' => $in_progress,
+            'review' => $review
         ];
     }
 
+    // Get summary stats for tasks (by status)
+    public function getTaskSummaryStats()
+    {
+        $builder = $this->db->table('tasks t');
+        $builder->select('sl.code as status_code, COUNT(*) as count');
+        $builder->join('task_status ts', 'ts.task_id = t.id AND ts.is_current = 1 AND ts.is_delete = 0', 'left');
+        $builder->join('status_lookup sl', 'sl.id = ts.status_id AND sl.is_delete = 0', 'left');
+        $builder->where('t.is_delete', 0);
+        $builder->groupBy('sl.code');
+        $result = $builder->get()->getResultArray();
+        $stats = ['total' => 0, 'completed' => 0, 'pending' => 0, 'in_progress' => 0];
+        foreach ($result as $row) {
+            $stats['total'] += $row['count'];
+            if (isset($stats[$row['status_code']])) {
+                $stats[$row['status_code']] = $row['count'];
+            }
+        }
+        return $stats;
+    }
+
+    // Get task status distribution for reports
     public function getTaskStatusDistribution()
     {
-        $stats = $this->getStatistics();
-        return [
-            'pending' => $stats['pending'],
-            'in_progress' => $stats['in_progress'],
-            'review' => $stats['review'],
-            'completed' => $stats['completed']
-        ];
+        $builder = $this->db->table('tasks t');
+        $builder->select('sl.name as status_name, COUNT(*) as count');
+        $builder->join('task_status ts', 'ts.task_id = t.id AND ts.is_current = 1 AND ts.is_delete = 0', 'left');
+        $builder->join('status_lookup sl', 'sl.id = ts.status_id AND sl.is_delete = 0', 'left');
+        $builder->where('t.is_delete', 0);
+        $builder->groupBy('sl.name');
+        $result = $builder->get()->getResultArray();
+        $dist = [];
+        foreach ($result as $row) {
+            $dist[$row['status_name']] = $row['count'];
+        }
+        return $dist;
     }
 
     public function getMonthlyCompletionData($months = 6)
@@ -549,9 +581,14 @@ class TaskModel extends Model
             $month = date('Y-m', strtotime("-$i months"));
             $monthName = date('M Y', strtotime("-$i months"));
             
-            $completedInMonth = $this->where('status', 'completed')
-                ->where("DATE_FORMAT(updated_at, '%Y-%m')", $month)
-                ->countAllResults();
+            $builder = $this->db->table('tasks');
+            $builder->join('task_status', 'task_status.task_id = tasks.id AND task_status.is_current = 1 AND task_status.is_delete = 0', 'left');
+            $builder->join('status_lookup', 'status_lookup.id = task_status.status_id AND status_lookup.type = "task" AND status_lookup.is_delete = 0', 'left');
+            $builder->where('tasks.is_delete', 0);
+            $builder->where('status_lookup.code', 'completed');
+            $builder->where("DATE_FORMAT(tasks.updated_at, '%Y-%m')", $month);
+            
+            $completedInMonth = $builder->countAllResults();
             
             $monthlyData[] = [
                 'month' => $monthName,
@@ -560,5 +597,95 @@ class TaskModel extends Model
         }
         
         return $monthlyData;
+    }
+
+    public function getTasksByStatus($statusCode)
+    {
+        $builder = $this->db->table('tasks');
+        $builder->join('task_status', 'task_status.task_id = tasks.id AND task_status.is_current = 1 AND task_status.is_delete = 0', 'left');
+        $builder->join('status_lookup', 'status_lookup.id = task_status.status_id AND status_lookup.type = "task" AND status_lookup.is_delete = 0', 'left');
+        $builder->where('tasks.is_delete', 0);
+        $builder->where('status_lookup.code', $statusCode);
+        return $builder->get()->getResultArray();
+    }
+    
+    public function countTasksByStatus($statusCode)
+    {
+        $builder = $this->db->table('tasks');
+        $builder->join('task_status', 'task_status.task_id = tasks.id AND task_status.is_current = 1 AND task_status.is_delete = 0', 'left');
+        $builder->join('status_lookup', 'status_lookup.id = task_status.status_id AND status_lookup.type = "task" AND status_lookup.is_delete = 0', 'left');
+        $builder->where('tasks.is_delete', 0);
+        $builder->where('status_lookup.code', $statusCode);
+        return $builder->countAllResults();
+    }
+    
+    public function getTasksByPriority($priorityCode)
+    {
+        $builder = $this->db->table('tasks');
+        $builder->join('task_priority', 'task_priority.task_id = tasks.id AND task_priority.is_current = 1 AND task_priority.is_delete = 0', 'left');
+        $builder->join('priority_lookup', 'priority_lookup.id = task_priority.priority_id AND priority_lookup.is_delete = 0', 'left');
+        $builder->where('tasks.is_delete', 0);
+        $builder->where('priority_lookup.code', $priorityCode);
+        return $builder->get()->getResultArray();
+    }
+    
+    public function countTasksByPriority($priorityCode)
+    {
+        $builder = $this->db->table('tasks');
+        $builder->join('task_priority', 'task_priority.task_id = tasks.id AND task_priority.is_current = 1 AND task_priority.is_delete = 0', 'left');
+        $builder->join('priority_lookup', 'priority_lookup.id = task_priority.priority_id AND priority_lookup.is_delete = 0', 'left');
+        $builder->where('tasks.is_delete', 0);
+        $builder->where('priority_lookup.code', $priorityCode);
+        return $builder->countAllResults();
+    }
+    
+    public function getTasksDueInDateRange($startDate, $endDate)
+    {
+        $builder = $this->db->table('tasks');
+        $builder->where('tasks.is_delete', 0);
+        $builder->where('tasks.due_date >=', $startDate);
+        $builder->where('tasks.due_date <=', $endDate);
+        return $builder->get()->getResultArray();
+    }
+    
+    public function getDailyCompletionsForPeriod($days = 30)
+    {
+        $dailyCompletions = [];
+        for ($i = $days - 1; $i >= 0; $i--) {
+            $date = date('Y-m-d', strtotime("-$i days"));
+            
+            $builder = $this->db->table('tasks');
+            $builder->join('task_status', 'task_status.task_id = tasks.id AND task_status.is_current = 1 AND task_status.is_delete = 0', 'left');
+            $builder->join('status_lookup', 'status_lookup.id = task_status.status_id AND status_lookup.type = "task" AND status_lookup.is_delete = 0', 'left');
+            $builder->where('tasks.is_delete', 0);
+            $builder->where('status_lookup.code', 'completed');
+            $builder->where("DATE(tasks.updated_at)", $date);
+            
+            $completedCount = $builder->countAllResults();
+            
+            $dailyCompletions[] = [
+                'date' => date('M j', strtotime($date)),
+                'completed' => $completedCount
+            ];
+        }
+        
+        return $dailyCompletions;
+    }
+    
+    public function getUserProductivityStats($limit = 10)
+    {
+        $builder = $this->db->table('tasks t');
+        $builder->select('user_profile.first_name, user_profile.last_name, users.email, COUNT(*) as completed_tasks');
+        $builder->join('task_assignment', 'task_assignment.task_id = t.id AND task_assignment.is_current = 1 AND task_assignment.is_delete = 0', 'inner');
+        $builder->join('users', 'users.id = task_assignment.user_id AND users.is_delete = 0', 'inner');
+        $builder->join('user_profile', 'user_profile.user_id = users.id AND user_profile.is_delete = 0', 'left');
+        $builder->join('task_status ts', 'ts.task_id = t.id AND ts.is_current = 1 AND ts.is_delete = 0', 'left');
+        $builder->join('status_lookup sl', 'sl.id = ts.status_id AND sl.type = "task" AND sl.is_delete = 0', 'left');
+        $builder->where('t.is_delete', 0);
+        $builder->where('sl.code', 'completed');
+        $builder->groupBy('task_assignment.user_id');
+        $builder->orderBy('completed_tasks', 'DESC');
+        $builder->limit($limit);
+        return $builder->get()->getResultArray();
     }
 }

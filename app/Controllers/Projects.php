@@ -125,7 +125,7 @@ class Projects extends BaseController
         
         $tasks = $this->taskModel->getKanbanTasks($id);
         $members = $this->userModel->getProjectMembers($id);
-        $stats = $this->projectModel->getProjectStats($id);
+        $stats = $this->projectModel->getProjectsWithDetails($id);
         $activities = $this->activityLog->getProjectActivity($id, 10);
         
         $data = [
@@ -397,8 +397,8 @@ class Projects extends BaseController
             ]);
         }
 
-        // Get projects that the user has access to
-        $userProjects = $this->projectModel->getUserProjects($userId);
+        // Get projects with full details using the same method as getProjects
+        $userProjects = $this->projectModel->getProjectsWithDetails($userId);
         
         $stats = [
             'total' => count($userProjects),
@@ -408,17 +408,21 @@ class Projects extends BaseController
         ];
 
         foreach ($userProjects as $project) {
-            switch ($project['status']) {
+            // Use the status_code field that should be available from getProjectsWithDetails
+            $statusCode = $project['status_code'] ?? $project['status'] ?? 'planning';
+            
+            switch ($statusCode) {
                 case 'completed':
                     $stats['completed']++;
                     break;
                 case 'active':
+                case 'in_progress':
+                case 'ongoing':
                     $stats['in_progress']++;
                     break;
             }
-            
             // Check if project is delayed (past end date and not completed)
-            if ($project['end_date'] && strtotime($project['end_date']) < time() && $project['status'] !== 'completed') {
+            if ($project['end_date'] && strtotime($project['end_date']) < time() && $statusCode !== 'completed') {
                 $stats['delayed']++;
             }
         }
@@ -428,7 +432,8 @@ class Projects extends BaseController
             'stats' => $stats,
             'debug' => [
                 'user_id' => $userId,
-                'projects_count' => count($userProjects)
+                'projects_count' => count($userProjects),
+                'sample_project' => !empty($userProjects) ? $userProjects[0] : null
             ]
         ]);
     }
@@ -440,16 +445,129 @@ class Projects extends BaseController
         exit;
     }
 
-    public function testAjax()
+    public function getProject($id)
     {
+        $userData = session('userdata');
+        $userId = $userData['id'] ?? null;
+        if (!$userId) {
+            return $this->response->setJSON([
+                'success' => false,
+                'message' => 'User not authenticated'
+            ]);
+        }
+        $project = $this->projectModel->getProjectById($id);
+        if (!$project) {
+            return $this->response->setJSON([
+                'success' => false,
+                'message' => 'Project not found'
+            ]);
+        }
+        // Add owner name
+        $owner = $this->userModel->getUserById($project['owner_id'] ?? 0);
+        $project['owner_name'] = $owner ? (($owner['first_name'] ?? '') . ' ' . ($owner['last_name'] ?? '')) : 'Unknown';
+
+        // Always provide status and priority fields for frontend
+        $project['status'] = $project['status_name'] ?? 'unknown';
+        $project['priority'] = $project['priority_name'] ?? 'medium';
+        // Optionally add color fields if needed by frontend
+        $project['status_color'] = $project['status_color'] ?? null;
+        $project['priority_color'] = $project['priority_color'] ?? null;
+
+        // Ensure progress is always set
+        if (!isset($project['progress'])) {
+            $project['progress'] = 0;
+        }
+
         return $this->response->setJSON([
             'success' => true,
-            'message' => 'AJAX is working',
-            'data' => [
-                'controller' => 'Projects',
-                'method' => 'testAjax',
-                'timestamp' => date('Y-m-d H:i:s')
-            ]
+            'project' => $project
+        ]);
+    }
+
+    // AJAX: Get project stats for view page
+    public function getStats($id)
+    {
+        $userData = session('userdata');
+        $userId = $userData['id'] ?? null;
+        if (!$userId) {
+            return $this->response->setJSON([
+                'success' => false,
+                'message' => 'User not authenticated'
+            ]);
+        }
+        $stats = $this->projectModel->getProjectStats($id);
+        return $this->response->setJSON([
+            'success' => true,
+            'stats' => $stats
+        ]);
+    }
+
+    // AJAX: Get recent activity for a project
+    public function recentActivity($id)
+    {
+        $activities = $this->activityLog->getProjectActivity($id, 10);
+        return $this->response->setJSON([
+            'success' => true,
+            'activities' => $activities
+        ]);
+    }
+
+    // AJAX: Get all tasks for a project
+    public function tasks($id)
+    {
+        $tasks = $this->taskModel->getTasksWithDetails($id);
+        // Ensure each task has status and priority fields for frontend
+        foreach ($tasks as &$task) {
+            $task['status'] = $task['status_name'] ?? 'todo';
+            $task['priority'] = $task['priority_name'] ?? 'medium';
+            // Optionally add assignee_name if not present
+            if (!isset($task['assignee_name'])) {
+                $task['assignee_name'] = ($task['owner_first_name'] ?? '') . ' ' . ($task['owner_last_name'] ?? '');
+                $task['assignee_name'] = trim($task['assignee_name']) ?: null;
+            }
+        }
+        unset($task);
+        return $this->response->setJSON([
+            'success' => true,
+            'tasks' => $tasks
+        ]);
+    }
+
+    // AJAX: Get all members for a project
+    public function members($id)
+    {
+        $members = $this->projectModel->getProjectMembers($id);
+        // Format for select options
+        $formatted = array_map(function($m) {
+            return [
+                'user_id' => $m['user_id'],
+                'first_name' => $m['first_name'],
+                'last_name' => $m['last_name']
+            ];
+        }, $members);
+        return $this->response->setJSON([
+            'success' => true,
+            'members' => $formatted
+        ]);
+    }
+
+    // AJAX: Progress chart data
+    public function progressData($id)
+    {
+        $data = $this->projectModel->getProgressChartData($id);
+        return $this->response->setJSON([
+            'success' => true,
+            'chartData' => $data
+        ]);
+    }
+
+    // AJAX: Task distribution chart data
+    public function taskDistribution($id)
+    {
+        $data = $this->projectModel->getTaskDistributionData($id);
+        return $this->response->setJSON([
+            'success' => true,
+            'chartData' => $data
         ]);
     }
 }

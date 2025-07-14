@@ -25,24 +25,23 @@ class Profile extends BaseController
         }
 
         $userId = user_id();
-        $user = $this->userModel->find($userId);
-
+        $user = $this->userModel->getUserById($userId);
         if (!$user) {
             return redirect()->to(base_url('dashboard'))->with('error', 'User not found.');
         }
-
         // Get recent activity for the user
         $recentActivity = $this->activityLogModel->getUserActivity($userId, 10);
-
+        // Get user stats (projects, tasks, etc.)
+        $userStats = $this->userModel->getUserStats($userId);
         $data = [
             'title' => 'My Profile',
             'user' => $user,
             'recentActivity' => $recentActivity,
+            'userStats' => $userStats,
             'breadcrumbs' => [
                 ['title' => 'My Profile']
             ]
         ];
-
         return $this->template->member('profile/index', $data);
     }
 

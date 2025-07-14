@@ -19,6 +19,7 @@ $routes->get('logout', 'AuthController::logout');
 // Note: profile route moved to Profile controller section below
 $routes->get('settings', 'AuthController::settings');
 $routes->get('dashboard', 'Home::dashboard');
+$routes->post('dashboard/refresh', 'Home::refresh');
 
 // Explicit routes for main controllers to ensure they work
 $routes->get('projects', 'Projects::index');
@@ -26,14 +27,17 @@ $routes->get('projects/(:any)', 'Projects::$1');
 $routes->post('projects/(:any)', 'Projects::$1');
 
 $routes->get('tasks', 'Tasks::index');
-$routes->get('tasks/(:any)', 'Tasks::$1');
-$routes->post('tasks/(:any)', 'Tasks::$1');
+$routes->get('tasks/myTasks', 'Tasks::myTasks');
 
-// Specific kanban routes
+// Specific kanban routes (must come before the generic route)
 $routes->get('tasks/kanban_select', 'Tasks::kanbanSelect');
 $routes->get('tasks/kanbanselect', 'Tasks::kanbanSelect'); // Legacy support
 $routes->get('tasks/kanban/(:num)', 'Tasks::kanban/$1');
 $routes->post('tasks/kanban/(:num)', 'Tasks::kanban/$1');
+
+// Generic task routes (must come after specific routes)
+$routes->get('tasks/(:any)', 'Tasks::$1');
+$routes->post('tasks/(:any)', 'Tasks::$1');
 
 // Profile routes
 $routes->get('profile', 'Profile::index');

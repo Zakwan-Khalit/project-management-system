@@ -39,40 +39,86 @@ class Home extends BaseController
         $userId = $userData['id'] ?? null;
         
         if (!$userId) {
+            log_message('warning', 'Dashboard access attempted without valid user session');
             return redirect()->to(base_url('login'));
         }
         
         try {
-            // Get dashboard stats
+            // Get dashboard stats with error handling
             $stats = $this->getDashboardStats($userId);
             
-            // Get recent projects
-            $projects = $this->projectModel->getUserProjects($userId, 5);
+            // Get recent projects with error handling
+            $projects = [];
+            try {
+                $projects = $this->projectModel->getUserProjects($userId, 5) ?? [];
+            } catch (\Exception $e) {
+                log_message('error', 'Failed to get user projects: ' . $e->getMessage());
+                $projects = [];
+            }
             
-            // Get user's tasks
-            $myTasks = $this->taskModel->getUserTasks($userId, 5);
+            // Get user's tasks with error handling
+            $myTasks = [];
+            try {
+                $myTasks = $this->taskModel->getUserTasks($userId, 5) ?? [];
+            } catch (\Exception $e) {
+                log_message('error', 'Failed to get user tasks: ' . $e->getMessage());
+                $myTasks = [];
+            }
             
-            // Get recent activities
-            $recentActivities = $this->activityLog->getRecentActivity(10);
+            // Get recent activities with error handling
+            $recentActivities = [];
+            try {
+                $recentActivities = $this->activityLog->getRecentActivity(10) ?? [];
+            } catch (\Exception $e) {
+                log_message('error', 'Failed to get recent activities: ' . $e->getMessage());
+                $recentActivities = [];
+            }
+            
+            // Get team count with error handling
+            $teamCount = 0;
+            try {
+                $teamCount = $this->userModel->countAll() ?? 0;
+            } catch (\Exception $e) {
+                log_message('error', 'Failed to get team count: ' . $e->getMessage());
+                $teamCount = 0;
+            }
             
             $data = [
                 'stats' => $stats,
-                'projects' => $projects ?? [],
-                'myTasks' => $myTasks ?? [],
-                'recentActivities' => $recentActivities ?? [],
-                'teamCount' => $this->userModel->countAll()
+                'projects' => $projects,
+                'myTasks' => $myTasks,
+                'recentActivities' => $recentActivities,
+                'teamCount' => $teamCount,
+                'title' => 'Dashboard - Project Management System'
             ];
             
             return $this->template->member('dashboard', $data);
         } catch (\Exception $e) {
-            log_message('error', 'Dashboard error: ' . $e->getMessage());
+            log_message('error', 'Dashboard critical error: ' . $e->getMessage());
             
-            // Return dashboard with empty data on error
+            // Return dashboard with empty data on critical error
             $data = [
-                'stats' => [],
+                'stats' => [
+                    'projects' => [
+                        'total_projects' => 0,
+                        'active_projects' => 0,
+                        'completed_projects' => 0,
+                        'on_hold_projects' => 0
+                    ],
+                    'tasks' => [
+                        'total_tasks' => 0,
+                        'completed_tasks' => 0,
+                        'in_progress_tasks' => 0,
+                        'pending_tasks' => 0,
+                        'overdue_tasks' => 0
+                    ]
+                ],
                 'projects' => [],
                 'myTasks' => [],
-                'recentActivities' => []
+                'recentActivities' => [],
+                'teamCount' => 0,
+                'title' => 'Dashboard - Project Management System',
+                'error_message' => 'Unable to load dashboard data. Please try again later.'
             ];
             
             return $this->template->member('dashboard', $data);

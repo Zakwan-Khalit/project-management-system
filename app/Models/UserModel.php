@@ -249,15 +249,15 @@ class UserModel extends Model
         $builder->where('is_active', 1);
         $builder->where('is_delete', 0);
         $projectStats = $builder->get()->getRowArray();
-        
-        // Get user's task count
-        $builder = $this->db->table('tasks');
-        $builder->selectCount('*', 'task_count');
-        $builder->where('assigned_to', $userId);
-        $builder->where('is_active', 1);
+
+        // Get user's task count (ownership)
+        $builder = $this->db->table('task_ownership');
+        $builder->selectCount('task_id', 'task_count');
+        $builder->where('owned_by', $userId);
+        $builder->where('is_current', 1);
         $builder->where('is_delete', 0);
         $taskStats = $builder->get()->getRowArray();
-        
+
         return array_merge($projectStats ?: [], $taskStats ?: []);
     }
     

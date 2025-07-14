@@ -30,40 +30,30 @@ class Reports extends BaseController
             return redirect()->to(base_url('login'));
         }
 
-        // Get overall statistics using model methods
-        $projectStats = $this->projectModel->getStatistics();
-        $taskStats = $this->taskModel->getStatistics();
-        $totalUsers = $this->userModel->countAll();
-
+        // Get overall statistics using model methods (should use builder pattern and lookup tables)
+        $projectStats = $this->projectModel->getProjectSummaryStats();
+        $taskStats = $this->taskModel->getTaskSummaryStats();
+        $totalUsers = $this->userModel->where('is_delete', 0)->countAllResults();
         // Get projects with task completion rates
         $projectsWithStats = $this->projectModel->getProjectsWithTaskStats();
-
         // Get task status distribution
         $taskStatusData = $this->taskModel->getTaskStatusDistribution();
-
         // Get project status distribution
-        $projectStatusData = [
-            'active' => $projectStats['active'],
-            'completed' => $projectStats['completed'],
-            'on_hold' => $projectStats['on_hold'],
-            'cancelled' => $projectStats['cancelled']
-        ];
-
+        $projectStatusData = $this->projectModel->getProjectStatusDistribution();
         // Get recent activity
         $recentActivity = $this->activityLogModel->getRecentActivityWithUsers(15);
-
         // Get monthly task completion data for the last 6 months
         $monthlyData = $this->taskModel->getMonthlyCompletionData(6);
 
         $data = [
             'title' => 'Reports & Analytics',
-            'totalProjects' => $projectStats['total'],
-            'activeProjects' => $projectStats['active'],
-            'completedProjects' => $projectStats['completed'],
-            'totalTasks' => $taskStats['total'],
-            'completedTasks' => $taskStats['completed'],
-            'pendingTasks' => $taskStats['pending'],
-            'inProgressTasks' => $taskStats['in_progress'],
+            'totalProjects' => $projectStats['total'] ?? 0,
+            'activeProjects' => $projectStats['active'] ?? 0,
+            'completedProjects' => $projectStats['completed'] ?? 0,
+            'totalTasks' => $taskStats['total'] ?? 0,
+            'completedTasks' => $taskStats['completed'] ?? 0,
+            'pendingTasks' => $taskStats['pending'] ?? 0,
+            'inProgressTasks' => $taskStats['in_progress'] ?? 0,
             'totalUsers' => $totalUsers,
             'projectStats' => $projectsWithStats,
             'taskStatusData' => $taskStatusData,
@@ -74,6 +64,7 @@ class Reports extends BaseController
                 ['title' => 'Reports']
             ]
         ];
+
 
         return $this->template->member('reports/index', $data);
     }
@@ -89,16 +80,16 @@ class Reports extends BaseController
         $detailedProjectStats = [];
         
         foreach ($projects as $project) {
-            $tasks = $this->taskModel->where('project_id', $project['id'])->findAll();
+            $tasks = $this->taskModel->getTasksWithDetails($project['id']);
             $totalTasks = count($tasks);
             $completedTasks = count(array_filter($tasks, function($task) {
-                return $task['status'] === 'completed';
+                return $task['status_code'] === 'completed';
             }));
             $inProgressTasks = count(array_filter($tasks, function($task) {
-                return $task['status'] === 'in_progress';
+                return $task['status_code'] === 'in_progress';
             }));
             $pendingTasks = count(array_filter($tasks, function($task) {
-                return $task['status'] === 'pending';
+                return $task['status_code'] === 'pending';
             }));
 
             $completionRate = $totalTasks > 0 ? round(($completedTasks / $totalTasks) * 100, 2) : 0;
@@ -144,44 +135,23 @@ class Reports extends BaseController
         }
 
         // Get task analytics by priority
-        $highPriorityTasks = $this->taskModel->where('priority', 'high')->countAllResults();
-        $mediumPriorityTasks = $this->taskModel->where('priority', 'medium')->countAllResults();
-        $lowPriorityTasks = $this->taskModel->where('priority', 'low')->countAllResults();
+        $highPriorityTasks = $this->taskModel->countTasksByPriority('high');
+        $mediumPriorityTasks = $this->taskModel->countTasksByPriority('medium');
+        $lowPriorityTasks = $this->taskModel->countTasksByPriority('low');
 
         // Get overdue tasks
-        $overdueTasks = $this->taskModel->where('due_date <', date('Y-m-d'))
-            ->where('status !=', 'completed')
-            ->findAll();
+        $overdueTasks = $this->taskModel->getOverdueTasks();
 
         // Get tasks due this week
         $weekStart = date('Y-m-d', strtotime('monday this week'));
         $weekEnd = date('Y-m-d', strtotime('sunday this week'));
-        $tasksThisWeek = $this->taskModel->where('due_date >=', $weekStart)
-            ->where('due_date <=', $weekEnd)
-            ->findAll();
+        $tasksThisWeek = $this->taskModel->getTasksDueInDateRange($weekStart, $weekEnd);
 
         // Get task completion trends for the last 30 days
-        $dailyCompletions = [];
-        for ($i = 29; $i >= 0; $i--) {
-            $date = date('Y-m-d', strtotime("-$i days"));
-            $completedCount = $this->taskModel->where('status', 'completed')
-                ->where("DATE(updated_at)", $date)
-                ->countAllResults();
-            
-            $dailyCompletions[] = [
-                'date' => date('M j', strtotime($date)),
-                'completed' => $completedCount
-            ];
-        }
+        $dailyCompletions = $this->taskModel->getDailyCompletionsForPeriod(30);
 
         // Get user productivity (tasks completed by user)
-        $userProductivity = $this->taskModel->select('CONCAT(users.first_name, " ", users.last_name) as user_name, users.email, COUNT(*) as completed_tasks')
-            ->join('users', 'users.id = tasks.assigned_to')
-            ->where('tasks.status', 'completed')
-            ->groupBy('tasks.assigned_to')
-            ->orderBy('completed_tasks', 'DESC')
-            ->limit(10)
-            ->findAll();
+        $userProductivity = $this->taskModel->getUserProductivityStats(10);
 
         $data = [
             'title' => 'Task Reports',
@@ -218,8 +188,12 @@ class Reports extends BaseController
             
             $projects = $this->projectModel->findAll();
             foreach ($projects as $project) {
-                $totalTasks = $this->taskModel->where('project_id', $project['id'])->countAllResults();
-                $completedTasks = $this->taskModel->where(['project_id' => $project['id'], 'status' => 'completed'])->countAllResults();
+                $totalTasks = $this->taskModel->where('project_id', $project['id'])->where('is_delete', 0)->countAllResults();
+                // For CSV, get project-specific task counts
+                $projectTasks = $this->taskModel->getTasksWithDetails($project['id']);
+                $completedTasks = count(array_filter($projectTasks, function($task) {
+                    return $task['status_code'] === 'completed';
+                }));
                 $progress = $totalTasks > 0 ? round(($completedTasks / $totalTasks) * 100, 2) : 0;
                 
                 fputcsv($output, [
@@ -235,19 +209,17 @@ class Reports extends BaseController
         } else if ($type === 'tasks') {
             fputcsv($output, ['Task Title', 'Project', 'Status', 'Priority', 'Assigned To', 'Due Date', 'Created Date']);
             
-            $tasks = $this->taskModel->select('tasks.*, projects.name as project_name, CONCAT(users.first_name, " ", users.last_name) as user_name, users.email')
-                ->join('projects', 'projects.id = tasks.project_id')
-                ->join('users', 'users.id = tasks.assigned_to', 'left')
-                ->findAll();
+            $tasks = $this->taskModel->getTasksWithDetails();
             
             foreach ($tasks as $task) {
                 fputcsv($output, [
                     $task['title'],
-                    $task['project_name'],
-                    $task['status'],
-                    $task['priority'],
-                    $task['user_name'] ?? 'Unassigned',
-                    $task['due_date'],
+                    $task['project_name'] ?? 'N/A',
+                    $task['status_name'] ?? 'N/A',
+                    $task['priority_name'] ?? 'N/A',
+                    isset($task['first_name']) && isset($task['last_name']) ? 
+                        $task['first_name'] . ' ' . $task['last_name'] : 'Unassigned',
+                    $task['due_date'] ?? 'N/A',
                     $task['created_at']
                 ]);
             }

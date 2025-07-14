@@ -396,10 +396,18 @@ function initializeTaskForm() {
 
 async function updateTaskStatus(taskId, newStatus, newPosition) {
     try {
-        const result = await apiCall('api/tasks/update-status', 'POST', {
-            task_id: taskId,
-            status: newStatus,
-            position: newPosition
+        const result = await $.ajax({
+            url: '<?= base_url('tasks/updateStatus') ?>',
+            method: 'POST',
+            data: {
+                task_id: taskId,
+                status: newStatus,
+                position: newPosition
+            },
+            dataType: 'json',
+            headers: {
+                'X-Requested-With': 'XMLHttpRequest'
+            }
         });
         
         if (result.success) {

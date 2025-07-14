@@ -1,0 +1,27 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Asset Test</title>
+</head>
+<body>
+    <h1>Testing Asset Loading</h1>
+    <div id="test-result">Testing...</div>
+    
+    <script src="assets/js/jquery/jquery.min.js"></script>
+    <script>
+        $(document).ready(function() {
+            $('#test-result').html('jQuery is working! Assets are loading correctly.');
+            $('#test-result').css('color', 'green');
+        });
+        
+        // Fallback if jQuery fails
+        setTimeout(function() {
+            const el = document.getElementById('test-result');
+            if (el.innerHTML === 'Testing...') {
+                el.innerHTML = 'jQuery failed to load - asset routing issue';
+                el.style.color = 'red';
+            }
+        }, 2000);
+    </script>
+</body>
+</html>

@@ -244,19 +244,34 @@ p, span, div {
 
 .badge.bg-primary {
     background: var(--primary-gradient) !important;
+    color: #fff !important;
 }
 
 .badge.bg-success {
     background: var(--success-gradient) !important;
+    color: #fff !important;
 }
 
 .badge.bg-warning {
     background: var(--warning-gradient) !important;
+    color: #212529 !important;
 }
 
 .badge.bg-danger {
     background: var(--error-gradient) !important;
+    color: #fff !important;
 }
+
+.badge.bg-info {
+    background: var(--info-color, #0dcaf0) !important;
+    color: #212529 !important;
+}
+
+.badge.bg-secondary {
+    background: var(--secondary-color, #6c757d) !important;
+    color: #fff !important;
+}
+
 
 /* Avatars */
 .avatar {

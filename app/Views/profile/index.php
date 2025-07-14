@@ -16,7 +16,7 @@
             </div>
             <div class="col">
                 <h1 class="h2 mb-2">
-                    <?= esc($user['first_name'] . ' ' . $user['last_name']) ?: esc($user['email']) ?>
+                    <?= esc(trim(($user['first_name'] ?? '') . ' ' . ($user['last_name'] ?? ''))) ?: esc($user['email']) ?>
                 </h1>
                 <p class="mb-2 opacity-75">
                     <i class="fas fa-envelope me-2"></i>
@@ -30,7 +30,7 @@
                 <?php endif; ?>
                 <p class="mb-0 opacity-75">
                     <i class="fas fa-calendar me-2"></i>
-                    Member since <?= date('F Y', strtotime($user['created_at'])) ?>
+                    Member since <?= !empty($user['created_at']) ? date('F Y', strtotime($user['created_at'])) : 'N/A' ?>
                 </p>
             </div>
             <div class="col-auto">
@@ -48,15 +48,21 @@
             <div style="background: white; border-radius: 1rem; padding: 1.5rem; box-shadow: 0 4px 6px rgba(0,0,0,0.05); margin-bottom: 2rem;">
                 <div class="row text-center">
                     <div style="text-align: center; padding: 1rem;" class="col-md-4">
-                        <div style="font-size: 2rem; font-weight: 700; color: #667eea; margin-bottom: 0.5rem;">15</div>
+                        <div style="font-size: 2rem; font-weight: 700; color: #667eea; margin-bottom: 0.5rem;">
+                            <?= isset($userStats['project_count']) ? (int)$userStats['project_count'] : 0 ?>
+                        </div>
                         <div style="color: #6b7280; font-weight: 500; font-size: 0.875rem; text-transform: uppercase; letter-spacing: 0.05em;">Projects</div>
                     </div>
                     <div style="text-align: center; padding: 1rem;" class="col-md-4">
-                        <div style="font-size: 2rem; font-weight: 700; color: #667eea; margin-bottom: 0.5rem;">42</div>
-                        <div style="color: #6b7280; font-weight: 500; font-size: 0.875rem; text-transform: uppercase; letter-spacing: 0.05em;">Tasks Completed</div>
+                        <div style="font-size: 2rem; font-weight: 700; color: #667eea; margin-bottom: 0.5rem;">
+                            <?= isset($userStats['task_count']) ? (int)$userStats['task_count'] : 0 ?>
+                        </div>
+                        <div style="color: #6b7280; font-weight: 500; font-size: 0.875rem; text-transform: uppercase; letter-spacing: 0.05em;">Tasks</div>
                     </div>
                     <div style="text-align: center; padding: 1rem;" class="col-md-4">
-                        <div style="font-size: 2rem; font-weight: 700; color: #667eea; margin-bottom: 0.5rem;">98%</div>
+                        <div style="font-size: 2rem; font-weight: 700; color: #667eea; margin-bottom: 0.5rem;">
+                            <?= (isset($userStats['project_count'], $userStats['task_count']) && ($userStats['project_count'] + $userStats['task_count']) > 0) ? round(($userStats['task_count'] / max(1, ($userStats['project_count'] + $userStats['task_count']))) * 100) : 0 ?>%
+                        </div>
                         <div style="color: #6b7280; font-weight: 500; font-size: 0.875rem; text-transform: uppercase; letter-spacing: 0.05em;">Success Rate</div>
                     </div>
                 </div>
@@ -99,57 +105,83 @@
 
         <!-- Profile Information -->
         <div class="col-lg-4">
-            <div style="background: white; border-radius: 1rem; padding: 1.5rem; box-shadow: 0 4px 6px rgba(0,0,0,0.05); height: 100%;">
-                <h5 class="mb-4">
-                    <i class="fas fa-user me-2"></i>
+            <div style="backdrop-filter: blur(12px); background: rgba(255,255,255,0.55); border-radius: 1.5rem; box-shadow: 0 8px 32px rgba(102,126,234,0.18); padding: 2.5rem 1.5rem 2rem 1.5rem; height: 100%; position: relative; overflow: hidden; border: 1.5px solid rgba(102,126,234,0.10);">
+                <div style="position: absolute; top: -40px; right: -40px; width: 120px; height: 120px; background: rgba(102,126,234,0.10); border-radius: 50%; z-index: 0;"></div>
+                <div style="position: absolute; bottom: -30px; left: -30px; width: 80px; height: 80px; background: rgba(102,126,234,0.06); border-radius: 50%; z-index: 0;"></div>
+                <div style="display: flex; flex-direction: column; align-items: center; position: relative; z-index: 2; margin-bottom: 1.5rem;">
+                    <div style="width: 90px; height: 90px; border-radius: 50%; background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); box-shadow: 0 4px 16px rgba(102,126,234,0.15); display: flex; align-items: center; justify-content: center; margin-bottom: 0.75rem; border: 3px solid #fff; overflow: hidden;">
+                        <?php if (!empty($user['avatar'])): ?>
+                            <img src="<?= base_url('uploads/avatars/' . $user['avatar']) ?>" alt="Profile" style="width: 100%; height: 100%; border-radius: 50%; object-fit: cover;">
+                        <?php else: ?>
+                            <span style="color: #fff; font-size: 2.5rem; font-weight: 700; letter-spacing: 1px;">
+                                <?= strtoupper(substr($user['first_name'] ?? $user['email'] ?? 'U', 0, 1)) ?>
+                            </span>
+                        <?php endif; ?>
+                    </div>
+                    <div style="font-family: 'Poppins',sans-serif; font-weight: 700; color: #4f46e5; font-size: 1.25rem; text-align: center;">
+                        <?= esc(trim(($user['first_name'] ?? '') . ' ' . ($user['last_name'] ?? ''))) ?: esc($user['email']) ?>
+                    </div>
+                    <div style="color: #6b7280; font-size: 0.95rem; font-weight: 500; text-align: center; margin-bottom: 0.5rem;">
+                        <i class="fas fa-user-tag me-1"></i> <?= esc($user['role'] ?? 'User') ?>
+                    </div>
+                    <div style="width: 100%; margin: 0.5rem 0 0.5rem 0;">
+                        <div style="height: 8px; background: #e0e7ff; border-radius: 4px; overflow: hidden;">
+                            <?php 
+                                $fieldsFilled = 0;
+                                $fieldsTotal = 6;
+                                if (!empty($user['first_name'])) $fieldsFilled++;
+                                if (!empty($user['last_name'])) $fieldsFilled++;
+                                if (!empty($user['phone'])) $fieldsFilled++;
+                                if (!empty($user['avatar'])) $fieldsFilled++;
+                                if (!empty($user['email'])) $fieldsFilled++;
+                                if (!empty($user['last_login'])) $fieldsFilled++;
+                                $profilePercent = round(($fieldsFilled / $fieldsTotal) * 100);
+                            ?>
+                            <div style="width: <?= $profilePercent ?>%; background: linear-gradient(90deg, #667eea 0%, #764ba2 100%); height: 100%; transition: width 0.5s;"></div>
+                        </div>
+                        <div style="font-size: 0.8rem; color: #6b7280; margin-top: 0.25rem; text-align: right;">Profile Completeness: <?= $profilePercent ?>%</div>
+                    </div>
+                </div>
+                <h5 class="mb-4" style="font-family: 'Poppins',sans-serif; font-weight: 700; color: #4f46e5; position: relative; z-index: 1; text-align: center;">
+                    <i class="fas fa-id-card me-2"></i>
                     Profile Information
                 </h5>
-                
-                <div style="display: flex; justify-content: space-between; align-items: center; padding: 0.75rem 0; border-bottom: 1px solid #f3f4f6;">
-                    <span style="color: #6b7280; font-weight: 500; font-size: 0.875rem;">Email</span>
-                    <span style="color: #374151; font-weight: 600; font-size: 0.875rem;"><?= esc($user['email']) ?></span>
-                </div>
-                
-                <div style="display: flex; justify-content: space-between; align-items: center; padding: 0.75rem 0; border-bottom: 1px solid #f3f4f6;">
-                    <span style="color: #6b7280; font-weight: 500; font-size: 0.875rem;">First Name</span>
-                    <span style="color: #374151; font-weight: 600; font-size: 0.875rem;"><?= esc($user['first_name'] ?? 'Not set') ?></span>
-                </div>
-                
-                <div style="display: flex; justify-content: space-between; align-items: center; padding: 0.75rem 0; border-bottom: 1px solid #f3f4f6;">
-                    <span style="color: #6b7280; font-weight: 500; font-size: 0.875rem;">Last Name</span>
-                    <span style="color: #374151; font-weight: 600; font-size: 0.875rem;"><?= esc($user['last_name'] ?? 'Not set') ?></span>
-                </div>
-                
-                <div style="display: flex; justify-content: space-between; align-items: center; padding: 0.75rem 0; border-bottom: 1px solid #f3f4f6;">
-                    <span style="color: #6b7280; font-weight: 500; font-size: 0.875rem;">Phone</span>
-                    <span style="color: #374151; font-weight: 600; font-size: 0.875rem;"><?= esc($user['phone'] ?? 'Not set') ?></span>
-                </div>
-                
-                <div style="display: flex; justify-content: space-between; align-items: center; padding: 0.75rem 0; border-bottom: 1px solid #f3f4f6;">
-                    <span style="color: #6b7280; font-weight: 500; font-size: 0.875rem;">Role</span>
-                    <span style="color: #374151; font-weight: 600; font-size: 0.875rem;"><?= esc($user['role'] ?? 'User') ?></span>
-                </div>
-                
-                <div style="display: flex; justify-content: space-between; align-items: center; padding: 0.75rem 0; border-bottom: 1px solid #f3f4f6;">
-                    <span style="color: #6b7280; font-weight: 500; font-size: 0.875rem;">Status</span>
-                    <span style="color: #374151; font-weight: 600; font-size: 0.875rem;">
-                        <?= $user['is_active'] ? '<span class="badge bg-success">Active</span>' : '<span class="badge bg-danger">Inactive</span>' ?>
-                    </span>
-                </div>
-                
-                <div style="display: flex; justify-content: space-between; align-items: center; padding: 0.75rem 0;">
-                    <span style="color: #6b7280; font-weight: 500; font-size: 0.875rem;">Last Login</span>
-                    <span style="color: #374151; font-weight: 600; font-size: 0.875rem;">
-                        <?= $user['last_login'] ? date('M j, Y H:i', strtotime($user['last_login'])) : 'Never' ?>
-                    </span>
-                </div>
-
+                <ul class="list-group list-group-flush" style="background: transparent; position: relative; z-index: 1;">
+                    <li class="list-group-item d-flex align-items-center" style="background: transparent; border: none; border-bottom: 1px solid #e5e7eb; padding: 0.85rem 0; gap: 0.75rem;">
+                        <span style="color: #667eea; background: #e0e7ff; border-radius: 50%; width: 36px; height: 36px; display: flex; align-items: center; justify-content: center; font-size: 1.2rem;"><i class="fas fa-envelope"></i></span>
+                        <span style="color: #374151; font-weight: 600; font-size: 1rem;"> <?= esc($user['email']) ?> </span>
+                    </li>
+                    <li class="list-group-item d-flex align-items-center" style="background: transparent; border: none; border-bottom: 1px solid #e5e7eb; padding: 0.85rem 0; gap: 0.75rem;">
+                        <span style="color: #667eea; background: #e0e7ff; border-radius: 50%; width: 36px; height: 36px; display: flex; align-items: center; justify-content: center; font-size: 1.2rem;"><i class="fas fa-user"></i></span>
+                        <span style="color: #374151; font-weight: 600; font-size: 1rem;"> <?= esc($user['first_name'] ?? 'Not set') ?> </span>
+                    </li>
+                    <li class="list-group-item d-flex align-items-center" style="background: transparent; border: none; border-bottom: 1px solid #e5e7eb; padding: 0.85rem 0; gap: 0.75rem;">
+                        <span style="color: #667eea; background: #e0e7ff; border-radius: 50%; width: 36px; height: 36px; display: flex; align-items: center; justify-content: center; font-size: 1.2rem;"><i class="fas fa-user"></i></span>
+                        <span style="color: #374151; font-weight: 600; font-size: 1rem;"> <?= esc($user['last_name'] ?? 'Not set') ?> </span>
+                    </li>
+                    <li class="list-group-item d-flex align-items-center" style="background: transparent; border: none; border-bottom: 1px solid #e5e7eb; padding: 0.85rem 0; gap: 0.75rem;">
+                        <span style="color: #667eea; background: #e0e7ff; border-radius: 50%; width: 36px; height: 36px; display: flex; align-items: center; justify-content: center; font-size: 1.2rem;"><i class="fas fa-phone"></i></span>
+                        <span style="color: #374151; font-weight: 600; font-size: 1rem;"> <?= esc($user['phone'] ?? 'Not set') ?> </span>
+                    </li>
+                    <li class="list-group-item d-flex align-items-center" style="background: transparent; border: none; border-bottom: 1px solid #e5e7eb; padding: 0.85rem 0; gap: 0.75rem;">
+                        <span style="color: #667eea; background: #e0e7ff; border-radius: 50%; width: 36px; height: 36px; display: flex; align-items: center; justify-content: center; font-size: 1.2rem;"><i class="fas fa-toggle-on"></i></span>
+                        <span style="color: #374151; font-weight: 600; font-size: 1rem;">
+                            <?= $user['is_active'] ? '<span class="badge bg-success">Active</span>' : '<span class="badge bg-danger">Inactive</span>' ?>
+                        </span>
+                    </li>
+                    <li class="list-group-item d-flex align-items-center" style="background: transparent; border: none; padding: 0.85rem 0; gap: 0.75rem;">
+                        <span style="color: #667eea; background: #e0e7ff; border-radius: 50%; width: 36px; height: 36px; display: flex; align-items: center; justify-content: center; font-size: 1.2rem;"><i class="fas fa-clock"></i></span>
+                        <span style="color: #374151; font-weight: 600; font-size: 1rem;">
+                            <?= !empty($user['last_login']) ? date('M j, Y H:i', strtotime($user['last_login'])) : 'Never' ?>
+                        </span>
+                    </li>
+                </ul>
                 <div class="mt-4 d-grid gap-2">
-                    <a href="<?= base_url('profile/edit') ?>" class="btn btn-primary">
+                    <a href="<?= base_url('profile/edit') ?>" class="btn btn-primary" style="font-weight:600; border-radius:0.75rem;">
                         <i class="fas fa-edit me-2"></i>
                         Edit Profile
                     </a>
-                    <a href="<?= base_url('profile/change-password') ?>" class="btn btn-outline-secondary">
+                    <a href="<?= base_url('profile/change-password') ?>" class="btn btn-outline-secondary" style="font-weight:600; border-radius:0.75rem;">
                         <i class="fas fa-lock me-2"></i>
                         Change Password
                     </a>

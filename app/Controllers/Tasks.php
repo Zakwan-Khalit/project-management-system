@@ -33,15 +33,25 @@ class Tasks extends BaseController
             return redirect()->to(base_url('login'));
         }
         
-        $tasks = $this->taskModel->getUserTasks($userId);
+        // Get ALL tasks (not just user's tasks) - for supervisors/admin view
+        $tasks = $this->taskModel->getTasksWithDetails();
         $projects = $this->projectModel->getUserProjects($userId);
-        
+
+        // Ensure each task has a status_code for frontend filtering
+        foreach ($tasks as &$task) {
+            if (!isset($task['status_code']) && isset($task['status_name'])) {
+                $task['status_code'] = strtolower(str_replace(' ', '_', $task['status_name']));
+            }
+        }
+        unset($task);
+
         $data = [
-            'title' => 'Tasks',
+            'title' => 'All Tasks',
             'tasks' => $tasks,
-            'projects' => $projects
+            'projects' => $projects,
+            'is_all_tasks' => true
         ];
-        
+
         return $this->template->member('tasks/index', $data);
     }
     
@@ -64,6 +74,7 @@ class Tasks extends BaseController
                 ['title' => 'Kanban Board']
             ]
         ];
+
         
         return $this->template->member('tasks/kanban_select', $data);
     }
@@ -88,8 +99,10 @@ class Tasks extends BaseController
         }
         
         $allTasks = $this->taskModel->getKanbanTasks($projectId);
-        $members = $this->userModel->getProjectMembers($projectId);
-        
+
+        // FIX: Get members from ProjectModel, not UserModel
+        $members = $this->projectModel->getProjectMembers($projectId);
+
         // Organize tasks by status
         $tasks = [
             'todo' => [],
@@ -465,11 +478,131 @@ class Tasks extends BaseController
             return redirect()->to(base_url('login'));
         }
 
+        // Get only the current user's assigned tasks
         $tasks = $this->taskModel->getUserTasks($userId);
+        $projects = $this->projectModel->getUserProjects($userId);
         
-        return $this->template->member('tasks/my_tasks', [
+        $data = [
             'title' => 'My Tasks',
-            'tasks' => $tasks
+            'tasks' => $tasks,
+            'projects' => $projects,
+            'is_my_tasks' => true
+        ];
+        
+        return $this->template->member('tasks/index', $data);
+    }
+
+    // AJAX endpoint for tasks data (for DataTables/grid)
+    public function getTasks()
+    {
+        $userData = session('userdata');
+        $userId = $userData['id'] ?? null;
+        if (!$userId) {
+            return $this->response->setJSON([
+                'success' => false,
+                'message' => 'Session expired'
+            ]);
+        }
+
+        // Get filters from query params
+        $status = $this->request->getGet('status');
+        $search = $this->request->getGet('search');
+        $projectId = $this->request->getGet('project_id');
+        $priority = $this->request->getGet('priority');
+        $assignedTo = $this->request->getGet('assigned_to');
+        $page = (int) $this->request->getGet('page') ?: 1;
+        $perPage = 12;
+
+        $tasks = $this->taskModel->getTasksWithDetails($projectId);
+
+        // Filter by status
+        if ($status && $status !== 'all') {
+            $tasks = array_filter($tasks, function($t) use ($status) {
+                return (isset($t['status_code']) && $t['status_code'] === $status);
+            });
+        }
+        // Filter by priority
+        if ($priority && $priority !== 'all') {
+            $tasks = array_filter($tasks, function($t) use ($priority) {
+                return (isset($t['priority_name']) && strtolower($t['priority_name']) === strtolower($priority));
+            });
+        }
+        // Filter by assignee
+        if ($assignedTo && $assignedTo !== 'all') {
+            $tasks = array_filter($tasks, function($t) use ($assignedTo) {
+                return (isset($t['owner_first_name']) && $t['owner_first_name'] && isset($t['owner_last_name']) && $t['owner_last_name'] && isset($t['owner_id']) && $t['owner_id'] == $assignedTo);
+            });
+        }
+        // Filter by search
+        if ($search) {
+            $search = strtolower($search);
+            $tasks = array_filter($tasks, function($t) use ($search) {
+                return (strpos(strtolower($t['title']), $search) !== false) || (isset($t['description']) && strpos(strtolower($t['description']), $search) !== false);
+            });
+        }
+
+        $tasks = array_values($tasks);
+        $total = count($tasks);
+        $totalPages = ceil($total / $perPage);
+        $offset = ($page - 1) * $perPage;
+        $tasksPage = array_slice($tasks, $offset, $perPage);
+
+        // Map to frontend structure
+        $tasksPage = array_map(function($t) {
+            return [
+                'id' => $t['id'],
+                'title' => $t['title'],
+                'description' => $t['description'],
+                'project_name' => $t['project_name'],
+                'status' => $t['status_code'] ?? 'pending',
+                'priority' => strtolower($t['priority_name'] ?? 'medium'),
+                'assigned_first_name' => $t['owner_first_name'] ?? '',
+                'assigned_last_name' => $t['owner_last_name'] ?? '',
+                'due_date' => $t['due_date'],
+            ];
+        }, $tasksPage);
+
+        return $this->response->setJSON([
+            'success' => true,
+            'tasks' => $tasksPage,
+            'pagination' => [
+                'current_page' => $page,
+                'total_pages' => $totalPages,
+                'total' => $total
+            ]
+        ]);
+    }
+
+    // AJAX endpoint for filter options (projects, users)
+    public function getFilterOptions()
+    {
+        $userData = session('userdata');
+        $userId = $userData['id'] ?? null;
+        if (!$userId) {
+            return $this->response->setJSON([
+                'success' => false,
+                'message' => 'Session expired'
+            ]);
+        }
+        $projects = $this->projectModel->getUserProjects($userId);
+        $users = $this->userModel->getAllUsers();
+        $projectOptions = array_map(function($p) {
+            return [
+                'id' => $p['id'],
+                'name' => $p['name']
+            ];
+        }, $projects);
+        $userOptions = array_map(function($u) {
+            return [
+                'id' => $u['id'],
+                'first_name' => $u['first_name'],
+                'last_name' => $u['last_name']
+            ];
+        }, $users);
+        return $this->response->setJSON([
+            'success' => true,
+            'projects' => $projectOptions,
+            'users' => $userOptions
         ]);
     }
 }

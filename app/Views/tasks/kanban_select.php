@@ -24,7 +24,7 @@
                          onmouseout="this.style.transform='translateY(0)'; this.style.boxShadow='0 10px 30px rgba(0,0,0,0.08)'">
                         
                         <!-- Status Indicator -->
-                        <div style="position: absolute; top: 0; left: 0; right: 0; height: 4px; background: linear-gradient(135deg, <?= getStatusColor($project['status']) == 'success' ? '#10b981, #059669' : (getStatusColor($project['status']) == 'warning' ? '#f59e0b, #d97706' : (getStatusColor($project['status']) == 'danger' ? '#ef4444, #dc2626' : '#3b82f6, #2563eb')) ?>);"></div>
+                        <div style="position: absolute; top: 0; left: 0; right: 0; height: 4px; background: linear-gradient(135deg, <?= getStatusColor($project['status_name']) == 'success' ? '#10b981, #059669' : (getStatusColor($project['status_name']) == 'warning' ? '#f59e0b, #d97706' : (getStatusColor($project['status_name']) == 'danger' ? '#ef4444, #dc2626' : '#3b82f6, #2563eb')) ?>);"></div>
                         
                         <!-- Card Content -->
                         <div style="padding: 2rem;">
@@ -36,8 +36,8 @@
                                 <div style="flex: 1; min-width: 0;">
                                     <h3 style="margin: 0 0 0.5rem 0; font-size: 1.25rem; font-weight: 600; color: #1f2937; font-family: 'Poppins', sans-serif; line-height: 1.3;"><?= esc($project['name']) ?></h3>
                                     <div style="display: flex; align-items: center; gap: 0.75rem;">
-                                        <span style="background: <?= getStatusColor($project['status']) == 'success' ? 'linear-gradient(135deg, #d1fae5, #a7f3d0)' : (getStatusColor($project['status']) == 'warning' ? 'linear-gradient(135deg, #fef3c7, #fde68a)' : (getStatusColor($project['status']) == 'danger' ? 'linear-gradient(135deg, #fee2e2, #fecaca)' : 'linear-gradient(135deg, #dbeafe, #bfdbfe)')) ?>; color: <?= getStatusColor($project['status']) == 'success' ? '#065f46' : (getStatusColor($project['status']) == 'warning' ? '#92400e' : (getStatusColor($project['status']) == 'danger' ? '#991b1b' : '#1e40af')) ?>; padding: 0.375rem 0.75rem; border-radius: 1rem; font-size: 0.75rem; font-weight: 600; text-transform: uppercase; letter-spacing: 0.025em;">
-                                            <?= ucfirst($project['status']) ?>
+                                        <span style="background: <?= getStatusColor($project['status_name']) == 'success' ? 'linear-gradient(135deg, #d1fae5, #a7f3d0)' : (getStatusColor($project['status_name']) == 'warning' ? 'linear-gradient(135deg, #fef3c7, #fde68a)' : (getStatusColor($project['status_name']) == 'danger' ? 'linear-gradient(135deg, #fee2e2, #fecaca)' : 'linear-gradient(135deg, #dbeafe, #bfdbfe)')) ?>; color: <?= getStatusColor($project['status_name']) == 'success' ? '#065f46' : (getStatusColor($project['status_name']) == 'warning' ? '#92400e' : (getStatusColor($project['status_name']) == 'danger' ? '#991b1b' : '#1e40af')) ?>; padding: 0.375rem 0.75rem; border-radius: 1rem; font-size: 0.75rem; font-weight: 600; text-transform: uppercase; letter-spacing: 0.025em;">
+                                            <?= ucfirst($project['status_name']) ?>
                                         </span>
                                     </div>
                                 </div>
@@ -102,8 +102,8 @@
 
 
 <?php
-function getStatusColor($status) {
-    switch(strtolower($status)) {
+function getStatusColor($status_name) {
+    switch(strtolower($status_name)) {
         case 'active':
         case 'in_progress':
             return 'success';

@@ -11,11 +11,8 @@
     <!-- Bootstrap CSS -->
     <link href="<?= base_url('assets/css/bootstrap/bootstrap.min.css') ?>" rel="stylesheet">
     
-    <!-- Font Awesome -->
+    <!-- Font Awesome (Local Only) -->
     <link href="<?= base_url('assets/fonts/fontawesome/css/all.min.css') ?>" rel="stylesheet">
-    
-    <!-- Font Awesome CDN (fallback) -->
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" integrity="sha512-iecdLmaskl7CVkqkXNQ/ZH/XLlvWZOJyj7Yy7tcenmpD1ypASozpmT/E0iPtmFIB46ZmdtAc9eNBvH0H/ZpiBw==" crossorigin="anonymous" referrerpolicy="no-referrer" />
     
     <!-- SweetAlert2 CSS -->
     <link href="<?= base_url('assets/js/sweetalert2/sweetalert2.min.css') ?>" rel="stylesheet">
@@ -995,12 +992,12 @@
                 <i class="fas fa-project-diagram"></i>
                 <span>Projects</span>
             </a>
-            <a href="<?= base_url('tasks') ?>" class="nav-link <?= strpos(current_url(), 'tasks') !== false && strpos(current_url(), 'myTasks') === false ? 'active' : '' ?>" data-tooltip="Tasks">
+            <a href="<?= base_url('tasks') ?>" class="nav-link <?= strpos(current_url(), 'tasks') !== false && strpos(current_url(), 'myTasks') === false && strpos(current_url(), 'kanban') === false ? 'active' : '' ?>" data-tooltip="All Tasks">
                 <i class="fas fa-tasks"></i>
-                <span>Tasks</span>
+                <span>All Tasks</span>
             </a>
             <a href="<?= base_url('tasks/myTasks') ?>" class="nav-link <?= strpos(current_url(), 'myTasks') !== false ? 'active' : '' ?>" data-tooltip="My Tasks">
-                <i class="fas fa-user-tasks"></i>
+                <i class="fas fa-clipboard-check"></i>
                 <span>My Tasks</span>
             </a>
             <a href="<?= base_url('tasks/kanban_select') ?>" class="nav-link <?= strpos(current_url(), 'kanban') !== false ? 'active' : '' ?>" data-tooltip="Kanban">

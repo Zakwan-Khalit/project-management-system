@@ -180,55 +180,53 @@
 <script>
 function submitTask(event) {
     event.preventDefault();
-    
     const form = event.target;
     const formData = new FormData(form);
-    
     // Show loading state
     const submitBtn = form.querySelector('button[type="submit"]');
     const originalText = submitBtn.innerHTML;
     submitBtn.innerHTML = '<i class="fas fa-spinner fa-spin me-2"></i>Creating...';
     submitBtn.disabled = true;
-    
-    fetch('<?= base_url('tasks/create') ?>', {
-        method: 'POST',
-        body: formData
-    })
-    .then(response => response.json())
-    .then(data => {
-        if (data.success) {
-            // Show success message
-            Swal.fire({
-                icon: 'success',
-                title: 'Success!',
-                text: data.message,
-                confirmButtonColor: '#48bb78'
-            }).then(() => {
-                window.location.href = '<?= base_url('tasks') ?>';
-            });
-        } else {
-            // Show error message
+
+    $.ajax({
+        url: '<?= base_url('tasks/create') ?>',
+        type: 'POST',
+        data: formData,
+        processData: false,
+        contentType: false,
+        dataType: 'json',
+        success: function(data) {
+            if (data.success) {
+                Swal.fire({
+                    icon: 'success',
+                    title: 'Success!',
+                    text: data.message,
+                    confirmButtonColor: '#48bb78'
+                }).then(() => {
+                    window.location.href = '<?= base_url('tasks') ?>';
+                });
+            } else {
+                Swal.fire({
+                    icon: 'error',
+                    title: 'Error!',
+                    text: data.message || 'Failed to create task',
+                    confirmButtonColor: '#e53e3e'
+                });
+            }
+        },
+        error: function(xhr, status, error) {
+            console.error('Error:', error);
             Swal.fire({
                 icon: 'error',
                 title: 'Error!',
-                text: data.message || 'Failed to create task',
+                text: 'An unexpected error occurred',
                 confirmButtonColor: '#e53e3e'
             });
+        },
+        complete: function() {
+            submitBtn.innerHTML = originalText;
+            submitBtn.disabled = false;
         }
-    })
-    .catch(error => {
-        console.error('Error:', error);
-        Swal.fire({
-            icon: 'error',
-            title: 'Error!',
-            text: 'An unexpected error occurred',
-            confirmButtonColor: '#e53e3e'
-        });
-    })
-    .finally(() => {
-        // Reset button state
-        submitBtn.innerHTML = originalText;
-        submitBtn.disabled = false;
     });
 }
 </script>
