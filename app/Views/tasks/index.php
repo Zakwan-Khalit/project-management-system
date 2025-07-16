@@ -195,8 +195,10 @@ let currentFilters = {
 let currentPage = 1;
 let tasksData = [];
 
-// Initialize the page
-document.addEventListener('DOMContentLoaded', function() {
+
+// jQuery document ready for initialization (explicit)
+$(document).ready(function() {
+    console.log('touched document ready');
     loadTasks();
     initializeEventListeners();
     loadFilterOptions();
@@ -239,42 +241,43 @@ function initializeEventListeners() {
 }
 
 function loadTasks() {
-    showLoading();
-    
-    // Build query parameters
+    console.log('touched loadTasks');
     const params = new URLSearchParams({
         page: currentPage,
         ...currentFilters
     });
-
+    console.log(`Loading tasks with params: ${params.toString()}`);
     $.ajax({
         url: `<?= base_url('tasks/getTasks') ?>?${params}`,
         method: 'GET',
         dataType: 'json',
         success: function(data) {
+            hideLoading();
             if (data.success) {
                 tasksData = data.tasks;
                 renderTasks(data.tasks);
-                hideLoading();
+                renderPagination(data.pagination);
             } else {
-                showError('Failed to load tasks');
+                showNoTasks();
+                renderPagination({current_page:1,total_pages:1,total:0});
+                showError(data.message || 'Failed to load tasks');
             }
         },
         error: function(xhr, status, error) {
-            console.error('Error loading tasks:', error);
-            showError('Failed to load tasks');
+            hideLoading();
+            showNoTasks();
+            renderPagination({current_page:1,total_pages:1,total:0});
+            Swal.fire('Error', 'Failed to load tasks', 'error');
         }
     });
 }
 
 function renderTasks(tasks) {
-    if (tasks.length === 0) {
+    if (!tasks || tasks.length === 0) {
         showNoTasks();
         return;
     }
-
     hideNoTasks();
-    
     if (currentView === 'grid') {
         renderGridView(tasks);
     } else {
@@ -504,24 +507,6 @@ function changePage(page) {
     loadTasks();
 }
 
-function showLoading() {
-    const loadingSpinner = document.getElementById('loadingSpinner');
-    if (loadingSpinner) {
-        loadingSpinner.style.display = 'block';
-    }
-    
-    const gridView = document.getElementById('gridView');
-    const tableView = document.getElementById('tableView');
-    
-    if (currentView === 'grid') {
-        gridView.innerHTML = '<div style="grid-column: 1 / -1; text-align: center; padding: 4rem;"><div style="width: 60px; height: 60px; border: 4px solid #e2e8f0; border-top: 4px solid #48bb78; border-radius: 50%; margin: 0 auto 1rem auto; animation: spin 1s linear infinite;"></div><p style="color: #6b7280; font-size: 1.1rem; font-weight: 500;">Loading tasks...</p></div>';
-    } else {
-        document.getElementById('tasksTableBody').innerHTML = '<tr><td colspan="8" style="text-align: center; color: #9ca3af; padding: 4rem;"><i class="fas fa-spinner fa-spin" style="font-size: 1.5rem; margin-bottom: 1rem;"></i><br>Loading tasks...</td></tr>';
-    }
-    
-    hideNoTasks();
-}
-
 function hideLoading() {
     const loadingSpinner = document.getElementById('loadingSpinner');
     if (loadingSpinner) {
@@ -542,7 +527,11 @@ function hideNoTasks() {
 
 function showError(message) {
     hideLoading();
-    // You can implement SweetAlert2 or another notification system here
+    if (typeof Swal !== 'undefined') {
+        Swal.fire('Error', message || 'An error occurred', 'error');
+    } else {
+        alert(message || 'An error occurred');
+    }
     console.error(message);
 }
 

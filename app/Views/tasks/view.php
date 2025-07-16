@@ -51,14 +51,14 @@ $priority_colors = [
                 <div class="row mb-3">
                     <div class="col-md-6">
                         <strong>Status:</strong>
-                        <span class="badge bg-<?= $status_colors[$task['status']] ?? 'secondary' ?> ms-2">
-                            <?= $status_options[$task['status']] ?? esc($task['status']) ?>
+                        <span class="badge bg-<?= $status_colors[$task['status_code'] ?? 'pending'] ?? 'secondary' ?> ms-2">
+                            <?= $status_options[$task['status_code'] ?? 'pending'] ?? esc($task['status_name'] ?? 'Pending') ?>
                         </span>
                     </div>
                     <div class="col-md-6">
                         <strong>Priority:</strong>
-                        <span class="badge bg-<?= $priority_colors[$task['priority']] ?? 'secondary' ?> ms-2">
-                            <?= $priority_options[$task['priority']] ?? esc($task['priority']) ?>
+                        <span class="badge bg-<?= $priority_colors[strtolower($task['priority_name'] ?? 'medium')] ?? 'secondary' ?> ms-2">
+                            <?= $priority_options[strtolower($task['priority_name'] ?? 'medium')] ?? esc($task['priority_name'] ?? 'Medium') ?>
                         </span>
                     </div>
                 </div>
@@ -82,7 +82,7 @@ $priority_colors = [
                         <span class="ms-2">
                             <?php if ($task['due_date']): ?>
                                 <?= date('M d, Y', strtotime($task['due_date'])) ?>
-                                <?php if (strtotime($task['due_date']) < time() && $task['status'] !== 'completed'): ?>
+                                <?php if (strtotime($task['due_date']) < time() && ($task['status_code'] ?? 'pending') !== 'completed'): ?>
                                     <span class="badge bg-danger ms-2">Overdue</span>
                                 <?php endif; ?>
                             <?php else: ?>
@@ -110,7 +110,7 @@ $priority_colors = [
                     <strong>Update Status:</strong>
                     <div class="btn-group ms-2" role="group">
                         <?php foreach ($status_options as $status_key => $status_label): ?>
-                            <?php if ($status_key !== $task['status']): ?>
+                            <?php if ($status_key !== ($task['status_code'] ?? 'pending')): ?>
                                 <button type="button" 
                                         class="btn btn-outline-<?= $status_colors[$status_key] ?> btn-sm"
                                         onclick="updateTaskStatus(<?= $task['id'] ?>, '<?= $status_key ?>')">
@@ -192,7 +192,7 @@ $priority_colors = [
                     <a href="<?= base_url('tasks/edit/' . $task['id']) ?>" class="btn btn-outline-primary">
                         <i class="fas fa-edit me-2"></i>Edit Task
                     </a>
-                    <?php if ($task['status'] !== 'completed'): ?>
+                    <?php if (($task['status_code'] ?? 'pending') !== 'completed'): ?>
                         <button type="button" 
                                 class="btn btn-outline-success"
                                 onclick="updateTaskStatus(<?= $task['id'] ?>, 'completed')">
@@ -237,7 +237,7 @@ $priority_colors = [
                             </div>
                         </div>
                     <?php endif; ?>
-                    <?php if ($task['status'] === 'completed'): ?>
+                    <?php if (($task['status_code'] ?? 'pending') === 'completed'): ?>
                         <div class="timeline-item">
                             <div class="timeline-marker bg-success"></div>
                             <div class="timeline-content">
@@ -257,31 +257,41 @@ $priority_colors = [
 <script>
 // Update task status
 function updateTaskStatus(taskId, status) {
-    if (confirm('Are you sure you want to update the task status?')) {
-        fetch(`<?= base_url('tasks/updateStatus') ?>/${taskId}`, {
-            method: 'POST',
-            headers: {
-                'Content-Type': 'application/json',
-                'X-Requested-With': 'XMLHttpRequest'
-            },
-            body: JSON.stringify({ status: status })
-        })
-        .then(response => response.json())
-        .then(data => {
-            if (data.success) {
-                Swal.fire('Success', 'Task status updated successfully', 'success')
-                .then(() => {
-                    location.reload();
-                });
-            } else {
-                Swal.fire('Error', data.message || 'Failed to update task status', 'error');
-            }
-        })
-        .catch(error => {
-            console.error('Error:', error);
-            Swal.fire('Error', 'An error occurred while updating task status', 'error');
-        });
-    }
+    Swal.fire({
+        title: 'Update Status',
+        text: 'Are you sure you want to update the task status?',
+        icon: 'question',
+        showCancelButton: true,
+        confirmButtonColor: '#38a169',
+        cancelButtonColor: '#e53e3e',
+        confirmButtonText: 'Yes, update it!'
+    }).then((result) => {
+        if (result.isConfirmed) {
+            fetch(`<?= base_url('tasks/updateStatus') ?>/${taskId}`, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'X-Requested-With': 'XMLHttpRequest'
+                },
+                body: JSON.stringify({ status: status })
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.success) {
+                    Swal.fire('Success', 'Task status updated successfully', 'success')
+                    .then(() => {
+                        location.reload();
+                    });
+                } else {
+                    Swal.fire('Error', data.message || 'Failed to update task status', 'error');
+                }
+            })
+            .catch(error => {
+                console.error('Error:', error);
+                Swal.fire('Error', 'An error occurred while updating task status', 'error');
+            });
+        }
+    });
 }
 
 // Delete task
@@ -324,10 +334,10 @@ function deleteTask(taskId) {
 // Add comment
 document.getElementById('commentForm').addEventListener('submit', function(e) {
     e.preventDefault();
-    
+
     const commentText = document.getElementById('commentText').value.trim();
     if (!commentText) return;
-    
+
     fetch(`<?= base_url('tasks/addComment') ?>/<?= $task['id'] ?>`, {
         method: 'POST',
         headers: {

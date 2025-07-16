@@ -19,6 +19,24 @@
     
     <!-- Google Fonts -->
     <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&family=Roboto:wght@300;400;500&display=swap" rel="stylesheet">
+
+    <!-- jQuery (must be before content for inline JS in views) -->
+    <script src="<?= base_url('assets/js/jquery/jquery.min.js') ?>"></script>
+
+    <!-- Bootstrap JS -->
+    <script src="<?= base_url('assets/js/bootstrap/bootstrap.bundle.min.js') ?>"></script>
+    
+    <!-- Chart.js -->
+    <script src="<?= base_url('assets/js/chartjs/chart.umd.min.js') ?>"></script>
+    
+    <!-- ApexCharts -->
+    <script src="<?= base_url('assets/js/apexcharts/apexcharts.min.js') ?>"></script>
+    
+    <!-- SortableJS -->
+    <script src="<?= base_url('assets/js/sortable/Sortable.min.js') ?>"></script>
+    
+    <!-- SweetAlert2 -->
+    <script src="<?= base_url('assets/js/sweetalert2/sweetalert2.all.min.js') ?>"></script>
     
     <!-- Additional CSS files -->
     <?php if (isset($css_files) && is_array($css_files)): ?>
@@ -1102,24 +1120,6 @@
             <?= isset($content) ? $content : '' ?>
         </main>
     </div>
-
-    <!-- Bootstrap JS -->
-    <script src="<?= base_url('assets/js/bootstrap/bootstrap.bundle.min.js') ?>"></script>
-    
-    <!-- jQuery -->
-    <script src="<?= base_url('assets/js/jquery/jquery.min.js') ?>"></script>
-    
-    <!-- Chart.js -->
-    <script src="<?= base_url('assets/js/chartjs/chart.umd.min.js') ?>"></script>
-    
-    <!-- ApexCharts -->
-    <script src="<?= base_url('assets/js/apexcharts/apexcharts.min.js') ?>"></script>
-    
-    <!-- SortableJS -->
-    <script src="<?= base_url('assets/js/sortable/Sortable.min.js') ?>"></script>
-    
-    <!-- SweetAlert2 -->
-    <script src="<?= base_url('assets/js/sweetalert2/sweetalert2.all.min.js') ?>"></script>
     
     <!-- Additional JS files -->
     <?php if (isset($js_files) && is_array($js_files)): ?>

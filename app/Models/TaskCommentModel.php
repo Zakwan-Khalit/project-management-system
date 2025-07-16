@@ -6,19 +6,6 @@ use CodeIgniter\Model;
 
 class TaskCommentModel extends Model
 {
-    protected $table = 'task_comments';
-    protected $primaryKey = 'id';
-    protected $allowedFields = ['task_id', 'user_id', 'comment', 'is_active', 'is_delete'];
-    protected $useTimestamps = true;
-    protected $createdField = 'created_at';
-    protected $updatedField = 'updated_at';
-    
-    protected $validationRules = [
-        'task_id' => 'required|integer',
-        'user_id' => 'required|integer',
-        'comment' => 'required'
-    ];
-    
     public function getTaskComments($taskId)
     {
         $builder = $this->db->table('task_comments tc');
@@ -35,47 +22,44 @@ class TaskCommentModel extends Model
         $builder->where('tc.is_active', 1);
         $builder->where('tc.is_delete', 0);
         $builder->orderBy('tc.created_at', 'DESC');
-        
         return $builder->get()->getResultArray();
     }
-    
+
     public function addComment($data)
     {
         $data['is_active'] = 1;
         $data['is_delete'] = 0;
-        return $this->insert($data);
+        $builder = $this->db->table('task_comments');
+        return $builder->insert($data);
     }
-    
+
     public function updateComment($id, $data)
     {
-        return $this->update($id, $data);
+        $builder = $this->db->table('task_comments');
+        return $builder->where('id', $id)->update($data);
     }
-    
+
     public function deleteComment($id, $userId = null)
     {
         $updateData = [
             'is_delete' => 1
         ];
-        
         if ($userId) {
-            // Only allow user to delete their own comments or admin
-            $comment = $this->find($id);
-            if (!$comment || ($comment['user_id'] != $userId && !$this->isAdmin($userId))) {
-                return false;
-            }
+            $updateData['deleted_by'] = $userId;
         }
-        
-        return $this->update($id, $updateData);
+        $builder = $this->db->table('task_comments');
+        return $builder->where('id', $id)->update($updateData);
     }
-    
+
     public function getCommentCount($taskId)
     {
-        return $this->where('task_id', $taskId)
-                   ->where('is_active', 1)
-                   ->where('is_delete', 0)
-                   ->countAllResults();
+        $builder = $this->db->table('task_comments');
+        return $builder->where('task_id', $taskId)
+                       ->where('is_active', 1)
+                       ->where('is_delete', 0)
+                       ->countAllResults();
     }
-    
+
     public function getUserComments($userId, $limit = 10)
     {
         $builder = $this->db->table('task_comments tc');
@@ -91,10 +75,9 @@ class TaskCommentModel extends Model
         $builder->where('tc.is_delete', 0);
         $builder->orderBy('tc.created_at', 'DESC');
         $builder->limit($limit);
-        
         return $builder->get()->getResultArray();
     }
-    
+
     private function isAdmin($userId)
     {
         $builder = $this->db->table('user_role ur');
@@ -102,9 +85,10 @@ class TaskCommentModel extends Model
         $builder->where('ur.user_id', $userId);
         $builder->where('ur.is_active', 1);
         $builder->where('ur.is_delete', 0);
+        $builder->groupStart();
         $builder->where('url.code', 'admin');
         $builder->orWhere('url.code', 'superadmin');
-        
+        $builder->groupEnd();
         return $builder->countAllResults() > 0;
     }
 }

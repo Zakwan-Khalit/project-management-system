@@ -6,43 +6,34 @@ use CodeIgniter\Model;
 
 class RoleModel extends Model
 {
-    protected $table = 'user_role_lookup';
-    protected $primaryKey = 'id';
-    protected $allowedFields = ['code', 'name', 'description', 'permissions', 'level', 'is_active', 'is_delete'];
-    protected $useTimestamps = true;
-    protected $createdField = 'created_at';
-    protected $updatedField = 'updated_at';
-    
-    protected $validationRules = [
-        'code' => 'required|max_length[50]',
-        'name' => 'required|max_length[100]'
-    ];
-    
     public function getAllRoles()
     {
-        return $this->where('is_active', 1)
-                   ->where('is_delete', 0)
-                   ->orderBy('level', 'DESC')
-                   ->findAll();
+        $builder = $this->db->table('user_role_lookup');
+        return $builder->where('is_active', 1)
+                       ->where('is_delete', 0)
+                       ->orderBy('level', 'DESC')
+                       ->get()->getResultArray();
     }
-    
+
     public function getRoleByCode($code)
     {
-        return $this->where('code', $code)
-                   ->where('is_active', 1)
-                   ->where('is_delete', 0)
-                   ->first();
+        $builder = $this->db->table('user_role_lookup');
+        return $builder->where('code', $code)
+                       ->where('is_active', 1)
+                       ->where('is_delete', 0)
+                       ->get()->getRowArray();
     }
-    
+
     public function getRolePermissions($roleId)
     {
-        $role = $this->find($roleId);
+        $builder = $this->db->table('user_role_lookup');
+        $role = $builder->where('id', $roleId)->get()->getRowArray();
         if ($role && !empty($role['permissions'])) {
             return json_decode($role['permissions'], true);
         }
         return [];
     }
-    
+
     public function createRole($data)
     {
         if (isset($data['permissions']) && is_array($data['permissions'])) {
@@ -50,22 +41,24 @@ class RoleModel extends Model
         }
         $data['is_active'] = 1;
         $data['is_delete'] = 0;
-        return $this->insert($data);
+        $builder = $this->db->table('user_role_lookup');
+        return $builder->insert($data);
     }
-    
+
     public function updateRole($id, $data)
     {
         if (isset($data['permissions']) && is_array($data['permissions'])) {
             $data['permissions'] = json_encode($data['permissions']);
         }
-        return $this->update($id, $data);
+        $builder = $this->db->table('user_role_lookup');
+        return $builder->where('id', $id)->update($data);
     }
-    
+
     public function softDeleteRole($id)
     {
-        return $this->update($id, ['is_delete' => 1]);
+        $builder = $this->db->table('user_role_lookup');
+        return $builder->where('id', $id)->update(['is_delete' => 1]);
     }
-    
     public function hasPermission($userId, $resource, $permission = 'read')
     {
         $builder = $this->db->table('user_role ur');
@@ -76,20 +69,15 @@ class RoleModel extends Model
         $builder->where('ur.is_delete', 0);
         $builder->where('url.is_active', 1);
         $builder->where('url.is_delete', 0);
-        
         $userRole = $builder->get()->getRowArray();
-        
         if (!$userRole || empty($userRole['permissions'])) {
             return false;
         }
-        
         $permissions = json_decode($userRole['permissions'], true);
-        
         // Check for superadmin access
         if (isset($permissions['all']) && $permissions['all'] === true) {
             return true;
         }
-        
         // Check specific resource permission
         if (isset($permissions[$resource])) {
             if (is_array($permissions[$resource])) {
@@ -97,7 +85,6 @@ class RoleModel extends Model
             }
             return $permissions[$resource] === true;
         }
-        
         return false;
     }
 }

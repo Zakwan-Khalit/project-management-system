@@ -13,15 +13,17 @@ class Tasks extends BaseController
     protected $projectModel;
     protected $userModel;
     protected $activityLog;
-    protected $db;
-    
+    protected $statusLookupModel;
+    protected $priorityLookupModel;
+
     public function __construct()
     {
         $this->taskModel = new TaskModel();
         $this->projectModel = new ProjectModel();
         $this->userModel = new UserModel();
         $this->activityLog = new ActivityLogModel();
-        $this->db = \Config\Database::connect();
+        $this->statusLookupModel = new \App\Models\StatusLookupModel();
+        $this->priorityLookupModel = new \App\Models\PriorityLookupModel();
     }
     
     public function index()
@@ -140,16 +142,9 @@ class Tasks extends BaseController
         }
 
         if ($this->request->getMethod() === 'POST') {
-            // Get lookup IDs for status and priority
-            $statusLookup = $this->db->table('status_lookup')
-                                   ->where('type', 'task')
-                                   ->where('code', $this->request->getPost('status') ?: 'todo')
-                                   ->get()->getRowArray();
-            
-            $priorityLookup = $this->db->table('priority_lookup')
-                                     ->where('type', 'task')
-                                     ->where('code', $this->request->getPost('priority') ?: 'medium')
-                                     ->get()->getRowArray();
+            // Get lookup IDs for status and priority using models
+            $statusLookup = $this->statusLookupModel->getStatusByTypeAndCode('task', $this->request->getPost('status') ?: 'todo');
+            $priorityLookup = $this->priorityLookupModel->getPriorityByTypeAndCode('task', $this->request->getPost('priority') ?: 'medium');
             
             $taskData = [
                 'project_id' => $this->request->getPost('project_id'),
@@ -231,22 +226,16 @@ class Tasks extends BaseController
                 // Update status if provided
                 $newStatus = $this->request->getPost('status');
                 if ($newStatus) {
-                    $statusLookup = $this->db->table('status_lookup')
-                                           ->where('type', 'task')
-                                           ->where('code', $newStatus)
-                                           ->get()->getRowArray();
+                    $statusLookup = $this->statusLookupModel->getStatusByTypeAndCode('task', $newStatus);
                     if ($statusLookup) {
                         $this->taskModel->setTaskStatus($id, $statusLookup['id'], $userId);
                     }
                 }
-                
+
                 // Update priority if provided
                 $newPriority = $this->request->getPost('priority');
                 if ($newPriority) {
-                    $priorityLookup = $this->db->table('priority_lookup')
-                                             ->where('type', 'task')
-                                             ->where('code', $newPriority)
-                                             ->get()->getRowArray();
+                    $priorityLookup = $this->priorityLookupModel->getPriorityByTypeAndCode('task', $newPriority);
                     if ($priorityLookup) {
                         $this->taskModel->setTaskPriority($id, $priorityLookup['id'], $userId);
                     }
@@ -376,12 +365,8 @@ class Tasks extends BaseController
             ]);
         }
         
-        // Get new status ID
-        $statusLookup = $this->db->table('status_lookup')
-                               ->where('type', 'task')
-                               ->where('code', $newStatusCode)
-                               ->get()->getRowArray();
-        
+        // Get new status ID using model
+        $statusLookup = $this->statusLookupModel->getStatusByTypeAndCode('task', $newStatusCode);
         if (!$statusLookup) {
             return $this->response->setJSON([
                 'success' => false,
@@ -473,23 +458,30 @@ class Tasks extends BaseController
     {
         $userData = session('userdata');
         $userId = $userData['id'] ?? null;
-        
         if (!$userId) {
             return redirect()->to(base_url('login'));
         }
-
-        // Get only the current user's assigned tasks
         $tasks = $this->taskModel->getUserTasks($userId);
         $projects = $this->projectModel->getUserProjects($userId);
-        
+
+        // Fetch status and priority options from lookup tables
+        $statusOptions = $this->statusLookupModel->getStatusesByType('task');
+        $priorityOptions = $this->priorityLookupModel->getPrioritiesByType('task');
+
         $data = [
             'title' => 'My Tasks',
             'tasks' => $tasks,
             'projects' => $projects,
-            'is_my_tasks' => true
+            'is_my_tasks' => true,
+            'status_options' => $statusOptions,
+            'priority_options' => $priorityOptions,
+            'breadcrumbs' => [
+                ['title' => 'Tasks', 'url' => base_url('tasks')],
+                ['title' => 'My Tasks']
+            ]
         ];
-        
-        return $this->template->member('tasks/index', $data);
+
+        return $this->template->member('tasks/my_tasks', $data);
     }
 
     // AJAX endpoint for tasks data (for DataTables/grid)

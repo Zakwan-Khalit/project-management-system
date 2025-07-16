@@ -242,3 +242,19 @@ if (!function_exists('is_admin')) {
         return has_role('admin');
     }
 }
+
+if (!function_exists('getTaskStatus')) {
+    function getTaskStatus($task) {
+        // Try to return the status code, fallback to status_name or 'pending'
+        return $task['status_code'] ?? 
+               (isset($task['status_name']) ? strtolower(str_replace(' ', '_', $task['status_name'])) : 'pending');
+    }
+}
+
+if (!function_exists('getTaskPriority')) {
+    function getTaskPriority($task) {
+        // Try to return the priority code, fallback to priority_name or 'medium'
+        return $task['priority_code'] ??
+               (isset($task['priority_name']) ? strtolower(str_replace(' ', '_', $task['priority_name'])) : 'medium');
+    }
+}

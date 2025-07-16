@@ -6,61 +6,54 @@ use CodeIgniter\Model;
 
 class PriorityLookupModel extends Model
 {
-    protected $table = 'priority_lookup';
-    protected $primaryKey = 'id';
-    protected $allowedFields = ['type', 'code', 'name', 'description', 'color', 'level', 'order_index', 'is_active', 'is_delete'];
-    protected $useTimestamps = true;
-    protected $createdField = 'created_at';
-    protected $updatedField = 'updated_at';
-    
-    protected $validationRules = [
-        'type' => 'required|max_length[50]',
-        'code' => 'required|max_length[50]',
-        'name' => 'required|max_length[100]'
-    ];
-    
     public function getPrioritiesByType($type)
     {
-        return $this->where('type', $type)
-                   ->where('is_active', 1)
-                   ->where('is_delete', 0)
-                   ->orderBy('level', 'ASC')
-                   ->orderBy('order_index', 'ASC')
-                   ->findAll();
+        $builder = $this->db->table('priority_lookup');
+        return $builder->where('type', $type)
+                       ->where('is_active', 1)
+                       ->where('is_delete', 0)
+                       ->orderBy('level', 'ASC')
+                       ->orderBy('order_index', 'ASC')
+                       ->get()->getResultArray();
     }
-    
+
     public function getActivePriorities()
     {
-        return $this->where('is_active', 1)
-                   ->where('is_delete', 0)
-                   ->orderBy('type', 'ASC')
-                   ->orderBy('level', 'ASC')
-                   ->findAll();
+        $builder = $this->db->table('priority_lookup');
+        return $builder->where('is_active', 1)
+                       ->where('is_delete', 0)
+                       ->orderBy('type', 'ASC')
+                       ->orderBy('level', 'ASC')
+                       ->get()->getResultArray();
     }
-    
+
     public function getPriorityByTypeAndCode($type, $code)
     {
-        return $this->where('type', $type)
-                   ->where('code', $code)
-                   ->where('is_active', 1)
-                   ->where('is_delete', 0)
-                   ->first();
+        $builder = $this->db->table('priority_lookup');
+        return $builder->where('type', $type)
+                       ->where('code', $code)
+                       ->where('is_active', 1)
+                       ->where('is_delete', 0)
+                       ->get()->getRowArray();
     }
-    
+
     public function createPriority($data)
     {
         $data['is_active'] = 1;
         $data['is_delete'] = 0;
-        return $this->insert($data);
+        $builder = $this->db->table('priority_lookup');
+        return $builder->insert($data);
     }
-    
+
     public function updatePriority($id, $data)
     {
-        return $this->update($id, $data);
+        $builder = $this->db->table('priority_lookup');
+        return $builder->where('id', $id)->update($data);
     }
-    
+
     public function softDeletePriority($id)
     {
-        return $this->update($id, ['is_delete' => 1]);
+        $builder = $this->db->table('priority_lookup');
+        return $builder->where('id', $id)->update(['is_delete' => 1]);
     }
 }

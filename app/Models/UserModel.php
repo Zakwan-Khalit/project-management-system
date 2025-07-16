@@ -6,19 +6,6 @@ use CodeIgniter\Model;
 
 class UserModel extends Model
 {
-    protected $table = 'users';
-    protected $primaryKey = 'id';
-    protected $allowedFields = ['email', 'password', 'email_verified_at', 'remember_token', 'created_at', 'updated_at', 'is_delete'];
-    protected $useTimestamps = true;
-    protected $deletedField = 'is_delete';
-    protected $db;
-
-    public function __construct()
-    {
-        parent::__construct();
-        $this->db = \Config\Database::connect();
-    }
-
     public function getUserByEmail($email)
     {
         $builder = $this->db->table('users');
@@ -40,7 +27,7 @@ class UserModel extends Model
         $builder->where('users.is_active', 1);
         return $builder->get()->getRowArray();
     }
-    
+
     public function getUserById($userId)
     {
         $builder = $this->db->table('users');
