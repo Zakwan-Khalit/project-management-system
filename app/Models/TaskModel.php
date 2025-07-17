@@ -1,5 +1,4 @@
 <?php
-
 namespace App\Models;
 
 use CodeIgniter\Model;
@@ -73,7 +72,12 @@ class TaskModel extends Model
     {
         $builder = $this->db->table('tasks');
         $builder->select('
-            tasks.*,
+            tasks.id as id,
+            tasks.title as title,
+            tasks.description,
+            tasks.due_date,
+            tasks.progress,
+            tasks.order_index,
             status_lookup.name as status_name,
             status_lookup.color as status_color,
             status_lookup.code as status_code,
@@ -177,8 +181,7 @@ class TaskModel extends Model
         $builder->where('id', $taskId);
         return $builder->update([
             'is_delete' => 1,
-            'deleted_at' => date('Y-m-d H:i:s'),
-            'deleted_by' => $deletedBy,
+            'is_active' => 0,
             'updated_at' => date('Y-m-d H:i:s')
         ]);
     }
@@ -197,7 +200,7 @@ class TaskModel extends Model
             'task_id' => $taskId,
             'status_id' => $statusId,
             'changed_by' => $changedBy,
-            'changed_at' => date('Y-m-d H:i:s'),
+            'updated_at' => date('Y-m-d H:i:s'),
             'is_current' => 1,
             'is_delete' => 0
         ]);
@@ -228,7 +231,7 @@ class TaskModel extends Model
             'task_id' => $taskId,
             'priority_id' => $priorityId,
             'changed_by' => $changedBy,
-            'changed_at' => date('Y-m-d H:i:s'),
+            'updated_at' => date('Y-m-d H:i:s'),
             'is_current' => 1,
             'is_delete' => 0
         ]);
@@ -259,7 +262,7 @@ class TaskModel extends Model
             'task_id' => $taskId,
             'owned_by' => $ownedBy,
             'created_by' => $createdBy,
-            'assigned_at' => date('Y-m-d H:i:s'),
+            'created_at' => date('Y-m-d H:i:s'),
             'is_current' => 1,
             'is_delete' => 0
         ]);

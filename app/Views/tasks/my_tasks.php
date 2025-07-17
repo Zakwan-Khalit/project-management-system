@@ -5,7 +5,7 @@
                 <div class="d-flex justify-content-between">
                     <div>
                         <h5 class="card-title">Pending</h5>
-                        <h2 class="mb-0"><?= count($grouped_tasks['pending'] ?? []) ?></h2>
+                        <h2 class="mb-0" style="color:#222; background:transparent;"><?php echo isset($pending_count) ? $pending_count : 0; ?></h2>
                     </div>
                     <div class="align-self-center">
                         <i class="fas fa-clock fa-2x"></i>
@@ -20,7 +20,7 @@
                 <div class="d-flex justify-content-between">
                     <div>
                         <h5 class="card-title">In Progress</h5>
-                        <h2 class="mb-0"><?= count($grouped_tasks['in_progress'] ?? []) ?></h2>
+                        <h2 class="mb-0" style="color:#222; background:transparent;"><?php echo isset($in_progress_count) ? $in_progress_count : 0; ?></h2>
                     </div>
                     <div class="align-self-center">
                         <i class="fas fa-spinner fa-2x"></i>
@@ -35,7 +35,7 @@
                 <div class="d-flex justify-content-between">
                     <div>
                         <h5 class="card-title">In Review</h5>
-                        <h2 class="mb-0"><?= count($grouped_tasks['review'] ?? []) ?></h2>
+                        <h2 class="mb-0" style="color:#222; background:transparent;"><?php echo isset($review_count) ? $review_count : 0; ?></h2>
                     </div>
                     <div class="align-self-center">
                         <i class="fas fa-eye fa-2x"></i>
@@ -50,7 +50,7 @@
                 <div class="d-flex justify-content-between">
                     <div>
                         <h5 class="card-title">Completed</h5>
-                        <h2 class="mb-0"><?= count($grouped_tasks['completed'] ?? []) ?></h2>
+                        <h2 class="mb-0" style="color:#222; background:transparent;"><?php echo isset($completed_count) ? $completed_count : 0; ?></h2>
                     </div>
                     <div class="align-self-center">
                         <i class="fas fa-check fa-2x"></i>

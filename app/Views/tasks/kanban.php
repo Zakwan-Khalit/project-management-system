@@ -3,24 +3,24 @@
     
     <!-- Kanban Header -->
     <div class="card border-0 shadow-lg mb-4">
-        <div class="card-header border-0 text-white p-4" style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); border-radius: 1rem 1rem 0 0;">
+        <div class="card-header border-0 bg-white text-dark p-4" style="border-radius: 1rem 1rem 0 0;">
             <div class="d-flex justify-content-between align-items-center flex-wrap">
                 <div>
                     <h1 class="h2 mb-2 fw-bold d-flex align-items-center">
-                        <i class="fas fa-columns me-3"></i>
+                        <i class="fas fa-columns me-3" style="color: #6366f1;"></i>
                         <?= esc($project['name']) ?> - Kanban Board
                     </h1>
-                    <p class="mb-0 opacity-75">
+                    <p class="mb-0 opacity-75 text-secondary">
                         <i class="fas fa-info-circle me-2"></i>
                         Drag and drop tasks between columns to update their status
                     </p>
                 </div>
                 <div class="d-flex gap-2 flex-wrap">
-                    <button onclick="openAddTaskModal()" class="btn btn-outline-light">
+                    <button onclick="openAddTaskModal()" class="btn btn-outline-primary">
                         <i class="fas fa-plus me-2"></i>
                         Add Task
                     </button>
-                    <button onclick="refreshKanban()" class="btn btn-outline-light">
+                    <button onclick="refreshKanban()" class="btn btn-outline-secondary">
                         <i class="fas fa-sync-alt me-2"></i>
                         Refresh
                     </button>
@@ -107,18 +107,122 @@
         <!-- To Do Column -->
         <div class="col-lg-3 col-md-6">
             <div class="card border-0 shadow-sm h-100" style="transition: all 0.3s ease;" data-status="pending">
-                <div class="card-header text-white text-center py-3" style="background: linear-gradient(135deg, #6b7280 0%, #4b5563 100%);">
-                    <h5 class="mb-0 fw-semibold d-flex justify-content-center align-items-center">
-                        <i class="fas fa-clipboard-list me-2"></i>
+                <div class="card-header bg-white text-dark text-center py-3 border-0" style="border-left: 5px solid #6366f1; border-radius: 1rem 1rem 0 0; font-weight: 700; letter-spacing: 0.01em;">
+                    <h5 class="mb-0 fw-semibold d-flex justify-content-center align-items-center gap-2">
+                        <i class="fas fa-clipboard-list" style="color: #6366f1;"></i>
                         To Do
                         <span class="badge bg-light text-dark ms-2"><?= count($tasks['pending']) ?></span>
                     </h5>
                 </div>
                 <div class="card-body p-3" style="background: #f8f9fa; min-height: 400px; max-height: 600px; overflow-y: auto;" id="pending-tasks">
-                    <?php foreach ($tasks['pending'] as $task): ?>
-                        <?= $this->include('tasks/kanban_card', ['task' => $task]) ?>
-                    <?php endforeach; ?>
-                    
+                    <?php if (isset($tasks['pending']) && is_array($tasks['pending']) && count($tasks['pending'])): ?>
+                        <?php foreach ($tasks['pending'] as $task): ?>
+                            <!-- Modern Kanban Task Card (inlined) -->
+                            <div class="kanban-card shadow-sm bg-white border-0 mb-3" style="border-radius: 1rem; padding: 1.5rem 1.25rem 1.25rem 1.25rem; min-width: 280px; position: relative; transition: box-shadow 0.2s, transform 0.2s; cursor: grab; overflow: visible;"
+                                 data-task-id="<?= isset($task['id']) ? (int)$task['id'] : 0 ?>"
+                                 onmouseover="this.style.transform='translateY(-4px) scale(1.02)'; this.style.boxShadow='0 8px 32px rgba(102,126,234,0.12)';"
+                                 onmouseout="this.style.transform='translateY(0) scale(1)'; this.style.boxShadow='0 4px 12px rgba(0,0,0,0.05)';">
+                                <!-- Priority Indicator -->
+                                <div style="position: absolute; top: 0; left: 0; right: 0; height: 4px; border-radius: 1rem 1rem 0 0; background: <?php
+                                    $priority = !empty($task['priority']) ? strtolower($task['priority']) : 'low';
+                                    echo $priority === 'high' ? 'linear-gradient(135deg, #ef4444, #dc2626)' :
+                                        ($priority === 'medium' ? 'linear-gradient(135deg, #f59e0b, #d97706)' :
+                                        'linear-gradient(135deg, #10b981, #059669)');
+                                ?>;"></div>
+                                <!-- Task Header -->
+                                <div class="d-flex justify-content-between align-items-start mb-2">
+                                    <h4 class="mb-0 fw-semibold text-dark flex-grow-1 pe-2" style="font-size: 1.08rem; line-height: 1.4;">
+                                        <?= esc(!empty($task['title']) ? $task['title'] : 'Untitled Task') ?>
+                                    </h4>
+                                    <span class="badge border-0" style="background: <?php
+                                        echo $priority === 'high' ? 'linear-gradient(135deg, #fee2e2, #fecaca)' :
+                                            ($priority === 'medium' ? 'linear-gradient(135deg, #fef3c7, #fde68a)' :
+                                            'linear-gradient(135deg, #d1fae5, #a7f3d0)');
+                                    ?>; color: <?php
+                                        echo $priority === 'high' ? '#991b1b' :
+                                            ($priority === 'medium' ? '#92400e' : '#065f46');
+                                    ?>; font-size: 0.75rem; font-weight: 600; text-transform: uppercase; letter-spacing: 0.025em;">
+                                        <?= ucfirst($priority) ?>
+                                    </span>
+                                </div>
+                                <!-- Task Description -->
+                                <?php if (!empty($task['description'])): ?>
+                                    <div class="mb-2">
+                                        <p class="mb-0 text-secondary" style="font-size: 0.93rem; line-height: 1.5; display: -webkit-box; -webkit-line-clamp: 3; -webkit-box-orient: vertical; overflow: hidden;">
+                                            <?= esc(mb_substr($task['description'], 0, 100)) ?><?= mb_strlen($task['description']) > 100 ? '...' : '' ?>
+                                        </p>
+                                    </div>
+                                <?php endif; ?>
+                                <!-- Task Progress -->
+                                <?php if (isset($task['progress']) && is_numeric($task['progress']) && $task['progress'] > 0): ?>
+                                    <div class="mb-2">
+                                        <div class="d-flex justify-content-between align-items-center mb-1">
+                                            <span class="small fw-semibold text-muted">Progress</span>
+                                            <span class="small fw-semibold text-primary"><?= (int)$task['progress'] ?>%</span>
+                                        </div>
+                                        <div class="progress" style="height: 7px;">
+                                            <div class="progress-bar" role="progressbar" style="width: <?= (int)$task['progress'] ?>%; background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);" aria-valuenow="<?= (int)$task['progress'] ?>" aria-valuemin="0" aria-valuemax="100"></div>
+                                        </div>
+                                    </div>
+                                <?php endif; ?>
+                                <!-- Task Meta Information -->
+                                <div class="d-flex justify-content-between align-items-center flex-wrap gap-2 pt-3 mt-2 border-top" style="border-color: #f1f5f9 !important;">
+                                    <!-- Due Date -->
+                                    <?php if (!empty($task['due_date'])): ?>
+                                        <div class="d-flex align-items-center gap-1">
+                                            <i class="fas fa-calendar-alt text-muted" style="font-size: 0.85rem;"></i>
+                                            <span class="text-secondary small fw-medium">
+                                                <?php 
+                                                $dueDate = strtotime($task['due_date']);
+                                                echo $dueDate ? date('M d', $dueDate) : 'Invalid Date';
+                                                ?>
+                                            </span>
+                                        </div>
+                                    <?php endif; ?>
+                                    <!-- Assignee Avatar -->
+                                    <?php if (!empty($task['assigned_to'])): ?>
+                                        <div class="d-flex align-items-center gap-1">
+                                            <div style="width: 26px; height: 26px; background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); border-radius: 50%; display: flex; align-items: center; justify-content: center; color: white; font-size: 0.8rem; font-weight: 600;">
+                                                <?= strtoupper(mb_substr(isset($task['assignee_name']) && $task['assignee_name'] ? $task['assignee_name'] : 'U', 0, 1)) ?>
+                                            </div>
+                                            <span class="text-secondary small fw-medium">
+                                                <?= esc(isset($task['assignee_name']) && $task['assignee_name'] ? $task['assignee_name'] : 'Unassigned') ?>
+                                            </span>
+                                        </div>
+                                    <?php endif; ?>
+                                    <!-- Task Actions -->
+                                    <div class="d-flex align-items-center gap-1 ms-auto">
+                                        <button onclick="typeof editTask === 'function' ? editTask(<?= isset($task['id']) ? (int)$task['id'] : 0 ?>) : console.warn('editTask function not defined')"
+                                                class="btn btn-light btn-sm px-2 py-1 border-0" style="color: #667eea; border-radius: 0.35rem; transition: background 0.2s, color 0.2s;"
+                                                onmouseover="this.style.background='#e0e7ff'; this.style.color='#4338ca'"
+                                                onmouseout="this.style.background=''; this.style.color='#667eea'"
+                                                title="Edit Task">
+                                            <i class="fas fa-edit" style="font-size: 0.9rem;"></i>
+                                        </button>
+                                        <button onclick="typeof deleteTask === 'function' ? deleteTask(<?= isset($task['id']) ? (int)$task['id'] : 0 ?>) : console.warn('deleteTask function not defined')"
+                                                class="btn btn-light btn-sm px-2 py-1 border-0" style="color: #ef4444; border-radius: 0.35rem; transition: background 0.2s, color 0.2s;"
+                                                onmouseover="this.style.background='#fee2e2'; this.style.color='#b91c1c'"
+                                                onmouseout="this.style.background=''; this.style.color='#ef4444'"
+                                                title="Delete Task">
+                                            <i class="fas fa-trash" style="font-size: 0.9rem;"></i>
+                                        </button>
+                                    </div>
+                                </div>
+                                <!-- Task Labels/Tags -->
+                                <?php if (!empty($task['tags'])): ?>
+                                    <div class="mt-2 d-flex flex-wrap gap-1">
+                                        <?php foreach (explode(',', $task['tags']) as $tag): ?>
+                                            <?php $tag = trim($tag); if ($tag !== ''): ?>
+                                            <span class="badge" style="background: rgba(102,126,234,0.08); color: #667eea; font-size: 0.75rem; font-weight: 500; border-radius: 0.5rem;">
+                                                <?= esc($tag) ?>
+                                            </span>
+                                            <?php endif; ?>
+                                        <?php endforeach; ?>
+                                    </div>
+                                <?php endif; ?>
+                            </div>
+                        <?php endforeach; ?>
+                    <?php endif; ?>
                     <?php if (empty($tasks['pending'])): ?>
                         <div class="text-center py-5" style="border: 2px dashed #dee2e6; border-radius: 0.5rem; background: white;">
                             <i class="fas fa-plus-circle text-muted mb-3" style="font-size: 3rem;"></i>
@@ -131,25 +235,126 @@
                 </div>
             </div>
         </div>
-                </div>
-            </div>
-        </div>
 
         <!-- In Progress Column -->
         <div class="col-lg-3 col-md-6">
             <div class="card border-0 shadow-sm h-100" style="transition: all 0.3s ease;" data-status="in_progress">
-                <div class="card-header text-white text-center py-3" style="background: linear-gradient(135deg, #f59e0b 0%, #d97706 100%);">
-                    <h5 class="mb-0 fw-semibold d-flex justify-content-center align-items-center">
-                        <i class="fas fa-play-circle me-2"></i>
+                <div class="card-header bg-white text-dark text-center py-3 border-0" style="border-left: 5px solid #fbbf24; border-radius: 1rem 1rem 0 0; font-weight: 700; letter-spacing: 0.01em;">
+                    <h5 class="mb-0 fw-semibold d-flex justify-content-center align-items-center gap-2">
+                        <i class="fas fa-play-circle" style="color: #f59e42;"></i>
                         In Progress
                         <span class="badge bg-light text-dark ms-2"><?= count($tasks['in_progress']) ?></span>
                     </h5>
                 </div>
                 <div class="card-body p-3" style="background: #f8f9fa; min-height: 400px; max-height: 600px; overflow-y: auto;" id="in_progress-tasks">
-                    <?php foreach ($tasks['in_progress'] as $task): ?>
-                        <?= $this->include('tasks/kanban_card', ['task' => $task]) ?>
-                    <?php endforeach; ?>
-                    
+                    <?php if (isset($tasks['in_progress']) && is_array($tasks['in_progress']) && count($tasks['in_progress'])): ?>
+                        <?php foreach ($tasks['in_progress'] as $task): ?>
+                            <!-- Modern Kanban Task Card (inlined) -->
+                            <div class="kanban-card shadow-sm bg-white border-0 mb-3" style="border-radius: 1rem; padding: 1.5rem 1.25rem 1.25rem 1.25rem; min-width: 280px; position: relative; transition: box-shadow 0.2s, transform 0.2s; cursor: grab; overflow: visible;"
+                                 data-task-id="<?= isset($task['id']) ? (int)$task['id'] : 0 ?>"
+                                 onmouseover="this.style.transform='translateY(-4px) scale(1.02)'; this.style.boxShadow='0 8px 32px rgba(102,126,234,0.12)';"
+                                 onmouseout="this.style.transform='translateY(0) scale(1)'; this.style.boxShadow='0 4px 12px rgba(0,0,0,0.05)';">
+                                <!-- Priority Indicator -->
+                                <div style="position: absolute; top: 0; left: 0; right: 0; height: 4px; border-radius: 1rem 1rem 0 0; background: <?php
+                                    $priority = !empty($task['priority_name']) ? strtolower($task['priority_name']) : (!empty($task['priority']) ? strtolower($task['priority']) : 'low');
+                                    echo $priority === 'high' ? 'linear-gradient(135deg, #ef4444, #dc2626)' :
+                                        ($priority === 'medium' ? 'linear-gradient(135deg, #f59e0b, #d97706)' :
+                                        'linear-gradient(135deg, #10b981, #059669)');
+                                ?>;"></div>
+                                <!-- Task Header -->
+                                <div class="d-flex justify-content-between align-items-start mb-2">
+                                    <h4 class="mb-0 fw-semibold text-dark flex-grow-1 pe-2" style="font-size: 1.08rem; line-height: 1.4;">
+                                        <?= esc(!empty($task['title']) ? $task['title'] : 'Untitled Task') ?>
+                                    </h4>
+                                    <span class="badge border-0" style="background: <?php
+                                        echo $priority === 'high' ? 'linear-gradient(135deg, #fee2e2, #fecaca)' :
+                                            ($priority === 'medium' ? 'linear-gradient(135deg, #fef3c7, #fde68a)' :
+                                            'linear-gradient(135deg, #d1fae5, #a7f3d0)');
+                                    ?>; color: <?php
+                                        echo $priority === 'high' ? '#991b1b' :
+                                            ($priority === 'medium' ? '#92400e' : '#065f46');
+                                    ?>; font-size: 0.75rem; font-weight: 600; text-transform: uppercase; letter-spacing: 0.025em;">
+                                        <?= ucfirst($priority) ?>
+                                    </span>
+                                </div>
+                                <!-- Task Description -->
+                                <?php if (!empty($task['description'])): ?>
+                                    <div class="mb-2">
+                                        <p class="mb-0 text-secondary" style="font-size: 0.93rem; line-height: 1.5; display: -webkit-box; -webkit-line-clamp: 3; -webkit-box-orient: vertical; overflow: hidden;">
+                                            <?= esc(mb_substr($task['description'], 0, 100)) ?><?= mb_strlen($task['description']) > 100 ? '...' : '' ?>
+                                        </p>
+                                    </div>
+                                <?php endif; ?>
+                                <!-- Task Progress -->
+                                <?php if (isset($task['progress']) && is_numeric($task['progress']) && $task['progress'] > 0): ?>
+                                    <div class="mb-2">
+                                        <div class="d-flex justify-content-between align-items-center mb-1">
+                                            <span class="small fw-semibold text-muted">Progress</span>
+                                            <span class="small fw-semibold text-primary"><?= (int)$task['progress'] ?>%</span>
+                                        </div>
+                                        <div class="progress" style="height: 7px;">
+                                            <div class="progress-bar" role="progressbar" style="width: <?= (int)$task['progress'] ?>%; background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);" aria-valuenow="<?= (int)$task['progress'] ?>" aria-valuemin="0" aria-valuemax="100"></div>
+                                        </div>
+                                    </div>
+                                <?php endif; ?>
+                                <!-- Task Meta Information -->
+                                <div class="d-flex justify-content-between align-items-center flex-wrap gap-2 pt-3 mt-2 border-top" style="border-color: #f1f5f9 !important;">
+                                    <!-- Due Date -->
+                                    <?php if (!empty($task['due_date'])): ?>
+                                        <div class="d-flex align-items-center gap-1">
+                                            <i class="fas fa-calendar-alt text-muted" style="font-size: 0.85rem;"></i>
+                                            <span class="text-secondary small fw-medium">
+                                                <?php 
+                                                $dueDate = strtotime($task['due_date']);
+                                                echo $dueDate ? date('M d', $dueDate) : 'Invalid Date';
+                                                ?>
+                                            </span>
+                                        </div>
+                                    <?php endif; ?>
+                                    <!-- Assignee Avatar -->
+                                    <?php if (!empty($task['assigned_to'])): ?>
+                                        <div class="d-flex align-items-center gap-1">
+                                            <div style="width: 26px; height: 26px; background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); border-radius: 50%; display: flex; align-items: center; justify-content: center; color: white; font-size: 0.8rem; font-weight: 600;">
+                                                <?= strtoupper(mb_substr(isset($task['assignee_name']) && $task['assignee_name'] ? $task['assignee_name'] : 'U', 0, 1)) ?>
+                                            </div>
+                                            <span class="text-secondary small fw-medium">
+                                                <?= esc(isset($task['assignee_name']) && $task['assignee_name'] ? $task['assignee_name'] : 'Unassigned') ?>
+                                            </span>
+                                        </div>
+                                    <?php endif; ?>
+                                    <!-- Task Actions -->
+                                    <div class="d-flex align-items-center gap-1 ms-auto">
+                                        <button onclick="typeof editTask === 'function' ? editTask(<?= isset($task['id']) ? (int)$task['id'] : 0 ?>) : console.warn('editTask function not defined')"
+                                                class="btn btn-light btn-sm px-2 py-1 border-0" style="color: #667eea; border-radius: 0.35rem; transition: background 0.2s, color 0.2s;"
+                                                onmouseover="this.style.background='#e0e7ff'; this.style.color='#4338ca'"
+                                                onmouseout="this.style.background=''; this.style.color='#667eea'"
+                                                title="Edit Task">
+                                            <i class="fas fa-edit" style="font-size: 0.9rem;"></i>
+                                        </button>
+                                        <button onclick="typeof deleteTask === 'function' ? deleteTask(<?= isset($task['id']) ? (int)$task['id'] : 0 ?>) : console.warn('deleteTask function not defined')"
+                                                class="btn btn-light btn-sm px-2 py-1 border-0" style="color: #ef4444; border-radius: 0.35rem; transition: background 0.2s, color 0.2s;"
+                                                onmouseover="this.style.background='#fee2e2'; this.style.color='#b91c1c'"
+                                                onmouseout="this.style.background=''; this.style.color='#ef4444'"
+                                                title="Delete Task">
+                                            <i class="fas fa-trash" style="font-size: 0.9rem;"></i>
+                                        </button>
+                                    </div>
+                                </div>
+                                <!-- Task Labels/Tags -->
+                                <?php if (isset($task['tags']) && !empty($task['tags'])): ?>
+                                    <div class="mt-2 d-flex flex-wrap gap-1">
+                                        <?php foreach (explode(',', $task['tags']) as $tag): ?>
+                                            <?php $tag = trim($tag); if ($tag !== ''): ?>
+                                            <span class="badge" style="background: rgba(102,126,234,0.08); color: #667eea; font-size: 0.75rem; font-weight: 500; border-radius: 0.5rem;">
+                                                <?= esc($tag) ?>
+                                            </span>
+                                            <?php endif; ?>
+                                        <?php endforeach; ?>
+                                    </div>
+                                <?php endif; ?>
+                            </div>
+                        <?php endforeach; ?>
+                    <?php endif; ?>
                     <?php if (empty($tasks['in_progress'])): ?>
                         <div class="text-center py-5" style="border: 2px dashed #dee2e6; border-radius: 0.5rem; background: white;">
                             <i class="fas fa-play-circle text-muted mb-3" style="font-size: 3rem;"></i>
@@ -163,17 +368,122 @@
         <!-- Review Column -->
         <div class="col-lg-3 col-md-6">
             <div class="card border-0 shadow-sm h-100" style="transition: all 0.3s ease;" data-status="review">
-                <div class="card-header text-white text-center py-3" style="background: linear-gradient(135deg, #06b6d4 0%, #0891b2 100%);">
-                    <h5 class="mb-0 fw-semibold d-flex justify-content-center align-items-center">
-                        <i class="fas fa-eye me-2"></i>
+                <div class="card-header bg-white text-dark text-center py-3 border-0" style="border-left: 5px solid #38bdf8; border-radius: 1rem 1rem 0 0; font-weight: 700; letter-spacing: 0.01em;">
+                    <h5 class="mb-0 fw-semibold d-flex justify-content-center align-items-center gap-2">
+                        <i class="fas fa-eye" style="color: #0ea5e9;"></i>
                         Review
                         <span class="badge bg-light text-dark ms-2"><?= count($tasks['review']) ?></span>
                     </h5>
                 </div>
                 <div class="card-body p-3" style="background: #f8f9fa; min-height: 400px; max-height: 600px; overflow-y: auto;" id="review-tasks">
-                    <?php foreach ($tasks['review'] as $task): ?>
-                        <?= $this->include('tasks/kanban_card', ['task' => $task]) ?>
-                    <?php endforeach; ?>
+                    <?php if (isset($tasks['review']) && is_array($tasks['review'])): ?>
+                        <?php foreach ($tasks['review'] as $task): ?>
+                            <!-- Modern Kanban Task Card (inlined) -->
+                            <div class="kanban-card shadow-sm bg-white border-0 mb-3" style="border-radius: 1rem; padding: 1.5rem 1.25rem 1.25rem 1.25rem; min-width: 280px; position: relative; transition: box-shadow 0.2s, transform 0.2s; cursor: grab; overflow: visible;"
+                                 data-task-id="<?= isset($task['id']) ? (int)$task['id'] : 0 ?>"
+                                 onmouseover="this.style.transform='translateY(-4px) scale(1.02)'; this.style.boxShadow='0 8px 32px rgba(102,126,234,0.12)';"
+                                 onmouseout="this.style.transform='translateY(0) scale(1)'; this.style.boxShadow='0 4px 12px rgba(0,0,0,0.05)';">
+                                <!-- Priority Indicator -->
+                                <div style="position: absolute; top: 0; left: 0; right: 0; height: 4px; border-radius: 1rem 1rem 0 0; background: <?php
+                                    $priority = !empty($task['priority_name']) ? strtolower($task['priority_name']) : (!empty($task['priority']) ? strtolower($task['priority']) : 'low');
+                                    echo $priority === 'high' ? 'linear-gradient(135deg, #ef4444, #dc2626)' :
+                                        ($priority === 'medium' ? 'linear-gradient(135deg, #f59e0b, #d97706)' :
+                                        'linear-gradient(135deg, #10b981, #059669)');
+                                ?>;"></div>
+                                <!-- Task Header -->
+                                <div class="d-flex justify-content-between align-items-start mb-2">
+                                    <h4 class="mb-0 fw-semibold text-dark flex-grow-1 pe-2" style="font-size: 1.08rem; line-height: 1.4;">
+                                        <?= esc(!empty($task['title']) ? $task['title'] : 'Untitled Task') ?>
+                                    </h4>
+                                    <span class="badge border-0" style="background: <?php
+                                        echo $priority === 'high' ? 'linear-gradient(135deg, #fee2e2, #fecaca)' :
+                                            ($priority === 'medium' ? 'linear-gradient(135deg, #fef3c7, #fde68a)' :
+                                            'linear-gradient(135deg, #d1fae5, #a7f3d0)');
+                                    ?>; color: <?php
+                                        echo $priority === 'high' ? '#991b1b' :
+                                            ($priority === 'medium' ? '#92400e' : '#065f46');
+                                    ?>; font-size: 0.75rem; font-weight: 600; text-transform: uppercase; letter-spacing: 0.025em;">
+                                        <?= ucfirst($priority) ?>
+                                    </span>
+                                </div>
+                                <!-- Task Description -->
+                                <?php if (!empty($task['description'])): ?>
+                                    <div class="mb-2">
+                                        <p class="mb-0 text-secondary" style="font-size: 0.93rem; line-height: 1.5; display: -webkit-box; -webkit-line-clamp: 3; -webkit-box-orient: vertical; overflow: hidden;">
+                                            <?= esc(mb_substr($task['description'], 0, 100)) ?><?= mb_strlen($task['description']) > 100 ? '...' : '' ?>
+                                        </p>
+                                    </div>
+                                <?php endif; ?>
+                                <!-- Task Progress -->
+                                <?php if (isset($task['progress']) && is_numeric($task['progress']) && $task['progress'] > 0): ?>
+                                    <div class="mb-2">
+                                        <div class="d-flex justify-content-between align-items-center mb-1">
+                                            <span class="small fw-semibold text-muted">Progress</span>
+                                            <span class="small fw-semibold text-primary"><?= (int)$task['progress'] ?>%</span>
+                                        </div>
+                                        <div class="progress" style="height: 7px;">
+                                            <div class="progress-bar" role="progressbar" style="width: <?= (int)$task['progress'] ?>%; background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);" aria-valuenow="<?= (int)$task['progress'] ?>" aria-valuemin="0" aria-valuemax="100"></div>
+                                        </div>
+                                    </div>
+                                <?php endif; ?>
+                                <!-- Task Meta Information -->
+                                <div class="d-flex justify-content-between align-items-center flex-wrap gap-2 pt-3 mt-2 border-top" style="border-color: #f1f5f9 !important;">
+                                    <!-- Due Date -->
+                                    <?php if (!empty($task['due_date'])): ?>
+                                        <div class="d-flex align-items-center gap-1">
+                                            <i class="fas fa-calendar-alt text-muted" style="font-size: 0.85rem;"></i>
+                                            <span class="text-secondary small fw-medium">
+                                                <?php 
+                                                $dueDate = strtotime($task['due_date']);
+                                                echo $dueDate ? date('M d', $dueDate) : 'Invalid Date';
+                                                ?>
+                                            </span>
+                                        </div>
+                                    <?php endif; ?>
+                                    <!-- Assignee Avatar -->
+                                    <?php if (!empty($task['assigned_to'])): ?>
+                                        <div class="d-flex align-items-center gap-1">
+                                            <div style="width: 26px; height: 26px; background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); border-radius: 50%; display: flex; align-items: center; justify-content: center; color: white; font-size: 0.8rem; font-weight: 600;">
+                                                <?= strtoupper(mb_substr(isset($task['assignee_name']) && $task['assignee_name'] ? $task['assignee_name'] : 'U', 0, 1)) ?>
+                                            </div>
+                                            <span class="text-secondary small fw-medium">
+                                                <?= esc(isset($task['assignee_name']) && $task['assignee_name'] ? $task['assignee_name'] : 'Unassigned') ?>
+                                            </span>
+                                        </div>
+                                    <?php endif; ?>
+                                    <!-- Task Actions -->
+                                    <div class="d-flex align-items-center gap-1 ms-auto">
+                                        <button onclick="typeof editTask === 'function' ? editTask(<?= isset($task['id']) ? (int)$task['id'] : 0 ?>) : console.warn('editTask function not defined')"
+                                                class="btn btn-light btn-sm px-2 py-1 border-0" style="color: #667eea; border-radius: 0.35rem; transition: background 0.2s, color 0.2s;"
+                                                onmouseover="this.style.background='#e0e7ff'; this.style.color='#4338ca'"
+                                                onmouseout="this.style.background=''; this.style.color='#667eea'"
+                                                title="Edit Task">
+                                            <i class="fas fa-edit" style="font-size: 0.9rem;"></i>
+                                        </button>
+                                        <button onclick="typeof deleteTask === 'function' ? deleteTask(<?= isset($task['id']) ? (int)$task['id'] : 0 ?>) : console.warn('deleteTask function not defined')"
+                                                class="btn btn-light btn-sm px-2 py-1 border-0" style="color: #ef4444; border-radius: 0.35rem; transition: background 0.2s, color 0.2s;"
+                                                onmouseover="this.style.background='#fee2e2'; this.style.color='#b91c1c'"
+                                                onmouseout="this.style.background=''; this.style.color='#ef4444'"
+                                                title="Delete Task">
+                                            <i class="fas fa-trash" style="font-size: 0.9rem;"></i>
+                                        </button>
+                                    </div>
+                                </div>
+                                <!-- Task Labels/Tags -->
+                                <?php if (isset($task['tags']) && !empty($task['tags'])): ?>
+                                    <div class="mt-2 d-flex flex-wrap gap-1">
+                                        <?php foreach (explode(',', $task['tags']) as $tag): ?>
+                                            <?php $tag = trim($tag); if ($tag !== ''): ?>
+                                            <span class="badge" style="background: rgba(102,126,234,0.08); color: #667eea; font-size: 0.75rem; font-weight: 500; border-radius: 0.5rem;">
+                                                <?= esc($tag) ?>
+                                            </span>
+                                            <?php endif; ?>
+                                        <?php endforeach; ?>
+                                    </div>
+                                <?php endif; ?>
+                            </div>
+                        <?php endforeach; ?>
+                    <?php endif; ?>
                     
                     <?php if (empty($tasks['review'])): ?>
                         <div class="text-center py-5" style="border: 2px dashed #dee2e6; border-radius: 0.5rem; background: white;">
@@ -188,17 +498,122 @@
         <!-- Done Column -->
         <div class="col-lg-3 col-md-6">
             <div class="card border-0 shadow-sm h-100" style="transition: all 0.3s ease;" data-status="completed">
-                <div class="card-header text-white text-center py-3" style="background: linear-gradient(135deg, #10b981 0%, #059669 100%);">
-                    <h5 class="mb-0 fw-semibold d-flex justify-content-center align-items-center">
-                        <i class="fas fa-check-circle me-2"></i>
+                <div class="card-header bg-white text-dark text-center py-3 border-0" style="border-left: 5px solid #10b981; border-radius: 1rem 1rem 0 0; font-weight: 700; letter-spacing: 0.01em;">
+                    <h5 class="mb-0 fw-semibold d-flex justify-content-center align-items-center gap-2">
+                        <i class="fas fa-check-circle" style="color: #10b981;"></i>
                         Done
                         <span class="badge bg-light text-dark ms-2"><?= count($tasks['completed']) ?></span>
                     </h5>
                 </div>
                 <div class="card-body p-3" style="background: #f8f9fa; min-height: 400px; max-height: 600px; overflow-y: auto;" id="completed-tasks">
-                    <?php foreach ($tasks['completed'] as $task): ?>
-                        <?= $this->include('tasks/kanban_card', ['task' => $task]) ?>
-                    <?php endforeach; ?>
+                    <?php if (isset($tasks['completed']) && is_array($tasks['completed'])): ?>
+                        <?php foreach ($tasks['completed'] as $task): ?>
+                            <!-- Modern Kanban Task Card (inlined) -->
+                            <div class="kanban-card shadow-sm bg-white border-0 mb-3" style="border-radius: 1rem; padding: 1.5rem 1.25rem 1.25rem 1.25rem; min-width: 280px; position: relative; transition: box-shadow 0.2s, transform 0.2s; cursor: grab; overflow: visible;"
+                                 data-task-id="<?= isset($task['id']) ? (int)$task['id'] : 0 ?>"
+                                 onmouseover="this.style.transform='translateY(-4px) scale(1.02)'; this.style.boxShadow='0 8px 32px rgba(102,126,234,0.12)';"
+                                 onmouseout="this.style.transform='translateY(0) scale(1)'; this.style.boxShadow='0 4px 12px rgba(0,0,0,0.05)';">
+                                <!-- Priority Indicator -->
+                                <div style="position: absolute; top: 0; left: 0; right: 0; height: 4px; border-radius: 1rem 1rem 0 0; background: <?php
+                                    $priority = !empty($task['priority_name']) ? strtolower($task['priority_name']) : (!empty($task['priority']) ? strtolower($task['priority']) : 'low');
+                                    echo $priority === 'high' ? 'linear-gradient(135deg, #ef4444, #dc2626)' :
+                                        ($priority === 'medium' ? 'linear-gradient(135deg, #f59e0b, #d97706)' :
+                                        'linear-gradient(135deg, #10b981, #059669)');
+                                ?>;"></div>
+                                <!-- Task Header -->
+                                <div class="d-flex justify-content-between align-items-start mb-2">
+                                    <h4 class="mb-0 fw-semibold text-dark flex-grow-1 pe-2" style="font-size: 1.08rem; line-height: 1.4;">
+                                        <?= esc(!empty($task['title']) ? $task['title'] : 'Untitled Task') ?>
+                                    </h4>
+                                    <span class="badge border-0" style="background: <?php
+                                        echo $priority === 'high' ? 'linear-gradient(135deg, #fee2e2, #fecaca)' :
+                                            ($priority === 'medium' ? 'linear-gradient(135deg, #fef3c7, #fde68a)' :
+                                            'linear-gradient(135deg, #d1fae5, #a7f3d0)');
+                                    ?>; color: <?php
+                                        echo $priority === 'high' ? '#991b1b' :
+                                            ($priority === 'medium' ? '#92400e' : '#065f46');
+                                    ?>; font-size: 0.75rem; font-weight: 600; text-transform: uppercase; letter-spacing: 0.025em;">
+                                        <?= ucfirst($priority) ?>
+                                    </span>
+                                </div>
+                                <!-- Task Description -->
+                                <?php if (!empty($task['description'])): ?>
+                                    <div class="mb-2">
+                                        <p class="mb-0 text-secondary" style="font-size: 0.93rem; line-height: 1.5; display: -webkit-box; -webkit-line-clamp: 3; -webkit-box-orient: vertical; overflow: hidden;">
+                                            <?= esc(mb_substr($task['description'], 0, 100)) ?><?= mb_strlen($task['description']) > 100 ? '...' : '' ?>
+                                        </p>
+                                    </div>
+                                <?php endif; ?>
+                                <!-- Task Progress -->
+                                <?php if (isset($task['progress']) && is_numeric($task['progress']) && $task['progress'] > 0): ?>
+                                    <div class="mb-2">
+                                        <div class="d-flex justify-content-between align-items-center mb-1">
+                                            <span class="small fw-semibold text-muted">Progress</span>
+                                            <span class="small fw-semibold text-primary"><?= (int)$task['progress'] ?>%</span>
+                                        </div>
+                                        <div class="progress" style="height: 7px;">
+                                            <div class="progress-bar" role="progressbar" style="width: <?= (int)$task['progress'] ?>%; background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);" aria-valuenow="<?= (int)$task['progress'] ?>" aria-valuemin="0" aria-valuemax="100"></div>
+                                        </div>
+                                    </div>
+                                <?php endif; ?>
+                                <!-- Task Meta Information -->
+                                <div class="d-flex justify-content-between align-items-center flex-wrap gap-2 pt-3 mt-2 border-top" style="border-color: #f1f5f9 !important;">
+                                    <!-- Due Date -->
+                                    <?php if (!empty($task['due_date'])): ?>
+                                        <div class="d-flex align-items-center gap-1">
+                                            <i class="fas fa-calendar-alt text-muted" style="font-size: 0.85rem;"></i>
+                                            <span class="text-secondary small fw-medium">
+                                                <?php 
+                                                $dueDate = strtotime($task['due_date']);
+                                                echo $dueDate ? date('M d', $dueDate) : 'Invalid Date';
+                                                ?>
+                                            </span>
+                                        </div>
+                                    <?php endif; ?>
+                                    <!-- Assignee Avatar -->
+                                    <?php if (!empty($task['assigned_to'])): ?>
+                                        <div class="d-flex align-items-center gap-1">
+                                            <div style="width: 26px; height: 26px; background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); border-radius: 50%; display: flex; align-items: center; justify-content: center; color: white; font-size: 0.8rem; font-weight: 600;">
+                                                <?= strtoupper(mb_substr(isset($task['assignee_name']) && $task['assignee_name'] ? $task['assignee_name'] : 'U', 0, 1)) ?>
+                                            </div>
+                                            <span class="text-secondary small fw-medium">
+                                                <?= esc(isset($task['assignee_name']) && $task['assignee_name'] ? $task['assignee_name'] : 'Unassigned') ?>
+                                            </span>
+                                        </div>
+                                    <?php endif; ?>
+                                    <!-- Task Actions -->
+                                    <div class="d-flex align-items-center gap-1 ms-auto">
+                                        <button onclick="typeof editTask === 'function' ? editTask(<?= isset($task['id']) ? (int)$task['id'] : 0 ?>) : console.warn('editTask function not defined')"
+                                                class="btn btn-light btn-sm px-2 py-1 border-0" style="color: #667eea; border-radius: 0.35rem; transition: background 0.2s, color 0.2s;"
+                                                onmouseover="this.style.background='#e0e7ff'; this.style.color='#4338ca'"
+                                                onmouseout="this.style.background=''; this.style.color='#667eea'"
+                                                title="Edit Task">
+                                            <i class="fas fa-edit" style="font-size: 0.9rem;"></i>
+                                        </button>
+                                        <button onclick="typeof deleteTask === 'function' ? deleteTask(<?= isset($task['id']) ? (int)$task['id'] : 0 ?>) : console.warn('deleteTask function not defined')"
+                                                class="btn btn-light btn-sm px-2 py-1 border-0" style="color: #ef4444; border-radius: 0.35rem; transition: background 0.2s, color 0.2s;"
+                                                onmouseover="this.style.background='#fee2e2'; this.style.color='#b91c1c'"
+                                                onmouseout="this.style.background=''; this.style.color='#ef4444'"
+                                                title="Delete Task">
+                                            <i class="fas fa-trash" style="font-size: 0.9rem;"></i>
+                                        </button>
+                                    </div>
+                                </div>
+                                <!-- Task Labels/Tags -->
+                                <?php if (isset($task['tags']) && !empty($task['tags'])): ?>
+                                    <div class="mt-2 d-flex flex-wrap gap-1">
+                                        <?php foreach (explode(',', $task['tags']) as $tag): ?>
+                                            <?php $tag = trim($tag); if ($tag !== ''): ?>
+                                            <span class="badge" style="background: rgba(102,126,234,0.08); color: #667eea; font-size: 0.75rem; font-weight: 500; border-radius: 0.5rem;">
+                                                <?= esc($tag) ?>
+                                            </span>
+                                            <?php endif; ?>
+                                        <?php endforeach; ?>
+                                    </div>
+                                <?php endif; ?>
+                            </div>
+                        <?php endforeach; ?>
+                    <?php endif; ?>
                     
                     <?php if (empty($tasks['completed'])): ?>
                         <div class="text-center py-5" style="border: 2px dashed #dee2e6; border-radius: 0.5rem; background: white;">
@@ -320,21 +735,27 @@ function initializeKanban() {
             group: 'kanban',
             animation: 150,
             onStart: function(evt) {
-                // Apply ghost effect
                 evt.item.style.opacity = '0.5';
             },
             onEnd: function(evt) {
-                // Remove ghost effect
                 evt.item.style.opacity = '';
-                
-                const taskId = evt.item.dataset.taskId;
+                // Ensure taskId is a valid integer
+                let taskId = evt.item.dataset.taskId;
+                if (!taskId || isNaN(taskId)) {
+                    console.error('Invalid or missing data-task-id on card:', evt.item);
+                    Swal.fire({ icon: 'error', title: 'Error', text: 'Task ID missing on card. Please refresh.' });
+                    return;
+                }
+                taskId = parseInt(taskId, 10);
                 const newStatus = evt.to.id.replace('-tasks', '');
                 const newPosition = evt.newIndex;
-                
-                updateTaskStatus(taskId, newStatus, newPosition);
+                // Get new order of all task IDs in this column, as integers
+                const order = Array.from(evt.to.querySelectorAll('[data-task-id]'))
+                    .map(card => parseInt(card.dataset.taskId, 10))
+                    .filter(id => !isNaN(id));
+                updateTaskStatus(taskId, newStatus, newPosition, order);
             },
             onAdd: function(evt) {
-                // Apply drag-over effect
                 evt.to.style.background = '#e3f2fd';
                 evt.to.style.border = '2px dashed #2196f3';
                 setTimeout(() => {
@@ -394,50 +815,31 @@ function initializeTaskForm() {
     });
 }
 
-async function updateTaskStatus(taskId, newStatus, newPosition) {
+async function updateTaskStatus(taskId, newStatus, newPosition, order) {
     try {
-        const result = await $.ajax({
+        await $.ajax({
             url: '<?= base_url('tasks/updateStatus') ?>',
             method: 'POST',
             data: {
                 task_id: taskId,
                 status: newStatus,
-                position: newPosition
+                position: newPosition,
+                order: order
             },
+            traditional: true, // ensures array is sent as order[]=1&order[]=2
             dataType: 'json',
             headers: {
                 'X-Requested-With': 'XMLHttpRequest'
             }
         });
-        
-        if (result.success) {
-            updateColumnCounters();
-            
-            const Toast = Swal.mixin({
-                toast: true,
-                position: 'top-end',
-                showConfirmButton: false,
-                timer: 3000,
-                timerProgressBar: true
-            });
-            
-            Toast.fire({
-                icon: 'success',
-                title: 'Task status updated'
-            });
-        } else {
-            Swal.fire({
-                icon: 'error',
-                title: 'Error',
-                text: 'Failed to update task status'
-            });
-            
-            location.reload();
-        }
     } catch (error) {
         console.error('Error updating task status:', error);
-        location.reload();
+        if (error && error.responseText) {
+            console.error('Raw responseText:', error.responseText);
+        }
     }
+    // Always reload after AJAX, regardless of result
+    location.reload();
 }
 
 function updateColumnCounters() {
@@ -470,7 +872,98 @@ function refreshKanban() {
 }
 
 function editTask(taskId) {
-    console.log('Edit task:', taskId);
+    // Fetch task data and show edit modal
+    $.ajax({
+        url: '<?= base_url('tasks/edit/') ?>' + taskId,
+        method: 'GET',
+        headers: {
+            'X-Requested-With': 'XMLHttpRequest'
+        },
+        success: function(html) {
+            // Log the raw HTML response for debugging
+            console.log('[editTask] Raw HTML response:', html);
+            let modalDiv = document.getElementById('editTaskModalContainer');
+            if (!modalDiv) {
+                modalDiv = document.createElement('div');
+                modalDiv.id = 'editTaskModalContainer';
+                document.body.appendChild(modalDiv);
+            }
+            modalDiv.innerHTML = html;
+            // Find the modal element
+            const modalEl = modalDiv.querySelector('.modal');
+            if (!modalEl) {
+                // Show the raw response in a collapsible details for easier debugging
+                Swal.fire({
+                    icon: 'error',
+                    title: 'Error',
+                    html: '<div>Edit modal markup not found in response.<br><br><details style="text-align:left;"><summary>Show raw response</summary><pre style="max-height:200px;overflow:auto;">' +
+                        $('<div>').text(html).html() + '</pre></details></div>'
+                });
+                return;
+            }
+            // Remove any previously initialized modals
+            if (modalEl.classList.contains('show')) {
+                bootstrap.Modal.getInstance(modalEl)?.hide();
+            }
+            // Ensure modal is initialized only once
+            let modal;
+            try {
+                modal = bootstrap.Modal.getOrCreateInstance(modalEl);
+            } catch (e) {
+                modal = new bootstrap.Modal(modalEl);
+            }
+            modal.show();
+
+            // Attach submit handler for edit form
+            const form = modalDiv.querySelector('form');
+            if (form) {
+                form.addEventListener('submit', async function(e) {
+                    e.preventDefault();
+                    const formData = new FormData(this);
+                    try {
+                        const result = await $.ajax({
+                            url: form.action,
+                            method: 'POST',
+                            data: formData,
+                            processData: false,
+                            contentType: false,
+                            headers: {
+                                'X-Requested-With': 'XMLHttpRequest'
+                            }
+                        });
+                        if (result.success) {
+                            modal.hide();
+                            location.reload();
+                        } else {
+                            Swal.fire({
+                                icon: 'error',
+                                title: 'Error',
+                                text: result.message || 'Failed to update task.'
+                            });
+                        }
+                    } catch (error) {
+                        console.error('Error updating task:', error);
+                        if (error && error.responseText) {
+                            console.error('Raw responseText:', error.responseText);
+                        }
+                        Swal.fire({
+                            icon: 'error',
+                            title: 'Error',
+                            text: 'An error occurred while updating the task.'
+                        });
+                    }
+                });
+            }
+        },
+        error: function(xhr) {
+            console.error('Error loading edit task modal:', xhr);
+            Swal.fire({
+                icon: 'error',
+                title: 'Error',
+                text: 'Failed to load task for editing.'
+            });
+        }
+    });
 }
 
 function deleteTask(taskId) {
@@ -482,9 +975,25 @@ function deleteTask(taskId) {
         confirmButtonColor: '#d33',
         cancelButtonColor: '#3085d6',
         confirmButtonText: 'Yes, delete it!'
-    }).then((result) => {
+    }).then(async (result) => {
         if (result.isConfirmed) {
-            console.log('Delete task:', taskId);
+            try {
+                await $.ajax({
+                    url: '<?= base_url('tasks/delete/') ?>' + taskId,
+                    method: 'POST',
+                    dataType: 'json',
+                    headers: {
+                        'X-Requested-With': 'XMLHttpRequest'
+                    }
+                });
+            } catch (error) {
+                console.error('Error deleting task:', error);
+                if (error && error.responseText) {
+                    console.error('Raw responseText:', error.responseText);
+                }
+            }
+            // Always reload after AJAX, regardless of result
+            location.reload();
         }
     });
 }

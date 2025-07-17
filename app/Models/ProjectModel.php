@@ -6,6 +6,51 @@ use CodeIgniter\Model;
 
 class ProjectModel extends Model
 {
+    /**
+     * Recalculate and update the progress field for a project based on completed tasks.
+     * Progress = (completed tasks / total tasks) * 100
+     */
+    public function updateProgress($projectId)
+    {
+        // Count total tasks (not deleted)
+        $total = $this->db->table('tasks')
+            ->where('project_id', $projectId)
+            ->where('is_delete', 0)
+            ->countAllResults();
+
+        if ($total === 0) {
+            $progress = 0;
+        } else {
+            // Count completed tasks (status = 'completed')
+            $completed = $this->db->table('tasks t')
+                ->join('task_status ts', 'ts.task_id = t.id AND ts.is_current = 1 AND ts.is_delete = 0')
+                ->join('status_lookup sl', "sl.id = ts.status_id AND sl.code = 'completed' AND sl.type = 'task' AND sl.is_delete = 0")
+                ->where('t.project_id', $projectId)
+                ->where('t.is_delete', 0)
+                ->countAllResults();
+            $progress = round(($completed / $total) * 100, 2);
+        }
+
+        // Update the project
+        $this->db->table('projects')
+            ->where('id', $projectId)
+            ->update([
+                'progress' => $progress,
+                'updated_at' => date('Y-m-d H:i:s')
+            ]);
+        return $progress;
+    }
+    // Check if a user has access to a project (is an active, non-deleted member)
+    public function userHasAccess($userId, $projectId)
+    {
+        $builder = $this->db->table('project_members');
+        $builder->where('user_id', $userId);
+        $builder->where('project_id', $projectId);
+        $builder->where('is_active', 1);
+        $builder->where('is_delete', 0);
+        $result = $builder->get()->getRowArray();
+        return $result !== null;
+    }
     // No protected properties or constructor
 
     // Get a single project with current status and priority

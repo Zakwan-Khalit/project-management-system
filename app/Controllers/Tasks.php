@@ -94,7 +94,6 @@ class Tasks extends BaseController
         if (!$project) {
             throw \CodeIgniter\Exceptions\PageNotFoundException::forPageNotFound();
         }
-        
         // Check if user has access to this project
         if (!$this->projectModel->userHasAccess($userId, $projectId)) {
             throw \CodeIgniter\Exceptions\PageNotFoundException::forPageNotFound();
@@ -102,33 +101,32 @@ class Tasks extends BaseController
         
         $allTasks = $this->taskModel->getKanbanTasks($projectId);
 
-        // FIX: Get members from ProjectModel, not UserModel
+        // Get members from ProjectModel
         $members = $this->projectModel->getProjectMembers($projectId);
 
-        // Organize tasks by status
+        // Organize tasks by status (use keys matching the kanban view: pending, in_progress, review, completed)
         $tasks = [
-            'todo' => [],
+            'pending' => [],
             'in_progress' => [],
             'review' => [],
             'completed' => []
         ];
-        
         foreach ($allTasks as $task) {
-            $statusCode = $task['status_code'] ?? 'todo';
+            $statusCode = $task['status_code'] ?? 'pending';
             if (isset($tasks[$statusCode])) {
                 $tasks[$statusCode][] = $task;
             } else {
-                $tasks['todo'][] = $task; // Default to todo if status not recognized
+                $tasks['pending'][] = $task; // Default to pending if status not recognized
             }
         }
-        
+
         $data = [
             'title' => 'Kanban Board - ' . $project['name'],
             'project' => $project,
             'tasks' => $tasks,
             'members' => $members
         ];
-        
+
         return $this->template->member('tasks/kanban', $data);
     }
     
@@ -142,29 +140,33 @@ class Tasks extends BaseController
         }
 
         if ($this->request->getMethod() === 'POST') {
-            // Get lookup IDs for status and priority using models
-            $statusLookup = $this->statusLookupModel->getStatusByTypeAndCode('task', $this->request->getPost('status') ?: 'todo');
-            $priorityLookup = $this->priorityLookupModel->getPriorityByTypeAndCode('task', $this->request->getPost('priority') ?: 'medium');
-            
+            // Validate and sanitize input
+            $projectId = $this->request->getPost('project_id');
+            $title = trim($this->request->getPost('title'));
+            $description = trim($this->request->getPost('description'));
+            $dueDate = $this->request->getPost('due_date') ?: null;
+            $estimatedHours = $this->request->getPost('estimated_hours') ?: null;
+            $statusCode = $this->request->getPost('status') ?: 'pending';
+            $priorityCode = $this->request->getPost('priority') ?: 'medium';
+            $assignedTo = $this->request->getPost('assigned_to') ?: $userId;
+
+            $statusLookup = $this->statusLookupModel->getStatusByTypeAndCode('task', $statusCode);
+            $priorityLookup = $this->priorityLookupModel->getPriorityByTypeAndCode('task', $priorityCode);
+            $statusId = $statusLookup['id'] ?? null;
+            $priorityId = $priorityLookup['id'] ?? null;
+
             $taskData = [
-                'project_id' => $this->request->getPost('project_id'),
-                'title' => $this->request->getPost('title'),
-                'description' => $this->request->getPost('description'),
-                'due_date' => $this->request->getPost('due_date'),
-                'estimated_hours' => $this->request->getPost('estimated_hours'),
+                'project_id' => $projectId,
+                'title' => $title ?: 'Untitled Task',
+                'description' => $description,
+                'due_date' => $dueDate,
+                'estimated_hours' => $estimatedHours,
                 'progress' => 0,
                 'order_index' => 0
             ];
-            
-            $statusId = $statusLookup['id'] ?? null;
-            $priorityId = $priorityLookup['id'] ?? null;
-            $assignedTo = $this->request->getPost('assigned_to') ?: $userId;
-            
+
             if ($taskId = $this->taskModel->createTask($taskData, $statusId, $priorityId, $assignedTo, $userId)) {
-                // Update project progress
-                $this->projectModel->updateProgress($taskData['project_id']);
-                
-                // Log activity
+                $this->projectModel->updateProgress($projectId);
                 $this->activityLog->logActivity([
                     'user_id' => $userId,
                     'action' => 'task_created',
@@ -172,7 +174,6 @@ class Tasks extends BaseController
                     'record_id' => $taskId,
                     'new_values' => json_encode($taskData)
                 ]);
-                
                 return $this->response->setJSON([
                     'success' => true,
                     'message' => 'Task created successfully',
@@ -212,54 +213,56 @@ class Tasks extends BaseController
         
         if ($this->request->getMethod() === 'POST') {
             $oldData = $task;
-            
-            $taskData = [
-                'title' => $this->request->getPost('title'),
-                'description' => $this->request->getPost('description'),
-                'due_date' => $this->request->getPost('due_date'),
-                'estimated_hours' => $this->request->getPost('estimated_hours'),
-                'actual_hours' => $this->request->getPost('actual_hours'),
-                'progress' => $this->request->getPost('progress')
-            ];
-            
-            if ($this->taskModel->updateTask($id, $taskData)) {
-                // Update status if provided
-                $newStatus = $this->request->getPost('status');
-                if ($newStatus) {
-                    $statusLookup = $this->statusLookupModel->getStatusByTypeAndCode('task', $newStatus);
-                    if ($statusLookup) {
-                        $this->taskModel->setTaskStatus($id, $statusLookup['id'], $userId);
-                    }
-                }
+            $title = trim($this->request->getPost('title'));
+            $description = trim($this->request->getPost('description'));
+            $dueDate = $this->request->getPost('due_date') ?: null;
+            $estimatedHours = $this->request->getPost('estimated_hours') ?: null;
+            $actualHours = $this->request->getPost('actual_hours') ?: null;
+            $progress = $this->request->getPost('progress') ?: 0;
+            $statusCode = $this->request->getPost('status');
+            $priorityCode = $this->request->getPost('priority');
+            $assignedTo = $this->request->getPost('assigned_to');
 
-                // Update priority if provided
-                $newPriority = $this->request->getPost('priority');
-                if ($newPriority) {
-                    $priorityLookup = $this->priorityLookupModel->getPriorityByTypeAndCode('task', $newPriority);
-                    if ($priorityLookup) {
-                        $this->taskModel->setTaskPriority($id, $priorityLookup['id'], $userId);
-                    }
+            $taskData = [
+                'title' => $title ?: 'Untitled Task',
+                'description' => $description,
+                'due_date' => $dueDate,
+                'estimated_hours' => $estimatedHours,
+                'actual_hours' => $actualHours,
+                'progress' => $progress
+            ];
+
+            $ok = $this->taskModel->updateTask($id, $taskData);
+            // Update status if provided
+            if ($statusCode) {
+                $statusLookup = $this->statusLookupModel->getStatusByTypeAndCode('task', $statusCode);
+                if ($statusLookup) {
+                    $this->taskModel->setTaskStatus($id, $statusLookup['id'], $userId);
                 }
-                
-                // Update assignment if provided
-                $assignedTo = $this->request->getPost('assigned_to');
-                if ($assignedTo) {
-                    $this->taskModel->setTaskOwnership($id, $assignedTo, $userId);
+            }
+            // Update priority if provided
+            if ($priorityCode) {
+                $priorityLookup = $this->priorityLookupModel->getPriorityByTypeAndCode('task', $priorityCode);
+                if ($priorityLookup) {
+                    $this->taskModel->setTaskPriority($id, $priorityLookup['id'], $userId);
                 }
-                
-                // Update project progress
-                $this->projectModel->updateProgress($task['project_id']);
-                
-                // Log activity
-                $this->activityLog->logActivity([
-                    'user_id' => $userId,
-                    'action' => 'task_updated',
-                    'table_name' => 'tasks',
-                    'record_id' => $id,
-                    'old_values' => json_encode($oldData),
-                    'new_values' => json_encode($taskData)
-                ]);
-                
+            }
+            // Update assignment if provided
+            if ($assignedTo) {
+                $this->taskModel->setTaskOwnership($id, $assignedTo, $userId);
+            }
+            // Update project progress
+            $this->projectModel->updateProgress($task['project_id']);
+            // Log activity
+            $this->activityLog->logActivity([
+                'user_id' => $userId,
+                'action' => 'task_updated',
+                'table_name' => 'tasks',
+                'record_id' => $id,
+                'old_values' => json_encode($oldData),
+                'new_values' => json_encode($taskData)
+            ]);
+            if ($ok) {
                 return $this->response->setJSON([
                     'success' => true,
                     'message' => 'Task updated successfully'
@@ -356,7 +359,8 @@ class Tasks extends BaseController
         $taskId = $this->request->getPost('task_id');
         $newStatusCode = $this->request->getPost('status');
         $newPosition = $this->request->getPost('position');
-        
+        $order = $this->request->getPost('order'); // array of task IDs in new order
+
         $task = $this->taskModel->getTaskById($taskId);
         if (!$task) {
             return $this->response->setJSON([
@@ -364,8 +368,7 @@ class Tasks extends BaseController
                 'message' => 'Task not found'
             ]);
         }
-        
-        // Get new status ID using model
+
         $statusLookup = $this->statusLookupModel->getStatusByTypeAndCode('task', $newStatusCode);
         if (!$statusLookup) {
             return $this->response->setJSON([
@@ -373,20 +376,21 @@ class Tasks extends BaseController
                 'message' => 'Invalid status'
             ]);
         }
-        
+
         $oldStatus = $task['status_name'] ?? 'Unknown';
-        
-        // Update task status
-        if ($this->taskModel->setTaskStatus($taskId, $statusLookup['id'], $userId)) {
-            // Update task position if provided
-            if ($newPosition !== null) {
+        $ok = $this->taskModel->setTaskStatus($taskId, $statusLookup['id'], $userId);
+        if ($ok) {
+            // Update order_index for all tasks in this column if order is provided
+            if (is_array($order)) {
+                foreach ($order as $idx => $tid) {
+                    $this->taskModel->updateTask($tid, ['order_index' => $idx]);
+                }
+            } elseif ($newPosition !== null) {
                 $this->taskModel->updateTask($taskId, ['order_index' => $newPosition]);
             }
-            
-            // Update project progress
+            // Always update the main tasks table's updated_at field after status change
+            $this->taskModel->updateTask($taskId, ['updated_at' => date('Y-m-d H:i:s')]);
             $this->projectModel->updateProgress($task['project_id']);
-            
-            // Log activity
             $this->activityLog->logActivity([
                 'user_id' => $userId,
                 'action' => 'task_status_changed',
@@ -395,7 +399,6 @@ class Tasks extends BaseController
                 'old_values' => json_encode(['status' => $oldStatus]),
                 'new_values' => json_encode(['status' => $statusLookup['name']])
             ]);
-            
             return $this->response->setJSON([
                 'success' => true,
                 'message' => 'Task status updated successfully'
@@ -464,6 +467,22 @@ class Tasks extends BaseController
         $tasks = $this->taskModel->getUserTasks($userId);
         $projects = $this->projectModel->getUserProjects($userId);
 
+        // Group tasks by status for dashboard counts
+        $grouped_tasks = [
+            'pending' => [],
+            'in_progress' => [],
+            'review' => [],
+            'completed' => []
+        ];
+        foreach ($tasks as $task) {
+            $status = $task['status_code'] ?? strtolower(str_replace(' ', '_', $task['status_name'] ?? 'pending'));
+            if (isset($grouped_tasks[$status])) {
+                $grouped_tasks[$status][] = $task;
+            } else {
+                $grouped_tasks['pending'][] = $task;
+            }
+        }
+
         // Fetch status and priority options from lookup tables
         $statusOptions = $this->statusLookupModel->getStatusesByType('task');
         $priorityOptions = $this->priorityLookupModel->getPrioritiesByType('task');
@@ -475,6 +494,11 @@ class Tasks extends BaseController
             'is_my_tasks' => true,
             'status_options' => $statusOptions,
             'priority_options' => $priorityOptions,
+            'grouped_tasks' => $grouped_tasks,
+            'pending_count' => count($grouped_tasks['pending']),
+            'in_progress_count' => count($grouped_tasks['in_progress']),
+            'review_count' => count($grouped_tasks['review']),
+            'completed_count' => count($grouped_tasks['completed']),
             'breadcrumbs' => [
                 ['title' => 'Tasks', 'url' => base_url('tasks')],
                 ['title' => 'My Tasks']
