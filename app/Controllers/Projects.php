@@ -657,10 +657,10 @@ class Projects extends BaseController
     {
         $taskId = $this->request->getPost('id');
         $template_code = $this->request->getPost('template_code');
-        pr($this->request->getPost());
         $project_id = $this->request->getPost('project_id');
         $template = $this->projectModel->getTaskTemplateByCode($template_code);
         // pr($template);
+        // pr($this->request->getPost());
         if (!$template) {
             return $this->response->setJSON([
                 'success' => false,
@@ -669,9 +669,25 @@ class Projects extends BaseController
         }
         $fields = json_decode($template['fields'] ?? '[]', true);
         $taskData = [];
-        // pr($fields);
+        // Map POST keys with underscores to template field names with spaces
+        $postData = $this->request->getPost();
         foreach ($fields as $field) {
-            $taskData[$field] = $this->request->getPost($field);
+            // Normalize field name: replace spaces with underscores, remove casing
+            $normalized = str_replace(' ', '_', $field);
+            // Try exact match first
+            if (isset($postData[$field])) {
+                $taskData[$field] = $postData[$field];
+            } elseif (isset($postData[$normalized])) {
+                $taskData[$field] = $postData[$normalized];
+            } else {
+                // Try lowercased
+                $lower = strtolower($normalized);
+                if (isset($postData[$lower])) {
+                    $taskData[$field] = $postData[$lower];
+                } else {
+                    $taskData[$field] = null;
+                }
+            }
         }
         if (!$taskId) {
             // Insert new task

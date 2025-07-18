@@ -50,6 +50,10 @@
     </div>
 </div>
 <script>
+// --- Patch: Always send project_id and template_code in AJAX ---
+const projectId = "<?= esc($project_id ?? $template['project_id'] ?? $project['id'] ?? '') ?>";
+const templateCode = "<?= esc($template['code'] ?? '') ?>";
+
 // Row hover effect for modern look
 $('#dynamicTaskTable tbody').on('mouseenter', 'tr.task-row', function() {
     $(this).css({
@@ -76,12 +80,15 @@ $('#dynamicTaskTable tbody').on('blur', 'td.editable-cell', function() {
     row.find('td.editable-cell').each(function() {
         data[$(this).data('field')] = $(this).text();
     });
+    // Always send project_id and template_code
+    data['project_id'] = projectId;
+    data['template_code'] = templateCode;
     // If no taskId, create new task
     if (!taskId) {
         $.ajax({
             url: '<?= base_url('projects/save_task') ?>',
             method: 'POST',
-            data: { ...data, template_code: "<?= esc($template['code'] ?? '') ?>", project_id: "<?= esc($template['project_id'] ?? $project['id'] ?? '') ?>" },
+            data: data,
             success: function(res) {
                 if (res.success && res.task_id) {
                     row.attr('data-task-id', res.task_id);
