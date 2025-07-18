@@ -998,7 +998,7 @@
         <div class="sidebar-header">
             <h4>
                 <i class="fas fa-project-diagram"></i>
-                <span>PMS</span>
+                <span>ProMSys</span>
             </h4>
         </div>
         <div class="sidebar-menu">

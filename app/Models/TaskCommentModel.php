@@ -21,7 +21,7 @@ class TaskCommentModel extends Model
         $builder->where('tc.task_id', $taskId);
         $builder->where('tc.is_active', 1);
         $builder->where('tc.is_delete', 0);
-        $builder->orderBy('tc.created_at', 'DESC');
+        $builder->orderBy('tc.date_created', 'DESC');
         return $builder->get()->getResultArray();
     }
 
@@ -73,7 +73,7 @@ class TaskCommentModel extends Model
         $builder->where('tc.user_id', $userId);
         $builder->where('tc.is_active', 1);
         $builder->where('tc.is_delete', 0);
-        $builder->orderBy('tc.created_at', 'DESC');
+        $builder->orderBy('tc.date_created', 'DESC');
         $builder->limit($limit);
         return $builder->get()->getResultArray();
     }

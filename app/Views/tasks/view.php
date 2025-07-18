@@ -92,7 +92,7 @@ $priority_colors = [
                     </div>
                     <div class="col-md-6">
                         <strong>Created:</strong>
-                        <span class="ms-2"><?= date('M d, Y g:i A', strtotime($task['created_at'])) ?></span>
+                        <span class="ms-2"><?= date('M d, Y g:i A', strtotime($task['date_created'])) ?></span>
                     </div>
                 </div>
 
@@ -165,7 +165,7 @@ $priority_colors = [
                                         <div>
                                             <h6 class="mb-1"><?= esc($comment['user_name'] ?? 'Unknown User') ?></h6>
                                             <small class="text-muted">
-                                                <?= date('M d, Y g:i A', strtotime($comment['created_at'])) ?>
+                                                <?= date('M d, Y g:i A', strtotime($comment['date_created'])) ?>
                                             </small>
                                         </div>
                                     </div>
@@ -222,17 +222,17 @@ $priority_colors = [
                         <div class="timeline-content">
                             <h6 class="mb-1">Task Created</h6>
                             <small class="text-muted">
-                                <?= date('M d, Y g:i A', strtotime($task['created_at'])) ?>
+                                <?= date('M d, Y g:i A', strtotime($task['date_created'])) ?>
                             </small>
                         </div>
                     </div>
-                    <?php if ($task['updated_at'] !== $task['created_at']): ?>
+                    <?php if ($task['date_modified'] !== $task['date_created']): ?>
                         <div class="timeline-item">
                             <div class="timeline-marker bg-info"></div>
                             <div class="timeline-content">
                                 <h6 class="mb-1">Last Updated</h6>
                                 <small class="text-muted">
-                                    <?= date('M d, Y g:i A', strtotime($task['updated_at'])) ?>
+                                    <?= date('M d, Y g:i A', strtotime($task['date_modified'])) ?>
                                 </small>
                             </div>
                         </div>

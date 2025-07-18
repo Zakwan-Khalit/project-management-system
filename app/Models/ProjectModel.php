@@ -23,7 +23,7 @@ class ProjectModel extends Model
         } else {
             // Count completed tasks (status = 'completed')
             $completed = $this->db->table('tasks t')
-                ->join('task_status ts', 'ts.task_id = t.id AND ts.is_current = 1 AND ts.is_delete = 0')
+                ->join('task_status ts', 'ts.task_id = t.id AND ts.is_active = 1 AND ts.is_delete = 0')
                 ->join('status_lookup sl', "sl.id = ts.status_id AND sl.code = 'completed' AND sl.type = 'task' AND sl.is_delete = 0")
                 ->where('t.project_id', $projectId)
                 ->where('t.is_delete', 0)
@@ -36,7 +36,7 @@ class ProjectModel extends Model
             ->where('id', $projectId)
             ->update([
                 'progress' => $progress,
-                'updated_at' => date('Y-m-d H:i:s')
+                'date_modified' => date('Y-m-d H:i:s')
             ]);
         return $progress;
     }
@@ -50,9 +50,8 @@ class ProjectModel extends Model
         $builder->where('is_delete', 0);
         $result = $builder->get()->getRowArray();
         return $result !== null;
-    }
     // No protected properties or constructor
-
+    }
     // Get a single project with current status and priority
     public function getProjectById($projectId)
     {
@@ -65,9 +64,9 @@ class ProjectModel extends Model
             pl.color as priority_color,
             pl.level as priority_level
         ');
-        $builder->join('project_status ps', 'ps.project_id = p.id AND ps.is_current = 1 AND ps.is_delete = 0', 'left');
+        $builder->join('project_status ps', 'ps.project_id = p.id AND ps.is_active = 1 AND ps.is_delete = 0', 'left');
         $builder->join('status_lookup sl', 'sl.id = ps.status_id AND sl.is_delete = 0', 'left');
-        $builder->join('project_priority pp', 'pp.project_id = p.id AND pp.is_current = 1 AND pp.is_delete = 0', 'left');
+        $builder->join('project_priority pp', 'pp.project_id = p.id AND pp.is_active = 1 AND pp.is_delete = 0', 'left');
         $builder->join('priority_lookup pl', 'pl.id = pp.priority_id AND pl.is_delete = 0', 'left');
         $builder->where('p.id', $projectId);
         $builder->where('p.is_delete', 0);
@@ -86,13 +85,13 @@ class ProjectModel extends Model
             pl.name as priority_name,
             pl.color as priority_color
         ');
-        $builder->join('project_status ps', 'ps.project_id = p.id AND ps.is_current = 1 AND ps.is_delete = 0', 'left');
+        $builder->join('project_status ps', 'ps.project_id = p.id AND ps.is_active = 1 AND ps.is_delete = 0', 'left');
         $builder->join('status_lookup sl', 'sl.id = ps.status_id AND sl.is_delete = 0', 'left');
-        $builder->join('project_priority pp', 'pp.project_id = p.id AND pp.is_current = 1 AND pp.is_delete = 0', 'left');
+        $builder->join('project_priority pp', 'pp.project_id = p.id AND pp.is_active = 1 AND pp.is_delete = 0', 'left');
         $builder->join('priority_lookup pl', 'pl.id = pp.priority_id AND pl.is_delete = 0', 'left');
         $builder->where('p.is_delete', 0);
         $builder->where('p.is_active', 1);
-        $builder->orderBy('p.created_at', 'DESC');
+        $builder->orderBy('p.date_created', 'DESC');
 
         return $builder->get()->getResultArray();
     }
@@ -112,16 +111,22 @@ class ProjectModel extends Model
             pl.color as priority_color
         ');
         $builder->join('project_members pm', 'pm.project_id = p.id AND pm.is_active = 1 AND pm.is_delete = 0');
-        $builder->join('project_status ps', 'ps.project_id = p.id AND ps.is_current = 1 AND ps.is_delete = 0', 'left');
+        $builder->join('project_status ps', 'ps.project_id = p.id AND ps.is_active = 1 AND ps.is_delete = 0', 'left');
         $builder->join('status_lookup sl', 'sl.id = ps.status_id AND sl.is_delete = 0', 'left');
-        $builder->join('project_priority pp', 'pp.project_id = p.id AND pp.is_current = 1 AND pp.is_delete = 0', 'left');
+        $builder->join('project_priority pp', 'pp.project_id = p.id AND pp.is_active = 1 AND pp.is_delete = 0', 'left');
         $builder->join('priority_lookup pl', 'pl.id = pp.priority_id AND pl.is_delete = 0', 'left');
         $builder->where('pm.user_id', $userId);
         $builder->where('p.is_delete', 0);
         $builder->where('p.is_active', 1);
-        $builder->orderBy('p.created_at', 'DESC');
+        $builder->orderBy('p.date_created', 'DESC');
 
-        return $builder->get()->getResultArray();
+        $projects = $builder->get()->getResultArray();
+        // Ensure every project has a team_members array
+        foreach ($projects as &$project) {
+            $project['team_members'] = $this->getProjectMembers($project['id']) ?? [];
+        }
+        unset($project);
+        return $projects;
     }
 
     // Set current status for a project
@@ -130,8 +135,8 @@ class ProjectModel extends Model
         // Mark current as not current
         $this->db->table('project_status')
             ->where('project_id', $projectId)
-            ->where('is_current', 1)
-            ->update(['is_current' => 0, 'end_date' => date('Y-m-d H:i:s')]);
+            // Removed incomplete chained method causing syntax error
+            ->update(['is_active' => 0, 'end_date' => date('Y-m-d H:i:s')]);
 
         // Insert new status
         return $this->db->table('project_status')->insert([
@@ -140,7 +145,7 @@ class ProjectModel extends Model
             'changed_by' => $changedBy,
             'notes' => $notes,
             'start_date' => date('Y-m-d H:i:s'),
-            'is_current' => 1,
+            'is_active' => 1,
             'is_active' => 1,
             'is_delete' => 0
         ]);
@@ -151,8 +156,8 @@ class ProjectModel extends Model
     {
         $this->db->table('project_priority')
             ->where('project_id', $projectId)
-            ->where('is_current', 1)
-            ->update(['is_current' => 0, 'end_date' => date('Y-m-d H:i:s')]);
+            ->where('is_active', 1)
+            ->update(['is_active' => 0, 'end_date' => date('Y-m-d H:i:s')]);
 
         return $this->db->table('project_priority')->insert([
             'project_id' => $projectId,
@@ -160,7 +165,7 @@ class ProjectModel extends Model
             'changed_by' => $changedBy,
             'notes' => $notes,
             'start_date' => date('Y-m-d H:i:s'),
-            'is_current' => 1,
+            'is_active' => 1,
             'is_active' => 1,
             'is_delete' => 0
         ]);
@@ -231,7 +236,6 @@ class ProjectModel extends Model
             u.email,
             up.first_name,
             up.last_name,
-            up.avatar
         ');
         $builder->join('users u', 'u.id = pm.user_id AND u.is_delete = 0');
         $builder->join('user_profile up', 'up.user_id = u.id AND up.is_delete = 0', 'left');
@@ -256,7 +260,7 @@ class ProjectModel extends Model
     {
         $builder = $this->db->table('projects p');
         $builder->select('sl.code as status_code, COUNT(*) as count');
-        $builder->join('project_status ps', 'ps.project_id = p.id AND ps.is_current = 1 AND ps.is_delete = 0', 'left');
+        $builder->join('project_status ps', 'ps.project_id = p.id AND ps.is_active = 1 AND ps.is_delete = 0', 'left');
         $builder->join('status_lookup sl', 'sl.id = ps.status_id AND sl.is_delete = 0', 'left');
         $builder->where('p.is_delete', 0);
         $builder->groupBy('sl.code');
@@ -276,7 +280,7 @@ class ProjectModel extends Model
     {
         $builder = $this->db->table('projects p');
         $builder->select('sl.name as status_name, COUNT(*) as count');
-        $builder->join('project_status ps', 'ps.project_id = p.id AND ps.is_current = 1 AND ps.is_delete = 0', 'left');
+        $builder->join('project_status ps', 'ps.project_id = p.id AND ps.is_active = 1 AND ps.is_delete = 0', 'left');
         $builder->join('status_lookup sl', 'sl.id = ps.status_id AND sl.is_delete = 0', 'left');
         $builder->where('p.is_delete', 0);
         $builder->groupBy('sl.name');
@@ -293,9 +297,9 @@ class ProjectModel extends Model
     {
         $builder = $this->db->table('projects p');
         $builder->select('p.*, sl.name as status_name, pl.name as priority_name');
-        $builder->join('project_status ps', 'ps.project_id = p.id AND ps.is_current = 1 AND ps.is_delete = 0', 'left');
+        $builder->join('project_status ps', 'ps.project_id = p.id AND ps.is_active = 1 AND ps.is_delete = 0', 'left');
         $builder->join('status_lookup sl', 'sl.id = ps.status_id AND sl.is_delete = 0', 'left');
-        $builder->join('project_priority pp', 'pp.project_id = p.id AND pp.is_current = 1 AND pp.is_delete = 0', 'left');
+        $builder->join('project_priority pp', 'pp.project_id = p.id AND pp.is_active = 1 AND pp.is_delete = 0', 'left');
         $builder->join('priority_lookup pl', 'pl.id = pp.priority_id AND pl.is_delete = 0', 'left');
         $builder->where('p.is_delete', 0);
         $projects = $builder->get()->getResultArray();
@@ -326,9 +330,9 @@ class ProjectModel extends Model
             pl.code as priority_code
         ');
         $builder->join('project_members pm', 'pm.project_id = p.id AND pm.user_id = ' . (int)$userId . ' AND pm.is_active = 1 AND pm.is_delete = 0');
-        $builder->join('project_status ps', 'ps.project_id = p.id AND ps.is_current = 1 AND ps.is_delete = 0', 'left');
+        $builder->join('project_status ps', 'ps.project_id = p.id AND ps.is_active = 1 AND ps.is_delete = 0', 'left');
         $builder->join('status_lookup sl', 'sl.id = ps.status_id AND sl.is_delete = 0', 'left');
-        $builder->join('project_priority pp', 'pp.project_id = p.id AND pp.is_current = 1 AND pp.is_delete = 0', 'left');
+        $builder->join('project_priority pp', 'pp.project_id = p.id AND pp.is_active = 1 AND pp.is_delete = 0', 'left');
         $builder->join('priority_lookup pl', 'pl.id = pp.priority_id AND pl.is_delete = 0', 'left');
         $builder->where('p.is_delete', 0);
         $builder->where('p.is_active', 1);
@@ -352,7 +356,7 @@ class ProjectModel extends Model
             $builder->groupEnd();
         }
         
-        $builder->orderBy('p.created_at', 'DESC');
+        $builder->orderBy('p.date_created', 'DESC');
         $projects = $builder->get()->getResultArray();
         
         // Add task statistics for each project
@@ -367,7 +371,7 @@ class ProjectModel extends Model
             // Get completed task counts
             $completedBuilder = $this->db->table('tasks t');
             $completedBuilder->select('COUNT(*) as completed_tasks');
-            $completedBuilder->join('task_status ts', 'ts.task_id = t.id AND ts.is_current = 1 AND ts.is_delete = 0', 'left');
+            $completedBuilder->join('task_status ts', 'ts.task_id = t.id AND ts.is_active = 1 AND ts.is_delete = 0', 'left');
             $completedBuilder->join('status_lookup sl', 'sl.id = ts.status_id AND sl.code = "completed" AND sl.is_delete = 0', 'left');
             $completedBuilder->where('t.project_id', $project['id']);
             $completedBuilder->where('t.is_delete', 0);
@@ -402,7 +406,7 @@ class ProjectModel extends Model
         $total = $db->table('tasks')->where('project_id', $projectId)->where('is_delete', 0)->countAllResults();
         // Completed tasks
         $completed = $db->table('tasks t')
-            ->join('task_status ts', 'ts.task_id = t.id AND ts.is_current = 1 AND ts.is_delete = 0', 'left')
+            ->join('task_status ts', 'ts.task_id = t.id AND ts.is_active = 1 AND ts.is_delete = 0', 'left')
             ->join('status_lookup sl', 'sl.id = ts.status_id AND sl.code = "completed" AND sl.is_delete = 0', 'left')
             ->where('t.project_id', $projectId)
             ->where('t.is_delete', 0)
@@ -458,7 +462,7 @@ class ProjectModel extends Model
         $values = [];
         foreach ($statuses as $i => $code) {
             $count = $db->table('tasks t')
-                ->join('task_status ts', 'ts.task_id = t.id AND ts.is_current = 1 AND ts.is_delete = 0', 'left')
+                ->join('task_status ts', 'ts.task_id = t.id AND ts.is_active = 1 AND ts.is_delete = 0', 'left')
                 ->join('status_lookup sl', 'sl.id = ts.status_id AND sl.code = "' . $code . '" AND sl.is_delete = 0', 'left')
                 ->where('t.project_id', $projectId)
                 ->where('t.is_delete', 0)
@@ -470,5 +474,118 @@ class ProjectModel extends Model
             'labels' => $labels,
             'values' => $values
         ];
+    }
+
+    // Get all task templates
+    public function getTaskTemplates()
+    {
+        $builder = $this->db->table('task_templates');
+        $builder->where('is_active', 1);
+        $builder->where('is_delete', 0);
+        return $builder->get()->getResultArray();
+    }
+
+    // Get template by code
+    public function getTaskTemplateByCode($code)
+    {
+        $builder = $this->db->table('task_templates');
+        $builder->where('code', $code);
+        $builder->where('is_active', 1);
+        $builder->where('is_delete', 0);
+        return $builder->get()->getRowArray();
+    }
+
+    // Get tasks by template code
+    public function getTasksByTemplate($template_code)
+    {
+        $template = $this->getTaskTemplateByCode($template_code);
+        if (!$template) return [];
+        $template_id = $template['id'];
+        $builder = $this->db->table('tasks');
+        $builder->where('template_id', $template_id);
+        $builder->where('is_delete', 0);
+        $tasks = $builder->get()->getResultArray();
+        // Decode data JSON for each task
+        foreach ($tasks as &$task) {
+            $data = isset($task['data']) ? json_decode($task['data'], true) : [];
+            if (is_array($data)) {
+                $task = array_merge($task, $data);
+            }
+        }
+        unset($task);
+        return $tasks;
+    }
+
+    // Get progress for a template (dummy: % completed tasks)
+    public function getTemplateProgress($template_code)
+    {
+        $template = $this->getTaskTemplateByCode($template_code);
+        if (!$template) return 0;
+        $total = $this->db->table('tasks')->where('template_id', $template['id'])->where('is_delete', 0)->countAllResults();
+        if ($total == 0) return 0;
+        $completed = $this->db->table('tasks')->where('template_id', $template['id'])->where('is_active', 1)->where('is_delete', 0)->countAllResults();
+        return round(($completed / $total) * 100, 2);
+    }
+
+    // Autosave task
+    public function autosaveTask($taskId, $data)
+    {
+        if (!$taskId) return false;
+        $update = [];
+        if (isset($data['data'])) {
+            $update['data'] = $data['data'];
+        }
+        $update['date_modified'] = date('Y-m-d H:i:s');
+        return $this->db->table('tasks')->where('id', $taskId)->update($update);
+    }
+
+        // Delete a task by ID (soft delete)
+    public function deleteTaskById($taskId)
+    {
+        if (!$taskId) return false;
+        // Soft delete: set is_delete=1 if column exists, else hard delete
+        if ($this->db->getFieldData('tasks', 'is_delete')) {
+            return $this->db->table('tasks')->where('id', $taskId)->update(['is_delete' => 1]);
+        } else {
+            return $this->db->table('tasks')->where('id', $taskId)->delete();
+        }
+    }
+
+        // Insert a new dynamic task (for Excel-like table)
+    public function insertDynamicTask($data)
+    {
+        if (empty($data['project_id']) || empty($data['template_id']) || empty($data['data'])) return false;
+        $this->db->table('tasks')->insert([
+            'project_id' => $data['project_id'],
+            'template_id' => $data['template_id'],
+            'data' => $data['data'],
+            'date_created' => date('Y-m-d H:i:s'),
+            'date_modified' => date('Y-m-d H:i:s'),
+            'is_active' => 1,
+            'is_delete' => 0
+        ]);
+        return $this->db->insertID();
+    }
+
+    // Get tasks by template code and project id
+    public function getTasksByTemplateAndProject($template_code, $project_id)
+    {
+        $template = $this->getTaskTemplateByCode($template_code);
+        if (!$template) return [];
+        $template_id = $template['id'];
+        $builder = $this->db->table('tasks');
+        $builder->where('template_id', $template_id);
+        $builder->where('project_id', $project_id);
+        $builder->where('is_delete', 0);
+        $tasks = $builder->get()->getResultArray();
+        // Decode data JSON for each task
+        foreach ($tasks as &$task) {
+            $data = isset($task['data']) ? json_decode($task['data'], true) : [];
+            if (is_array($data)) {
+                $task = array_merge($task, $data);
+            }
+        }
+        unset($task);
+        return $tasks;
     }
 }

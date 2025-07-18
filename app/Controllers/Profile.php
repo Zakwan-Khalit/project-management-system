@@ -117,7 +117,7 @@ class Profile extends BaseController
             'last_name' => $this->request->getPost('last_name'),
             'phone' => $this->request->getPost('phone'),
             'bio' => $this->request->getPost('bio'),
-            'updated_at' => date('Y-m-d H:i:s')
+            'date_modified' => date('Y-m-d H:i:s')
         ];
 
         // Update password if provided
@@ -133,7 +133,7 @@ class Profile extends BaseController
                 'user_id' => $userId,
                 'action' => 'profile_updated',
                 'description' => 'Profile information updated',
-                'created_at' => date('Y-m-d H:i:s')
+                'date_created' => date('Y-m-d H:i:s')
             ]);
 
             // Update session data
@@ -215,7 +215,7 @@ class Profile extends BaseController
         try {
             $this->userModel->update($userId, [
                 'password' => password_hash($this->request->getPost('new_password'), PASSWORD_DEFAULT),
-                'updated_at' => date('Y-m-d H:i:s')
+                'date_modified' => date('Y-m-d H:i:s')
             ]);
 
             // Log the activity
@@ -223,7 +223,7 @@ class Profile extends BaseController
                 'user_id' => $userId,
                 'action' => 'password_changed',
                 'description' => 'Password changed successfully',
-                'created_at' => date('Y-m-d H:i:s')
+                'date_created' => date('Y-m-d H:i:s')
             ]);
 
             return redirect()->to(base_url('profile'))->with('success', 'Password changed successfully!');

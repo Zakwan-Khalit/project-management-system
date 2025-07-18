@@ -220,7 +220,7 @@ class Reports extends BaseController
                     isset($task['first_name']) && isset($task['last_name']) ? 
                         $task['first_name'] . ' ' . $task['last_name'] : 'Unassigned',
                     $task['due_date'] ?? 'N/A',
-                    $task['created_at']
+                    $task['date_created']
                 ]);
             }
         }

@@ -22,11 +22,11 @@ class TaskModel extends Model
             owner_profile.last_name as owner_last_name
         ');
         $builder->join('projects', 'projects.id = tasks.project_id AND projects.is_delete = 0');
-        $builder->join('task_status', 'task_status.task_id = tasks.id AND task_status.is_current = 1 AND task_status.is_delete = 0', 'left');
+        $builder->join('task_status', 'task_status.task_id = tasks.id AND task_status.is_active = 1 AND task_status.is_delete = 0', 'left');
         $builder->join('status_lookup', 'status_lookup.id = task_status.status_id AND status_lookup.type = "task" AND status_lookup.is_delete = 0', 'left');
-        $builder->join('task_priority', 'task_priority.task_id = tasks.id AND task_priority.is_current = 1 AND task_priority.is_delete = 0', 'left');
+        $builder->join('task_priority', 'task_priority.task_id = tasks.id AND task_priority.is_active = 1 AND task_priority.is_delete = 0', 'left');
         $builder->join('priority_lookup', 'priority_lookup.id = task_priority.priority_id AND priority_lookup.type = "task" AND priority_lookup.is_delete = 0', 'left');
-        $builder->join('task_ownership', 'task_ownership.task_id = tasks.id AND task_ownership.is_current = 1 AND task_ownership.is_delete = 0', 'left');
+        $builder->join('task_ownership', 'task_ownership.task_id = tasks.id AND task_ownership.is_active = 1 AND task_ownership.is_delete = 0', 'left');
         $builder->join('user_profile as creator_profile', 'creator_profile.user_id = task_ownership.created_by AND creator_profile.is_delete = 0', 'left');
         $builder->join('user_profile as owner_profile', 'owner_profile.user_id = task_ownership.owned_by AND owner_profile.is_delete = 0', 'left');
         $builder->where('tasks.id', $taskId);
@@ -51,11 +51,11 @@ class TaskModel extends Model
             owner_profile.avatar as owner_avatar
         ');
         $builder->join('projects', 'projects.id = tasks.project_id AND projects.is_delete = 0');
-        $builder->join('task_status', 'task_status.task_id = tasks.id AND task_status.is_current = 1 AND task_status.is_delete = 0', 'left');
+        $builder->join('task_status', 'task_status.task_id = tasks.id AND task_status.is_active = 1 AND task_status.is_delete = 0', 'left');
         $builder->join('status_lookup', 'status_lookup.id = task_status.status_id AND status_lookup.type = "task" AND status_lookup.is_delete = 0', 'left');
-        $builder->join('task_priority', 'task_priority.task_id = tasks.id AND task_priority.is_current = 1 AND task_priority.is_delete = 0', 'left');
+        $builder->join('task_priority', 'task_priority.task_id = tasks.id AND task_priority.is_active = 1 AND task_priority.is_delete = 0', 'left');
         $builder->join('priority_lookup', 'priority_lookup.id = task_priority.priority_id AND priority_lookup.type = "task" AND priority_lookup.is_delete = 0', 'left');
-        $builder->join('task_ownership', 'task_ownership.task_id = tasks.id AND task_ownership.is_current = 1 AND task_ownership.is_delete = 0', 'left');
+        $builder->join('task_ownership', 'task_ownership.task_id = tasks.id AND task_ownership.is_active = 1 AND task_ownership.is_delete = 0', 'left');
         $builder->join('user_profile as owner_profile', 'owner_profile.user_id = task_ownership.owned_by AND owner_profile.is_delete = 0', 'left');
         $builder->where('tasks.is_delete', 0);
         $builder->where('tasks.is_active', 1);
@@ -64,7 +64,7 @@ class TaskModel extends Model
             $builder->where('tasks.project_id', $projectId);
         }
         
-        $builder->orderBy('tasks.created_at', 'DESC');
+        $builder->orderBy('tasks.date_created', 'DESC');
         return $builder->get()->getResultArray();
     }
     
@@ -88,17 +88,17 @@ class TaskModel extends Model
             owner_profile.last_name as owner_last_name,
             owner_profile.avatar as owner_avatar
         ');
-        $builder->join('task_status', 'task_status.task_id = tasks.id AND task_status.is_current = 1 AND task_status.is_delete = 0', 'left');
+        $builder->join('task_status', 'task_status.task_id = tasks.id AND task_status.is_active = 1 AND task_status.is_delete = 0', 'left');
         $builder->join('status_lookup', 'status_lookup.id = task_status.status_id AND status_lookup.type = "task" AND status_lookup.is_delete = 0', 'left');
-        $builder->join('task_priority', 'task_priority.task_id = tasks.id AND task_priority.is_current = 1 AND task_priority.is_delete = 0', 'left');
+        $builder->join('task_priority', 'task_priority.task_id = tasks.id AND task_priority.is_active = 1 AND task_priority.is_delete = 0', 'left');
         $builder->join('priority_lookup', 'priority_lookup.id = task_priority.priority_id AND priority_lookup.type = "task" AND priority_lookup.is_delete = 0', 'left');
-        $builder->join('task_ownership', 'task_ownership.task_id = tasks.id AND task_ownership.is_current = 1 AND task_ownership.is_delete = 0', 'left');
+        $builder->join('task_ownership', 'task_ownership.task_id = tasks.id AND task_ownership.is_active = 1 AND task_ownership.is_delete = 0', 'left');
         $builder->join('user_profile as owner_profile', 'owner_profile.user_id = task_ownership.owned_by AND owner_profile.is_delete = 0', 'left');
         $builder->where('tasks.project_id', $projectId);
         $builder->where('tasks.is_delete', 0);
         $builder->where('tasks.is_active', 1);
         $builder->orderBy('tasks.order_index', 'ASC');
-        $builder->orderBy('tasks.created_at', 'ASC');
+        $builder->orderBy('tasks.date_created', 'ASC');
         return $builder->get()->getResultArray();
     }
     
@@ -116,11 +116,11 @@ class TaskModel extends Model
             priority_lookup.level as priority_level
         ');
         $builder->join('projects', 'projects.id = tasks.project_id AND projects.is_delete = 0');
-        $builder->join('task_status', 'task_status.task_id = tasks.id AND task_status.is_current = 1 AND task_status.is_delete = 0', 'left');
+        $builder->join('task_status', 'task_status.task_id = tasks.id AND task_status.is_active = 1 AND task_status.is_delete = 0', 'left');
         $builder->join('status_lookup', 'status_lookup.id = task_status.status_id AND status_lookup.type = "task" AND status_lookup.is_delete = 0', 'left');
-        $builder->join('task_priority', 'task_priority.task_id = tasks.id AND task_priority.is_current = 1 AND task_priority.is_delete = 0', 'left');
+        $builder->join('task_priority', 'task_priority.task_id = tasks.id AND task_priority.is_active = 1 AND task_priority.is_delete = 0', 'left');
         $builder->join('priority_lookup', 'priority_lookup.id = task_priority.priority_id AND priority_lookup.type = "task" AND priority_lookup.is_delete = 0', 'left');
-        $builder->join('task_ownership', 'task_ownership.task_id = tasks.id AND task_ownership.is_current = 1 AND task_ownership.is_delete = 0', 'left');
+        $builder->join('task_ownership', 'task_ownership.task_id = tasks.id AND task_ownership.is_active = 1 AND task_ownership.is_delete = 0', 'left');
         $builder->where('task_ownership.owned_by', $userId);
         $builder->where('tasks.is_delete', 0);
         $builder->where('tasks.is_active', 1);
@@ -137,8 +137,8 @@ class TaskModel extends Model
     // Task Management Functions
     public function createTask($taskData, $statusId = null, $priorityId = null, $ownedBy = null, $createdBy = null)
     {
-        $taskData['created_at'] = date('Y-m-d H:i:s');
-        $taskData['updated_at'] = date('Y-m-d H:i:s');
+        $taskData['date_created'] = date('Y-m-d H:i:s');
+        $taskData['date_modified'] = date('Y-m-d H:i:s');
         $taskData['is_active'] = 1;
         $taskData['is_delete'] = 0;
         
@@ -168,7 +168,7 @@ class TaskModel extends Model
     
     public function updateTask($taskId, $taskData)
     {
-        $taskData['updated_at'] = date('Y-m-d H:i:s');
+        $taskData['date_modified'] = date('Y-m-d H:i:s');
         
         $builder = $this->db->table('tasks');
         $builder->where('id', $taskId);
@@ -182,7 +182,7 @@ class TaskModel extends Model
         return $builder->update([
             'is_delete' => 1,
             'is_active' => 0,
-            'updated_at' => date('Y-m-d H:i:s')
+            'date_modified' => date('Y-m-d H:i:s')
         ]);
     }
     
@@ -192,7 +192,7 @@ class TaskModel extends Model
         // Deactivate current status
         $builder = $this->db->table('task_status');
         $builder->where('task_id', $taskId);
-        $builder->update(['is_current' => 0]);
+        $builder->update(['is_active' => 0]);
         
         // Set new status
         $builder = $this->db->table('task_status');
@@ -200,8 +200,8 @@ class TaskModel extends Model
             'task_id' => $taskId,
             'status_id' => $statusId,
             'changed_by' => $changedBy,
-            'updated_at' => date('Y-m-d H:i:s'),
-            'is_current' => 1,
+            'date_modified' => date('Y-m-d H:i:s'),
+            'is_active' => 1,
             'is_delete' => 0
         ]);
     }
@@ -212,7 +212,7 @@ class TaskModel extends Model
         $builder->select('task_status.*, status_lookup.code, status_lookup.name, status_lookup.color');
         $builder->join('status_lookup', 'status_lookup.id = task_status.status_id');
         $builder->where('task_status.task_id', $taskId);
-        $builder->where('task_status.is_current', 1);
+        $builder->where('task_status.is_active', 1);
         $builder->where('task_status.is_delete', 0);
         return $builder->get()->getRowArray();
     }
@@ -223,7 +223,7 @@ class TaskModel extends Model
         // Deactivate current priority
         $builder = $this->db->table('task_priority');
         $builder->where('task_id', $taskId);
-        $builder->update(['is_current' => 0]);
+        $builder->update(['is_active' => 0]);
         
         // Set new priority
         $builder = $this->db->table('task_priority');
@@ -231,8 +231,8 @@ class TaskModel extends Model
             'task_id' => $taskId,
             'priority_id' => $priorityId,
             'changed_by' => $changedBy,
-            'updated_at' => date('Y-m-d H:i:s'),
-            'is_current' => 1,
+            'date_modified' => date('Y-m-d H:i:s'),
+            'is_active' => 1,
             'is_delete' => 0
         ]);
     }
@@ -243,7 +243,7 @@ class TaskModel extends Model
         $builder->select('task_priority.*, priority_lookup.code, priority_lookup.name, priority_lookup.color, priority_lookup.level');
         $builder->join('priority_lookup', 'priority_lookup.id = task_priority.priority_id');
         $builder->where('task_priority.task_id', $taskId);
-        $builder->where('task_priority.is_current', 1);
+        $builder->where('task_priority.is_active', 1);
         $builder->where('task_priority.is_delete', 0);
         return $builder->get()->getRowArray();
     }
@@ -254,7 +254,7 @@ class TaskModel extends Model
         // Deactivate current ownership
         $builder = $this->db->table('task_ownership');
         $builder->where('task_id', $taskId);
-        $builder->update(['is_current' => 0]);
+        $builder->update(['is_active' => 0]);
         
         // Set new ownership
         $builder = $this->db->table('task_ownership');
@@ -262,8 +262,8 @@ class TaskModel extends Model
             'task_id' => $taskId,
             'owned_by' => $ownedBy,
             'created_by' => $createdBy,
-            'created_at' => date('Y-m-d H:i:s'),
-            'is_current' => 1,
+            'date_created' => date('Y-m-d H:i:s'),
+            'is_active' => 1,
             'is_delete' => 0
         ]);
     }
@@ -282,7 +282,7 @@ class TaskModel extends Model
         $builder->join('user_profile as owner_profile', 'owner_profile.user_id = task_ownership.owned_by AND owner_profile.is_delete = 0', 'left');
         $builder->join('user_profile as creator_profile', 'creator_profile.user_id = task_ownership.created_by AND creator_profile.is_delete = 0', 'left');
         $builder->where('task_ownership.task_id', $taskId);
-        $builder->where('task_ownership.is_current', 1);
+        $builder->where('task_ownership.is_active', 1);
         $builder->where('task_ownership.is_delete', 0);
         return $builder->get()->getRowArray();
     }
@@ -298,7 +298,7 @@ class TaskModel extends Model
             COUNT(DISTINCT CASE WHEN sl.code = "pending" THEN t.id END) as pending_tasks,
             AVG(t.progress) as avg_progress
         ');
-        $builder->join('task_status ts', 'ts.task_id = t.id AND ts.is_current = 1 AND ts.is_delete = 0', 'left');
+        $builder->join('task_status ts', 'ts.task_id = t.id AND ts.is_active = 1 AND ts.is_delete = 0', 'left');
         $builder->join('status_lookup sl', 'sl.id = ts.status_id AND sl.type = "task" AND sl.is_delete = 0', 'left');
         $builder->where('t.is_delete', 0);
         $builder->where('t.is_active', 1);
@@ -308,7 +308,7 @@ class TaskModel extends Model
         }
         
         if ($userId) {
-            $builder->join('task_ownership to', 'to.task_id = t.id AND to.is_current = 1 AND to.is_delete = 0');
+            $builder->join('task_ownership to', 'to.task_id = t.id AND to.is_active = 1 AND to.is_delete = 0');
             $builder->where('to.owned_by', $userId);
         }
         
@@ -328,9 +328,9 @@ class TaskModel extends Model
             priority_lookup.color as priority_color
         ');
         $builder->join('projects', 'projects.id = tasks.project_id AND projects.is_delete = 0');
-        $builder->join('task_status', 'task_status.task_id = tasks.id AND task_status.is_current = 1 AND task_status.is_delete = 0', 'left');
+        $builder->join('task_status', 'task_status.task_id = tasks.id AND task_status.is_active = 1 AND task_status.is_delete = 0', 'left');
         $builder->join('status_lookup', 'status_lookup.id = task_status.status_id AND status_lookup.type = "task" AND status_lookup.is_delete = 0', 'left');
-        $builder->join('task_priority', 'task_priority.task_id = tasks.id AND task_priority.is_current = 1 AND task_priority.is_delete = 0', 'left');
+        $builder->join('task_priority', 'task_priority.task_id = tasks.id AND task_priority.is_active = 1 AND task_priority.is_delete = 0', 'left');
         $builder->join('priority_lookup', 'priority_lookup.id = task_priority.priority_id AND priority_lookup.type = "task" AND priority_lookup.is_delete = 0', 'left');
         $builder->where('tasks.is_delete', 0);
         $builder->where('tasks.is_active', 1);
@@ -347,7 +347,7 @@ class TaskModel extends Model
         }
         
         $builder->limit($limit);
-        $builder->orderBy('tasks.created_at', 'DESC');
+        $builder->orderBy('tasks.date_created', 'DESC');
         return $builder->get()->getResultArray();
     }
     
@@ -384,8 +384,8 @@ class TaskModel extends Model
             COUNT(CASE WHEN sl.code = "pending" THEN 1 END) as pending_tasks,
             COUNT(CASE WHEN t.due_date < CURDATE() AND sl.code != "completed" THEN 1 END) as overdue_tasks
         ');
-        $builder->join('task_ownership to', 'to.task_id = t.id AND to.is_current = 1 AND to.is_delete = 0', 'left');
-        $builder->join('task_status ts', 'ts.task_id = t.id AND ts.is_current = 1 AND ts.is_delete = 0', 'left');
+        $builder->join('task_ownership to', 'to.task_id = t.id AND to.is_active = 1 AND to.is_delete = 0', 'left');
+        $builder->join('task_status ts', 'ts.task_id = t.id AND ts.is_active = 1 AND ts.is_delete = 0', 'left');
         $builder->join('status_lookup sl', 'sl.id = ts.status_id AND sl.type = "task" AND sl.is_delete = 0', 'left');
         $builder->where('to.owned_by', $userId);
         $builder->where('t.is_delete', 0);
@@ -414,9 +414,9 @@ class TaskModel extends Model
             up.avatar
         ');
         $builder->join('projects p', 'p.id = t.project_id AND p.is_delete = 0', 'left');
-        $builder->join('task_ownership to', 'to.task_id = t.id AND to.is_current = 1 AND to.is_delete = 0', 'left');
+        $builder->join('task_ownership to', 'to.task_id = t.id AND to.is_active = 1 AND to.is_delete = 0', 'left');
         $builder->join('user_profile up', 'up.user_id = to.owned_by AND up.is_delete = 0', 'left');
-        $builder->join('task_status ts', 'ts.task_id = t.id AND ts.is_current = 1 AND ts.is_delete = 0', 'left');
+        $builder->join('task_status ts', 'ts.task_id = t.id AND ts.is_active = 1 AND ts.is_delete = 0', 'left');
         $builder->join('status_lookup sl', 'sl.id = ts.status_id AND sl.type = "task" AND sl.is_delete = 0', 'left');
         $builder->where('t.due_date <', date('Y-m-d'));
         $builder->where('sl.code !=', 'completed');
@@ -432,8 +432,8 @@ class TaskModel extends Model
     {
         $builder = $this->db->table('tasks t');
         $builder->select('sl.code as status, COUNT(*) as count');
-        $builder->join('task_ownership to', 'to.task_id = t.id AND to.is_current = 1 AND to.is_delete = 0', 'left');
-        $builder->join('task_status ts', 'ts.task_id = t.id AND ts.is_current = 1 AND ts.is_delete = 0', 'left');
+        $builder->join('task_ownership to', 'to.task_id = t.id AND to.is_active = 1 AND to.is_delete = 0', 'left');
+        $builder->join('task_status ts', 'ts.task_id = t.id AND ts.is_active = 1 AND ts.is_delete = 0', 'left');
         $builder->join('status_lookup sl', 'sl.id = ts.status_id AND sl.type = "task" AND sl.is_delete = 0', 'left');
         $builder->where('to.owned_by', $userId);
         $builder->where('t.is_delete', 0);
@@ -447,8 +447,8 @@ class TaskModel extends Model
     {
         $builder = $this->db->table('tasks t');
         $builder->select('pl.code as priority, COUNT(*) as count');
-        $builder->join('task_ownership to', 'to.task_id = t.id AND to.is_current = 1 AND to.is_delete = 0', 'left');
-        $builder->join('task_priority tp', 'tp.task_id = t.id AND tp.is_current = 1 AND tp.is_delete = 0', 'left');
+        $builder->join('task_ownership to', 'to.task_id = t.id AND to.is_active = 1 AND to.is_delete = 0', 'left');
+        $builder->join('task_priority tp', 'tp.task_id = t.id AND tp.is_active = 1 AND tp.is_delete = 0', 'left');
         $builder->join('priority_lookup pl', 'pl.id = tp.priority_id AND pl.type = "task" AND pl.is_delete = 0', 'left');
         $builder->where('to.owned_by', $userId);
         $builder->where('t.is_delete', 0);
@@ -465,8 +465,8 @@ class TaskModel extends Model
             'task_id' => $taskId,
             'user_id' => $userId,
             'comment' => $comment,
-            'created_at' => date('Y-m-d H:i:s'),
-            'updated_at' => date('Y-m-d H:i:s')
+            'date_created' => date('Y-m-d H:i:s'),
+            'date_modified' => date('Y-m-d H:i:s')
         ];
         
         return $this->db->table('task_comments')->insert($data);
@@ -479,7 +479,7 @@ class TaskModel extends Model
         $builder->join('users u', 'u.id = tc.user_id', 'left');
         $builder->join('user_profile up', 'up.user_id = u.id', 'left');
         $builder->where('tc.task_id', $taskId);
-        $builder->orderBy('tc.created_at', 'DESC');
+        $builder->orderBy('tc.date_created', 'DESC');
         
         return $builder->get()->getResultArray();
     }
@@ -513,7 +513,7 @@ class TaskModel extends Model
     public function getStatistics()
     {
         $builder = $this->db->table('tasks');
-        $builder->join('task_status', 'task_status.task_id = tasks.id AND task_status.is_current = 1 AND task_status.is_delete = 0', 'left');
+        $builder->join('task_status', 'task_status.task_id = tasks.id AND task_status.is_active = 1 AND task_status.is_delete = 0', 'left');
         $builder->join('status_lookup', 'status_lookup.id = task_status.status_id AND status_lookup.type = "task" AND status_lookup.is_delete = 0', 'left');
         $builder->where('tasks.is_delete', 0);
         
@@ -545,7 +545,7 @@ class TaskModel extends Model
     {
         $builder = $this->db->table('tasks t');
         $builder->select('sl.code as status_code, COUNT(*) as count');
-        $builder->join('task_status ts', 'ts.task_id = t.id AND ts.is_current = 1 AND ts.is_delete = 0', 'left');
+        $builder->join('task_status ts', 'ts.task_id = t.id AND ts.is_active = 1 AND ts.is_delete = 0', 'left');
         $builder->join('status_lookup sl', 'sl.id = ts.status_id AND sl.is_delete = 0', 'left');
         $builder->where('t.is_delete', 0);
         $builder->groupBy('sl.code');
@@ -565,7 +565,7 @@ class TaskModel extends Model
     {
         $builder = $this->db->table('tasks t');
         $builder->select('sl.name as status_name, COUNT(*) as count');
-        $builder->join('task_status ts', 'ts.task_id = t.id AND ts.is_current = 1 AND ts.is_delete = 0', 'left');
+        $builder->join('task_status ts', 'ts.task_id = t.id AND ts.is_active = 1 AND ts.is_delete = 0', 'left');
         $builder->join('status_lookup sl', 'sl.id = ts.status_id AND sl.is_delete = 0', 'left');
         $builder->where('t.is_delete', 0);
         $builder->groupBy('sl.name');
@@ -585,11 +585,11 @@ class TaskModel extends Model
             $monthName = date('M Y', strtotime("-$i months"));
             
             $builder = $this->db->table('tasks');
-            $builder->join('task_status', 'task_status.task_id = tasks.id AND task_status.is_current = 1 AND task_status.is_delete = 0', 'left');
+            $builder->join('task_status', 'task_status.task_id = tasks.id AND task_status.is_active = 1 AND task_status.is_delete = 0', 'left');
             $builder->join('status_lookup', 'status_lookup.id = task_status.status_id AND status_lookup.type = "task" AND status_lookup.is_delete = 0', 'left');
             $builder->where('tasks.is_delete', 0);
             $builder->where('status_lookup.code', 'completed');
-            $builder->where("DATE_FORMAT(tasks.updated_at, '%Y-%m')", $month);
+            $builder->where("DATE_FORMAT(tasks.date_modified, '%Y-%m')", $month);
             
             $completedInMonth = $builder->countAllResults();
             
@@ -605,7 +605,7 @@ class TaskModel extends Model
     public function getTasksByStatus($statusCode)
     {
         $builder = $this->db->table('tasks');
-        $builder->join('task_status', 'task_status.task_id = tasks.id AND task_status.is_current = 1 AND task_status.is_delete = 0', 'left');
+        $builder->join('task_status', 'task_status.task_id = tasks.id AND task_status.is_active = 1 AND task_status.is_delete = 0', 'left');
         $builder->join('status_lookup', 'status_lookup.id = task_status.status_id AND status_lookup.type = "task" AND status_lookup.is_delete = 0', 'left');
         $builder->where('tasks.is_delete', 0);
         $builder->where('status_lookup.code', $statusCode);
@@ -615,7 +615,7 @@ class TaskModel extends Model
     public function countTasksByStatus($statusCode)
     {
         $builder = $this->db->table('tasks');
-        $builder->join('task_status', 'task_status.task_id = tasks.id AND task_status.is_current = 1 AND task_status.is_delete = 0', 'left');
+        $builder->join('task_status', 'task_status.task_id = tasks.id AND task_status.is_active = 1 AND task_status.is_delete = 0', 'left');
         $builder->join('status_lookup', 'status_lookup.id = task_status.status_id AND status_lookup.type = "task" AND status_lookup.is_delete = 0', 'left');
         $builder->where('tasks.is_delete', 0);
         $builder->where('status_lookup.code', $statusCode);
@@ -625,7 +625,7 @@ class TaskModel extends Model
     public function getTasksByPriority($priorityCode)
     {
         $builder = $this->db->table('tasks');
-        $builder->join('task_priority', 'task_priority.task_id = tasks.id AND task_priority.is_current = 1 AND task_priority.is_delete = 0', 'left');
+        $builder->join('task_priority', 'task_priority.task_id = tasks.id AND task_priority.is_active = 1 AND task_priority.is_delete = 0', 'left');
         $builder->join('priority_lookup', 'priority_lookup.id = task_priority.priority_id AND priority_lookup.is_delete = 0', 'left');
         $builder->where('tasks.is_delete', 0);
         $builder->where('priority_lookup.code', $priorityCode);
@@ -635,7 +635,7 @@ class TaskModel extends Model
     public function countTasksByPriority($priorityCode)
     {
         $builder = $this->db->table('tasks');
-        $builder->join('task_priority', 'task_priority.task_id = tasks.id AND task_priority.is_current = 1 AND task_priority.is_delete = 0', 'left');
+        $builder->join('task_priority', 'task_priority.task_id = tasks.id AND task_priority.is_active = 1 AND task_priority.is_delete = 0', 'left');
         $builder->join('priority_lookup', 'priority_lookup.id = task_priority.priority_id AND priority_lookup.is_delete = 0', 'left');
         $builder->where('tasks.is_delete', 0);
         $builder->where('priority_lookup.code', $priorityCode);
@@ -658,11 +658,11 @@ class TaskModel extends Model
             $date = date('Y-m-d', strtotime("-$i days"));
             
             $builder = $this->db->table('tasks');
-            $builder->join('task_status', 'task_status.task_id = tasks.id AND task_status.is_current = 1 AND task_status.is_delete = 0', 'left');
+            $builder->join('task_status', 'task_status.task_id = tasks.id AND task_status.is_active = 1 AND task_status.is_delete = 0', 'left');
             $builder->join('status_lookup', 'status_lookup.id = task_status.status_id AND status_lookup.type = "task" AND status_lookup.is_delete = 0', 'left');
             $builder->where('tasks.is_delete', 0);
             $builder->where('status_lookup.code', 'completed');
-            $builder->where("DATE(tasks.updated_at)", $date);
+            $builder->where("DATE(tasks.date_modified)", $date);
             
             $completedCount = $builder->countAllResults();
             
@@ -679,10 +679,10 @@ class TaskModel extends Model
     {
         $builder = $this->db->table('tasks t');
         $builder->select('user_profile.first_name, user_profile.last_name, users.email, COUNT(*) as completed_tasks');
-        $builder->join('task_assignment', 'task_assignment.task_id = t.id AND task_assignment.is_current = 1 AND task_assignment.is_delete = 0', 'inner');
+        $builder->join('task_assignment', 'task_assignment.task_id = t.id AND task_assignment.is_active = 1 AND task_assignment.is_delete = 0', 'inner');
         $builder->join('users', 'users.id = task_assignment.user_id AND users.is_delete = 0', 'inner');
         $builder->join('user_profile', 'user_profile.user_id = users.id AND user_profile.is_delete = 0', 'left');
-        $builder->join('task_status ts', 'ts.task_id = t.id AND ts.is_current = 1 AND ts.is_delete = 0', 'left');
+        $builder->join('task_status ts', 'ts.task_id = t.id AND ts.is_active = 1 AND ts.is_delete = 0', 'left');
         $builder->join('status_lookup sl', 'sl.id = ts.status_id AND sl.type = "task" AND sl.is_delete = 0', 'left');
         $builder->where('t.is_delete', 0);
         $builder->where('sl.code', 'completed');

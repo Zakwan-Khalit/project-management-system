@@ -13,7 +13,6 @@ class UserModel extends Model
             users.*, 
             user_profile.first_name, 
             user_profile.last_name, 
-            user_profile.avatar, 
             user_profile.phone, 
             user_profile.bio,
             user_role_lookup.name as role_name, 
@@ -35,7 +34,6 @@ class UserModel extends Model
             users.*, 
             user_profile.first_name, 
             user_profile.last_name, 
-            user_profile.avatar, 
             user_profile.phone, 
             user_profile.bio,
             user_profile.address,
@@ -66,7 +64,6 @@ class UserModel extends Model
             users.*, 
             user_profile.first_name, 
             user_profile.last_name, 
-            user_profile.avatar,
             user_role_lookup.name as role_name
         ');
         $builder->join('user_profile', 'user_profile.user_id = users.id AND user_profile.is_delete = 0', 'left');
@@ -84,7 +81,6 @@ class UserModel extends Model
             users.*, 
             user_profile.first_name, 
             user_profile.last_name, 
-            user_profile.avatar,
             project_members.role as project_role,
             project_members.joined_at
         ');
@@ -105,7 +101,6 @@ class UserModel extends Model
             users.email,
             user_profile.first_name, 
             user_profile.last_name, 
-            user_profile.avatar,
             user_role_lookup.name as role_name
         ');
         $builder->join('user_profile', 'user_profile.user_id = users.id AND user_profile.is_delete = 0', 'left');
@@ -134,8 +129,8 @@ class UserModel extends Model
             $userData['password'] = password_hash($userData['password'], PASSWORD_DEFAULT);
         }
         
-        $userData['created_at'] = date('Y-m-d H:i:s');
-        $userData['updated_at'] = date('Y-m-d H:i:s');
+        $userData['date_created'] = date('Y-m-d H:i:s');
+        $userData['date_modified'] = date('Y-m-d H:i:s');
         $userData['is_active'] = 1;
         $userData['is_delete'] = 0;
         
@@ -145,8 +140,8 @@ class UserModel extends Model
         
         if ($userId && !empty($profileData)) {
             $profileData['user_id'] = $userId;
-            $profileData['created_at'] = date('Y-m-d H:i:s');
-            $profileData['updated_at'] = date('Y-m-d H:i:s');
+            $profileData['date_created'] = date('Y-m-d H:i:s');
+            $profileData['date_modified'] = date('Y-m-d H:i:s');
             $profileData['is_active'] = 1;
             $profileData['is_delete'] = 0;
             
@@ -163,7 +158,7 @@ class UserModel extends Model
             $userData['password'] = password_hash($userData['password'], PASSWORD_DEFAULT);
         }
         
-        $userData['updated_at'] = date('Y-m-d H:i:s');
+        $userData['date_modified'] = date('Y-m-d H:i:s');
         
         $builder = $this->db->table('users');
         $builder->where('id', $userId);
@@ -172,7 +167,7 @@ class UserModel extends Model
     
     public function updateUserProfile($userId, $profileData)
     {
-        $profileData['updated_at'] = date('Y-m-d H:i:s');
+        $profileData['date_modified'] = date('Y-m-d H:i:s');
         
         // Check if profile exists
         $builder = $this->db->table('user_profile');
@@ -186,7 +181,7 @@ class UserModel extends Model
             return $builder->update($profileData);
         } else {
             $profileData['user_id'] = $userId;
-            $profileData['created_at'] = date('Y-m-d H:i:s');
+            $profileData['date_created'] = date('Y-m-d H:i:s');
             $profileData['is_active'] = 1;
             $profileData['is_delete'] = 0;
             
@@ -241,7 +236,7 @@ class UserModel extends Model
         $builder = $this->db->table('task_ownership');
         $builder->selectCount('task_id', 'task_count');
         $builder->where('owned_by', $userId);
-        $builder->where('is_current', 1);
+        $builder->where('is_active', 1);
         $builder->where('is_delete', 0);
         $taskStats = $builder->get()->getRowArray();
 

@@ -92,7 +92,7 @@
                         <option value="due_date">Sort by Due Date</option>
                         <option value="priority">Sort by Priority</option>
                         <option value="status">Sort by Status</option>
-                        <option value="created_at">Sort by Created</option>
+                        <option value="date_created">Sort by Created</option>
                     </select>
                     <button class="btn btn-outline-secondary" onclick="toggleView()">
                         <i id="viewIcon" class="fas fa-th"></i>
@@ -138,7 +138,7 @@
                                     data-status="<?= getTaskStatus($task) ?>" 
                                     data-priority="<?= getTaskPriority($task) ?>"
                                     data-due="<?= $task['due_date'] ?? '' ?>"
-                                    data-created="<?= $task['created_at'] ?>">
+                                    data-created="<?= $task['date_created'] ?>">
                                     <td>
                                         <div>
                                             <h6 class="mb-1">
@@ -221,7 +221,7 @@
                          data-status="<?= getTaskStatus($task) ?>" 
                          data-priority="<?= getTaskPriority($task) ?>"
                          data-due="<?= $task['due_date'] ?? '' ?>"
-                         data-created="<?= $task['created_at'] ?>">
+                         data-created="<?= $task['date_created'] ?>">
                         <div class="card h-100">
                             <div class="card-header d-flex justify-content-between align-items-center">
                                 <span class="badge bg-<?= $priority_colors[getTaskPriority($task)] ?? 'secondary' ?>">
@@ -356,7 +356,7 @@ function applySorting() {
                 aValue = statusOrder[a.dataset.status] || 4;
                 bValue = statusOrder[b.dataset.status] || 4;
                 return aValue - bValue;
-            case 'created_at':
+            case 'date_created':
                 aValue = new Date(a.dataset.created);
                 bValue = new Date(b.dataset.created);
                 return bValue - aValue; // Newest first

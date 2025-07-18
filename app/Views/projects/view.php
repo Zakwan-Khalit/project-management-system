@@ -531,7 +531,7 @@ function renderRecentActivity(activities) {
                 </div>
             </div>
             <div class="flex-grow-1 ms-3">
-                <div class="small text-muted">${timeAgo(activity.created_at)}</div>
+                <div class="small text-muted">${timeAgo(activity.date_created)}</div>
                 <div>${activity.description}</div>
                 <small class="text-muted">by ${activity.user_name}</small>
             </div>

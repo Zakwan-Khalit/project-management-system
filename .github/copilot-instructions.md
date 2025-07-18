@@ -47,7 +47,7 @@ This is a comprehensive project management system built with CodeIgniter 4 and m
 - Use proper foreign key relationships
 - Implement soft deletes where appropriate
 - Use ENUM fields for status and priority fields
-- Include created_at and updated_at timestamps
+- Include date_created and date_modified timestamps
 - Follow proper indexing strategies
 
 ### Security Considerations

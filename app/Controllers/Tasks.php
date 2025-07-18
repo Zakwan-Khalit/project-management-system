@@ -388,8 +388,8 @@ class Tasks extends BaseController
             } elseif ($newPosition !== null) {
                 $this->taskModel->updateTask($taskId, ['order_index' => $newPosition]);
             }
-            // Always update the main tasks table's updated_at field after status change
-            $this->taskModel->updateTask($taskId, ['updated_at' => date('Y-m-d H:i:s')]);
+            // Always update the main tasks table's date_modified field after status change
+            $this->taskModel->updateTask($taskId, ['date_modified' => date('Y-m-d H:i:s')]);
             $this->projectModel->updateProgress($task['project_id']);
             $this->activityLog->logActivity([
                 'user_id' => $userId,

@@ -104,7 +104,7 @@
                                     </div>
                                     <div style="flex: 1;">
                                         <strong><?= esc($activity['user_name'] ?? ($activity['first_name'] ?? '')) ?></strong> <?= esc($activity['action']) ?>
-                                        <span class="text-muted">on <span class="badge bg-light text-dark"><?= esc($activity['table_name']) ?></span> <span style="font-size:0.95em;">(<?= esc($activity['created_at']) ?>)</span></span>
+                                        <span class="text-muted">on <span class="badge bg-light text-dark"><?= esc($activity['table_name']) ?></span> <span style="font-size:0.95em;">(<?= esc($activity['date_created']) ?>)</span></span>
                                     </div>
                                     <div>
                                         <span class="badge bg-info text-dark" style="font-size:0.9em;">#<?= esc($activity['id'] ?? '') ?></span>
@@ -147,7 +147,7 @@ document.getElementById('refresh-activity-btn').addEventListener('click', functi
                         </div>
                         <div style="flex: 1;">
                             <strong>${activity.user_name ?? activity.first_name ?? ''}</strong> ${activity.action}
-                            <span class="text-muted">on <span class="badge bg-light text-dark">${activity.table_name}</span> <span style="font-size:0.95em;">(${activity.created_at})</span></span>
+                            <span class="text-muted">on <span class="badge bg-light text-dark">${activity.table_name}</span> <span style="font-size:0.95em;">(${activity.date_created})</span></span>
                         </div>
                         <div>
                             <span class="badge bg-info text-dark" style="font-size:0.9em;">#${activity.id ?? ''}</span>

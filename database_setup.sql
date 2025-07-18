@@ -7,40 +7,7 @@ USE `project_management_system`;
 
 -- Lookup Tables for Dropdowns and References
 
--- Status lookup table
-CREATE TABLE `status_lookup` (
-    `id` int(11) NOT NULL AUTO_INCREMENT,
-    `type` varchar(50) NOT NULL, -- 'project', 'task', 'user'
-    `code` varchar(50) NOT NULL,
-    `name` varchar(100) NOT NULL,
-    `description` text,
-    `color` varchar(7) DEFAULT NULL, -- hex color code
-    `order_index` int(11) DEFAULT 0,
-    `is_active` tinyint(1) DEFAULT 1,
-    `is_delete` tinyint(1) DEFAULT 0,
-    `created_at` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP,
-    `updated_at` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
-    PRIMARY KEY (`id`),
-    UNIQUE KEY `type_code` (`type`, `code`),
-    KEY `type` (`type`),
-    KEY `is_active` (`is_active`),
-    KEY `is_delete` (`is_delete`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
-
--- Priority lookup table
-CREATE TABLE `priority_lookup` (
-    `id` int(11) NOT NULL AUTO_INCREMENT,
-    `type` varchar(50) NOT NULL, -- 'project', 'task'
-    `code` varchar(50) NOT NULL,
-    `name` varchar(100) NOT NULL,
-    `description` text,
-    `color` varchar(7) DEFAULT NULL,
-    `level` int(11) DEFAULT 0, -- numerical priority level
-    `order_index` int(11) DEFAULT 0,
-    `is_active` tinyint(1) DEFAULT 1,
-    `is_delete` tinyint(1) DEFAULT 0,
-    `created_at` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP,
-    `updated_at` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+    `date_modified` TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
     PRIMARY KEY (`id`),
     UNIQUE KEY `type_code` (`type`, `code`),
     KEY `type` (`type`),
@@ -57,8 +24,8 @@ CREATE TABLE `department_lookup` (
     `manager_id` int(11) DEFAULT NULL,
     `is_active` tinyint(1) DEFAULT 1,
     `is_delete` tinyint(1) DEFAULT 0,
-    `created_at` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP,
-    `updated_at` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+    `date_created` TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    `date_modified` TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
     PRIMARY KEY (`id`),
     UNIQUE KEY `code` (`code`),
     KEY `is_active` (`is_active`),
@@ -75,8 +42,8 @@ CREATE TABLE `position_lookup` (
     `level` int(11) DEFAULT 0, -- seniority level
     `is_active` tinyint(1) DEFAULT 1,
     `is_delete` tinyint(1) DEFAULT 0,
-    `created_at` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP,
-    `updated_at` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+    `date_created` TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    `date_modified` TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
     PRIMARY KEY (`id`),
     UNIQUE KEY `code` (`code`),
     KEY `department_id` (`department_id`),
@@ -94,8 +61,8 @@ CREATE TABLE `user_role_lookup` (
     `level` int(11) DEFAULT 0, -- hierarchy level
     `is_active` tinyint(1) DEFAULT 1,
     `is_delete` tinyint(1) DEFAULT 0,
-    `created_at` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP,
-    `updated_at` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+    `date_created` TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    `date_modified` TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
     PRIMARY KEY (`id`),
     UNIQUE KEY `code` (`code`),
     KEY `is_active` (`is_active`),
@@ -113,8 +80,8 @@ CREATE TABLE `users` (
     `is_delete` tinyint(1) DEFAULT 0,
     `email_verified_at` timestamp NULL DEFAULT NULL,
     `last_login_at` timestamp NULL DEFAULT NULL,
-    `created_at` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP,
-    `updated_at` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+    `date_created` TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    `date_modified` TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
     PRIMARY KEY (`id`),
     UNIQUE KEY `email` (`email`),
     KEY `is_active` (`is_active`),
@@ -137,8 +104,8 @@ CREATE TABLE `user_profile` (
     `time_format` varchar(20) DEFAULT 'H:i:s',
     `is_active` tinyint(1) DEFAULT 1,
     `is_delete` tinyint(1) DEFAULT 0,
-    `created_at` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP,
-    `updated_at` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+    `date_created` TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    `date_modified` TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
     PRIMARY KEY (`id`),
     UNIQUE KEY `user_id` (`user_id`),
     KEY `is_active` (`is_active`),
@@ -176,6 +143,8 @@ CREATE TABLE `user_access` (
     `expires_at` timestamp NULL DEFAULT NULL,
     `is_active` tinyint(1) DEFAULT 1,
     `is_delete` tinyint(1) DEFAULT 0,
+    `date_created` TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    `date_modified` TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
     PRIMARY KEY (`id`),
     KEY `user_id` (`user_id`),
     KEY `resource` (`resource`),
@@ -196,8 +165,8 @@ CREATE TABLE `user_rel` (
     `end_date` date DEFAULT NULL,
     `is_active` tinyint(1) DEFAULT 1,
     `is_delete` tinyint(1) DEFAULT 0,
-    `created_at` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP,
-    `updated_at` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+    `date_created` TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    `date_modified` TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
     PRIMARY KEY (`id`),
     KEY `user_id` (`user_id`),
     KEY `related_user_id` (`related_user_id`),
@@ -224,8 +193,8 @@ CREATE TABLE `projects` (
     `progress` decimal(5,2) DEFAULT 0.00,
     `is_active` tinyint(1) DEFAULT 1,
     `is_delete` tinyint(1) DEFAULT 0,
-    `created_at` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP,
-    `updated_at` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+    `date_created` TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    `date_modified` TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
     PRIMARY KEY (`id`),
     UNIQUE KEY `code` (`code`),
     KEY `is_active` (`is_active`),
@@ -241,14 +210,16 @@ CREATE TABLE `project_status` (
     `notes` text,
     `start_date` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP,
     `end_date` timestamp NULL DEFAULT NULL,
-    `is_current` tinyint(1) DEFAULT 1,
+    `is_active` tinyint(1) DEFAULT 1,
     `is_active` tinyint(1) DEFAULT 1,
     `is_delete` tinyint(1) DEFAULT 0,
+    `date_created` TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    `date_modified` TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
     PRIMARY KEY (`id`),
     KEY `project_id` (`project_id`),
     KEY `status_id` (`status_id`),
     KEY `changed_by` (`changed_by`),
-    KEY `is_current` (`is_current`),
+    KEY `is_active` (`is_active`),
     KEY `is_active` (`is_active`),
     KEY `is_delete` (`is_delete`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
@@ -262,14 +233,16 @@ CREATE TABLE `project_priority` (
     `notes` text,
     `start_date` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP,
     `end_date` timestamp NULL DEFAULT NULL,
-    `is_current` tinyint(1) DEFAULT 1,
+    `is_active` tinyint(1) DEFAULT 1,
     `is_active` tinyint(1) DEFAULT 1,
     `is_delete` tinyint(1) DEFAULT 0,
+    `date_created` TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    `date_modified` TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
     PRIMARY KEY (`id`),
     KEY `project_id` (`project_id`),
     KEY `priority_id` (`priority_id`),
     KEY `changed_by` (`changed_by`),
-    KEY `is_current` (`is_current`),
+    KEY `is_active` (`is_active`),
     KEY `is_active` (`is_active`),
     KEY `is_delete` (`is_delete`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
@@ -285,6 +258,8 @@ CREATE TABLE `project_members` (
     `left_at` timestamp NULL DEFAULT NULL,
     `is_active` tinyint(1) DEFAULT 1,
     `is_delete` tinyint(1) DEFAULT 0,
+    `date_created` TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    `date_modified` TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
     PRIMARY KEY (`id`),
     UNIQUE KEY `project_user_active` (`project_id`, `user_id`, `is_active`),
     KEY `project_id` (`project_id`),
@@ -308,8 +283,8 @@ CREATE TABLE `project_client` (
     `contract_end_date` date DEFAULT NULL,
     `is_active` tinyint(1) DEFAULT 1,
     `is_delete` tinyint(1) DEFAULT 0,
-    `created_at` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP,
-    `updated_at` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+    `date_created` TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    `date_modified` TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
     PRIMARY KEY (`id`),
     KEY `project_id` (`project_id`),
     KEY `is_active` (`is_active`),
@@ -333,8 +308,8 @@ CREATE TABLE `tasks` (
     `order_index` int(11) DEFAULT 0,
     `is_active` tinyint(1) DEFAULT 1,
     `is_delete` tinyint(1) DEFAULT 0,
-    `created_at` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP,
-    `updated_at` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+    `date_created` TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    `date_modified` TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
     PRIMARY KEY (`id`),
     KEY `project_id` (`project_id`),
     KEY `is_active` (`is_active`),
@@ -350,14 +325,16 @@ CREATE TABLE `task_status` (
     `notes` text,
     `start_date` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP,
     `end_date` timestamp NULL DEFAULT NULL,
-    `is_current` tinyint(1) DEFAULT 1,
+    `is_active` tinyint(1) DEFAULT 1,
     `is_active` tinyint(1) DEFAULT 1,
     `is_delete` tinyint(1) DEFAULT 0,
+    `date_created` TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    `date_modified` TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
     PRIMARY KEY (`id`),
     KEY `task_id` (`task_id`),
     KEY `status_id` (`status_id`),
     KEY `changed_by` (`changed_by`),
-    KEY `is_current` (`is_current`),
+    KEY `is_active` (`is_active`),
     KEY `is_active` (`is_active`),
     KEY `is_delete` (`is_delete`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
@@ -371,14 +348,16 @@ CREATE TABLE `task_priority` (
     `notes` text,
     `start_date` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP,
     `end_date` timestamp NULL DEFAULT NULL,
-    `is_current` tinyint(1) DEFAULT 1,
+    `is_active` tinyint(1) DEFAULT 1,
     `is_active` tinyint(1) DEFAULT 1,
     `is_delete` tinyint(1) DEFAULT 0,
+    `date_created` TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    `date_modified` TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
     PRIMARY KEY (`id`),
     KEY `task_id` (`task_id`),
     KEY `priority_id` (`priority_id`),
     KEY `changed_by` (`changed_by`),
-    KEY `is_current` (`is_current`),
+    KEY `is_active` (`is_active`),
     KEY `is_active` (`is_active`),
     KEY `is_delete` (`is_delete`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
@@ -394,6 +373,8 @@ CREATE TABLE `task_assignment` (
     `unassigned_at` timestamp NULL DEFAULT NULL,
     `is_active` tinyint(1) DEFAULT 1,
     `is_delete` tinyint(1) DEFAULT 0,
+    `date_created` TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    `date_modified` TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
     PRIMARY KEY (`id`),
     KEY `task_id` (`task_id`),
     KEY `user_id` (`user_id`),
@@ -410,15 +391,16 @@ CREATE TABLE `task_ownership` (
     `owned_by` int(11) DEFAULT NULL, -- current owner (can be different from creator)
     `transferred_by` int(11) DEFAULT NULL,
     `transferred_at` timestamp NULL DEFAULT NULL,
-    `is_current` tinyint(1) DEFAULT 1,
+    `is_active` tinyint(1) DEFAULT 1,
     `is_active` tinyint(1) DEFAULT 1,
     `is_delete` tinyint(1) DEFAULT 0,
-    `created_at` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    `date_created` TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    `date_modified` TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
     PRIMARY KEY (`id`),
     KEY `task_id` (`task_id`),
     KEY `created_by` (`created_by`),
     KEY `owned_by` (`owned_by`),
-    KEY `is_current` (`is_current`),
+    KEY `is_active` (`is_active`),
     KEY `is_active` (`is_active`),
     KEY `is_delete` (`is_delete`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
@@ -438,7 +420,8 @@ CREATE TABLE `activity_logs` (
     `user_agent` text,
     `is_active` tinyint(1) DEFAULT 1,
     `is_delete` tinyint(1) DEFAULT 0,
-    `created_at` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    `date_created` TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    `date_modified` TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
     PRIMARY KEY (`id`),
     KEY `user_id` (`user_id`),
     KEY `table_name` (`table_name`),
@@ -455,8 +438,8 @@ CREATE TABLE `task_comments` (
     `comment` text NOT NULL,
     `is_active` tinyint(1) DEFAULT 1,
     `is_delete` tinyint(1) DEFAULT 0,
-    `created_at` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP,
-    `updated_at` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+    `date_created` TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    `date_modified` TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
     PRIMARY KEY (`id`),
     KEY `task_id` (`task_id`),
     KEY `user_id` (`user_id`),
@@ -475,13 +458,39 @@ CREATE TABLE `task_attachments` (
     `uploaded_by` int(11) NOT NULL,
     `is_active` tinyint(1) DEFAULT 1,
     `is_delete` tinyint(1) DEFAULT 0,
-    `created_at` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    `date_created` TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    `date_modified` TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
     PRIMARY KEY (`id`),
     KEY `task_id` (`task_id`),
     KEY `uploaded_by` (`uploaded_by`),
     KEY `is_active` (`is_active`),
     KEY `is_delete` (`is_delete`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+
+-- Task Templates Table
+CREATE TABLE `task_templates` (
+    `id` int(11) NOT NULL AUTO_INCREMENT,
+    `code` varchar(32) NOT NULL,
+    `name` varchar(128) NOT NULL,
+    `description` text,
+    `fields` text, -- JSON array of header fields
+    `is_active` tinyint(1) DEFAULT 1,
+    `is_delete` tinyint(1) DEFAULT 0,
+    `date_created` TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    `date_modified` TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+    PRIMARY KEY (`id`),
+    UNIQUE KEY `code` (`code`),
+    KEY `is_delete` (`is_delete`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+
+-- Add template_id to tasks table
+ALTER TABLE `tasks`
+    ADD COLUMN `template_id` int(11) DEFAULT NULL,
+    ADD COLUMN `date_created` TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    ADD COLUMN `date_modified` TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP;
+
+ALTER TABLE `tasks`
+    ADD CONSTRAINT `fk_tasks_template` FOREIGN KEY (`template_id`) REFERENCES `task_templates` (`id`) ON DELETE SET NULL;
 
 -- Add foreign key constraints
 ALTER TABLE `position_lookup` ADD CONSTRAINT `fk_position_department` FOREIGN KEY (`department_id`) REFERENCES `department_lookup` (`id`) ON DELETE SET NULL;
@@ -686,3 +695,9 @@ INSERT INTO `task_ownership` (`task_id`, `created_by`, `owned_by`) VALUES
 (5, 1, 1),
 (6, 1, 1),
 (7, 1, 1);
+
+-- Insert default templates for BRS, UAT, FAT
+INSERT INTO `task_templates` (`code`, `name`, `description`, `fields`) VALUES
+('brs', 'Business Requirement Specification', 'BRS Template', '["Title","Description","Status","Owner","Last Modified"]'),
+('uat', 'User Acceptance Testing', 'UAT Template', '["Title","Description","Status","Owner","Last Modified"]'),
+('fat', 'Factory Acceptance Testing', 'FAT Template', '["Title","Description","Status","Owner","Last Modified"]');

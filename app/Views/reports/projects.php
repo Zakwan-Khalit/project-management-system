@@ -177,7 +177,7 @@
                             <div class="col-4">
                                 <div style="font-size: 0.75rem; color: #6b7280; margin-bottom: 0.25rem;">Created</div>
                                 <div style="font-weight: 600; color: #374151;">
-                                    <?= date('M j', strtotime($stat['project']['created_at'])) ?>
+                                    <?= date('M j', strtotime($stat['project']['date_created'])) ?>
                                 </div>
                             </div>
                         </div>

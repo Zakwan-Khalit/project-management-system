@@ -14,7 +14,7 @@ This document describes the comprehensive MySQL database schema for the Project 
 - ✅ **Lookup Tables**: Centralized status, priority, department, position, and role management
 - ✅ **Soft Deletes**: `is_delete` field in all tables for data preservation
 - ✅ **Active/Inactive States**: `is_active` field for enabling/disabling records
-- ✅ **Audit Trail**: `created_at` and `updated_at` timestamps in all tables
+- ✅ **Audit Trail**: `date_created` and `date_modified` timestamps in all tables
 - ✅ **Relationship Tables**: Many-to-many relationships properly normalized
 - ✅ **Foreign Key Constraints**: Data integrity enforced at database level
 
@@ -30,7 +30,7 @@ Primary user account information
 - `password_hash`
 - `email_verified_at`
 - `is_active`, `is_delete`
-- `created_at`, `updated_at`
+- `date_created`, `date_modified`
 
 #### `user_profile`
 Extended user profile information
@@ -41,7 +41,7 @@ Extended user profile information
 - `avatar_path`
 - `date_of_birth`
 - `is_active`, `is_delete`
-- `created_at`, `updated_at`
+- `date_created`, `date_modified`
 
 #### `projects`
 Project master data
@@ -50,7 +50,7 @@ Project master data
 - `start_date`, `end_date`
 - `budget`
 - `is_active`, `is_delete`
-- `created_at`, `updated_at`
+- `date_created`, `date_modified`
 
 #### `tasks`
 Task master data
@@ -60,7 +60,7 @@ Task master data
 - `estimated_hours`, `actual_hours`
 - `completion_percentage`
 - `is_active`, `is_delete`
-- `created_at`, `updated_at`
+- `date_created`, `date_modified`
 
 ### Lookup Tables
 
@@ -208,7 +208,7 @@ Comments and notes on tasks
 - `user_id` (Foreign Key to users)
 - `comment`
 - `is_active`, `is_delete`
-- `created_at`, `updated_at`
+- `date_created`, `date_modified`
 
 #### `task_attachments`
 File attachments for tasks
@@ -219,7 +219,7 @@ File attachments for tasks
 - `file_path`, `file_size`
 - `mime_type`
 - `is_active`, `is_delete`
-- `created_at`, `updated_at`
+- `date_created`, `date_modified`
 
 #### `activity_logs`
 System activity and audit trail
@@ -229,7 +229,7 @@ System activity and audit trail
 - `table_name`, `record_id`
 - `old_values`, `new_values` (JSON fields)
 - `ip_address`, `user_agent`
-- `created_at`
+- `date_created`
 
 ## Sample Data
 

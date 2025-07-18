@@ -35,7 +35,7 @@ class ActivityLogModel extends Model
         if (!isset($data['user_agent'])) {
             $data['user_agent'] = $_SERVER['HTTP_USER_AGENT'] ?? null;
         }
-        $data['created_at'] = date('Y-m-d H:i:s');
+        $data['date_created'] = date('Y-m-d H:i:s');
         $data['is_active'] = 1;
         $data['is_delete'] = 0;
 
@@ -68,16 +68,16 @@ class ActivityLogModel extends Model
             $builder->where('activity_logs.action', $filters['action']);
         }
         if (isset($filters['date_from'])) {
-            $builder->where('activity_logs.created_at >=', $filters['date_from']);
+            $builder->where('activity_logs.date_created >=', $filters['date_from']);
         }
         if (isset($filters['date_to'])) {
-            $builder->where('activity_logs.created_at <=', $filters['date_to']);
+            $builder->where('activity_logs.date_created <=', $filters['date_to']);
         }
         if (isset($filters['limit'])) {
             $builder->limit($filters['limit']);
         }
 
-        $builder->orderBy('activity_logs.created_at', 'DESC');
+        $builder->orderBy('activity_logs.date_created', 'DESC');
         return $builder->get()->getResultArray();
     }
 
@@ -86,7 +86,7 @@ class ActivityLogModel extends Model
         $builder = $this->db->table('activity_logs');
         $builder->where('user_id', $userId);
         $builder->where('is_delete', 0);
-        $builder->orderBy('created_at', 'DESC');
+        $builder->orderBy('date_created', 'DESC');
         $builder->limit($limit);
         return $builder->get()->getResultArray();
     }
@@ -104,7 +104,7 @@ class ActivityLogModel extends Model
         $builder->where('activity_logs.table_name', 'projects');
         $builder->where('activity_logs.record_id', $projectId);
         $builder->where('activity_logs.is_delete', 0);
-        $builder->orderBy('activity_logs.created_at', 'DESC');
+        $builder->orderBy('activity_logs.date_created', 'DESC');
         $builder->limit($limit);
         return $builder->get()->getResultArray();
     }
@@ -122,7 +122,7 @@ class ActivityLogModel extends Model
         $builder->where('activity_logs.table_name', 'tasks');
         $builder->where('activity_logs.record_id', $taskId);
         $builder->where('activity_logs.is_delete', 0);
-        $builder->orderBy('activity_logs.created_at', 'DESC');
+        $builder->orderBy('activity_logs.date_created', 'DESC');
         $builder->limit($limit);
         return $builder->get()->getResultArray();
     }
@@ -139,7 +139,7 @@ class ActivityLogModel extends Model
         $builder->join('user_profile', 'user_profile.user_id = activity_logs.user_id AND user_profile.is_delete = 0', 'left');
         $builder->where('activity_logs.is_delete', 0);
         $builder->where('activity_logs.is_active', 1);
-        $builder->orderBy('activity_logs.created_at', 'DESC');
+        $builder->orderBy('activity_logs.date_created', 'DESC');
         $builder->limit($limit);
         return $builder->get()->getResultArray();
     }
@@ -149,7 +149,7 @@ class ActivityLogModel extends Model
         $builder = $this->db->table('activity_logs');
         $builder->select('activity_logs.*, user_profile.first_name, user_profile.last_name, user_profile.avatar');
         $builder->join('user_profile', 'user_profile.user_id = activity_logs.user_id AND user_profile.is_delete = 0', 'left');
-        $builder->orderBy('activity_logs.created_at', 'DESC');
+        $builder->orderBy('activity_logs.date_created', 'DESC');
         $builder->limit($limit);
         return $builder->get()->getResultArray();
     }
@@ -158,7 +158,7 @@ class ActivityLogModel extends Model
     {
         $cutoffDate = date('Y-m-d H:i:s', strtotime("-{$daysOld} days"));
         $builder = $this->db->table('activity_logs');
-        $builder->where('created_at <', $cutoffDate);
+        $builder->where('date_created <', $cutoffDate);
         return $builder->update(['is_delete' => 1]);
     }
 }

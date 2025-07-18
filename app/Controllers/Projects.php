@@ -14,7 +14,7 @@ class Projects extends BaseController
     protected $userModel;
     protected $activityLog;
     protected $db;
-    
+
     public function __construct()
     {
         $this->projectModel = new ProjectModel();
@@ -22,6 +22,28 @@ class Projects extends BaseController
         $this->userModel = new UserModel();
         $this->activityLog = new ActivityLogModel();
         $this->db = \Config\Database::connect();
+    }
+
+    // Project Task View (for project_task route)
+    public function project_task($id)
+    {
+        $userData = session('userdata');
+        $userId = $userData['id'] ?? null;
+        if (!$userId) {
+            return redirect()->to(base_url('login'));
+        }
+
+        $project = $this->projectModel->getProjectById($id);
+        if (!$project) {
+            throw \CodeIgniter\Exceptions\PageNotFoundException::forPageNotFound();
+        }
+
+        $templates = $this->projectModel->getTaskTemplates();
+        $data = [
+            'project' => $project,
+            'templates' => $templates
+        ];
+        return $this->template->member('projects/project_task', $data);
     }
     
     public function index()
@@ -50,23 +72,19 @@ class Projects extends BaseController
     {
         $userData = session('userdata');
         $userId = $userData['id'] ?? null;
-        
         if (!$userId) {
             return redirect()->to(base_url('login'));
         }
-
         if ($this->request->getMethod() === 'POST') {
             // Get lookup IDs for status and priority
             $statusLookup = $this->db->table('status_lookup')
                                    ->where('type', 'project')
                                    ->where('code', $this->request->getPost('status') ?: 'planning')
                                    ->get()->getRowArray();
-            
             $priorityLookup = $this->db->table('priority_lookup')
                                      ->where('type', 'project')
                                      ->where('code', $this->request->getPost('priority') ?: 'medium')
                                      ->get()->getRowArray();
-            
             $projectData = [
                 'name' => $this->request->getPost('name'),
                 'code' => $this->request->getPost('code'),
@@ -76,21 +94,17 @@ class Projects extends BaseController
                 'budget' => $this->request->getPost('budget'),
                 'progress' => 0
             ];
-            
             if ($projectId = $this->projectModel->createProject($projectData)) {
                 // Set project status
                 if ($statusLookup) {
                     $this->projectModel->setProjectStatus($projectId, $statusLookup['id'], $userId);
                 }
-                
                 // Set project priority
                 if ($priorityLookup) {
                     $this->projectModel->setProjectPriority($projectId, $priorityLookup['id'], $userId);
                 }
-                
                 // Add creator as project manager
                 $this->projectModel->addProjectMember($projectId, $userId, 'manager', $userId);
-                
                 // Log activity
                 $this->activityLog->logActivity([
                     'user_id' => $userId,
@@ -99,7 +113,6 @@ class Projects extends BaseController
                     'record_id' => $projectId,
                     'new_values' => json_encode($projectData)
                 ]);
-                
                 return $this->response->setJSON([
                     'success' => true,
                     'message' => 'Project created successfully',
@@ -112,7 +125,6 @@ class Projects extends BaseController
                 ]);
             }
         }
-        
         return $this->template->member('projects/create');
     }
     
@@ -568,6 +580,169 @@ class Projects extends BaseController
         return $this->response->setJSON([
             'success' => true,
             'chartData' => $data
+        ]);
+    }
+
+    // Get all task templates (AJAX)
+    public function get_task_templates()
+    {
+        $templates = $this->projectModel->getTaskTemplates();
+        foreach ($templates as &$tmpl) {
+            $tmpl['progress'] = $this->projectModel->getTemplateProgress($tmpl['code']);
+        }
+        unset($tmpl);
+        return $this->response->setJSON([
+            'success' => true,
+            'templates' => $templates
+        ]);
+    }
+
+    // Dynamic task page for a template (Excel-like flexibility)
+    public function task_page($template_code)
+    {
+        $userData = session('userdata');
+        $userId = $userData['id'] ?? null;
+        if (!$userId) {
+            return redirect()->to(base_url('auth/login'));
+        }
+
+        // Get project_id from query string (or route param if you prefer)
+        $project_id = $this->request->getGet('project_id');
+        if (!$project_id) {
+            // Optionally, redirect or show error if project_id is missing
+            return redirect()->to(base_url('projects'));
+        }
+
+        // Fetch template by code
+        $template = $this->projectModel->getTaskTemplateByCode($template_code);
+
+        $fields = [];
+        if ($template && !empty($template['fields'])) {
+            $fields = json_decode($template['fields'], true);
+            if (!is_array($fields)) $fields = [];
+        }
+
+        // Fetch tasks for this template and project
+        $tasks = $this->projectModel->getTasksByTemplateAndProject($template_code, $project_id);
+
+        return $this->template->member('projects/task_dynamic', [
+            'template' => $template,
+            'fields' => $fields,
+            'tasks' => $tasks,
+            'project_id' => $project_id
+        ]);
+    // Add new task (show form for dynamic template)
+    }
+
+    public function add_task()
+    {
+        $template_code = $this->request->getGet('template');
+        $template = $this->projectModel->getTaskTemplateByCode($template_code);
+        if (!$template) {
+            return $this->response->setJSON([
+                'success' => false,
+                'message' => 'Template not found'
+            ]);
+        }
+        $fields = json_decode($template['fields'] ?? '[]', true);
+        $data = [
+            'template' => $template,
+            'fields' => $fields
+        ];
+        return $this->template->member('projects/add_task', $data);
+    }
+
+    // Autosave task (AJAX, dynamic fields)
+    public function save_task()
+    {
+        $taskId = $this->request->getPost('id');
+        $template_code = $this->request->getPost('template_code');
+        pr($this->request->getPost());
+        $project_id = $this->request->getPost('project_id');
+        $template = $this->projectModel->getTaskTemplateByCode($template_code);
+        // pr($template);
+        if (!$template) {
+            return $this->response->setJSON([
+                'success' => false,
+                'message' => 'Template not found'
+            ]);
+        }
+        $fields = json_decode($template['fields'] ?? '[]', true);
+        $taskData = [];
+        // pr($fields);
+        foreach ($fields as $field) {
+            $taskData[$field] = $this->request->getPost($field);
+        }
+        if (!$taskId) {
+            // Insert new task
+            $newId = $this->projectModel->insertDynamicTask([
+                'project_id' => $project_id,
+                'template_id' => $template['id'],
+                'data' => json_encode($taskData)
+            ]);
+            return $this->response->setJSON([
+                'success' => !!$newId,
+                'task_id' => $newId
+            ]);
+        } else {
+            // Update existing task
+            $result = $this->projectModel->autosaveTask($taskId, [
+                'template_code' => $template_code,
+                'data' => json_encode($taskData)
+            ]);
+            return $this->response->setJSON([
+                'success' => $result
+            ]);
+        }
+    }
+
+    // Project list view
+    public function project_list()
+    {
+        $userData = session('userdata');
+        $userId = $userData['id'] ?? null;
+        if (!$userId) {
+            return redirect()->to(base_url('login'));
+        }
+        $projects = $this->projectModel->getUserProjects($userId);
+        $status_options = $this->db->table('status_lookup')->where('type', 'project')->get()->getResultArray();
+        $priority_options = $this->db->table('priority_lookup')->where('type', 'project')->get()->getResultArray();
+        $status_colors = [
+            'pending' => 'warning',
+            'in_progress' => 'primary',
+            'review' => 'info',
+            'completed' => 'success'
+        ];
+        $priority_colors = [
+            'low' => 'secondary',
+            'medium' => 'info',
+            'high' => 'warning',
+            'urgent' => 'danger'
+        ];
+        $data = [
+            'projects' => $projects,
+            'status_options' => $status_options,
+            'priority_options' => $priority_options,
+            'status_colors' => $status_colors,
+            'priority_colors' => $priority_colors
+        ];
+        return $this->template->member('projects/project_list', $data);
+    }
+
+        // AJAX: Delete a dynamic task row
+    public function delete_task()
+    {
+        $taskId = $this->request->getPost('id');
+        if (!$taskId) {
+            return $this->response->setJSON([
+                'success' => false,
+                'message' => 'No task ID provided.'
+            ]);
+        }
+        $result = $this->projectModel->deleteTaskById($taskId);
+        return $this->response->setJSON([
+            'success' => $result,
+            'message' => $result ? 'Task deleted.' : 'Failed to delete task.'
         ]);
     }
 }

@@ -30,7 +30,7 @@
                 <?php endif; ?>
                 <p class="mb-0 opacity-75">
                     <i class="fas fa-calendar me-2"></i>
-                    Member since <?= !empty($user['created_at']) ? date('F Y', strtotime($user['created_at'])) : 'N/A' ?>
+                    Member since <?= !empty($user['date_created']) ? date('F Y', strtotime($user['date_created'])) : 'N/A' ?>
                 </p>
             </div>
             <div class="col-auto">
@@ -83,7 +83,7 @@
                             <div style="position: relative; margin-bottom: 2rem; background: white; border-radius: 0.75rem; padding: 1.5rem; box-shadow: 0 2px 4px rgba(0,0,0,0.05); margin-left: 1rem;">
                                 <div style="content: ''; position: absolute; left: -2.5rem; top: 1.5rem; width: 12px; height: 12px; background: #667eea; border-radius: 50%; border: 3px solid white; box-shadow: 0 0 0 3px #e5e7eb;"></div>
                                 <div style="color: #9ca3af; font-size: 0.875rem; font-weight: 500; margin-bottom: 0.5rem;">
-                                    <?= date('M j, Y - H:i', strtotime($activity['created_at'])) ?>
+                                    <?= date('M j, Y - H:i', strtotime($activity['date_created'])) ?>
                                 </div>
                                 <div>
                                     <h6 style="color: #374151; font-weight: 600; margin-bottom: 0.25rem;"><?= esc($activity['action']) ?></h6>
@@ -134,7 +134,7 @@
                                 if (!empty($user['phone'])) $fieldsFilled++;
                                 if (!empty($user['avatar'])) $fieldsFilled++;
                                 if (!empty($user['email'])) $fieldsFilled++;
-                                if (!empty($user['last_login'])) $fieldsFilled++;
+                                // if (!empty($user['last_login'])) $fieldsFilled++;
                                 $profilePercent = round(($fieldsFilled / $fieldsTotal) * 100);
                             ?>
                             <div style="width: <?= $profilePercent ?>%; background: linear-gradient(90deg, #667eea 0%, #764ba2 100%); height: 100%; transition: width 0.5s;"></div>
@@ -169,12 +169,7 @@
                             <?= $user['is_active'] ? '<span class="badge bg-success">Active</span>' : '<span class="badge bg-danger">Inactive</span>' ?>
                         </span>
                     </li>
-                    <li class="list-group-item d-flex align-items-center" style="background: transparent; border: none; padding: 0.85rem 0; gap: 0.75rem;">
-                        <span style="color: #667eea; background: #e0e7ff; border-radius: 50%; width: 36px; height: 36px; display: flex; align-items: center; justify-content: center; font-size: 1.2rem;"><i class="fas fa-clock"></i></span>
-                        <span style="color: #374151; font-weight: 600; font-size: 1rem;">
-                            <?= !empty($user['last_login']) ? date('M j, Y H:i', strtotime($user['last_login'])) : 'Never' ?>
-                        </span>
-                    </li>
+                    
                 </ul>
                 <div class="mt-4 d-grid gap-2">
                     <a href="<?= base_url('profile/edit') ?>" class="btn btn-primary" style="font-weight:600; border-radius:0.75rem;">

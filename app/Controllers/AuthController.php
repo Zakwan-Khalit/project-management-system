@@ -36,6 +36,7 @@ class AuthController extends BaseController
             
             try {
                 $user = $this->userModel->getUserByEmail($email);
+                // pr($user);
                 log_message('info', 'User found: ' . ($user ? 'Yes (ID: ' . $user['id'] . ')' : 'No'));
                 
                 if ($user && password_verify($password, $user['password'])) {
@@ -43,8 +44,8 @@ class AuthController extends BaseController
                         log_message('info', 'Login successful for user ID: ' . $user['id']);
                         
                         // Update last login
-                        $this->userModel->updateLastLogin($user['id']);
-                        
+                        // $this->userModel->updateLastLogin($user['id']);
+                        // pr('User last login updated');
                         // Set session data
                         $sessionData = [
                             'id' => $user['id'],
@@ -53,9 +54,9 @@ class AuthController extends BaseController
                             'last_name' => $user['last_name'] ?? '',
                             'role_id' => $user['role_id'] ?? null,
                             'role_name' => $user['role_name'] ?? '',
-                            'avatar' => $user['avatar'] ?? null,
                             'is_logged_in' => true
                         ];
+                        // pr($sessionData);
                         
                         // Start session and set data
                         session()->start();
@@ -169,12 +170,12 @@ class AuthController extends BaseController
             ];
             
             // Handle avatar upload
-            $avatar = $this->request->getFile('avatar');
-            if ($avatar && $avatar->isValid() && !$avatar->hasMoved()) {
-                $newName = $avatar->getRandomName();
-                $avatar->move(WRITEPATH . 'uploads/avatars', $newName);
-                $data['avatar'] = $newName;
-            }
+            // $avatar = $this->request->getFile('avatar');
+            // if ($avatar && $avatar->isValid() && !$avatar->hasMoved()) {
+            //     $newName = $avatar->getRandomName();
+            //     $avatar->move(WRITEPATH . 'uploads/avatars', $newName);
+            //     $data['avatar'] = $newName;
+            // }
             
             if ($this->userModel->update($userId, $data)) {
                 // Update session userdata
@@ -183,9 +184,9 @@ class AuthController extends BaseController
                     'last_name' => $data['last_name']
                 ]);
                 
-                if (isset($data['avatar'])) {
-                    $updatedUserData['avatar'] = $data['avatar'];
-                }
+                // if (isset($data['avatar'])) {
+                //     $updatedUserData['avatar'] = $data['avatar'];
+                // }
                 
                 session()->set('userdata', $updatedUserData);
                 
@@ -284,9 +285,9 @@ class AuthController extends BaseController
                     'first_name' => $user['first_name'],
                     'last_name' => $user['last_name'],
                     'role' => $user['role'],
-                    'avatar' => $user['avatar'],
+                    // 'avatar' => $user['avatar'],
                     'is_active' => $user['is_active'],
-                    'created_at' => $user['created_at'],
+                    'date_created' => $user['date_created'],
                     'last_login' => $user['last_login']
                 ];
                 
