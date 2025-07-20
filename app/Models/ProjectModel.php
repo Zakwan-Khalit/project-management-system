@@ -30,16 +30,18 @@ class ProjectModel extends Model
                 ->countAllResults();
             $progress = round(($completed / $total) * 100, 2);
         }
-
-        // Update the project
-        $this->db->table('projects')
-            ->where('id', $projectId)
-            ->update([
-                'progress' => $progress,
-                'date_modified' => date('Y-m-d H:i:s')
-            ]);
-        return $progress;
+        // (duplicate code removed)
     }
+
+    public function updateTaskOrder($taskOrder)
+    {
+        if (!is_array($taskOrder)) return false;
+        foreach ($taskOrder as $idx => $taskId) {
+            $this->db->table('tasks')->where('id', $taskId)->update(['`task_order`' => $idx + 1]);
+        }
+        return true;
+    }
+
     // Check if a user has access to a project (is an active, non-deleted member)
     public function userHasAccess($userId, $projectId)
     {
@@ -555,6 +557,13 @@ class ProjectModel extends Model
     public function insertDynamicTask($data)
     {
         if (empty($data['project_id']) || empty($data['template_id']) || empty($data['data'])) return false;
+        // Find max task_order for this project/template
+        $builder = $this->db->table('tasks');
+        $builder->selectMax('`task_order`', 'max_order');
+        $builder->where('project_id', $data['project_id']);
+        $builder->where('template_id', $data['template_id']);
+        $maxOrderRow = $builder->get()->getRowArray();
+        $nextOrder = isset($maxOrderRow['max_order']) ? ((int)$maxOrderRow['max_order'] + 1) : 1;
         $this->db->table('tasks')->insert([
             'project_id' => $data['project_id'],
             'template_id' => $data['template_id'],
@@ -562,7 +571,8 @@ class ProjectModel extends Model
             'date_created' => date('Y-m-d H:i:s'),
             'date_modified' => date('Y-m-d H:i:s'),
             'is_active' => 1,
-            'is_delete' => 0
+            'is_delete' => 0,
+            '`task_order`' => $nextOrder
         ]);
         return $this->db->insertID();
     }
@@ -577,6 +587,7 @@ class ProjectModel extends Model
         $builder->where('template_id', $template_id);
         $builder->where('project_id', $project_id);
         $builder->where('is_delete', 0);
+        $builder->orderBy('`task_order`', 'ASC');
         $tasks = $builder->get()->getResultArray();
         // Decode data JSON for each task
         foreach ($tasks as &$task) {

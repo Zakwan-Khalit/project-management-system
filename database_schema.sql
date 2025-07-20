@@ -241,6 +241,7 @@ CREATE TABLE `tasks` (
     `data` json,
     `is_active` tinyint(1) DEFAULT 1,
     `is_delete` tinyint(1) DEFAULT 0,
+    `order` int(11) DEFAULT 0,
     `date_created` TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
     `date_modified` TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
     PRIMARY KEY (`id`)

@@ -761,4 +761,20 @@ class Projects extends BaseController
             'message' => $result ? 'Task deleted.' : 'Failed to delete task.'
         ]);
     }
+
+    // AJAX endpoint to update task order after drag-and-drop
+    public function update_task_order()
+    {
+        $taskOrder = $this->request->getPost('task_order'); // expects array of task IDs
+        if (!is_array($taskOrder)) {
+            return $this->response->setJSON([
+                'success' => false,
+                'message' => 'Invalid order data'
+            ]);
+        }
+        $result = $this->projectModel->updateTaskOrder($taskOrder);
+        return $this->response->setJSON([
+            'success' => $result
+        ]);
+    }
 }

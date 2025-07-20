@@ -40,31 +40,45 @@ $(document).ready(function() {
                     'cursor: pointer',
                     'transition: box-shadow 0.3s, transform 0.3s, background 0.3s'
                 ].join(';');
+                const progressSize = 48;
+                const radius = 20;
+                const strokeBg = 7;
+                const strokeFg = 7;
+                const circumference = 2 * Math.PI * radius;
+                const percent = Math.round(tmpl.progress ?? 0);
+                const fgColor = percent === 100 ? '#22c55e' : '#667eea';
+                const textColor = percent === 100 ? '#22c55e' : '#4338ca';
                 const progressCircleStyle = [
-                    'width: 40px',
-                    'height: 40px',
+                    `width: ${progressSize}px`,
+                    `height: ${progressSize}px`,
                     'position: relative',
-                    'display: block'
+                    'display: block',
+                    'background: linear-gradient(135deg, #f3f4f6 0%, #e0e7ff 100%)',
+                    'border-radius: 50%'
                 ].join(';');
                 const progressTextStyle = [
                     'position: absolute',
                     'top: 50%',
                     'left: 50%',
                     'transform: translate(-50%, -50%)',
-                    'font-size: 0.95rem',
-                    'font-weight: 700',
-                    'color: #667eea'
+                    'font-size: 1.15rem',
+                    'font-weight: 800',
+                    `color: ${percent === 100 ? '#166534' : textColor}`,
+                    'text-shadow: 0 0 2px #fff, 0 1px 4px rgba(0,0,0,0.08)'
                 ].join(';');
                 $('#taskTemplateList').append(`
                     <div class="task-template-card task-template-item" data-template-code="${tmpl.code}" style="${cardStyle}">
                         <div class="d-flex align-items-center gap-3">
                             <span style="font-family: 'Poppins', sans-serif; font-weight:700; font-size:1.15rem; color:#3b3b3b;">${tmpl.name}</span>
                             <div class="progress-circle" style="${progressCircleStyle}">
-                                <svg width="40" height="40" style="display:block;">
-                                    <circle cx="20" cy="20" r="16" stroke="#e2e8f0" stroke-width="6" fill="none"/>
-                                    <circle cx="20" cy="20" r="16" stroke="#667eea" stroke-width="6" fill="none" stroke-dasharray="100.48" stroke-dashoffset="${100.48 - (100.48 * (tmpl.progress ?? 0) / 100)}" style="transition: stroke-dashoffset 0.5s;"/>
+                                <svg width="${progressSize}" height="${progressSize}" style="display:block;">
+                                    <circle cx="${progressSize/2}" cy="${progressSize/2}" r="${radius}" stroke="#e2e8f0" stroke-width="${strokeBg}" fill="none"/>
+                                    <circle cx="${progressSize/2}" cy="${progressSize/2}" r="${radius}" stroke="${fgColor}" stroke-width="${strokeFg}" fill="none"
+                                        stroke-dasharray="${circumference}"
+                                        stroke-dashoffset="${circumference - (circumference * percent / 100)}"
+                                        style="transition: stroke-dashoffset 0.6s cubic-bezier(.4,2,.3,1); stroke-linecap:round; filter: drop-shadow(0 2px 6px rgba(102,126,234,0.10));"/>
                                 </svg>
-                                <span style="${progressTextStyle}">${Math.round(tmpl.progress ?? 0)}%</span>
+                                <span style="${progressTextStyle}">${percent}%</span>
                             </div>
                         </div>
                         <i class="fas fa-chevron-right" style="font-size:1.3rem; color:#667eea;"></i>

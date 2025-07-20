@@ -122,10 +122,10 @@ INSERT INTO `task_templates` (`id`, `code`, `name`, `description`, `fields`) VAL
 (3, 'fat', 'Factory Acceptance Testing', 'FAT Template', '["Title","Description","Status","Owner","Last Modified"]');
 
 -- Insert tasks referencing correct template_id
-INSERT INTO `tasks` (`project_id`, `template_id`, `data`, `is_active`, `is_delete`, `date_created`, `date_modified`) VALUES
-(1, 2, '{"Module":"Login","Sub Module":"Frontend","Item":"Login Button","Priority Level":"high","PIC":"Ali","Status":"in_progress","Progress":60,"Start Date":"2025-01-02","End Date":"2025-01-05","Notes":"UI needs improvement"}', 1, 0, NOW(), NOW()),
-(1, 2, '{"Module":"Register","Sub Module":"Backend","Item":"Register API","Priority Level":"medium","PIC":"Sara","Status":"todo","Progress":0,"Start Date":"2025-01-03","End Date":"2025-01-10","Notes":"API pending"}', 1, 0, NOW(), NOW()),
-(1, 1, '{"Title":"Requirements Gathering","Description":"Initial requirements","Status":"planning","Owner":"Ali","Last Modified":"2025-01-02"}', 1, 0, NOW(), NOW()),
-(1, 3, '{"Title":"Factory Test Case","Description":"Test login flow","Status":"todo","Owner":"Sara","Last Modified":"2025-01-05"}', 1, 0, NOW(), NOW()),
-(1, 2, '{"Module":"Login","Sub Module":"Backend","Item":"Authentication API","Priority Level":"urgent","PIC":"Siti","Status":"todo","Progress":0,"Start Date":"2025-01-02","End Date":"2025-01-06","Notes":"Pending API integration"}', 1, 0, NOW(), NOW()),
-(1, 2, '{"Module":"Dashboard","Sub Module":"Charts","Item":"Progress Chart","Priority Level":"medium","PIC":"John","Status":"review","Progress":80,"Start Date":"2025-01-10","End Date":"2025-01-15","Notes":"Awaiting feedback"}', 1, 0, NOW(), NOW());
+INSERT INTO `tasks` (`project_id`, `template_id`, `data`, `is_active`, `is_delete`, `task_order`, `date_created`, `date_modified`) VALUES
+ (1, 2, '{"Module":"Login","Sub Module":"Frontend","Item":"Login Button","Priority Level":"high","PIC":"Ali","Status":"in_progress","Progress":60,"Start Date":"2025-01-02","End Date":"2025-01-05","Notes":"UI needs improvement"}', 1, 0, 1, NOW(), NOW()),
+ (1, 2, '{"Module":"Register","Sub Module":"Backend","Item":"Register API","Priority Level":"medium","PIC":"Sara","Status":"todo","Progress":0,"Start Date":"2025-01-03","End Date":"2025-01-10","Notes":"API pending"}', 1, 0, 2, NOW(), NOW()),
+ (1, 1, '{"Title":"Requirements Gathering","Description":"Initial requirements","Status":"planning","Owner":"Ali","Last Modified":"2025-01-02"}', 1, 0, 3, NOW(), NOW()),
+ (1, 3, '{"Title":"Factory Test Case","Description":"Test login flow","Status":"todo","Owner":"Sara","Last Modified":"2025-01-05"}', 1, 0, 4, NOW(), NOW()),
+ (1, 2, '{"Module":"Login","Sub Module":"Backend","Item":"Authentication API","Priority Level":"urgent","PIC":"Siti","Status":"todo","Progress":0,"Start Date":"2025-01-02","End Date":"2025-01-06","Notes":"Pending API integration"}', 1, 0, 5, NOW(), NOW()),
+ (1, 2, '{"Module":"Dashboard","Sub Module":"Charts","Item":"Progress Chart","Priority Level":"medium","PIC":"John","Status":"review","Progress":80,"Start Date":"2025-01-10","End Date":"2025-01-15","Notes":"Awaiting feedback"}', 1, 0, 6, NOW(), NOW());
