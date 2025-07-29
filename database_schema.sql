@@ -10,7 +10,6 @@ USE `project_management_system`;
 -- Status lookup table
 CREATE TABLE `status_lookup` (
     `id` int(11) NOT NULL AUTO_INCREMENT,
-    `type` varchar(32),
     `code` varchar(32),
     `name` varchar(128),
     `description` text,
@@ -26,7 +25,6 @@ CREATE TABLE `status_lookup` (
 
 -- Priority lookup table
 CREATE TABLE `priority_lookup` (
-    `id` int(11) NOT NULL AUTO_INCREMENT,
     `type` varchar(32),
     `code` varchar(32),
     `name` varchar(128),
@@ -71,6 +69,20 @@ CREATE TABLE `position_lookup` (
     KEY `is_delete` (`is_delete`),
     PRIMARY KEY (`id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+
+-- Table for storing images related to tasks
+CREATE TABLE `task_images` (
+  `id` INT AUTO_INCREMENT PRIMARY KEY,
+  `task_id` INT NOT NULL,
+  `file_name` VARCHAR(255) NOT NULL,
+  `file_address` VARCHAR(255) NOT NULL,
+  `is_active` tinyint(1) DEFAULT 1,
+  `is_delete` tinyint(1) DEFAULT 0,
+  `date_created` DATETIME DEFAULT CURRENT_TIMESTAMP,
+  `date_modified` TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+  FOREIGN KEY (`task_id`) REFERENCES `tasks`(`id`) ON DELETE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+
 
 -- User role lookup table
 CREATE TABLE `user_role_lookup` (
@@ -241,7 +253,7 @@ CREATE TABLE `tasks` (
     `data` json,
     `is_active` tinyint(1) DEFAULT 1,
     `is_delete` tinyint(1) DEFAULT 0,
-    `order` int(11) DEFAULT 0,
+    `task_order` int(11) DEFAULT 0,
     `date_created` TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
     `date_modified` TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
     PRIMARY KEY (`id`)

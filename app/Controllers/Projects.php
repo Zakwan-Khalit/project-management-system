@@ -9,6 +9,26 @@ use App\Models\ActivityLogModel;
 
 class Projects extends BaseController
 {
+
+    // AJAX: Get all tasks for a template and project (for dynamic progress bar)
+    public function get_tasks_by_template($template_code, $project_id)
+    {
+        // Security: check user session
+        $userData = session('userdata');
+        $userId = $userData['id'] ?? null;
+        if (!$userId) {
+            return $this->response->setJSON([
+                'success' => false,
+                'message' => 'User not authenticated'
+            ]);
+        }
+        // Fetch tasks for this template and project
+        $tasks = $this->projectModel->getTasksByTemplateAndProject($template_code, $project_id);
+        return $this->response->setJSON([
+            'success' => true,
+            'tasks' => $tasks
+        ]);
+    }
     protected $projectModel;
     protected $taskModel;
     protected $userModel;
@@ -22,6 +42,36 @@ class Projects extends BaseController
         $this->userModel = new UserModel();
         $this->activityLog = new ActivityLogModel();
         $this->db = \Config\Database::connect();
+    }
+
+    // AJAX: Get all users for a project (for dynamic task dropdowns)
+    public function project_users($projectId)
+    {
+        $userData = session('userdata');
+        $userId = $userData['id'] ?? null;
+        if (!$userId) {
+            return $this->response->setJSON([
+                'success' => false,
+                'message' => 'User not authenticated'
+            ]);
+        }
+        // Use the helper or model to get all users for this project
+        if (!function_exists('get_project_users')) {
+            helper('general');
+        }
+        $users = get_project_users($projectId);
+        // Format for select options
+        $formatted = array_map(function($u) {
+            return [
+                'user_id' => $u['user_id'],
+                'first_name' => $u['first_name'],
+                'last_name' => $u['last_name']
+            ];
+        }, $users);
+        return $this->response->setJSON([
+            'success' => true,
+            'users' => $formatted
+        ]);
     }
 
     // Project Task View (for project_task route)
@@ -76,15 +126,8 @@ class Projects extends BaseController
             return redirect()->to(base_url('login'));
         }
         if ($this->request->getMethod() === 'POST') {
-            // Get lookup IDs for status and priority
-            $statusLookup = $this->db->table('status_lookup')
-                                   ->where('type', 'project')
-                                   ->where('code', $this->request->getPost('status') ?: 'planning')
-                                   ->get()->getRowArray();
-            $priorityLookup = $this->db->table('priority_lookup')
-                                     ->where('type', 'project')
-                                     ->where('code', $this->request->getPost('priority') ?: 'medium')
-                                     ->get()->getRowArray();
+            $statusCode = $this->request->getPost('status') ?: 'planning';
+            $statusLookup = $this->projectModel->getProjectStatusByCode($statusCode);
             $projectData = [
                 'name' => $this->request->getPost('name'),
                 'code' => $this->request->getPost('code'),
@@ -92,16 +135,12 @@ class Projects extends BaseController
                 'start_date' => $this->request->getPost('start_date'),
                 'end_date' => $this->request->getPost('end_date'),
                 'budget' => $this->request->getPost('budget'),
-                'progress' => 0
             ];
+            // pr($projectData);
             if ($projectId = $this->projectModel->createProject($projectData)) {
-                // Set project status
+                // Set project status using model
                 if ($statusLookup) {
-                    $this->projectModel->setProjectStatus($projectId, $statusLookup['id'], $userId);
-                }
-                // Set project priority
-                if ($priorityLookup) {
-                    $this->projectModel->setProjectPriority($projectId, $priorityLookup['id'], $userId);
+                    $this->projectModel->setProjectStatusById($projectId, $statusLookup['id'], $userId);
                 }
                 // Add creator as project manager
                 $this->projectModel->addProjectMember($projectId, $userId, 'manager', $userId);
@@ -109,9 +148,10 @@ class Projects extends BaseController
                 $this->activityLog->logActivity([
                     'user_id' => $userId,
                     'action' => 'project_created',
-                    'table_name' => 'projects',
-                    'record_id' => $projectId,
-                    'new_values' => json_encode($projectData)
+                    'details' => json_encode([
+                        'project_id' => $projectId,
+                        'data' => $projectData
+                    ])
                 ]);
                 return $this->response->setJSON([
                     'success' => true,
@@ -138,7 +178,10 @@ class Projects extends BaseController
         $tasks = $this->taskModel->getKanbanTasks($id);
         $members = $this->userModel->getProjectMembers($id);
         $stats = $this->projectModel->getProjectsWithDetails($id);
-        $activities = $this->activityLog->getProjectActivity($id, 10);
+        $activities = $this->activityLog->getActivityLogs([
+            'action' => 'project_created',
+            'limit' => 10
+        ]);
         
         $data = [
             'title' => $project['name'],
@@ -172,7 +215,6 @@ class Projects extends BaseController
         
         if ($this->request->getMethod() === 'POST') {
             $oldData = $project;
-            
             $projectData = [
                 'name' => $this->request->getPost('name'),
                 'code' => $this->request->getPost('code'),
@@ -181,42 +223,25 @@ class Projects extends BaseController
                 'end_date' => $this->request->getPost('end_date'),
                 'budget' => $this->request->getPost('budget')
             ];
-            
             if ($this->projectModel->updateProject($id, $projectData)) {
-                // Update status if provided
+                // Update status if provided using model
                 $newStatus = $this->request->getPost('status');
                 if ($newStatus) {
-                    $statusLookup = $this->db->table('status_lookup')
-                                           ->where('type', 'project')
-                                           ->where('code', $newStatus)
-                                           ->get()->getRowArray();
+                    $statusLookup = $this->projectModel->getProjectStatusByCode($newStatus);
                     if ($statusLookup) {
-                        $this->projectModel->setProjectStatus($id, $statusLookup['id'], $userId);
+                        $this->projectModel->setProjectStatusById($id, $statusLookup['id'], $userId);
                     }
                 }
-                
-                // Update priority if provided
-                $newPriority = $this->request->getPost('priority');
-                if ($newPriority) {
-                    $priorityLookup = $this->db->table('priority_lookup')
-                                             ->where('type', 'project')
-                                             ->where('code', $newPriority)
-                                             ->get()->getRowArray();
-                    if ($priorityLookup) {
-                        $this->projectModel->setProjectPriority($id, $priorityLookup['id'], $userId);
-                    }
-                }
-                
                 // Log activity
                 $this->activityLog->logActivity([
                     'user_id' => $userId,
                     'action' => 'project_updated',
-                    'table_name' => 'projects',
-                    'record_id' => $id,
-                    'old_values' => json_encode($oldData),
-                    'new_values' => json_encode($projectData)
+                    'details' => json_encode([
+                        'project_id' => $id,
+                        'old' => $oldData,
+                        'new' => $projectData
+                    ])
                 ]);
-                
                 return $this->response->setJSON([
                     'success' => true,
                     'message' => 'Project updated successfully'
@@ -228,7 +253,6 @@ class Projects extends BaseController
                 ]);
             }
         }
-        
         return $this->template->member('projects/edit', ['project' => $project]);
     }
     
@@ -257,9 +281,10 @@ class Projects extends BaseController
             $this->activityLog->logActivity([
                 'user_id' => $userId,
                 'action' => 'project_deleted',
-                'table_name' => 'projects',
-                'record_id' => $id,
-                'old_values' => json_encode($project)
+                'details' => json_encode([
+                    'project_id' => $id,
+                    'old' => $project
+                ])
             ]);
             
             return $this->response->setJSON([
@@ -305,9 +330,11 @@ class Projects extends BaseController
             $this->activityLog->logActivity([
                 'user_id' => $userId,
                 'action' => 'member_added',
-                'table_name' => 'project_members',
-                'record_id' => $projectId,
-                'new_values' => json_encode(['user_id' => $memberUserId, 'role' => $role])
+                'details' => json_encode([
+                    'project_id' => $projectId,
+                    'user_id' => $memberUserId,
+                    'role' => $role
+                ])
             ]);
             
             return $this->response->setJSON([
@@ -342,9 +369,10 @@ class Projects extends BaseController
             $this->activityLog->logActivity([
                 'user_id' => $userId,
                 'action' => 'member_removed',
-                'table_name' => 'project_members',
-                'record_id' => $projectId,
-                'old_values' => json_encode(['user_id' => $memberUserId])
+                'details' => json_encode([
+                    'project_id' => $projectId,
+                    'user_id' => $memberUserId
+                ])
             ]);
             
             return $this->response->setJSON([
@@ -476,19 +504,41 @@ class Projects extends BaseController
         }
         // Add owner name
         $owner = $this->userModel->getUserById($project['owner_id'] ?? 0);
-        $project['owner_name'] = $owner ? (($owner['first_name'] ?? '') . ' ' . ($owner['last_name'] ?? '')) : 'Unknown';
+        $project['owner_name'] = $owner ? trim(($owner['first_name'] ?? '') . ' ' . ($owner['last_name'] ?? '')) : 'Unknown';
 
-        // Always provide status and priority fields for frontend
-        $project['status'] = $project['status_name'] ?? 'unknown';
-        $project['priority'] = $project['priority_name'] ?? 'medium';
-        // Optionally add color fields if needed by frontend
-        $project['status_color'] = $project['status_color'] ?? null;
-        $project['priority_color'] = $project['priority_color'] ?? null;
+        // Calculate progress as in project_list (index): (completed_tasks / total_tasks) * 100
+        $taskBuilder = $this->db->table('tasks t');
+        $taskBuilder->select('COUNT(*) as total_tasks');
+        $taskBuilder->where('t.project_id', $project['id']);
+        $taskBuilder->where('t.is_delete', 0);
+        $taskStats = $taskBuilder->get()->getRowArray();
 
-        // Ensure progress is always set
-        if (!isset($project['progress'])) {
-            $project['progress'] = 0;
-        }
+        $completedBuilder = $this->db->table('tasks t');
+        $completedBuilder->select('COUNT(*) as completed_tasks');
+        $completedBuilder->join('task_status ts', 'ts.task_id = t.id AND ts.is_active = 1 AND ts.is_delete = 0', 'left');
+        $completedBuilder->join('status_lookup sl', 'sl.id = ts.status_id AND sl.code = "completed" AND sl.is_delete = 0', 'left');
+        $completedBuilder->where('t.project_id', $project['id']);
+        $completedBuilder->where('t.is_delete', 0);
+        $completedBuilder->where('sl.id IS NOT NULL');
+        $completedStats = $completedBuilder->get()->getRowArray();
+
+        $totalTasks = (int)$taskStats['total_tasks'];
+        $completedTasks = (int)$completedStats['completed_tasks'];
+        $progress = $totalTasks > 0 ? round(($completedTasks / $totalTasks) * 100, 2) : 0;
+
+        $project['progress'] = $progress;
+        $project['total_tasks'] = $totalTasks;
+        $project['completed_tasks'] = $completedTasks;
+
+        // Ensure all fields are set and never null/empty for frontend
+        $project['name'] = $project['name'] ?? 'Untitled';
+        $project['description'] = $project['description'] ?? '';
+        $project['start_date'] = $project['start_date'] ?? 'N/A';
+        $project['end_date'] = $project['end_date'] ?? 'N/A';
+        $project['budget'] = $project['budget'] ?? 'N/A';
+        $project['client'] = $project['client'] ?? 'N/A';
+        $project['status'] = $project['status_name'] ?? 'Unknown';
+        $project['status_color'] = $project['status_color'] ?? '#e2e8f0';
 
         return $this->response->setJSON([
             'success' => true,
@@ -528,7 +578,7 @@ class Projects extends BaseController
     public function tasks($id)
     {
         $tasks = $this->taskModel->getTasksWithDetails($id);
-        // Ensure each task has status and priority fields for frontend
+        // Ensure each task has status and priority fields for frontend, and decode task fields from data JSON
         foreach ($tasks as &$task) {
             $task['status'] = $task['status_name'] ?? 'todo';
             $task['priority'] = $task['priority_name'] ?? 'medium';
@@ -536,6 +586,17 @@ class Projects extends BaseController
             if (!isset($task['assignee_name'])) {
                 $task['assignee_name'] = ($task['owner_first_name'] ?? '') . ' ' . ($task['owner_last_name'] ?? '');
                 $task['assignee_name'] = trim($task['assignee_name']) ?: null;
+            }
+            // Ensure task fields are available at top level for frontend
+            if (isset($task['data'])) {
+                $dataArr = is_array($task['data']) ? $task['data'] : json_decode($task['data'], true);
+                if (is_array($dataArr)) {
+                    foreach ($dataArr as $k => $v) {
+                        if (!isset($task[$k])) {
+                            $task[$k] = $v;
+                        }
+                    }
+                }
             }
         }
         unset($task);
@@ -597,7 +658,7 @@ class Projects extends BaseController
         ]);
     }
 
-    // Dynamic task page for a template (Excel-like flexibility)
+    // get_task_templates task page for a template (Excel-like flexibility)
     public function task_page($template_code)
     {
         $userData = session('userdata');
@@ -721,26 +782,56 @@ class Projects extends BaseController
             return redirect()->to(base_url('login'));
         }
         $projects = $this->projectModel->getUserProjects($userId);
+        foreach ($projects as &$project) {
+            $project['task_count'] = $this->taskModel->countTasksByProject($project['id']);
+            // Calculate average progress from 'progress' field in decoded data JSON of all tasks in this project
+            $tasks = $this->taskModel->getTasksWithDetails($project['id']);
+            $progressSum = 0;
+            $progressCount = 0;
+            foreach ($tasks as &$task) {
+                // Merge data JSON fields into top-level task array
+                if (isset($task['data'])) {
+                    $dataArr = is_array($task['data']) ? $task['data'] : json_decode($task['data'], true);
+                    if (is_array($dataArr)) {
+                        foreach ($dataArr as $k => $v) {
+                            if (!isset($task[$k])) {
+                                $task[$k] = $v;
+                            }
+                        }
+                    }
+                }
+                $progress = null;
+                // Prefer 'progress' field, fallback to 'Progress' (case-insensitive)
+                if (isset($task['progress'])) {
+                    $progress = $task['progress'];
+                } elseif (isset($task['Progress'])) {
+                    $progress = $task['Progress'];
+                }
+                if ($progress !== null) {
+                    $progressRaw = trim($progress);
+                    $progressRaw = rtrim($progressRaw, '%');
+                    $progressRaw = trim($progressRaw);
+                    if ($progressRaw !== '' && is_numeric($progressRaw)) {
+                        $progressSum += floatval($progressRaw);
+                        $progressCount++;
+                    }
+                }
+            }
+            unset($task);
+            $project['avg_progress'] = $progressCount > 0 ? ($progressSum / $progressCount) : 0;
+        }
+        unset($project);
         $status_options = $this->db->table('status_lookup')->where('type', 'project')->get()->getResultArray();
-        $priority_options = $this->db->table('priority_lookup')->where('type', 'project')->get()->getResultArray();
         $status_colors = [
             'pending' => 'warning',
             'in_progress' => 'primary',
             'review' => 'info',
             'completed' => 'success'
         ];
-        $priority_colors = [
-            'low' => 'secondary',
-            'medium' => 'info',
-            'high' => 'warning',
-            'urgent' => 'danger'
-        ];
         $data = [
             'projects' => $projects,
             'status_options' => $status_options,
-            'priority_options' => $priority_options,
             'status_colors' => $status_colors,
-            'priority_colors' => $priority_colors
         ];
         return $this->template->member('projects/project_list', $data);
     }

@@ -23,6 +23,13 @@
     <!-- jQuery (must be before content for inline JS in views) -->
     <script src="<?= base_url('assets/js/jquery/jquery.min.js') ?>"></script>
 
+    <!-- jsPDF, html2canvas, SheetJS (XLSX) for export buttons -->
+    <script src="<?= base_url('assets/js/jspdf.umd.min.js') ?>"></script>
+    <script src="<?= base_url('assets/js/jspdf.plugin.autotable.min.js') ?>"></script>
+    <script src="<?= base_url('assets/js/jspdf-global-fix.js') ?>"></script>
+    <script src="<?= base_url('assets/js/html2canvas.min.js') ?>"></script>
+    <script src="<?= base_url('assets/js/xlsx.full.min.js') ?>"></script>
+
     <!-- Bootstrap JS -->
     <script src="<?= base_url('assets/js/bootstrap/bootstrap.bundle.min.js') ?>"></script>
     
@@ -983,6 +990,19 @@
             color: #0277bd !important;
             border-left: 4px solid #0dcaf0 !important;
         }
+
+        #exportPdfBtn.btn-outline-danger {
+            border-color: #dc3545 !important;
+            color: #dc3545 !important;
+        }
+        #exportExcelBtn.btn-outline-success {
+            border-color: #198754 !important;
+            color: #198754 !important;
+        }
+        #exportCsvBtn.btn-outline-primary {
+            border-color: #0d6efd !important;
+            color: #0d6efd !important;
+        }
     </style>
     
     <!-- Inline CSS (for dynamic styles only) -->
@@ -1002,31 +1022,28 @@
             </h4>
         </div>
         <div class="sidebar-menu">
-            <a href="<?= base_url('dashboard') ?>" class="nav-link <?= current_url() == base_url('dashboard') ? 'active' : '' ?>" data-tooltip="Dashboard">
+            <?php $url = current_url(); ?>
+            <a href="<?= base_url('dashboard') ?>" class="nav-link<?= strpos($url, 'dashboard') !== false ? ' active' : '' ?>" data-tooltip="Dashboard">
                 <i class="fas fa-tachometer-alt"></i>
                 <span>Dashboard</span>
             </a>
-            <a href="<?= base_url('projects') ?>" class="nav-link <?= strpos(current_url(), 'projects') !== false ? 'active' : '' ?>" data-tooltip="Projects">
+            <a href="<?= base_url('projects') ?>" class="nav-link<?= strpos($url, 'projects') !== false && strpos($url, 'project_list') === false ? ' active' : '' ?>" data-tooltip="Projects">
                 <i class="fas fa-project-diagram"></i>
                 <span>Projects</span>
             </a>
-            <a href="<?= base_url('tasks') ?>" class="nav-link <?= strpos(current_url(), 'tasks') !== false && strpos(current_url(), 'myTasks') === false && strpos(current_url(), 'kanban') === false ? 'active' : '' ?>" data-tooltip="All Tasks">
-                <i class="fas fa-tasks"></i>
-                <span>All Tasks</span>
+            <a href="<?= base_url('projects/project_list') ?>" class="nav-link<?= strpos($url, 'project_list') !== false ? ' active' : '' ?>" data-tooltip="Tasks">
+                <i class="fas fa-list"></i>
+                <span>Tasks</span>
             </a>
-            <a href="<?= base_url('tasks/myTasks') ?>" class="nav-link <?= strpos(current_url(), 'myTasks') !== false ? 'active' : '' ?>" data-tooltip="My Tasks">
-                <i class="fas fa-clipboard-check"></i>
-                <span>My Tasks</span>
-            </a>
-            <a href="<?= base_url('tasks/kanban_select') ?>" class="nav-link <?= strpos(current_url(), 'kanban') !== false ? 'active' : '' ?>" data-tooltip="Kanban">
+            <a href="<?= base_url('tasks/kanban_select') ?>" class="nav-link<?= strpos($url, 'kanban') !== false ? ' active' : '' ?>" data-tooltip="Kanban">
                 <i class="fas fa-columns"></i>
                 <span>Kanban</span>
             </a>
-            <a href="<?= base_url('reports') ?>" class="nav-link <?= strpos(current_url(), 'reports') !== false ? 'active' : '' ?>" data-tooltip="Reports">
+            <a href="<?= base_url('reports') ?>" class="nav-link<?= strpos($url, 'reports') !== false ? ' active' : '' ?>" data-tooltip="Reports">
                 <i class="fas fa-chart-bar"></i>
                 <span>Reports</span>
             </a>
-            <a href="<?= base_url('profile') ?>" class="nav-link <?= strpos(current_url(), 'profile') !== false ? 'active' : '' ?>" data-tooltip="Profile">
+            <a href="<?= base_url('profile') ?>" class="nav-link<?= strpos($url, 'profile') !== false ? ' active' : '' ?>" data-tooltip="Profile">
                 <i class="fas fa-user"></i>
                 <span>Profile</span>
             </a>
@@ -1330,5 +1347,10 @@
         // Inline JavaScript
         <?= isset($inline_js) ? $inline_js : '' ?>
     </script>
+    <script>
+    if (window.jspdf && window.jspdf.jsPDF) {
+        window.jsPDF = window.jspdf.jsPDF;
+    }
+</script>
 </body>
 </html>

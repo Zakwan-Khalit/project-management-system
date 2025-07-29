@@ -31,15 +31,18 @@ class UserModel extends Model
     {
         $builder = $this->db->table('users');
         $builder->select('
-            users.*, 
-            user_profile.first_name, 
-            user_profile.last_name, 
-            user_profile.phone, 
+            users.id,
+            users.email,
+            users.is_active,
+            users.is_delete,
+            users.date_created,
+            users.date_modified,
+            user_profile.first_name,
+            user_profile.last_name,
+            user_profile.phone,
             user_profile.bio,
-            user_profile.address,
             user_profile.timezone,
-            user_profile.language,
-            user_role_lookup.name as role_name, 
+            user_role_lookup.name as role_name,
             user_role.role_id
         ');
         $builder->join('user_profile', 'user_profile.user_id = users.id AND user_profile.is_delete = 0', 'left');

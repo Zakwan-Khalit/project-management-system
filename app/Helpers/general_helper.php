@@ -258,3 +258,15 @@ if (!function_exists('getTaskPriority')) {
                (isset($task['priority_name']) ? strtolower(str_replace(' ', '_', $task['priority_name'])) : 'medium');
     }
 }
+
+if (!function_exists('get_project_users')) {
+    /**
+     * Helper to get all users for a project (for dropdowns)
+     * @param int $projectId
+     * @return array
+     */
+    function get_project_users($projectId) {
+        $projectModel = new \App\Models\ProjectModel();
+        return $projectModel->getProjectUsers($projectId);
+    }
+}

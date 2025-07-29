@@ -50,43 +50,12 @@
                            placeholder="PRJ-2025-001">
                 </div>
 
-                <!-- Priority -->
-                <div>
-                    <label style="display: block; font-weight: 600; color: #2d3748; margin-bottom: 0.5rem; font-size: 1rem;">
-                        Priority
-                    </label>
-                    <select name="priority" 
-                            style="width: 100%; padding: 1rem 1.25rem; border: 2px solid #e2e8f0; border-radius: 0.75rem; font-size: 1rem; transition: all 0.3s ease; background: #f8fafc;"
-                            onmouseenter="this.style.borderColor='#4299e1'"
-                            onmouseleave="this.style.borderColor='#e2e8f0'"
-                            onfocus="this.style.borderColor='#4299e1'; this.style.background='white'"
-                            onblur="this.style.borderColor='#e2e8f0'; this.style.background='#f8fafc'">
-                        <option value="low">Low Priority</option>
-                        <option value="medium" selected>Medium Priority</option>
-                        <option value="high">High Priority</option>
-                        <option value="urgent">Urgent Priority</option>
-                    </select>
-                </div>
-
                 <!-- Start Date -->
                 <div>
                     <label style="display: block; font-weight: 600; color: #2d3748; margin-bottom: 0.5rem; font-size: 1rem;">
                         Start Date
                     </label>
                     <input type="date" name="start_date" 
-                           style="width: 100%; padding: 1rem 1.25rem; border: 2px solid #e2e8f0; border-radius: 0.75rem; font-size: 1rem; transition: all 0.3s ease; background: #f8fafc;"
-                           onmouseenter="this.style.borderColor='#4299e1'"
-                           onmouseleave="this.style.borderColor='#e2e8f0'"
-                           onfocus="this.style.borderColor='#4299e1'; this.style.background='white'"
-                           onblur="this.style.borderColor='#e2e8f0'; this.style.background='#f8fafc'">
-                </div>
-
-                <!-- End Date -->
-                <div>
-                    <label style="display: block; font-weight: 600; color: #2d3748; margin-bottom: 0.5rem; font-size: 1rem;">
-                        End Date
-                    </label>
-                    <input type="date" name="end_date" 
                            style="width: 100%; padding: 1rem 1.25rem; border: 2px solid #e2e8f0; border-radius: 0.75rem; font-size: 1rem; transition: all 0.3s ease; background: #f8fafc;"
                            onmouseenter="this.style.borderColor='#4299e1'"
                            onmouseleave="this.style.borderColor='#e2e8f0'"
@@ -106,6 +75,19 @@
                            onfocus="this.style.borderColor='#4299e1'; this.style.background='white'"
                            onblur="this.style.borderColor='#e2e8f0'; this.style.background='#f8fafc'"
                            placeholder="0.00">
+                </div>
+
+                <!-- End Date -->
+                <div>
+                    <label style="display: block; font-weight: 600; color: #2d3748; margin-bottom: 0.5rem; font-size: 1rem;">
+                        End Date
+                    </label>
+                    <input type="date" name="end_date" 
+                           style="width: 100%; padding: 1rem 1.25rem; border: 2px solid #e2e8f0; border-radius: 0.75rem; font-size: 1rem; transition: all 0.3s ease; background: #f8fafc;"
+                           onmouseenter="this.style.borderColor='#4299e1'"
+                           onmouseleave="this.style.borderColor='#e2e8f0'"
+                           onfocus="this.style.borderColor='#4299e1'; this.style.background='white'"
+                           onblur="this.style.borderColor='#e2e8f0'; this.style.background='#f8fafc'">
                 </div>
 
                 <!-- Status -->

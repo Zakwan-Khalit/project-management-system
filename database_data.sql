@@ -117,15 +117,19 @@ INSERT INTO `task_status` (`task_id`, `status_id`, `changed_by`, `notes`) VALUES
 
 -- Insert task templates with explicit IDs
 INSERT INTO `task_templates` (`id`, `code`, `name`, `description`, `fields`) VALUES
-(1, 'brs', 'Business Requirement Specification', 'BRS Template', '["Title","Description","Status","Owner","Last Modified"]'),
-(2, 'uat', 'User Acceptance Testing', 'UAT Template', '["Module","Sub Module","Item","Priority Level","PIC","Status","Progress","Start Date","End Date","Notes"]'),
-(3, 'fat', 'Factory Acceptance Testing', 'FAT Template', '["Title","Description","Status","Owner","Last Modified"]');
+(1, 'brs', 'Business Requirement Specification', 'BRS Template', '["Module","Tester Name","Role","Issue","Description","Image","PIC","Status","Progress","Notes"]'),
+(2, 'uat', 'User Acceptance Testing', 'UAT Template', '["Module","Tester Name","Role","Issue","Description","Image","PIC","Status","Progress","Notes"]'),
+(3, 'fat', 'Factory Acceptance Testing', 'FAT Template', '["Module","Tester Name","Role","Issue","Description","Image","PIC","Status","Progress","Notes"]');
 
--- Insert tasks referencing correct template_id
 INSERT INTO `tasks` (`project_id`, `template_id`, `data`, `is_active`, `is_delete`, `task_order`, `date_created`, `date_modified`) VALUES
- (1, 2, '{"Module":"Login","Sub Module":"Frontend","Item":"Login Button","Priority Level":"high","PIC":"Ali","Status":"in_progress","Progress":60,"Start Date":"2025-01-02","End Date":"2025-01-05","Notes":"UI needs improvement"}', 1, 0, 1, NOW(), NOW()),
- (1, 2, '{"Module":"Register","Sub Module":"Backend","Item":"Register API","Priority Level":"medium","PIC":"Sara","Status":"todo","Progress":0,"Start Date":"2025-01-03","End Date":"2025-01-10","Notes":"API pending"}', 1, 0, 2, NOW(), NOW()),
- (1, 1, '{"Title":"Requirements Gathering","Description":"Initial requirements","Status":"planning","Owner":"Ali","Last Modified":"2025-01-02"}', 1, 0, 3, NOW(), NOW()),
- (1, 3, '{"Title":"Factory Test Case","Description":"Test login flow","Status":"todo","Owner":"Sara","Last Modified":"2025-01-05"}', 1, 0, 4, NOW(), NOW()),
- (1, 2, '{"Module":"Login","Sub Module":"Backend","Item":"Authentication API","Priority Level":"urgent","PIC":"Siti","Status":"todo","Progress":0,"Start Date":"2025-01-02","End Date":"2025-01-06","Notes":"Pending API integration"}', 1, 0, 5, NOW(), NOW()),
- (1, 2, '{"Module":"Dashboard","Sub Module":"Charts","Item":"Progress Chart","Priority Level":"medium","PIC":"John","Status":"review","Progress":80,"Start Date":"2025-01-10","End Date":"2025-01-15","Notes":"Awaiting feedback"}', 1, 0, 6, NOW(), NOW());
+ (1, 2, '{"Module":"Login","Tester Name":"Ali","Role":"Frontend Developer","Issue":"UI needs improvement","Description":"Login Button","Image":"","PIC":"Ali","Status":"in_progress","Progress":60,"Notes":"UI needs improvement"}', 1, 0, 1, NOW(), NOW()),
+ (1, 2, '{"Module":"Register","Tester Name":"Sara","Role":"Backend Developer","Issue":"API pending","Description":"Register API","Image":"","PIC":"Sara","Status":"todo","Progress":0,"Notes":"API pending"}', 1, 0, 2, NOW(), NOW()),
+ (1, 1, '{"Module":"Requirements","Tester Name":"Ali","Role":"System Analyst","Issue":"","Description":"Initial requirements","Image":"","PIC":"Ali","Status":"planning","Progress":0,"Notes":"Requirements gathering phase","Last Modified":"2025-01-02"}', 1, 0, 3, NOW(), NOW()),
+ (1, 3, '{"Module":"Factory Test","Tester Name":"Sara","Role":"QA Engineer","Issue":"","Description":"Test login flow","Image":"","PIC":"Sara","Status":"todo","Progress":0,"Notes":"Factory test case","Last Modified":"2025-01-05"}', 1, 0, 4, NOW(), NOW()),
+ (1, 2, '{"Module":"Login","Tester Name":"Siti","Role":"Backend Developer","Issue":"Pending API integration","Description":"Authentication API","Image":"","PIC":"Siti","Status":"todo","Progress":0,"Notes":"Pending API integration"}', 1, 0, 5, NOW(), NOW()),
+ (1, 2, '{"Module":"Dashboard","Tester Name":"John","Role":"Frontend Developer","Issue":"Awaiting feedback","Description":"Progress Chart","Image":"","PIC":"John","Status":"review","Progress":80,"Notes":"Awaiting feedback"}', 1, 0, 6, NOW(), NOW());
+
+-- Sample data for task_images
+INSERT INTO `task_images` (`task_id`, `file_name`, `file_address`, `is_active`, `is_delete`, `date_created`, `date_modified`) VALUES
+  (1, 'sample1.png', 'task_image/sample1.png', 1, 0, NOW(), NOW()),
+  (2, 'sample2.jpg', 'task_image/sample2.jpg', 1, 0, NOW(), NOW());

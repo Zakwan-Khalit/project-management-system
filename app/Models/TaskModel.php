@@ -5,6 +5,19 @@ use CodeIgniter\Model;
 
 class TaskModel extends Model
 {
+    /**
+     * Count all non-deleted tasks for a given project.
+     * @param int $projectId
+     * @return int
+     */
+    public function countTasksByProject($projectId)
+    {
+        $builder = $this->db->table('tasks');
+        $builder->where('project_id', $projectId);
+        $builder->where('is_delete', 0);
+        return $builder->countAllResults();
+    }
+
     public function getTaskById($taskId)
     {
         $builder = $this->db->table('tasks');
@@ -47,8 +60,7 @@ class TaskModel extends Model
             priority_lookup.color as priority_color,
             priority_lookup.level as priority_level,
             owner_profile.first_name as owner_first_name,
-            owner_profile.last_name as owner_last_name,
-            owner_profile.avatar as owner_avatar
+            owner_profile.last_name as owner_last_name
         ');
         $builder->join('projects', 'projects.id = tasks.project_id AND projects.is_delete = 0');
         $builder->join('task_status', 'task_status.task_id = tasks.id AND task_status.is_active = 1 AND task_status.is_delete = 0', 'left');
@@ -73,11 +85,7 @@ class TaskModel extends Model
         $builder = $this->db->table('tasks');
         $builder->select('
             tasks.id as id,
-            tasks.title as title,
-            tasks.description,
-            tasks.due_date,
-            tasks.progress,
-            tasks.order_index,
+            tasks.data,
             status_lookup.name as status_name,
             status_lookup.color as status_color,
             status_lookup.code as status_code,
@@ -85,8 +93,7 @@ class TaskModel extends Model
             priority_lookup.color as priority_color,
             priority_lookup.level as priority_level,
             owner_profile.first_name as owner_first_name,
-            owner_profile.last_name as owner_last_name,
-            owner_profile.avatar as owner_avatar
+            owner_profile.last_name as owner_last_name
         ');
         $builder->join('task_status', 'task_status.task_id = tasks.id AND task_status.is_active = 1 AND task_status.is_delete = 0', 'left');
         $builder->join('status_lookup', 'status_lookup.id = task_status.status_id AND status_lookup.type = "task" AND status_lookup.is_delete = 0', 'left');
@@ -97,16 +104,28 @@ class TaskModel extends Model
         $builder->where('tasks.project_id', $projectId);
         $builder->where('tasks.is_delete', 0);
         $builder->where('tasks.is_active', 1);
-        $builder->orderBy('tasks.order_index', 'ASC');
         $builder->orderBy('tasks.date_created', 'ASC');
-        return $builder->get()->getResultArray();
+        $rows = $builder->get()->getResultArray();
+        foreach ($rows as &$row) {
+            if (isset($row['data'])) {
+                $data = json_decode($row['data'], true);
+                if (is_array($data)) {
+                    $row = array_merge($row, $data);
+                }
+            }
+        }
+        return $rows;
     }
     
     public function getUserTasks($userId, $limit = null)
     {
         $builder = $this->db->table('tasks');
         $builder->select('
-            tasks.*,
+            tasks.id,
+            tasks.project_id,
+            tasks.data,
+            tasks.date_created,
+            tasks.date_modified,
             projects.name as project_name,
             status_lookup.name as status_name,
             status_lookup.color as status_color,
@@ -129,9 +148,25 @@ class TaskModel extends Model
             $builder->limit($limit);
         }
         
-        $builder->orderBy('tasks.due_date', 'ASC');
-        $builder->orderBy('priority_lookup.level', 'DESC');
-        return $builder->get()->getResultArray();
+        $rows = $builder->get()->getResultArray();
+        // Sort by due_date in PHP since it's in JSON
+        foreach ($rows as &$row) {
+            if (isset($row['data'])) {
+                $data = json_decode($row['data'], true);
+                if (is_array($data)) {
+                    $row = array_merge($row, $data);
+                }
+            }
+        }
+        usort($rows, function($a, $b) {
+            $ad = $a['due_date'] ?? '';
+            $bd = $b['due_date'] ?? '';
+            return strcmp($ad, $bd);
+        });
+        usort($rows, function($a, $b) {
+            return ($b['priority_level'] ?? 0) <=> ($a['priority_level'] ?? 0);
+        });
+        return $rows;
     }
     
     // Task Management Functions
@@ -275,7 +310,6 @@ class TaskModel extends Model
             task_ownership.*,
             owner_profile.first_name as owner_first_name,
             owner_profile.last_name as owner_last_name,
-            owner_profile.avatar as owner_avatar,
             creator_profile.first_name as creator_first_name,
             creator_profile.last_name as creator_last_name
         ');
@@ -339,16 +373,32 @@ class TaskModel extends Model
             $builder->where('tasks.project_id', $projectId);
         }
         
-        if (!empty($search)) {
-            $builder->groupStart();
-            $builder->like('tasks.title', $search);
-            $builder->orLike('tasks.description', $search);
-            $builder->groupEnd();
-        }
-        
         $builder->limit($limit);
         $builder->orderBy('tasks.date_created', 'DESC');
-        return $builder->get()->getResultArray();
+        $rows = $builder->get()->getResultArray();
+        // Search in PHP since fields are in JSON
+        if (!empty($search)) {
+            $filtered = [];
+            foreach ($rows as $row) {
+                $data = isset($row['data']) ? json_decode($row['data'], true) : [];
+                $haystack = strtolower(json_encode($data));
+                if (strpos($haystack, strtolower($search)) !== false) {
+                    $row = array_merge($row, $data);
+                    $filtered[] = $row;
+                }
+            }
+            return $filtered;
+        } else {
+            foreach ($rows as &$row) {
+                if (isset($row['data'])) {
+                    $data = json_decode($row['data'], true);
+                    if (is_array($data)) {
+                        $row = array_merge($row, $data);
+                    }
+                }
+            }
+            return $rows;
+        }
     }
     
     // Lookup Functions
@@ -358,7 +408,6 @@ class TaskModel extends Model
         $builder->where('type', 'task');
         $builder->where('is_delete', 0);
         $builder->where('is_active', 1);
-        $builder->orderBy('order_index', 'ASC');
         $builder->orderBy('name', 'ASC');
         return $builder->get()->getResultArray();
     }
@@ -411,7 +460,6 @@ class TaskModel extends Model
             sl.color as status_color,
             up.first_name,
             up.last_name,
-            up.avatar
         ');
         $builder->join('projects p', 'p.id = t.project_id AND p.is_delete = 0', 'left');
         $builder->join('task_ownership to', 'to.task_id = t.id AND to.is_active = 1 AND to.is_delete = 0', 'left');
@@ -475,7 +523,7 @@ class TaskModel extends Model
     public function getTaskComments($taskId)
     {
         $builder = $this->db->table('task_comments tc');
-        $builder->select('tc.*, u.email, up.first_name, up.last_name, up.avatar');
+        $builder->select('tc.*, u.email, up.first_name, up.last_name');
         $builder->join('users u', 'u.id = tc.user_id', 'left');
         $builder->join('user_profile up', 'up.user_id = u.id', 'left');
         $builder->where('tc.task_id', $taskId);
@@ -499,8 +547,12 @@ class TaskModel extends Model
         // Update task status
         $this->setTaskStatus($taskId, $statusLookup['id']);
         
-        // Update task position
-        return $this->updateTask($taskId, ['order_index' => $position]);
+        // Update task position in JSON 'data' field
+        $task = $this->getTaskById($taskId);
+        if (!$task) return false;
+        $data = isset($task['data']) ? json_decode($task['data'], true) : [];
+        $data['order'] = $position;
+        return $this->updateTask($taskId, ['data' => json_encode($data)]);
     }
     
     public function getSubTasks($parentTaskId)
@@ -646,9 +698,17 @@ class TaskModel extends Model
     {
         $builder = $this->db->table('tasks');
         $builder->where('tasks.is_delete', 0);
-        $builder->where('tasks.due_date >=', $startDate);
-        $builder->where('tasks.due_date <=', $endDate);
-        return $builder->get()->getResultArray();
+        $rows = $builder->get()->getResultArray();
+        $filtered = [];
+        foreach ($rows as $row) {
+            $data = isset($row['data']) ? json_decode($row['data'], true) : [];
+            $due = $data['due_date'] ?? null;
+            if ($due && $due >= $startDate && $due <= $endDate) {
+                $row = array_merge($row, $data);
+                $filtered[] = $row;
+            }
+        }
+        return $filtered;
     }
     
     public function getDailyCompletionsForPeriod($days = 30)

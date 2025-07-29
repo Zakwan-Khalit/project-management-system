@@ -14,7 +14,6 @@ class TaskCommentModel extends Model
             u.email,
             up.first_name,
             up.last_name,
-            up.avatar
         ');
         $builder->join('users u', 'u.id = tc.user_id AND u.is_delete = 0', 'left');
         $builder->join('user_profile up', 'up.user_id = u.id AND up.is_delete = 0', 'left');

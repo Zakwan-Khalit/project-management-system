@@ -15,54 +15,28 @@ class ActivityLogModel extends Model
             log_message('error', 'ActivityLogModel::logActivity - Missing required action field');
             return false;
         }
-
-        // Convert arrays to JSON for storage
-        if (isset($data['old_values']) && is_array($data['old_values'])) {
-            $data['old_values'] = json_encode($data['old_values']);
-        }
-        if (isset($data['new_values']) && is_array($data['new_values'])) {
-            $data['new_values'] = json_encode($data['new_values']);
-        }
-
-        // Set default values
-        if (!isset($data['user_id'])) {
-            $userData = session('userdata');
-            $data['user_id'] = $userData['id'] ?? null;
-        }
-        if (!isset($data['ip_address'])) {
-            $data['ip_address'] = $_SERVER['REMOTE_ADDR'] ?? null;
-        }
-        if (!isset($data['user_agent'])) {
-            $data['user_agent'] = $_SERVER['HTTP_USER_AGENT'] ?? null;
-        }
-        $data['date_created'] = date('Y-m-d H:i:s');
-        $data['is_active'] = 1;
-        $data['is_delete'] = 0;
-
+        // Only use allowed fields
+        $insert = [
+            'user_id'      => $data['user_id'] ?? (session('userdata')['id'] ?? null),
+            'action'       => $data['action'],
+            'details'      => $data['details'] ?? null,
+            'is_active'    => 1,
+            'is_delete'    => 0,
+            'date_created' => date('Y-m-d H:i:s'),
+            'date_modified'=> date('Y-m-d H:i:s'),
+        ];
         $builder = $this->db->table('activity_logs');
-        return $builder->insert($data);
+        return $builder->insert($insert);
     }
 
     public function getActivityLogs($filters = [])
     {
         $builder = $this->db->table('activity_logs');
-        $builder->select('
-            activity_logs.*,
-            user_profile.first_name,
-            user_profile.last_name,
-            user_profile.avatar
-        ');
+        $builder->select('activity_logs.*, user_profile.first_name, user_profile.last_name');
         $builder->join('user_profile', 'user_profile.user_id = activity_logs.user_id AND user_profile.is_delete = 0', 'left');
         $builder->where('activity_logs.is_delete', 0);
-
         if (isset($filters['user_id'])) {
             $builder->where('activity_logs.user_id', $filters['user_id']);
-        }
-        if (isset($filters['table_name'])) {
-            $builder->where('activity_logs.table_name', $filters['table_name']);
-        }
-        if (isset($filters['record_id'])) {
-            $builder->where('activity_logs.record_id', $filters['record_id']);
         }
         if (isset($filters['action'])) {
             $builder->where('activity_logs.action', $filters['action']);
@@ -76,7 +50,6 @@ class ActivityLogModel extends Model
         if (isset($filters['limit'])) {
             $builder->limit($filters['limit']);
         }
-
         $builder->orderBy('activity_logs.date_created', 'DESC');
         return $builder->get()->getResultArray();
     }
@@ -84,58 +57,24 @@ class ActivityLogModel extends Model
     public function getUserActivity($userId, $limit = 10)
     {
         $builder = $this->db->table('activity_logs');
-        $builder->where('user_id', $userId);
-        $builder->where('is_delete', 0);
-        $builder->orderBy('date_created', 'DESC');
-        $builder->limit($limit);
-        return $builder->get()->getResultArray();
-    }
-
-    public function getProjectActivity($projectId, $limit = 50)
-    {
-        $builder = $this->db->table('activity_logs');
-        $builder->select('
-            activity_logs.*,
-            user_profile.first_name,
-            user_profile.last_name,
-            user_profile.avatar
-        ');
+        $builder->select('activity_logs.*, user_profile.first_name, user_profile.last_name');
         $builder->join('user_profile', 'user_profile.user_id = activity_logs.user_id AND user_profile.is_delete = 0', 'left');
-        $builder->where('activity_logs.table_name', 'projects');
-        $builder->where('activity_logs.record_id', $projectId);
+        $builder->where('activity_logs.user_id', $userId);
         $builder->where('activity_logs.is_delete', 0);
         $builder->orderBy('activity_logs.date_created', 'DESC');
         $builder->limit($limit);
         return $builder->get()->getResultArray();
     }
 
-    public function getTaskActivity($taskId, $limit = 30)
-    {
-        $builder = $this->db->table('activity_logs');
-        $builder->select('
-            activity_logs.*,
-            user_profile.first_name,
-            user_profile.last_name,
-            user_profile.avatar
-        ');
-        $builder->join('user_profile', 'user_profile.user_id = activity_logs.user_id AND user_profile.is_delete = 0', 'left');
-        $builder->where('activity_logs.table_name', 'tasks');
-        $builder->where('activity_logs.record_id', $taskId);
-        $builder->where('activity_logs.is_delete', 0);
-        $builder->orderBy('activity_logs.date_created', 'DESC');
-        $builder->limit($limit);
-        return $builder->get()->getResultArray();
-    }
+    // getProjectActivity is not supported by schema (no table_name/record_id)
+    // You may filter by action or user_id if needed
+
+    // getTaskActivity is not supported by schema (no table_name/record_id)
 
     public function getRecentActivity($limit = 20)
     {
         $builder = $this->db->table('activity_logs');
-        $builder->select('
-            activity_logs.*,
-            user_profile.first_name,
-            user_profile.last_name,
-            user_profile.avatar
-        ');
+        $builder->select('activity_logs.*, user_profile.first_name, user_profile.last_name');
         $builder->join('user_profile', 'user_profile.user_id = activity_logs.user_id AND user_profile.is_delete = 0', 'left');
         $builder->where('activity_logs.is_delete', 0);
         $builder->where('activity_logs.is_active', 1);
@@ -147,7 +86,7 @@ class ActivityLogModel extends Model
     public function getRecentActivityWithUsers($limit = 15)
     {
         $builder = $this->db->table('activity_logs');
-        $builder->select('activity_logs.*, user_profile.first_name, user_profile.last_name, user_profile.avatar');
+        $builder->select('activity_logs.*, user_profile.first_name, user_profile.last_name');
         $builder->join('user_profile', 'user_profile.user_id = activity_logs.user_id AND user_profile.is_delete = 0', 'left');
         $builder->orderBy('activity_logs.date_created', 'DESC');
         $builder->limit($limit);

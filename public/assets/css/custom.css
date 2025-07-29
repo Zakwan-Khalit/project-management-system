@@ -545,3 +545,16 @@ p, span, div {
 .shadow-danger {
     box-shadow: 0 4px 12px rgba(239, 68, 68, 0.3);
 }
+
+#exportPdfBtn.btn-outline-danger {
+    border-color: #dc3545 !important;
+    color: #dc3545 !important;
+}
+#exportExcelBtn.btn-outline-success {
+    border-color: #198754 !important;
+    color: #198754 !important;
+}
+#exportCsvBtn.btn-outline-primary {
+    border-color: #0d6efd !important;
+    color: #0d6efd !important;
+}

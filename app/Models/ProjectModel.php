@@ -1,11 +1,67 @@
 <?php
-
 namespace App\Models;
 
 use CodeIgniter\Model;
 
 class ProjectModel extends Model
 {
+    /**
+     * Create a new project and return its ID
+     * @param array $data
+     * @return int|false New project ID or false on failure
+     */
+    public function createProject($data)
+    {
+        $insert = [
+            'name'         => $data['name'] ?? null,
+            'code'         => $data['code'] ?? null,
+            'description'  => $data['description'] ?? null,
+            'start_date'   => $data['start_date'] ?? null,
+            'end_date'     => $data['end_date'] ?? null,
+            'budget'       => $data['budget'] ?? null,
+            'is_active'    => $data['is_active'] ?? 1,
+            'is_delete'    => $data['is_delete'] ?? 0,
+            'date_created' => date('Y-m-d H:i:s'),
+            'date_modified'=> date('Y-m-d H:i:s'),
+        ];
+        // pr($insert);
+        $result = $this->db->table('projects')->insert($insert);
+        if ($result) {
+            return $this->db->insertID();
+        }
+        return false;
+    }
+    public function getProjectStatusByCode($code)
+    {
+        return $this->db->table('status_lookup')
+            ->where('type', 'project')
+            ->where('code', $code)
+            ->where('is_delete', 0)
+            ->get()->getRowArray();
+    }
+
+    /**
+     * Set the current status for a project (deactivate old, insert new)
+     */
+    public function setProjectStatusById($projectId, $statusId, $changedBy = null, $notes = null)
+    {
+        // Mark current as not current
+        $this->db->table('project_status')
+            ->where('project_id', $projectId)
+            ->where('is_active', 1)
+            ->update(['is_active' => 0, 'end_date' => date('Y-m-d H:i:s')]);
+
+        // Insert new status
+        return $this->db->table('project_status')->insert([
+            'project_id' => $projectId,
+            'status_id' => $statusId,
+            'changed_by' => $changedBy,
+            'notes' => $notes,
+            'start_date' => date('Y-m-d H:i:s'),
+            'is_active' => 1,
+            'is_delete' => 0
+        ]);
+    }
     /**
      * Recalculate and update the progress field for a project based on completed tasks.
      * Progress = (completed tasks / total tasks) * 100
@@ -57,23 +113,48 @@ class ProjectModel extends Model
     // Get a single project with current status and priority
     public function getProjectById($projectId)
     {
-        $builder = $this->db->table('projects p');
-        $builder->select('
-            p.*,
-            sl.name as status_name,
-            sl.color as status_color,
-            pl.name as priority_name,
-            pl.color as priority_color,
-            pl.level as priority_level
-        ');
-        $builder->join('project_status ps', 'ps.project_id = p.id AND ps.is_active = 1 AND ps.is_delete = 0', 'left');
-        $builder->join('status_lookup sl', 'sl.id = ps.status_id AND sl.is_delete = 0', 'left');
-        $builder->join('project_priority pp', 'pp.project_id = p.id AND pp.is_active = 1 AND pp.is_delete = 0', 'left');
-        $builder->join('priority_lookup pl', 'pl.id = pp.priority_id AND pl.is_delete = 0', 'left');
-        $builder->where('p.id', $projectId);
-        $builder->where('p.is_delete', 0);
+        // Always fetch the project base data first
+        $project = $this->db->table('projects')
+            ->where('id', $projectId)
+            ->where('is_delete', 0)
+            ->get()->getRowArray();
+        if (!$project) return null;
 
-        return $builder->get()->getRowArray();
+        // Fetch status (if any)
+        $status = $this->db->table('project_status ps')
+            ->select('sl.name as status_name, sl.color as status_color')
+            ->join('status_lookup sl', 'sl.id = ps.status_id AND sl.is_delete = 0', 'left')
+            ->where('ps.project_id', $projectId)
+            ->where('ps.is_active', 1)
+            ->where('ps.is_delete', 0)
+            ->get()->getRowArray();
+        if ($status) {
+            $project['status_name'] = $status['status_name'];
+            $project['status_color'] = $status['status_color'];
+        } else {
+            $project['status_name'] = null;
+            $project['status_color'] = null;
+        }
+
+        // Fetch priority (if any)
+        $priority = $this->db->table('project_priority pp')
+            ->select('pl.name as priority_name, pl.color as priority_color, pl.level as priority_level')
+            ->join('priority_lookup pl', 'pl.id = pp.priority_id AND pl.is_delete = 0', 'left')
+            ->where('pp.project_id', $projectId)
+            ->where('pp.is_active', 1)
+            ->where('pp.is_delete', 0)
+            ->get()->getRowArray();
+        if ($priority) {
+            $project['priority_name'] = $priority['priority_name'];
+            $project['priority_color'] = $priority['priority_color'];
+            $project['priority_level'] = $priority['priority_level'];
+        } else {
+            $project['priority_name'] = null;
+            $project['priority_color'] = null;
+            $project['priority_level'] = null;
+        }
+
+        return $project;
     }
 
     // Get all active projects with current status and priority
@@ -120,6 +201,7 @@ class ProjectModel extends Model
         $builder->where('pm.user_id', $userId);
         $builder->where('p.is_delete', 0);
         $builder->where('p.is_active', 1);
+        $builder->groupBy('p.id');
         $builder->orderBy('p.date_created', 'DESC');
 
         $projects = $builder->get()->getResultArray();
@@ -598,5 +680,22 @@ class ProjectModel extends Model
         }
         unset($task);
         return $tasks;
+    }
+
+    /**
+     * Get all active users for a project (for dropdowns like Tester Name, PIC)
+     * Returns: array of [user_id, email, first_name, last_name]
+     */
+    public function getProjectUsers($projectId)
+    {
+        $builder = $this->db->table('project_members pm');
+        $builder->select('u.id as user_id, u.email, up.first_name, up.last_name');
+        $builder->join('users u', 'u.id = pm.user_id AND u.is_delete = 0');
+        $builder->join('user_profile up', 'up.user_id = u.id AND up.is_delete = 0', 'left');
+        $builder->where('pm.project_id', $projectId);
+        $builder->where('pm.is_active', 1);
+        $builder->where('pm.is_delete', 0);
+        $builder->orderBy('up.first_name', 'ASC');
+        return $builder->get()->getResultArray();
     }
 }

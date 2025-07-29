@@ -25,6 +25,8 @@ $routes->post('dashboard/refresh', 'Home::refresh');
 $routes->get('projects', 'Projects::index');
 $routes->get('projects/(:any)', 'Projects::$1');
 $routes->post('projects/(:any)', 'Projects::$1');
+$routes->get('projects/get_tasks_by_template/(:any)/(:num)', 'Projects::get_tasks_by_template/$1/$2');
+
 
 $routes->get('tasks', 'Tasks::index');
 $routes->get('tasks/myTasks', 'Tasks::myTasks');
@@ -38,6 +40,10 @@ $routes->post('tasks/kanban/(:num)', 'Tasks::kanban/$1');
 // Generic task routes (must come after specific routes)
 $routes->get('tasks/(:any)', 'Tasks::$1');
 $routes->post('tasks/(:any)', 'Tasks::$1');
+$routes->post('task-images/upload', 'TaskImages::upload');
+$routes->get('task-images/list/(:num)', 'TaskImages::list/$1');
+$routes->post('task-images/delete/(:num)', 'TaskImages::delete/$1');
+$routes->get('task-images/view/(:any)', 'TaskImages::view/$1');
 
 // Profile routes
 $routes->get('profile', 'Profile::index');
