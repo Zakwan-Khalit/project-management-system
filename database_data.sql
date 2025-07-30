@@ -133,3 +133,24 @@ INSERT INTO `tasks` (`project_id`, `template_id`, `data`, `is_active`, `is_delet
 INSERT INTO `task_images` (`task_id`, `file_name`, `file_address`, `is_active`, `is_delete`, `date_created`, `date_modified`) VALUES
   (1, 'sample1.png', 'task_image/sample1.png', 1, 0, NOW(), NOW()),
   (2, 'sample2.jpg', 'task_image/sample2.jpg', 1, 0, NOW(), NOW());
+
+-- Insert sample task headers
+INSERT INTO `task_headers` (`column_name`, `is_active`, `is_delete`) VALUES
+('Module', 1, 0),
+('Tester Name', 1, 0),
+('Role', 1, 0),
+('Issue', 1, 0),
+('Description', 1, 0),
+('Image', 1, 0),
+('PIC', 1, 0),
+('Status', 1, 0),
+('Progress', 1, 0),
+('Notes', 1, 0),
+('Start Date', 1, 0),
+('End Date', 1, 0),
+('Last Modified', 1, 0);
+
+-- Update task_templates fields column to use header IDs (example: [1,2,3,...])
+UPDATE `task_templates` SET `fields` = '[1,2,3,4,5,6,7,8,9,10,11,12,13]' WHERE `id` = 1;
+UPDATE `task_templates` SET `fields` = '[1,2,3,4,5,6,7,8,9,10,11,12,13]' WHERE `id` = 2;
+UPDATE `task_templates` SET `fields` = '[1,2,3,4,5,6,7,8,9,10,11,12,13]' WHERE `id` = 3;

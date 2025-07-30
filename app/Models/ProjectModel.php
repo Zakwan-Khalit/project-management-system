@@ -698,4 +698,53 @@ class ProjectModel extends Model
         $builder->orderBy('up.first_name', 'ASC');
         return $builder->get()->getResultArray();
     }
+
+    /**
+     * Update the fields (headers) for a task template
+     * @param int $templateId
+     * @param array $fields
+     * @return bool
+     */
+    public function updateTaskTemplateFields($templateId, $fields)
+    {
+        if (!$templateId || !is_array($fields)) return false;
+        $fieldsJson = json_encode(array_values($fields));
+        return $this->db->table('task_templates')->where('id', $templateId)->update(['fields' => $fieldsJson]);
+    }
+
+    /**
+     * Get task headers by array of IDs, sorted as per IDs order
+     * @param array $ids
+     * @return array
+     */
+    public function getTaskHeadersByIds($ids)
+    {
+        if (!is_array($ids) || empty($ids)) return [];
+        $builder = $this->db->table('task_headers');
+        $builder->whereIn('id', $ids);
+        $builder->where('is_active', 1);
+        $builder->where('is_delete', 0);
+        $headers = $builder->get()->getResultArray();
+        // Sort headers by $ids order
+        $idMap = array_flip($ids);
+        usort($headers, function($a, $b) use ($idMap) {
+            return $idMap[$a['id']] <=> $idMap[$b['id']];
+        });
+        return $headers;
+    }
+    /**
+     * Insert a new header and return its ID
+     * @param string $columnName
+     * @return int|false
+     */
+    public function insertTaskHeader($columnName)
+    {
+        $data = [
+            'column_name' => $columnName,
+            'is_active' => 1,
+            'is_delete' => 0
+        ];
+        $this->db->table('task_headers')->insert($data);
+        return $this->db->insertID();
+    }
 }

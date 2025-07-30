@@ -353,6 +353,16 @@ CREATE TABLE `task_attachments` (
     PRIMARY KEY (`id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
+-- Table for dynamic task headers
+CREATE TABLE IF NOT EXISTS `task_headers` (
+    `id` INT NOT NULL AUTO_INCREMENT PRIMARY KEY,
+    `column_name` VARCHAR(128) NOT NULL,
+    `is_active` TINYINT(1) DEFAULT 1,
+    `is_delete` TINYINT(1) DEFAULT 0,
+    `date_created` TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    `date_modified` TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+
 -- Task Template Table
 CREATE TABLE `task_templates` (
     `id` int(11) NOT NULL AUTO_INCREMENT,

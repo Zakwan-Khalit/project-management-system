@@ -26,6 +26,7 @@ $routes->get('projects', 'Projects::index');
 $routes->get('projects/(:any)', 'Projects::$1');
 $routes->post('projects/(:any)', 'Projects::$1');
 $routes->get('projects/get_tasks_by_template/(:any)/(:num)', 'Projects::get_tasks_by_template/$1/$2');
+$routes->post('projects/updateHeaders', 'Projects::updateHeaders');
 
 
 $routes->get('tasks', 'Tasks::index');

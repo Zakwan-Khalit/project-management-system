@@ -24,30 +24,36 @@
   </div>
 </div>
     <!-- Export Buttons -->
-    <div class="mb-3 d-flex justify-content-end gap-2" id="exportBtnGroup">
-        <button id="exportPdfBtn" class="btn btn-outline-danger" type="button"><i class="fas fa-file-pdf me-1"></i> PDF</button>
-        <button id="exportExcelBtn" class="btn btn-outline-success" type="button"><i class="fas fa-file-excel me-1"></i> Excel</button>
-        <button id="exportCsvBtn" class="btn btn-outline-primary" type="button"><i class="fas fa-file-csv me-1"></i> CSV</button>
+    <div class="d-flex justify-content-between align-items-center mb-3">
+        <div class="d-flex gap-2" id="exportBtnGroupLeft">
+            <button id="exportCsvBtn" class="btn btn-outline-primary" type="button"><i class="fas fa-file-csv me-1"></i> CSV</button>
+            <button id="exportExcelBtn" class="btn btn-outline-success" type="button"><i class="fas fa-file-excel me-1"></i> Excel</button>
+            <button id="exportPdfBtn" class="btn btn-outline-danger" type="button"><i class="fas fa-file-pdf me-1"></i> PDF</button>
+        </div>
+        <div>
+            <button id="tableSettingsBtn" class="btn btn-outline-secondary" type="button" title="Table Settings" style="border-radius:50%;width:40px;height:40px;display:flex;align-items:center;justify-content:center;">
+                <i class="fas fa-cog"></i>
+            </button>
+        </div>
     </div>
             <div style="overflow-x:auto;">
                 <table class="table table-hover table-bordered" id="dynamicTaskTable" style="background: #fff; border-radius: 1.2rem; overflow: visible; box-shadow: 0 2px 12px rgba(102,126,234,0.07); margin-bottom:0; min-width:1100px;">
                     <thead class="table-light" style="background: linear-gradient(90deg, #e9ecef 0%, #f8fafc 100%);">
                         <tr>
-                            <?php if (empty($fields)): ?>
-                                <th class="text-center text-muted" colspan="100%">No template fields found.</th>
-                            <?php else: ?>
-                                <?php foreach ($fields as $field): ?>
-                                    <th style="font-family:'Poppins',sans-serif;font-weight:600;font-size:1.08rem;color:#667eea; padding:1.1rem 1rem; border-bottom:2px solid #e2e8f0; background:#f8fafc;">
-                                        <?= esc($field) ?>
-                                    </th>
+                            <?php if (!empty($fields)): ?>
+                                <?php foreach ($fields as $headerId): ?>
+                                    <?php $columnName = $headerMap[$headerId] ?? null; ?>
+                                    <th><?= esc($columnName) ?></th>
                                 <?php endforeach; ?>
-                                <th style="width:56px; text-align:center; background:#f8fafc; border-bottom:2px solid #e2e8f0;">
+                            <?php endif; ?>
+                            <th style="width:72px; text-align:center; background:#f8fafc; border-bottom:2px solid #e2e8f0;">
+                                <div style="display:flex;align-items:center;justify-content:center;gap:8px;">
                                     <button id="addRowBtn" type="button" class="btn btn-sm btn-outline-primary" title="Add Row" style="border-radius:50%;box-shadow:0 2px 8px rgba(102,126,234,0.12);width:40px;height:40px;display:flex;align-items:center;justify-content:center;">
                                         <i class="fas fa-plus"></i>
                                     </button>
-                                </th>
-                            <?php endif; ?>
-                        </tr>
+                                </div>
+                            </th>
+                            <th style="width:32px;"></th>
                     </thead>
                     <tbody>
                         <?php if (empty($fields)): ?>
@@ -56,40 +62,38 @@
                             <!-- No tasks: show nothing, allow adding rows -->
                         <?php else: ?>
                             <?php foreach ($tasks as $task): ?>
-                                <tr data-task-id="<?= esc($task['id']) ?>" class="task-row" style="transition:box-shadow 0.3s;">
-                                    <?php foreach ($fields as $idx => $field): ?>
-                                        <?php if ($field === 'Last Modified'): ?>
-                                            <td style="color:#6b7280; padding:1rem 1rem; font-size:1.05rem; border-bottom:1px solid #e2e8f0;">
-                                                <?= esc($task['date_modified'] ?? '') ?>
-                                            </td>
-                                        <?php elseif ($field === 'Image'): ?>
-                                            <td class="image-cell" data-field="Image" style="padding:1rem 1rem; font-size:1.05rem; border-bottom:1px solid #e2e8f0; min-width:110px; max-width:140px; text-align:center; vertical-align:middle;">
-                                                <div class="task-image-list" data-task-id="<?= esc($task['id']) ?>"></div>
-                                                <button class="btn btn-link p-0 upload-image-btn" title="Upload Image" data-task-id="<?= esc($task['id']) ?>" style="color:#667eea; font-size:1.5rem; display:inline-block;"><i class="fas fa-image"></i></button>
-                                                <input type="file" accept="image/*" class="d-none image-upload-input" data-task-id="<?= esc($task['id']) ?>" multiple>
-                                            </td>
-                                        <?php elseif (in_array($field, ['Start Date', 'End Date', 'Progress', 'Status'])): ?>
-                                            <td class="editable-cell" tabindex="0" data-field="<?= esc($field) ?>" style="transition:background 0.2s; padding:1rem 1rem; font-size:1.05rem; border-bottom:1px solid #e2e8f0;">
-                                                <?= esc($task[$field] ?? '') ?>
-                                            </td>
-                                        <?php elseif (in_array($field, ['Tester Name', 'PIC'])): ?>
-                                            <td class="editable-cell user-dropdown-cell" tabindex="0" data-field="<?= esc($field) ?>"><span class="user-display"><?= esc($task[$field] ?? '') ?></span></td>
-                                        <?php else: ?>
-                                            <td contenteditable="true" class="editable-cell" tabindex="0" data-field="<?= esc($field) ?>" style="transition:background 0.2s; padding:1rem 1rem; font-size:1.05rem; border-bottom:1px solid #e2e8f0;">
-                                                <?= esc($task[$field] ?? '') ?>
-                                            </td>
-                                        <?php endif; ?>
-                                    <?php endforeach; ?>
-                                    <td class="text-center align-middle" style="width:40px;">
-                                        <button type="button" class="btn btn-sm btn-link text-danger delete-row-btn" title="Delete Row" style="padding:0;border-radius:50%;background:#f8d7da;width:32px;height:32px;display:flex;align-items:center;justify-content:center;">
-                                            <i class="fas fa-times"></i>
-                                        </button>
+                        <?php $taskData = is_array($task['data']) ? $task['data'] : json_decode($task['data'], true); ?>
+                        <tr data-task-id="<?= esc($task['id']) ?>" class="task-row" style="transition:box-shadow 0.3s;">
+                            <?php foreach ($fields as $headerId): ?>
+                                <?php $field = $headerMap[$headerId] ?? null; ?>
+                                <?php if (in_array($field, ['Tester Name','PIC'])): ?>
+                                    <td class="editable-cell user-dropdown-cell" tabindex="0" data-field="<?= esc($field) ?>"><span class="user-display"><?= esc($taskData[$field] ?? '') ?></span></td>
+                                <?php elseif (in_array($field, ['Start Date','End Date','Progress','Status'])): ?>
+                                    <td class="editable-cell" tabindex="0" data-field="<?= esc($field) ?>"><?= esc($taskData[$field] ?? '') ?></td>
+                                <?php elseif ($field === 'Image'): ?>
+                                    <td class="image-cell" data-field="Image" style="padding:1rem 1rem; font-size:1.05rem; border-bottom:1px solid #e2e8f0; min-width:110px; max-width:140px; text-align:center; vertical-align:middle;">
+                                        <div class="task-image-list" data-task-id="<?= esc($task['id']) ?>"></div>
+                                        <button class="btn btn-link p-0 upload-image-btn" title="Upload Image" data-task-id="<?= esc($task['id']) ?>" style="color:#667eea; font-size:1.5rem; display:inline-block;"><i class="fas fa-image"></i></button>
+                                        <input type="file" accept="image/*" class="d-none image-upload-input" data-task-id="<?= esc($task['id']) ?>" multiple>
                                     </td>
-                                    <td class="text-center drag-handle" style="cursor:move;width:32px;">
-                                        <i class="fas fa-grip-vertical" style="color:#667eea;font-size:1.2rem;"></i>
-                                    </td>
-                                </tr>
+                                <?php elseif ($field === 'Last Modified'): ?>
+                                    <td style="color:#6b7280; padding:1rem 1rem; font-size:1.05rem; border-bottom:1px solid #e2e8f0;"></td>
+                                <?php else: ?>
+                                    <td contenteditable="true" class="editable-cell" tabindex="0" data-field="<?= esc($field) ?>" style="transition:background 0.2s; padding:1rem 1rem; font-size:1.05rem; border-bottom:1px solid #e2e8f0;"><?= esc($taskData[$field] ?? '') ?></td>
+                                <?php endif; ?>
                             <?php endforeach; ?>
+                            <td class="text-center align-middle" style="width:72px;">
+                                <div style="display:flex;align-items:center;justify-content:center;gap:8px;">
+                                    <button type="button" class="btn btn-sm btn-link text-danger delete-row-btn" title="Delete Row" style="padding:0;border-radius:50%;background:#f8d7da;width:32px;height:32px;display:flex;align-items:center;justify-content:center;">
+                                        <i class="fas fa-trash"></i>
+                                    </button>
+                                </div>
+                            </td>
+                            <td class="text-center drag-handle" style="cursor:move;width:32px;">
+                                <i class="fas fa-grip-vertical" style="color:#667eea;font-size:1.2rem;"></i>
+                            </td>
+                        </tr>
+                    <?php endforeach; ?>
                         <?php endif; ?>
                     </tbody>
                 </table>
@@ -336,7 +340,8 @@ $('#dynamicTaskTable tbody').on('mouseleave', 'tr.task-row', function() {
     colorRowsByModule();
 });
 // Editable cell focus effect
-$('#dynamicTaskTable tbody').on('click', 'td.editable-cell', function(e) {
+// --- Refactored editable cell logic for dynamic fields ---
+$('#dynamicTaskTable').on('click', 'td.editable-cell', function(e) {
     if (e.target !== this) return;
     $(this).css('background', '#e0e7ff');
     const field = $(this).data('field');
@@ -347,7 +352,11 @@ $('#dynamicTaskTable tbody').on('click', 'td.editable-cell', function(e) {
     let overlay;
 
     function removeOverlay(val, displayText) {
-        cell.text(displayText || val);
+        if (["Tester Name","PIC"].includes(field)) {
+            cell.find('.user-display').text(displayText || val);
+        } else {
+            cell.text(displayText || val);
+        }
         cell.css('background', '#fff');
         $('.cell-overlay-editor').remove();
         cell.trigger('blur');
@@ -372,7 +381,6 @@ $('#dynamicTaskTable tbody').on('click', 'td.editable-cell', function(e) {
             }
         });
     } else if (field === 'Progress') {
-        // DROPDOWN for progress in steps of 10
         let current = parseInt(cell.text().replace('%','').trim(), 10) || 0;
         let selectHtml = `<select class="cell-overlay-editor form-select form-select-sm" style="position:absolute;z-index:9999;left:${cellOffset.left}px;top:${cellOffset.top}px;width:${cellWidth}px;height:${cellHeight}px;">`;
         for (let i = 0; i <= 100; i += 10) {
@@ -419,7 +427,8 @@ $('#dynamicTaskTable tbody').on('click', 'td.editable-cell', function(e) {
         });
     }
 });
-$('#dynamicTaskTable tbody').on('blur', 'td.editable-cell', function() {
+
+$('#dynamicTaskTable').on('blur', 'td.editable-cell', function() {
     $(this).css('background', '#fff');
     const cell = $(this);
     const row = cell.closest('tr');
@@ -430,7 +439,9 @@ $('#dynamicTaskTable tbody').on('blur', 'td.editable-cell', function() {
     row.find('td.editable-cell').each(function() {
         const field = $(this).data('field');
         let value;
-        if (field === 'Start Date' || field === 'End Date') {
+        if (["Tester Name","PIC"].includes(field)) {
+            value = $(this).find('.user-display').text().trim();
+        } else if (field === 'Start Date' || field === 'End Date') {
             value = $(this).find('input[type="date"]').val() || $(this).text();
         } else if (field === 'Progress') {
             value = $(this).find('select.cell-overlay-editor').val() || $(this).text();
@@ -456,7 +467,9 @@ $('#dynamicTaskTable tbody').on('blur', 'td.editable-cell', function() {
     // Restore cell display
     row.find('td.editable-cell').each(function() {
         const field = $(this).data('field');
-        if (field === 'Start Date' || field === 'End Date') {
+        if (["Tester Name","PIC"].includes(field)) {
+            $(this).find('.user-display').text(data[field]);
+        } else if (field === 'Start Date' || field === 'End Date') {
             $(this).text(data[field]);
         } else if (field === 'Progress') {
             $(this).text(data[field]);
@@ -505,27 +518,40 @@ $('#addRowBtn').on('click', function() {
     if (lastRow.length) {
         firstColValue = lastRow.find('td:first').text() || '';
     }
+    // --- Refactored: Use JS for dynamic field handling ---
     let rowHtml = '<tr class="task-row" style="transition:box-shadow 0.3s;">';
-    <?php foreach ($fields as $idx => $field): ?>
-        if (<?= $idx ?> === 0) {
-            rowHtml += '<td contenteditable="true" class="editable-cell" tabindex="0" data-field="<?= esc($field) ?>" style="transition:background 0.2s; padding:1rem 1rem; font-size:1.05rem; border-bottom:1px solid #e2e8f0;">'+firstColValue+'</td>';
-        } else if ('<?= esc($field) ?>' === 'Last Modified') {
+    // Get header IDs and mapping from PHP variables
+    let headerIds = <?php echo json_encode($fields ?? []); ?>;
+    let allHeaderOptions = <?php echo json_encode($all_headers ?? []); ?>;
+    let headerMap = {};
+    allHeaderOptions.forEach(h => { headerMap[h.id] = h.column_name; });
+    // For each header, generate the correct cell type
+    headerIds.forEach(function(headerId, idx) {
+        let field = headerMap[headerId] || '';
+        if (idx === 0) {
+            rowHtml += '<td contenteditable="true" class="editable-cell" tabindex="0" data-field="'+field+'" style="transition:background 0.2s; padding:1rem 1rem; font-size:1.05rem; border-bottom:1px solid #e2e8f0;">'+firstColValue+'</td>';
+        } else if (field === 'Last Modified') {
             rowHtml += '<td style="color:#6b7280; padding:1rem 1rem; font-size:1.05rem; border-bottom:1px solid #e2e8f0;"></td>';
-        } else if ('<?= esc($field) ?>' === 'Image') {
+        } else if (field === 'Image') {
             rowHtml += '<td class="image-cell" data-field="Image" style="padding:1rem 1rem; font-size:1.05rem; border-bottom:1px solid #e2e8f0; min-width:110px; max-width:140px; text-align:center; vertical-align:middle;">';
             rowHtml += '<div class="task-image-list" data-task-id=""></div>';
             rowHtml += '<button class="btn btn-link p-0 upload-image-btn" title="Upload Image" data-task-id="" style="color:#667eea; font-size:1.5rem; display:inline-block;"><i class="fas fa-image"></i></button>';
             rowHtml += '<input type="file" accept="image/*" class="d-none image-upload-input" data-task-id="" multiple>';
             rowHtml += '</td>';
-        } else if (['Start Date','End Date','Progress','Status'].includes('<?= esc($field) ?>')) {
-            rowHtml += '<td class="editable-cell" tabindex="0" data-field="<?= esc($field) ?>" style="transition:background 0.2s; padding:1rem 1rem; font-size:1.05rem; border-bottom:1px solid #e2e8f0;"></td>';
-        } else if (['Tester Name','PIC'].includes('<?= esc($field) ?>')) {
-            rowHtml += '<td class="editable-cell user-dropdown-cell" tabindex="0" data-field="<?= esc($field) ?>"><span class="user-display"></span></td>';
+        } else if (["Start Date","End Date","Progress","Status"].includes(field)) {
+            rowHtml += '<td class="editable-cell" tabindex="0" data-field="'+field+'" style="transition:background 0.2s; padding:1rem 1rem; font-size:1.05rem; border-bottom:1px solid #e2e8f0;"></td>';
+        } else if (["Tester Name","PIC"].includes(field)) {
+            rowHtml += '<td class="editable-cell user-dropdown-cell" tabindex="0" data-field="'+field+'"><span class="user-display"></span></td>';
         } else {
-            rowHtml += '<td contenteditable="true" class="editable-cell" tabindex="0" data-field="<?= esc($field) ?>" style="transition:background 0.2s; padding:1rem 1rem; font-size:1.05rem; border-bottom:1px solid #e2e8f0;"></td>';
+            rowHtml += '<td contenteditable="true" class="editable-cell" tabindex="0" data-field="'+field+'" style="transition:background 0.2s; padding:1rem 1rem; font-size:1.05rem; border-bottom:1px solid #e2e8f0;"></td>';
         }
-    <?php endforeach; ?>
-    rowHtml += '<td class="text-center align-middle" style="width:40px;"><button type="button" class="btn btn-sm btn-link text-danger delete-row-btn" title="Delete Row" style="padding:0;border-radius:50%;background:#f8d7da;width:32px;height:32px;display:flex;align-items:center;justify-content:center;"><i class="fas fa-times"></i></button></td>';
+    });
+    // Only the trash button in the row
+    rowHtml += '<td class="text-center align-middle" style="width:72px;">';
+    rowHtml += '<div style="display:flex;align-items:center;justify-content:center;gap:8px;">';
+    rowHtml += '<button type="button" class="btn btn-sm btn-link text-danger delete-row-btn" title="Delete Row" style="padding:0;border-radius:50%;background:#f8d7da;width:32px;height:32px;display:flex;align-items:center;justify-content:center;"><i class="fas fa-trash"></i></button>';
+    rowHtml += '</div>';
+    rowHtml += '</td>';
     rowHtml += '<td class="text-center drag-handle" style="cursor:move;width:32px;"><i class="fas fa-grip-vertical" style="color:#667eea;font-size:1.2rem;"></i></td>';
     rowHtml += '</tr>';
     table.append(rowHtml);
@@ -712,4 +738,139 @@ $('#deleteImageBtn').on('click', function() {
         }
     });
 });
+
+// --- Table Settings Modal ---
+const tableSettingsBtn = document.getElementById('tableSettingsBtn');
+let headerIds = <?php echo json_encode($fields ?? []); ?>;
+let allHeaderOptions = <?php echo json_encode($all_headers ?? []); ?>;
+let headerMap = {};
+allHeaderOptions.forEach(h => { headerMap[h.id] = h.column_name; });
+let currentHeaders = headerIds.map(id => headerMap[id] || '');
+const modalHtml = `
+<div class="modal fade" id="tableSettingsModal" tabindex="-1" aria-labelledby="tableSettingsModalLabel" aria-hidden="true">
+  <div class="modal-dialog modal-lg">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title" id="tableSettingsModalLabel"><i class='fas fa-cog'></i> Table Header Settings</h5>
+        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+      </div>
+      <div class="modal-body">
+        <div class="mb-3">
+          <label class="form-label">Current Headers (Drag to Sort):</label>
+          <ul id="headerList" class="list-group mb-2" style="min-height:40px;"></ul>
+        </div>
+        <div class="mb-3">
+          <label class="form-label">Add Header:</label>
+          <div class="input-group">
+            <select id="headerDropdown" class="form-select" style="max-width:220px;"></select>
+            <input id="customHeaderInput" type="text" class="form-control" placeholder="Custom header..." style="max-width:180px;">
+            <button id="addHeaderBtn" class="btn btn-primary" type="button"><i class="fas fa-plus"></i></button>
+          </div>
+        </div>
+      </div>
+      <div class="modal-footer">
+        <button id="saveHeadersBtn" class="btn btn-success" type="button">Save</button>
+        <button class="btn btn-secondary" data-bs-dismiss="modal" type="button">Cancel</button>
+      </div>
+    </div>
+  </div>
+</div>`;
+if (!document.getElementById('tableSettingsModal')) {
+    document.body.insertAdjacentHTML('beforeend', modalHtml);
+}
+tableSettingsBtn.addEventListener('click', function() {
+    renderHeaderList();
+    renderHeaderDropdown();
+    document.getElementById('customHeaderInput').value = '';
+    const modal = new bootstrap.Modal(document.getElementById('tableSettingsModal'));
+    modal.show();
+});
+function renderHeaderList() {
+    const list = document.getElementById('headerList');
+    list.innerHTML = '';
+    currentHeaders.forEach((header, idx) => {
+        const li = document.createElement('li');
+        li.className = 'list-group-item d-flex align-items-center justify-content-between';
+        li.setAttribute('draggable', 'true');
+        li.setAttribute('data-idx', idx);
+        li.innerHTML = `<span>${header}</span><button class='btn btn-sm btn-link text-danger remove-header-btn' title='Remove'><i class='fas fa-times'></i></button>`;
+        li.querySelector('.remove-header-btn').onclick = function() {
+            currentHeaders.splice(idx, 1);
+            renderHeaderList();
+        };
+        li.addEventListener('dragstart', function(e) {
+            e.dataTransfer.setData('text/plain', idx);
+            li.classList.add('dragging');
+        });
+        li.addEventListener('dragend', function(e) {
+            li.classList.remove('dragging');
+        });
+        li.addEventListener('dragover', function(e) {
+            e.preventDefault();
+            li.classList.add('drag-over');
+        });
+        li.addEventListener('dragleave', function(e) {
+            li.classList.remove('drag-over');
+        });
+        li.addEventListener('drop', function(e) {
+            e.preventDefault();
+            li.classList.remove('drag-over');
+            const fromIdx = parseInt(e.dataTransfer.getData('text/plain'));
+            const toIdx = idx;
+            if (fromIdx !== toIdx) {
+                const moved = currentHeaders.splice(fromIdx, 1)[0];
+                currentHeaders.splice(toIdx, 0, moved);
+                renderHeaderList();
+            }
+        });
+        list.appendChild(li);
+    });
+}
+function renderHeaderDropdown() {
+    const dropdown = document.getElementById('headerDropdown');
+    dropdown.innerHTML = '';
+    allHeaderOptions.forEach(opt => {
+        if (!currentHeaders.includes(opt.column_name)) {
+            const option = document.createElement('option');
+            option.value = opt.column_name;
+            option.textContent = opt.column_name;
+            dropdown.appendChild(option);
+        }
+    });
+}
+document.getElementById('addHeaderBtn').onclick = function() {
+    const dropdown = document.getElementById('headerDropdown');
+    const customInput = document.getElementById('customHeaderInput');
+    let val = customInput.value.trim();
+    if (!val && dropdown.value) val = dropdown.value;
+    if (val && !currentHeaders.includes(val)) {
+        currentHeaders.push(val);
+        renderHeaderList();
+        renderHeaderDropdown();
+        customInput.value = '';
+    }
+};
+document.getElementById('saveHeadersBtn').onclick = function() {
+    const templateId = window.templateId || <?php echo json_encode($template_id ?? null); ?>;
+    $.ajax({
+        url: '<?= base_url('projects/updateHeaders') ?>',
+        method: 'POST',
+        contentType: 'application/json',
+        data: JSON.stringify({ fields: currentHeaders, template_id: templateId }),
+        headers: { 'X-Requested-With': 'XMLHttpRequest' },
+        success: function(data) {
+            if (data.success) {
+                Swal.fire('Saved!', 'Table headers updated.', 'success');
+                const modal = bootstrap.Modal.getInstance(document.getElementById('tableSettingsModal'));
+                modal.hide();
+                location.reload();
+            } else {
+                Swal.fire('Error', data.message || 'Failed to save headers.', 'error');
+            }
+        },
+        error: function() {
+            Swal.fire('Error', 'Failed to save headers.', 'error');
+        }
+    });
+};
 </script>

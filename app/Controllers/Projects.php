@@ -678,9 +678,16 @@ class Projects extends BaseController
         $template = $this->projectModel->getTaskTemplateByCode($template_code);
 
         $fields = [];
+        $headerMap = [];
+        $all_headers = [];
         if ($template && !empty($template['fields'])) {
             $fields = json_decode($template['fields'], true);
             if (!is_array($fields)) $fields = [];
+            // Fetch all headers
+            $all_headers = $this->db->table('task_headers')->where('is_active', 1)->where('is_delete', 0)->get()->getResultArray();
+            foreach ($all_headers as $h) {
+                $headerMap[$h['id']] = $h['column_name'];
+            }
         }
 
         // Fetch tasks for this template and project
@@ -689,6 +696,8 @@ class Projects extends BaseController
         return $this->template->member('projects/task_dynamic', [
             'template' => $template,
             'fields' => $fields,
+            'all_headers' => $all_headers,
+            'headerMap' => $headerMap,
             'tasks' => $tasks,
             'project_id' => $project_id
         ]);
@@ -868,4 +877,46 @@ class Projects extends BaseController
             'success' => $result
         ]);
     }
+
+    /**
+     * AJAX endpoint to update task template headers (fields)
+     */
+    public function updateHeaders()
+    {
+        if (!$this->request->isAJAX()) {
+            return $this->response->setJSON(['success' => false, 'message' => 'Invalid request']);
+        }
+        $fields = $this->request->getJSON(true)['fields'] ?? null;
+        $templateId = $this->request->getVar('template_id');
+        if (!$fields || !is_array($fields)) {
+            return $this->response->setJSON(['success' => false, 'message' => 'No fields provided']);
+        }
+        if (!$templateId) {
+            return $this->response->setJSON(['success' => false, 'message' => 'No template ID']);
+        }
+        $projectModel = model('ProjectModel');
+        $headerIds = [];
+        foreach ($fields as $field) {
+            // Check if header exists
+            $existing = $projectModel->db->table('task_headers')
+                ->where('column_name', $field)
+                ->where('is_active', 1)
+                ->where('is_delete', 0)
+                ->get()->getRowArray();
+            if ($existing) {
+                $headerIds[] = $existing['id'];
+            } else {
+                $headerIds[] = $projectModel->insertTaskHeader($field);
+            }
+        }
+        // Update fields column in task_templates
+        $fieldsJson = json_encode(array_values($headerIds));
+        $result = $projectModel->db->table('task_templates')->where('id', $templateId)->update(['fields' => $fieldsJson]);
+        if ($result) {
+            return $this->response->setJSON(['success' => true]);
+        } else {
+            return $this->response->setJSON(['success' => false, 'message' => 'Failed to update headers']);
+        }
+    }
+
 }
