@@ -8,7 +8,7 @@
             </button>
         </div>
         <div class="card mb-4">
-            <div class="card-body p-0">
+            <div class="card-body p-0" style="box-shadow:none;transition:none;background:none;">
                 <div class="task-template-list" id="taskTemplateList">
                     <!-- Dynamic template items will be loaded here -->
                 </div>
@@ -20,18 +20,15 @@
 <script>
 // Load templates dynamically via AJAX
 $(document).ready(function() {
-    // Get project_id from PHP (should be passed to view)
     var projectId = <?= isset($project['id']) ? json_encode($project['id']) : 'null' ?>;
-    $.get('<?= base_url('projects/get_task_templates') ?>', function(res) {
-        if (res.success && Array.isArray(res.templates)) {
-            $('#taskTemplateList').empty();
+    $.get('<?= base_url('projects/get_task_templates') ?>?project_id=' + encodeURIComponent(projectId), function(res) {
+        $('#taskTemplateList').empty();
+        if (res.success && Array.isArray(res.templates) && res.templates.length > 0) {
             let templatesLoaded = 0;
             res.templates.forEach(function(tmpl) {
-                // Use new URL pattern: /projects/get_tasks_by_template/{template_code}/{project_id}
-                $.get('<?= base_url('projects/get_tasks_by_template/') ?>' + tmpl.code + '/' + encodeURIComponent(projectId), function(taskRes) {
+                $.get('<?= base_url('projects/get_tasks_by_template/') ?>' + tmpl.id + '/' + encodeURIComponent(projectId), function(taskRes) {
                     let percent = 0;
                     if (taskRes.success && Array.isArray(taskRes.tasks) && taskRes.tasks.length > 0) {
-                        // Calculate average progress from Progress field (e.g., "60%")
                         let sum = 0;
                         let count = 0;
                         taskRes.tasks.forEach(t => {
@@ -49,86 +46,83 @@ $(document).ready(function() {
                             percent = Math.round(sum / count);
                         }
                     }
-                    // Inline styles for card and progress
                     const cardStyle = [
                         'background: #fff',
                         'border-radius: 1rem',
-                        'box-shadow: 0 4px 24px rgba(102,126,234,0.08)',
                         'border: 1px solid #e2e8f0',
                         'margin-bottom: 1.2rem',
                         'padding: 1.5rem 2rem',
                         'display: flex',
-                        'align-items: center',
                         'justify-content: space-between',
-                        'cursor: pointer',
-                        'transition: box-shadow 0.3s, transform 0.3s, background 0.3s'
-                    ].join(';');
-                    const progressSize = 48;
-                    const radius = 20;
-                    const strokeBg = 7;
-                    const strokeFg = 7;
-                    const circumference = 2 * Math.PI * radius;
-                    const fgColor = percent === 100 ? '#22c55e' : '#667eea';
-                    const textColor = percent === 100 ? '#22c55e' : '#4338ca';
-                    const progressCircleStyle = [
-                        `width: ${progressSize}px`,
-                        `height: ${progressSize}px`,
-                        'position: relative',
-                        'display: block',
-                        'background: linear-gradient(135deg, #f3f4f6 0%, #e0e7ff 100%)',
-                        'border-radius: 50%'
-                    ].join(';');
-                    const progressTextStyle = [
-                        'position: absolute',
-                        'top: 50%',
-                        'left: 50%',
-                        'transform: translate(-50%, -50%)',
-                        'font-size: 1.15rem',
-                        'font-weight: 800',
-                        `color: ${percent === 100 ? '#166534' : textColor}`,
-                        'text-shadow: 0 0 2px #fff, 0 1px 4px rgba(0,0,0,0.08)'
+                        'align-items: center'
                     ].join(';');
                     $('#taskTemplateList').append(`
-                        <div class="task-template-card task-template-item" data-template-code="${tmpl.code}" style="${cardStyle}">
-                            <div class="d-flex align-items-center gap-3">
-                                <span style="font-family: 'Poppins', sans-serif; font-weight:700; font-size:1.15rem; color:#3b3b3b;">${tmpl.name}</span>
-                                <div class="progress-circle" style="${progressCircleStyle}">
-                                    <svg width="${progressSize}" height="${progressSize}" style="display:block;">
-                                        <circle cx="${progressSize/2}" cy="${progressSize/2}" r="${radius}" stroke="#e2e8f0" stroke-width="${strokeBg}" fill="none"/>
-                                        <circle cx="${progressSize/2}" cy="${progressSize/2}" r="${radius}" stroke="${fgColor}" stroke-width="${strokeFg}" fill="none"
-                                            stroke-dasharray="${circumference}"
-                                            stroke-dashoffset="${circumference - (circumference * percent / 100)}"
-                                            style="transition: stroke-dashoffset 0.6s cubic-bezier(.4,2,.3,1); stroke-linecap:round; filter: drop-shadow(0 2px 6px rgba(102,126,234,0.10));"/>
-                                    </svg>
-                                    <span style="${progressTextStyle}">${percent}%</span>
-                                </div>
+                        <div class="task-template-card task-template-item" data-template-id="${tmpl.id}" style="${cardStyle}; box-shadow: 0 4px 24px rgba(102,126,234,0.08); transition: box-shadow 0.3s, transform 0.3s, background 0.3s;" onmouseover="this.style.boxShadow='0 8px 32px rgba(102,126,234,0.15)'; this.style.transform='translateY(-4px)';" onmouseout="this.style.boxShadow='0 4px 24px rgba(102,126,234,0.08)'; this.style.transform='none';">
+                            <div style="flex:1; display:flex; align-items:center; gap:1.2rem;">
+                                <div style="font-family: 'Poppins', sans-serif; font-weight:700; font-size:1.08rem; color:#23272b;">${tmpl.name}</div>
                             </div>
-                            <i class="fas fa-chevron-right" style="font-size:1.3rem; color:#667eea;"></i>
+                            <div style="display:flex; align-items:center; gap:0.7rem; min-width:54px;">
+                                <div style="display:flex; flex-direction:column; align-items:center;">
+                                    <div style="width:32px; height:32px; position:relative;">
+                                        <svg width="32" height="32" viewBox="0 0 32 32">
+                                            <circle cx="16" cy="16" r="12" stroke="#e2e8f0" stroke-width="4" fill="none" />
+                                            <circle cx="16" cy="16" r="12" stroke="#06b6d4" stroke-width="4" fill="none" stroke-dasharray="${Math.PI * 2 * 12}" stroke-dashoffset="${Math.PI * 2 * 12 * (1 - percent / 100)}" stroke-linecap="round" transform="rotate(-90 16 16)" />
+                                        </svg>
+                                        <span style="position:absolute; left:0; right:0; top:0; bottom:0; display:flex; align-items:center; justify-content:center; font-size:0.95rem; font-weight:800; color:#4a5568;">${percent}%</span>
+                                    </div>
+                                    <div style="color:#6b7280; font-size:0.75rem; margin-bottom:2px;">Progress</div>
+                                </div>
+                                <i class="fas fa-chevron-right" style="font-size:1.1rem; color:#667eea; margin-left:0.5rem;"></i>
+                            </div>
                         </div>
                     `);
                     templatesLoaded++;
-                    // Add hover effect after all templates loaded
-                    if (templatesLoaded === res.templates.length) {
-                        $('#taskTemplateList').on('mouseenter', '.task-template-card', function() {
-                            $(this).css('box-shadow', '0 12px 32px rgba(102,126,234,0.18)');
-                            $(this).css('background', 'linear-gradient(135deg, #e9ecef 0%, #f8fafc 100%)');
-                            $(this).css('transform', 'translateY(-6px) scale(1.03)');
-                        });
-                        $('#taskTemplateList').on('mouseleave', '.task-template-card', function() {
-                            $(this).css('box-shadow', '0 4px 24px rgba(102,126,234,0.08)');
-                            $(this).css('background', '#fff');
-                            $(this).css('transform', 'none');
-                        });
-                    }
                 });
             });
+        } else {
+            // No templates: show message and Add Task button
+            $('#taskTemplateList').html('<div class="text-center text-muted" style="padding:2rem;">No templates for this project.<br><button class="btn btn-primary mt-3" id="createTemplateBtn"><i class="fas fa-plus"></i> Create Template</button></div>');
         }
     });
 
-    // Event delegation for template item click
     $('#taskTemplateList').on('click', '.task-template-item', function() {
-        var templateCode = $(this).data('template-code');
-        window.location.href = '<?= base_url('projects/task_page/') ?>' + templateCode + '?project_id=' + projectId;
+        var templateId = $(this).data('template-id');
+        window.location.href = '<?= base_url('projects/task_page/') ?>' + templateId + '?project_id=' + projectId;
+    });
+
+    // Create Template button
+    $('#taskTemplateList').on('click', '#createTemplateBtn', function() {
+        Swal.fire({
+            title: 'Create New Template',
+            input: 'text',
+            inputLabel: 'Template Name',
+            inputPlaceholder: 'Enter template name',
+            showCancelButton: true,
+            confirmButtonText: 'Create',
+            preConfirm: (name) => {
+                if (!name) return false;
+                return name;
+            }
+        }).then((result) => {
+            if (result.isConfirmed && result.value) {
+                $.ajax({
+                    url: '<?= base_url('projects/create_template') ?>',
+                    method: 'POST',
+                    data: { name: result.value, project_id: projectId },
+                    success: function(res) {
+                        if (res.success) {
+                            Swal.fire('Created!', 'Template created.', 'success');
+                            location.reload();
+                        } else {
+                            Swal.fire('Error', res.message || 'Failed to create template.', 'error');
+                        }
+                    },
+                    error: function() {
+                        Swal.fire('Error', 'Failed to create template.', 'error');
+                    }
+                });
+            }
+        });
     });
 
     // Add Task button

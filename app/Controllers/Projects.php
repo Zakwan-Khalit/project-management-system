@@ -22,8 +22,18 @@ class Projects extends BaseController
                 'message' => 'User not authenticated'
             ]);
         }
-        // Fetch tasks for this template and project
-        $tasks = $this->projectModel->getTasksByTemplateAndProject($template_code, $project_id);
+        // Fetch tasks for this template and project (by template ID)
+        $tasks = $this->projectModel->getTasksByTemplateIdAndProject($template_code, $project_id); // $template_code is now template_id
+        // Decode progress from data JSON for each task
+        foreach ($tasks as &$task) {
+            $dataArr = is_array($task['data']) ? $task['data'] : json_decode($task['data'], true);
+            if (is_array($dataArr)) {
+                foreach ($dataArr as $k => $v) {
+                    $task[$k] = $v;
+                }
+            }
+        }
+        unset($task);
         return $this->response->setJSON([
             'success' => true,
             'tasks' => $tasks
@@ -88,7 +98,7 @@ class Projects extends BaseController
             throw \CodeIgniter\Exceptions\PageNotFoundException::forPageNotFound();
         }
 
-        $templates = $this->projectModel->getTaskTemplates();
+        $templates = $this->projectModel->getTaskTemplatesByProject($id);
         $data = [
             'project' => $project,
             'templates' => $templates
@@ -647,39 +657,34 @@ class Projects extends BaseController
     // Get all task templates (AJAX)
     public function get_task_templates()
     {
-        $templates = $this->projectModel->getTaskTemplates();
-        foreach ($templates as &$tmpl) {
-            $tmpl['progress'] = $this->projectModel->getTemplateProgress($tmpl['code']);
-        }
-        unset($tmpl);
-        return $this->response->setJSON([
-            'success' => true,
-            'templates' => $templates
-        ]);
+        $projectId = $this->request->getGet('project_id');
+        $templates = $this->projectModel->getTaskTemplatesByProject($projectId);
+        return $this->response->setJSON(['success' => true, 'templates' => $templates]);
     }
 
     // get_task_templates task page for a template (Excel-like flexibility)
-    public function task_page($template_code)
+    public function task_page($templateParam)
     {
         $userData = session('userdata');
         $userId = $userData['id'] ?? null;
-        if (!$userId) {
-            return redirect()->to(base_url('auth/login'));
-        }
-
-        // Get project_id from query string (or route param if you prefer)
+        
         $project_id = $this->request->getGet('project_id');
-        if (!$project_id) {
-            // Optionally, redirect or show error if project_id is missing
-            return redirect()->to(base_url('projects'));
+       
+        // templateParam can be either 'template=ID' or just the ID
+        $templateId = null;
+        if (is_numeric($templateParam)) {
+            $templateId = intval($templateParam);
+        } elseif (strpos($templateParam, 'template=') === 0) {
+            $templateId = intval(substr($templateParam, 9));
         }
-
-        // Fetch template by code
-        $template = $this->projectModel->getTaskTemplateByCode($template_code);
+        
+        // Fetch template by ID and project
+        $template = $this->projectModel->getTaskTemplateById($templateId, $project_id);
 
         $fields = [];
         $headerMap = [];
         $all_headers = [];
+        $header_lookup = [];
         if ($template && !empty($template['fields'])) {
             $fields = json_decode($template['fields'], true);
             if (!is_array($fields)) $fields = [];
@@ -689,9 +694,21 @@ class Projects extends BaseController
                 $headerMap[$h['id']] = $h['column_name'];
             }
         }
+        // Always fetch header_lookup for dropdown
+        $header_lookup = $this->projectModel->getHeaderLookupOptions();
 
         // Fetch tasks for this template and project
-        $tasks = $this->projectModel->getTasksByTemplateAndProject($template_code, $project_id);
+        $tasks = $this->projectModel->getTasksByTemplateIdAndProject($templateId, $project_id);
+        // Decode Progress from data JSON for each task
+        foreach ($tasks as &$task) {
+            $dataArr = is_array($task['data']) ? $task['data'] : json_decode($task['data'], true);
+            if (is_array($dataArr)) {
+                foreach ($dataArr as $k => $v) {
+                    $task[$k] = $v;
+                }
+            }
+        }
+        unset($task);
 
         return $this->template->member('projects/task_dynamic', [
             'template' => $template,
@@ -699,15 +716,17 @@ class Projects extends BaseController
             'all_headers' => $all_headers,
             'headerMap' => $headerMap,
             'tasks' => $tasks,
-            'project_id' => $project_id
+            'project_id' => $project_id,
+            'template_id' => $templateId,
+            'header_lookup' => $header_lookup
         ]);
-    // Add new task (show form for dynamic template)
     }
 
     public function add_task()
     {
-        $template_code = $this->request->getGet('template');
-        $template = $this->projectModel->getTaskTemplateByCode($template_code);
+        $template_id = $this->request->getGet('template_id');
+        $project_id = $this->request->getGet('project_id');
+        $template = $this->projectModel->getTaskTemplateById($template_id, $project_id);
         if (!$template) {
             return $this->response->setJSON([
                 'success' => false,
@@ -717,7 +736,9 @@ class Projects extends BaseController
         $fields = json_decode($template['fields'] ?? '[]', true);
         $data = [
             'template' => $template,
-            'fields' => $fields
+            'fields' => $fields,
+            'project_id' => $project_id,
+            'template_id' => $template_id
         ];
         return $this->template->member('projects/add_task', $data);
     }
@@ -726,11 +747,9 @@ class Projects extends BaseController
     public function save_task()
     {
         $taskId = $this->request->getPost('id');
-        $template_code = $this->request->getPost('template_code');
+        $template_id = $this->request->getPost('template_id');
         $project_id = $this->request->getPost('project_id');
-        $template = $this->projectModel->getTaskTemplateByCode($template_code);
-        // pr($template);
-        // pr($this->request->getPost());
+        $template = $this->projectModel->getTaskTemplateById($template_id, $project_id);
         if (!$template) {
             return $this->response->setJSON([
                 'success' => false,
@@ -739,18 +758,14 @@ class Projects extends BaseController
         }
         $fields = json_decode($template['fields'] ?? '[]', true);
         $taskData = [];
-        // Map POST keys with underscores to template field names with spaces
         $postData = $this->request->getPost();
         foreach ($fields as $field) {
-            // Normalize field name: replace spaces with underscores, remove casing
             $normalized = str_replace(' ', '_', $field);
-            // Try exact match first
             if (isset($postData[$field])) {
                 $taskData[$field] = $postData[$field];
             } elseif (isset($postData[$normalized])) {
                 $taskData[$field] = $postData[$normalized];
             } else {
-                // Try lowercased
                 $lower = strtolower($normalized);
                 if (isset($postData[$lower])) {
                     $taskData[$field] = $postData[$lower];
@@ -760,10 +775,9 @@ class Projects extends BaseController
             }
         }
         if (!$taskId) {
-            // Insert new task
             $newId = $this->projectModel->insertDynamicTask([
                 'project_id' => $project_id,
-                'template_id' => $template['id'],
+                'template_id' => $template_id,
                 'data' => json_encode($taskData)
             ]);
             return $this->response->setJSON([
@@ -771,9 +785,8 @@ class Projects extends BaseController
                 'task_id' => $newId
             ]);
         } else {
-            // Update existing task
             $result = $this->projectModel->autosaveTask($taskId, [
-                'template_code' => $template_code,
+                'template_id' => $template_id,
                 'data' => json_encode($taskData)
             ]);
             return $this->response->setJSON([
@@ -895,28 +908,26 @@ class Projects extends BaseController
             return $this->response->setJSON(['success' => false, 'message' => 'No template ID']);
         }
         $projectModel = model('ProjectModel');
-        $headerIds = [];
-        foreach ($fields as $field) {
-            // Check if header exists
-            $existing = $projectModel->db->table('task_headers')
-                ->where('column_name', $field)
-                ->where('is_active', 1)
-                ->where('is_delete', 0)
-                ->get()->getRowArray();
-            if ($existing) {
-                $headerIds[] = $existing['id'];
-            } else {
-                $headerIds[] = $projectModel->insertTaskHeader($field);
-            }
-        }
-        // Update fields column in task_templates
-        $fieldsJson = json_encode(array_values($headerIds));
-        $result = $projectModel->db->table('task_templates')->where('id', $templateId)->update(['fields' => $fieldsJson]);
+        $result = $projectModel->updateTaskTemplateFields($templateId, $fields);
         if ($result) {
             return $this->response->setJSON(['success' => true]);
         } else {
             return $this->response->setJSON(['success' => false, 'message' => 'Failed to update headers']);
         }
+    }
+
+    public function create_template()
+    {
+        $name = $this->request->getPost('name');
+        $projectId = $this->request->getPost('project_id');
+        if (!$name || !$projectId) {
+            return $this->response->setJSON(['success' => false, 'message' => 'Missing data']);
+        }
+        $templateId = $this->projectModel->createTaskTemplate($projectId, $name);
+        if ($templateId) {
+            return $this->response->setJSON(['success' => true, 'id' => $templateId]);
+        }
+        return $this->response->setJSON(['success' => false, 'message' => 'Failed to create template']);
     }
 
 }

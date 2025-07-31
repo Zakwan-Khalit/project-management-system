@@ -5,37 +5,37 @@
             <?= esc($template['name'] ?? 'Tasks') ?>
         </h2>
         <div style="background: #fff; border-radius: 2rem; box-shadow: 0 16px 48px rgba(102,126,234,0.13); border: none; padding: 2.5rem 2.5rem 2rem 2.5rem; margin-bottom:2rem;">
-<!-- Image Preview Modal -->
-<div class="modal fade" id="imageModal" tabindex="-1" aria-labelledby="imageModalLabel" aria-hidden="true">
-  <div class="modal-dialog modal-dialog-centered">
-    <div class="modal-content" style="border-radius:1.2rem;">
-      <div class="modal-header" style="border-bottom:0;">
-        <h5 class="modal-title" id="imageModalLabel">Image Preview</h5>
-        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-      </div>
-      <div class="modal-body text-center">
-        <img id="modalImage" src="" alt="Task Image" style="max-width:100%;max-height:400px;border-radius:0.7rem;box-shadow:0 2px 12px rgba(102,126,234,0.13);margin-bottom:1rem;" />
-      </div>
-      <div class="modal-footer" style="border-top:0;justify-content:center;">
-        <button id="deleteImageBtn" type="button" class="btn btn-danger" data-image-id=""><i class="fas fa-trash-alt me-1"></i>Delete Image</button>
-        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
-      </div>
-    </div>
-  </div>
-</div>
-    <!-- Export Buttons -->
-    <div class="d-flex justify-content-between align-items-center mb-3">
-        <div class="d-flex gap-2" id="exportBtnGroupLeft">
-            <button id="exportCsvBtn" class="btn btn-outline-primary" type="button"><i class="fas fa-file-csv me-1"></i> CSV</button>
-            <button id="exportExcelBtn" class="btn btn-outline-success" type="button"><i class="fas fa-file-excel me-1"></i> Excel</button>
-            <button id="exportPdfBtn" class="btn btn-outline-danger" type="button"><i class="fas fa-file-pdf me-1"></i> PDF</button>
+        <!-- Image Preview Modal -->
+        <div class="modal fade" id="imageModal" tabindex="-1" aria-labelledby="imageModalLabel" aria-hidden="true">
+        <div class="modal-dialog modal-dialog-centered">
+            <div class="modal-content" style="border-radius:1.2rem;">
+            <div class="modal-header" style="border-bottom:0;">
+                <h5 class="modal-title" id="imageModalLabel">Image Preview</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body text-center">
+                <img id="modalImage" src="" alt="Task Image" style="max-width:100%;max-height:400px;border-radius:0.7rem;box-shadow:0 2px 12px rgba(102,126,234,0.13);margin-bottom:1rem;" />
+            </div>
+            <div class="modal-footer" style="border-top:0;justify-content:center;">
+                <button id="deleteImageBtn" type="button" class="btn btn-danger" data-image-id=""><i class="fas fa-trash-alt me-1"></i>Delete Image</button>
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+            </div>
+            </div>
         </div>
-        <div>
-            <button id="tableSettingsBtn" class="btn btn-outline-secondary" type="button" title="Table Settings" style="border-radius:50%;width:40px;height:40px;display:flex;align-items:center;justify-content:center;">
-                <i class="fas fa-cog"></i>
-            </button>
         </div>
-    </div>
+            <!-- Export Buttons -->
+            <div class="d-flex justify-content-between align-items-center mb-3">
+                <div class="d-flex gap-2" id="exportBtnGroupLeft">
+                    <button id="exportCsvBtn" class="btn btn-outline-primary" type="button"><i class="fas fa-file-csv me-1"></i> CSV</button>
+                    <button id="exportExcelBtn" class="btn btn-outline-success" type="button"><i class="fas fa-file-excel me-1"></i> Excel</button>
+                    <button id="exportPdfBtn" class="btn btn-outline-danger" type="button"><i class="fas fa-file-pdf me-1"></i> PDF</button>
+                </div>
+                <div>
+                    <button id="tableSettingsBtn" class="btn btn-outline-secondary" type="button" title="Table Settings" style="border-radius:50%;width:40px;height:40px;display:flex;align-items:center;justify-content:center;">
+                        <i class="fas fa-cog"></i>
+                    </button>
+                </div>
+            </div>
             <div style="overflow-x:auto;">
                 <table class="table table-hover table-bordered" id="dynamicTaskTable" style="background: #fff; border-radius: 1.2rem; overflow: visible; box-shadow: 0 2px 12px rgba(102,126,234,0.07); margin-bottom:0; min-width:1100px;">
                     <thead class="table-light" style="background: linear-gradient(90deg, #e9ecef 0%, #f8fafc 100%);">
@@ -788,33 +788,47 @@ tableSettingsBtn.addEventListener('click', function() {
 function renderHeaderList() {
     const list = document.getElementById('headerList');
     list.innerHTML = '';
+    // Use CSS grid for compact multi-row layout
+    list.style.display = 'grid';
+    list.style.gridTemplateColumns = 'repeat(5, minmax(0, 1fr))';
+    list.style.gap = '0.5rem';
+    list.style.border = 'none';
+    list.style.background = 'none';
     currentHeaders.forEach((header, idx) => {
-        const li = document.createElement('li');
-        li.className = 'list-group-item d-flex align-items-center justify-content-between';
-        li.setAttribute('draggable', 'true');
-        li.setAttribute('data-idx', idx);
-        li.innerHTML = `<span>${header}</span><button class='btn btn-sm btn-link text-danger remove-header-btn' title='Remove'><i class='fas fa-times'></i></button>`;
-        li.querySelector('.remove-header-btn').onclick = function() {
+        const item = document.createElement('div');
+        item.className = 'header-grid-item d-flex align-items-center justify-content-between';
+        item.setAttribute('draggable', 'true');
+        item.setAttribute('data-idx', idx);
+        item.style.background = '#f8fafc';
+        item.style.borderRadius = '0.7rem';
+        item.style.padding = '0.5rem 0.7rem';
+        item.style.fontSize = '0.98rem';
+        item.style.boxShadow = '0 2px 8px rgba(102,126,234,0.07)';
+        item.style.margin = '0';
+        item.style.border = '1px solid #e2e8f0';
+        item.style.cursor = 'grab';
+        item.innerHTML = `<span style="flex:1;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">${header}</span><button class='btn btn-sm btn-link text-danger remove-header-btn' title='Remove' style='margin-left:8px;'><i class='fas fa-times'></i></button>`;
+        item.querySelector('.remove-header-btn').onclick = function() {
             currentHeaders.splice(idx, 1);
             renderHeaderList();
         };
-        li.addEventListener('dragstart', function(e) {
+        item.addEventListener('dragstart', function(e) {
             e.dataTransfer.setData('text/plain', idx);
-            li.classList.add('dragging');
+            item.classList.add('dragging');
         });
-        li.addEventListener('dragend', function(e) {
-            li.classList.remove('dragging');
+        item.addEventListener('dragend', function(e) {
+            item.classList.remove('dragging');
         });
-        li.addEventListener('dragover', function(e) {
+        item.addEventListener('dragover', function(e) {
             e.preventDefault();
-            li.classList.add('drag-over');
+            item.classList.add('drag-over');
         });
-        li.addEventListener('dragleave', function(e) {
-            li.classList.remove('drag-over');
+        item.addEventListener('dragleave', function(e) {
+            item.classList.remove('drag-over');
         });
-        li.addEventListener('drop', function(e) {
+        item.addEventListener('drop', function(e) {
             e.preventDefault();
-            li.classList.remove('drag-over');
+            item.classList.remove('drag-over');
             const fromIdx = parseInt(e.dataTransfer.getData('text/plain'));
             const toIdx = idx;
             if (fromIdx !== toIdx) {
@@ -823,19 +837,19 @@ function renderHeaderList() {
                 renderHeaderList();
             }
         });
-        list.appendChild(li);
+        list.appendChild(item);
     });
 }
 function renderHeaderDropdown() {
     const dropdown = document.getElementById('headerDropdown');
     dropdown.innerHTML = '';
-    allHeaderOptions.forEach(opt => {
-        if (!currentHeaders.includes(opt.column_name)) {
-            const option = document.createElement('option');
-            option.value = opt.column_name;
-            option.textContent = opt.column_name;
-            dropdown.appendChild(option);
-        }
+    // Use header_lookup for dropdown options, allow duplicates
+    let headerLookupOptions = <?php echo json_encode($header_lookup ?? []); ?>;
+    headerLookupOptions.forEach(opt => {
+        const option = document.createElement('option');
+        option.value = opt.column_name;
+        option.textContent = opt.column_name;
+        dropdown.appendChild(option);
     });
 }
 document.getElementById('addHeaderBtn').onclick = function() {

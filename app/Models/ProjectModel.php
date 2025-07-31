@@ -561,23 +561,26 @@ class ProjectModel extends Model
     }
 
     // Get all task templates
-    public function getTaskTemplates()
+    // Get all task templates for a project
+    public function getTaskTemplatesByProject($projectId)
     {
         $builder = $this->db->table('task_templates');
-        $builder->where('is_active', 1);
+        $builder->where('project_id', $projectId);
         $builder->where('is_delete', 0);
         return $builder->get()->getResultArray();
     }
-
+    
     // Get template by code
-    public function getTaskTemplateByCode($code)
+    // Get template by ID and project
+    public function getTaskTemplateById($templateId, $projectId)
     {
         $builder = $this->db->table('task_templates');
-        $builder->where('code', $code);
-        $builder->where('is_active', 1);
+        $builder->where('id', $templateId);
+        $builder->where('project_id', $projectId);
         $builder->where('is_delete', 0);
         return $builder->get()->getRowArray();
     }
+    
 
     // Get tasks by template code
     public function getTasksByTemplate($template_code)
@@ -660,26 +663,15 @@ class ProjectModel extends Model
     }
 
     // Get tasks by template code and project id
-    public function getTasksByTemplateAndProject($template_code, $project_id)
+    // Get tasks by template ID and project id
+    public function getTasksByTemplateIdAndProject($templateId, $projectId)
     {
-        $template = $this->getTaskTemplateByCode($template_code);
-        if (!$template) return [];
-        $template_id = $template['id'];
         $builder = $this->db->table('tasks');
-        $builder->where('template_id', $template_id);
-        $builder->where('project_id', $project_id);
+        $builder->where('template_id', $templateId);
+        $builder->where('project_id', $projectId);
         $builder->where('is_delete', 0);
-        $builder->orderBy('`task_order`', 'ASC');
-        $tasks = $builder->get()->getResultArray();
-        // Decode data JSON for each task
-        foreach ($tasks as &$task) {
-            $data = isset($task['data']) ? json_decode($task['data'], true) : [];
-            if (is_array($data)) {
-                $task = array_merge($task, $data);
-            }
-        }
-        unset($task);
-        return $tasks;
+        $builder->where('is_active', 1);
+        return $builder->get()->getResultArray();
     }
 
     /**
@@ -699,24 +691,22 @@ class ProjectModel extends Model
         return $builder->get()->getResultArray();
     }
 
-    /**
-     * Update the fields (headers) for a task template
-     * @param int $templateId
-     * @param array $fields
-     * @return bool
-     */
-    public function updateTaskTemplateFields($templateId, $fields)
+    // Create a new template for a project
+    public function createTaskTemplate($name, $projectId)
     {
-        if (!$templateId || !is_array($fields)) return false;
-        $fieldsJson = json_encode(array_values($fields));
-        return $this->db->table('task_templates')->where('id', $templateId)->update(['fields' => $fieldsJson]);
+        $data = [
+            'name' => $name,
+            'project_id' => $projectId,
+            'is_active' => 1,
+            'is_delete' => 0,
+            'date_created' => date('Y-m-d H:i:s'),
+            'date_modified' => date('Y-m-d H:i:s'),
+            'fields' => json_encode([])
+        ];
+        $this->db->table('task_templates')->insert($data);
+        return $this->db->insertID();
     }
 
-    /**
-     * Get task headers by array of IDs, sorted as per IDs order
-     * @param array $ids
-     * @return array
-     */
     public function getTaskHeadersByIds($ids)
     {
         if (!is_array($ids) || empty($ids)) return [];
@@ -732,19 +722,82 @@ class ProjectModel extends Model
         });
         return $headers;
     }
+
     /**
-     * Insert a new header and return its ID
-     * @param string $columnName
-     * @return int|false
+     * Get all header_lookup options for dropdown (can have duplicates)
+     */
+    public function getHeaderLookupOptions()
+    {
+        return $this->db->table('header_lookup')->get()->getResultArray();
+    }
+
+    /**
+     * Insert a new header: always add to header_lookup, then to task_headers
+     * Returns the new task_headers.id
      */
     public function insertTaskHeader($columnName)
     {
-        $data = [
-            'column_name' => $columnName,
-            'is_active' => 1,
-            'is_delete' => 0
-        ];
-        $this->db->table('task_headers')->insert($data);
-        return $this->db->insertID();
+        // Insert into header_lookup (for dropdown) if not exists
+        $lookupRow = $this->db->table('header_lookup')->where('column_name', $columnName)->get()->getRowArray();
+        if (!$lookupRow) {
+            $this->db->table('header_lookup')->insert(['column_name' => $columnName]);
+        }
+        // Insert into task_headers (for template logic) if not exists
+        $headerRow = $this->db->table('task_headers')->where('column_name', $columnName)->where('is_delete', 0)->get()->getRowArray();
+        if (!$headerRow) {
+            $this->db->table('task_headers')->insert([
+                'column_name' => $columnName,
+                'is_active' => 1,
+                'is_delete' => 0
+            ]);
+            return $this->db->insertID(); // Return new task_headers.id
+        } else {
+            return $headerRow['id'];
+        }
+    }
+
+    /**
+     * Update the fields (headers) for a task template
+     * @param int $templateId
+     * @param array $fields (array of header names)
+     * @return bool
+     */
+    public function updateTaskTemplateFields($templateId, $fields)
+    {
+        if (!$templateId || !is_array($fields)) return false;
+        $headerIds = [];
+        foreach ($fields as $field) {
+            // Check if header already exists (by name, not unique)
+            $row = $this->db->table('task_headers')->where('column_name', $field)->where('is_delete', 0)->get()->getRowArray();
+            if ($row) {
+                $headerIds[] = $row['id'];
+            } else {
+                // Insert new header
+                $headerIds[] = $this->insertTaskHeader($field);
+            }
+        }
+        $fieldsJson = json_encode(array_values($headerIds));
+        return $this->db->table('task_templates')->where('id', $templateId)->update(['fields' => $fieldsJson]);
+    }
+
+    /**
+     * Get task headers by array of IDs, sorted as per IDs order
+     * @param int $templateId
+     * @return array
+     */
+    public function getTaskHeadersByTemplateId($templateId)
+    {
+        $builder = $this->db->table('task_templates');
+        $template = $builder->where('id', $templateId)->get()->getRowArray();
+        if (!$template || empty($template['fields'])) return [];
+        $ids = json_decode($template['fields'], true);
+        if (!is_array($ids)) return [];
+        $headerBuilder = $this->db->table('task_headers');
+        $headers = [];
+        foreach ($ids as $id) {
+            $row = $headerBuilder->where('id', $id)->get()->getRowArray();
+            if ($row) $headers[] = $row;
+        }
+        return $headers;
     }
 }

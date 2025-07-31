@@ -8,7 +8,7 @@ USE `project_management_system`;
 
 -- Lookup Tables for Dropdowns and References
 -- Status lookup table
-CREATE TABLE `status_lookup` (
+CREATE TABLE IF NOT EXISTS `status_lookup` (
     `id` int(11) NOT NULL AUTO_INCREMENT,
     `code` varchar(32),
     `name` varchar(128),
@@ -24,7 +24,8 @@ CREATE TABLE `status_lookup` (
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
 -- Priority lookup table
-CREATE TABLE `priority_lookup` (
+CREATE TABLE IF NOT EXISTS `priority_lookup` (
+    `id` int(11) NOT NULL AUTO_INCREMENT,
     `type` varchar(32),
     `code` varchar(32),
     `name` varchar(128),
@@ -41,7 +42,7 @@ CREATE TABLE `priority_lookup` (
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
 -- Department lookup table
-CREATE TABLE `department_lookup` (
+CREATE TABLE IF NOT EXISTS `department_lookup` (
     `id` int(11) NOT NULL AUTO_INCREMENT,
     `code` varchar(32),
     `name` varchar(128),
@@ -54,8 +55,23 @@ CREATE TABLE `department_lookup` (
     PRIMARY KEY (`id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
+
+-- Task Core Tables
+CREATE TABLE IF NOT EXISTS `tasks` (
+    `id` int(11) NOT NULL AUTO_INCREMENT,
+    `project_id` int(11),
+    `template_id` int(11),
+    `data` json,
+    `is_active` tinyint(1) DEFAULT 1,
+    `is_delete` tinyint(1) DEFAULT 0,
+    `task_order` int(11) DEFAULT 0,
+    `date_created` TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    `date_modified` TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+    PRIMARY KEY (`id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+
 -- Position lookup table
-CREATE TABLE `position_lookup` (
+CREATE TABLE IF NOT EXISTS `position_lookup` (
     `id` int(11) NOT NULL AUTO_INCREMENT,
     `code` varchar(32),
     `name` varchar(128),
@@ -71,7 +87,7 @@ CREATE TABLE `position_lookup` (
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
 -- Table for storing images related to tasks
-CREATE TABLE `task_images` (
+CREATE TABLE IF NOT EXISTS `task_images` (
   `id` INT AUTO_INCREMENT PRIMARY KEY,
   `task_id` INT NOT NULL,
   `file_name` VARCHAR(255) NOT NULL,
@@ -85,7 +101,7 @@ CREATE TABLE `task_images` (
 
 
 -- User role lookup table
-CREATE TABLE `user_role_lookup` (
+CREATE TABLE IF NOT EXISTS `user_role_lookup` (
     `id` int(11) NOT NULL AUTO_INCREMENT,
     `code` varchar(32),
     `name` varchar(128),
@@ -101,7 +117,7 @@ CREATE TABLE `user_role_lookup` (
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
 -- Core User Tables
-CREATE TABLE `users` (
+CREATE TABLE IF NOT EXISTS `users` (
     `id` int(11) NOT NULL AUTO_INCREMENT,
     `email` varchar(128),
     `password` varchar(255),
@@ -114,7 +130,7 @@ CREATE TABLE `users` (
     PRIMARY KEY (`id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
-CREATE TABLE `user_profile` (
+CREATE TABLE IF NOT EXISTS `user_profile` (
     `id` int(11) NOT NULL AUTO_INCREMENT,
     `user_id` int(11),
     `first_name` varchar(64),
@@ -130,7 +146,7 @@ CREATE TABLE `user_profile` (
     PRIMARY KEY (`id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
-CREATE TABLE `user_role` (
+CREATE TABLE IF NOT EXISTS `user_role` (
     `id` int(11) NOT NULL AUTO_INCREMENT,
     `user_id` int(11),
     `role_id` int(11),
@@ -143,7 +159,7 @@ CREATE TABLE `user_role` (
     PRIMARY KEY (`id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
-CREATE TABLE `user_access` (
+CREATE TABLE IF NOT EXISTS `user_access` (
     `id` int(11) NOT NULL AUTO_INCREMENT,
     `user_id` int(11),
     `granted_by` int(11),
@@ -155,7 +171,7 @@ CREATE TABLE `user_access` (
     PRIMARY KEY (`id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
-CREATE TABLE `user_rel` (
+CREATE TABLE IF NOT EXISTS `user_rel` (
     `id` int(11) NOT NULL AUTO_INCREMENT,
     `user_id` int(11),
     `related_user_id` int(11),
@@ -170,7 +186,7 @@ CREATE TABLE `user_rel` (
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
 -- Project Core Tables
-CREATE TABLE `projects` (
+CREATE TABLE IF NOT EXISTS `projects` (
     `id` int(11) NOT NULL AUTO_INCREMENT,
     `name` varchar(128),
     `code` varchar(32),
@@ -186,7 +202,7 @@ CREATE TABLE `projects` (
     PRIMARY KEY (`id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
-CREATE TABLE `project_status` (
+CREATE TABLE IF NOT EXISTS `project_status` (
     `id` int(11) NOT NULL AUTO_INCREMENT,
     `project_id` int(11),
     `status_id` int(11),
@@ -200,7 +216,7 @@ CREATE TABLE `project_status` (
     PRIMARY KEY (`id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
-CREATE TABLE `project_priority` (
+CREATE TABLE IF NOT EXISTS `project_priority` (
     `id` int(11) NOT NULL AUTO_INCREMENT,
     `project_id` int(11),
     `priority_id` int(11),
@@ -214,7 +230,7 @@ CREATE TABLE `project_priority` (
     PRIMARY KEY (`id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
-CREATE TABLE `project_members` (
+CREATE TABLE IF NOT EXISTS `project_members` (
     `id` int(11) NOT NULL AUTO_INCREMENT,
     `project_id` int(11),
     `user_id` int(11),
@@ -229,7 +245,7 @@ CREATE TABLE `project_members` (
     PRIMARY KEY (`id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
-CREATE TABLE `project_client` (
+CREATE TABLE IF NOT EXISTS `project_client` (
     `id` int(11) NOT NULL AUTO_INCREMENT,
     `project_id` int(11),
     `client_name` varchar(128),
@@ -245,21 +261,9 @@ CREATE TABLE `project_client` (
     PRIMARY KEY (`id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
--- Task Core Tables
-CREATE TABLE `tasks` (
-    `id` int(11) NOT NULL AUTO_INCREMENT,
-    `project_id` int(11),
-    `template_id` int(11),
-    `data` json,
-    `is_active` tinyint(1) DEFAULT 1,
-    `is_delete` tinyint(1) DEFAULT 0,
-    `task_order` int(11) DEFAULT 0,
-    `date_created` TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
-    `date_modified` TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
-    PRIMARY KEY (`id`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
-CREATE TABLE `task_status` (
+
+CREATE TABLE IF NOT EXISTS `task_status` (
     `id` int(11) NOT NULL AUTO_INCREMENT,
     `task_id` int(11),
     `status_id` int(11),
@@ -273,7 +277,7 @@ CREATE TABLE `task_status` (
     PRIMARY KEY (`id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
-CREATE TABLE `task_priority` (
+CREATE TABLE IF NOT EXISTS `task_priority` (
     `id` int(11) NOT NULL AUTO_INCREMENT,
     `task_id` int(11),
     `priority_id` int(11),
@@ -287,7 +291,7 @@ CREATE TABLE `task_priority` (
     PRIMARY KEY (`id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
-CREATE TABLE `task_assignment` (
+CREATE TABLE IF NOT EXISTS `task_assignment` (
     `id` int(11) NOT NULL AUTO_INCREMENT,
     `task_id` int(11),
     `user_id` int(11),
@@ -300,7 +304,7 @@ CREATE TABLE `task_assignment` (
     PRIMARY KEY (`id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
-CREATE TABLE `task_ownership` (
+CREATE TABLE IF NOT EXISTS `task_ownership` (
     `id` int(11) NOT NULL AUTO_INCREMENT,
     `task_id` int(11),
     `created_by` int(11),
@@ -314,7 +318,7 @@ CREATE TABLE `task_ownership` (
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
 -- Supporting Tables
-CREATE TABLE `activity_logs` (
+CREATE TABLE IF NOT EXISTS `activity_logs` (
     `id` int(11) NOT NULL AUTO_INCREMENT,
     `user_id` int(11),
     `action` varchar(128),
@@ -327,7 +331,7 @@ CREATE TABLE `activity_logs` (
     PRIMARY KEY (`id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
-CREATE TABLE `task_comments` (
+CREATE TABLE IF NOT EXISTS `task_comments` (
     `id` int(11) NOT NULL AUTO_INCREMENT,
     `task_id` int(11),
     `user_id` int(11),
@@ -340,7 +344,7 @@ CREATE TABLE `task_comments` (
     PRIMARY KEY (`id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
-CREATE TABLE `task_attachments` (
+CREATE TABLE IF NOT EXISTS `task_attachments` (
     `id` int(11) NOT NULL AUTO_INCREMENT,
     `task_id` int(11),
     `uploaded_by` int(11),
@@ -353,7 +357,13 @@ CREATE TABLE `task_attachments` (
     PRIMARY KEY (`id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
--- Table for dynamic task headers
+CREATE TABLE IF NOT EXISTS `header_lookup` (
+    `id` INT NOT NULL AUTO_INCREMENT PRIMARY KEY,
+    `column_name` VARCHAR(128) NOT NULL,
+    `date_created` TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+
+-- Table for dynamic task headers (no reference to header_lookup)
 CREATE TABLE IF NOT EXISTS `task_headers` (
     `id` INT NOT NULL AUTO_INCREMENT PRIMARY KEY,
     `column_name` VARCHAR(128) NOT NULL,
@@ -364,7 +374,7 @@ CREATE TABLE IF NOT EXISTS `task_headers` (
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
 -- Task Template Table
-CREATE TABLE `task_templates` (
+CREATE TABLE IF NOT EXISTS `task_templates` (
     `id` int(11) NOT NULL AUTO_INCREMENT,
     `code` varchar(32) NOT NULL,
     `name` varchar(128) NOT NULL,
