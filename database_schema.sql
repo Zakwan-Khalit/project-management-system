@@ -10,6 +10,7 @@ USE `project_management_system`;
 -- Status lookup table
 CREATE TABLE IF NOT EXISTS `status_lookup` (
     `id` int(11) NOT NULL AUTO_INCREMENT,
+    `type` varchar(32),
     `code` varchar(32),
     `name` varchar(128),
     `description` text,
