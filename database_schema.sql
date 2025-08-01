@@ -378,6 +378,7 @@ CREATE TABLE IF NOT EXISTS `task_headers` (
 CREATE TABLE IF NOT EXISTS `task_templates` (
     `id` int(11) NOT NULL AUTO_INCREMENT,
     `code` varchar(32) NOT NULL,
+    `project_id` int(11),
     `name` varchar(128) NOT NULL,
     `description` text,
     `fields` text,

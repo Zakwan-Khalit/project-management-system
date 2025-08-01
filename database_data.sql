@@ -102,10 +102,10 @@ INSERT INTO `project_client` (`project_id`, `client_name`, `client_email`, `clie
 (1, 'Tech Solutions Inc.', 'contact@techsolutions.com', '+1-555-123-4567', 'John Smith', 50000.00);
 
 -- Insert task templates with header IDs (see task_headers table for correct IDs)
-INSERT INTO `task_templates` (`id`, `code`, `name`, `description`, `fields`) VALUES
-(1, 'brs', 'Business Requirement Specification', 'BRS Template', '[1,2,3,4,5,6,7,8,9,10,11,12,13]'),
-(2, 'uat', 'User Acceptance Testing', 'UAT Template', '[1,2,3,4,5,6,7,8,9,10,11,12,13]'),
-(3, 'fat', 'Factory Acceptance Testing', 'FAT Template', '[1,2,3,4,5,6,7,8,9,10,11,12,13]');
+INSERT INTO `task_templates` (`id`, `code`, `project_id`, `name`, `description`, `fields`) VALUES
+(1, 'brs', '1', 'Business Requirement Specification', 'BRS Template', '[1,2,3,4,5,6,7,8,9,10,11,12,13]'),
+(2, 'uat', '1', 'User Acceptance Testing', 'UAT Template', '[1,2,3,4,5,6,7,8,9,10,11,12,13]'),
+(3, 'fat', '1', 'Factory Acceptance Testing', 'FAT Template', '[1,2,3,4,5,6,7,8,9,10,11,12,13]');
 
 INSERT INTO `tasks` (`project_id`, `template_id`, `data`, `is_active`, `is_delete`, `task_order`, `date_created`, `date_modified`) VALUES
  (1, 2, '{"Module":"Login","Tester Name":"Ali","Role":"Frontend Developer","Issue":"UI needs improvement","Description":"Login Button","Image":"","PIC":"Ali","Status":"in_progress","Progress":60,"Notes":"UI needs improvement","Start Date":"2025-01-02","End Date":"2025-01-05","Last Modified":"2025-01-05"}', 1, 0, 1, NOW(), NOW()),
