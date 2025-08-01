@@ -1,3 +1,7 @@
+<a href="javascript:history.back()" class="btn btn-outline-primary d-inline-flex align-items-center" style="gap:0.5rem;">
+    <i class="fas fa-arrow-left"></i>
+    <span>Back</span>
+</a>
 <!-- Projects Header -->
 <div style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white; border-radius: 1.5rem; padding: 2rem; margin-bottom: 2rem; box-shadow: 0 20px 60px rgba(102,126,234,0.2); position: relative; overflow: hidden;">
     <!-- Decorative Elements -->

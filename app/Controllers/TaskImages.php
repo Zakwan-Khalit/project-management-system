@@ -1,11 +1,16 @@
 <?php
 namespace App\Controllers;
 
-use App\Controllers\BaseController;
 use App\Models\TaskImage;
 
 class TaskImages extends BaseController
 {
+    protected $taskImageModel;
+
+    public function __construct()
+    {
+        $this->taskImageModel = new TaskImage();
+    }
 
     // Serve image from writable/task_image/ by filename
     public function view($filename)
@@ -13,7 +18,10 @@ class TaskImages extends BaseController
         $folder = WRITEPATH . 'task_image/';
         $filePath = $folder . $filename;
         if (!is_file($filePath)) {
-            throw \CodeIgniter\Exceptions\PageNotFoundException::forPageNotFound("Image not found");
+            return $this->response->setStatusCode(404)->setJSON([
+                'success' => false,
+                'message' => 'Image not found.'
+            ]);
         }
         $mime = mime_content_type($filePath);
         return $this->response
@@ -22,12 +30,16 @@ class TaskImages extends BaseController
             ->setBody(file_get_contents($filePath));
     }
 
+    // Upload image for a task
     public function upload()
     {
         $taskId = $this->request->getPost('task_id');
         $file = $this->request->getFile('image');
         if (!$file || !$file->isValid()) {
-            return $this->response->setJSON(['success' => false, 'message' => 'No file uploaded.']);
+            return $this->response->setJSON([
+                'success' => false,
+                'message' => 'No file uploaded.'
+            ]);
         }
         $folder = WRITEPATH . 'task_image/';
         if (!is_dir($folder)) {
@@ -35,34 +47,45 @@ class TaskImages extends BaseController
         }
         $newName = $file->getRandomName();
         $file->move($folder, $newName);
-        $model = new TaskImage();
-        $model->insert([
+        $this->taskImageModel->addImage([
             'task_id' => $taskId,
             'file_name' => $file->getClientName(),
             'file_address' => 'task_image/' . $newName,
         ]);
-        return $this->response->setJSON(['success' => true, 'file_address' => 'task_image/' . $newName, 'file_name' => $file->getClientName()]);
+        return $this->response->setJSON([
+            'success' => true,
+            'file_address' => 'task_image/' . $newName,
+            'file_name' => $file->getClientName()
+        ]);
     }
 
+    // List all images for a task
     public function list($taskId)
     {
-        $model = new TaskImage();
-        $images = $model->where('task_id', $taskId)->findAll();
-        return $this->response->setJSON(['success' => true, 'images' => $images]);
+        $images = $this->taskImageModel->getImagesByTask($taskId);
+        return $this->response->setJSON([
+            'success' => true,
+            'images' => $images
+        ]);
     }
 
+    // Delete an image by ID
     public function delete($id)
     {
-        $model = new TaskImage();
-        $image = $model->find($id);
+        $image = $this->taskImageModel->getImage($id);
         if ($image) {
             $filePath = WRITEPATH . $image['file_address'];
             if (is_file($filePath)) {
                 unlink($filePath);
             }
-            $model->delete($id);
-            return $this->response->setJSON(['success' => true]);
+            $this->taskImageModel->deleteImage($id);
+            return $this->response->setJSON([
+                'success' => true
+            ]);
         }
-        return $this->response->setJSON(['success' => false, 'message' => 'Image not found.']);
+        return $this->response->setJSON([
+            'success' => false,
+            'message' => 'Image not found.'
+        ]);
     }
 }

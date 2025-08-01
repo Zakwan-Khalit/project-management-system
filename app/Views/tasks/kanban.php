@@ -1,3 +1,7 @@
+<a href="javascript:history.back()" class="btn btn-outline-primary d-inline-flex align-items-center" style="gap:0.5rem;">
+    <i class="fas fa-arrow-left"></i>
+    <span>Back</span>
+</a>
 <!-- Modern Kanban Board Page -->
 <div class="min-vh-100 p-4" style="background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%);">
     

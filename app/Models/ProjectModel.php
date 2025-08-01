@@ -737,7 +737,6 @@ class ProjectModel extends Model
      */
     public function insertTaskHeader($columnName)
     {
-        // Insert into header_lookup (for dropdown) if not exists
         $lookupRow = $this->db->table('header_lookup')->where('column_name', $columnName)->get()->getRowArray();
         if (!$lookupRow) {
             $this->db->table('header_lookup')->insert(['column_name' => $columnName]);
@@ -748,7 +747,9 @@ class ProjectModel extends Model
             $this->db->table('task_headers')->insert([
                 'column_name' => $columnName,
                 'is_active' => 1,
-                'is_delete' => 0
+                'is_delete' => 0,
+                'date_created' => date('Y-m-d H:i:s'),
+                'date_modified' => date('Y-m-d H:i:s')
             ]);
             return $this->db->insertID(); // Return new task_headers.id
         } else {
@@ -764,16 +765,14 @@ class ProjectModel extends Model
      */
     public function updateTaskTemplateFields($templateId, $fields)
     {
+        // $fields is now an array of header IDs (integers)
         if (!$templateId || !is_array($fields)) return false;
         $headerIds = [];
-        foreach ($fields as $field) {
-            // Check if header already exists (by name, not unique)
-            $row = $this->db->table('task_headers')->where('column_name', $field)->where('is_delete', 0)->get()->getRowArray();
+        foreach ($fields as $headerId) {
+            // Only use valid header IDs that exist in task_headers
+            $row = $this->db->table('task_headers')->where('id', $headerId)->where('is_delete', 0)->get()->getRowArray();
             if ($row) {
-                $headerIds[] = $row['id'];
-            } else {
-                // Insert new header
-                $headerIds[] = $this->insertTaskHeader($field);
+                $headerIds[] = $headerId;
             }
         }
         $fieldsJson = json_encode(array_values($headerIds));

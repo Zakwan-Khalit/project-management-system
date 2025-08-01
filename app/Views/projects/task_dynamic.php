@@ -1,10 +1,10 @@
 <!-- Modern Dynamic Task Page - Enhanced UI -->
-<div style="background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%); min-height: 100vh; padding: 2rem; font-family: 'Roboto', sans-serif;">
+<div style="min-height: 100vh; padding: 2rem; font-family: 'Roboto', sans-serif;">
     <div style="max-width: 1400px; margin: 0 auto;">
         <h2 id="taskTableTitle" style="font-family: 'Poppins', sans-serif; font-weight: 700; color: #3b3b3b; letter-spacing: -1px; margin-bottom: 2.5rem; font-size:2.4rem; text-align:center;">
             <?= esc($template['name'] ?? 'Tasks') ?>
         </h2>
-        <div style="background: #fff; border-radius: 2rem; box-shadow: 0 16px 48px rgba(102,126,234,0.13); border: none; padding: 2.5rem 2.5rem 2rem 2.5rem; margin-bottom:2rem;">
+        <div style="border-radius: 2rem; box-shadow: 0 16px 48px rgba(102,126,234,0.13); border: none; padding: 2.5rem 2.5rem 2rem 2.5rem; margin-bottom:2rem;">
         <!-- Image Preview Modal -->
         <div class="modal fade" id="imageModal" tabindex="-1" aria-labelledby="imageModalLabel" aria-hidden="true">
         <div class="modal-dialog modal-dialog-centered">
@@ -26,9 +26,9 @@
             <!-- Export Buttons -->
             <div class="d-flex justify-content-between align-items-center mb-3">
                 <div class="d-flex gap-2" id="exportBtnGroupLeft">
-                    <button id="exportCsvBtn" class="btn btn-outline-primary" type="button"><i class="fas fa-file-csv me-1"></i> CSV</button>
-                    <button id="exportExcelBtn" class="btn btn-outline-success" type="button"><i class="fas fa-file-excel me-1"></i> Excel</button>
-                    <button id="exportPdfBtn" class="btn btn-outline-danger" type="button"><i class="fas fa-file-pdf me-1"></i> PDF</button>
+                    <button id="exportCsvBtn" class="btn btn-outline-primary export-btn-fix" type="button"><i class="fas fa-file-csv me-1"></i> CSV</button>
+                    <button id="exportExcelBtn" class="btn btn-outline-success export-btn-fix" type="button"><i class="fas fa-file-excel me-1"></i> Excel</button>
+                    <button id="exportPdfBtn" class="btn btn-outline-danger export-btn-fix" type="button"><i class="fas fa-file-pdf me-1"></i> PDF</button>
                 </div>
                 <div>
                     <button id="tableSettingsBtn" class="btn btn-outline-secondary" type="button" title="Table Settings" style="border-radius:50%;width:40px;height:40px;display:flex;align-items:center;justify-content:center;">
@@ -37,8 +37,8 @@
                 </div>
             </div>
             <div style="overflow-x:auto;">
-                <table class="table table-hover table-bordered" id="dynamicTaskTable" style="background: #fff; border-radius: 1.2rem; overflow: visible; box-shadow: 0 2px 12px rgba(102,126,234,0.07); margin-bottom:0; min-width:1100px;">
-                    <thead class="table-light" style="background: linear-gradient(90deg, #e9ecef 0%, #f8fafc 100%);">
+                <table class="table table-hover table-bordered" id="dynamicTaskTable" style="border-radius: 1.2rem; overflow: visible; box-shadow: 0 2px 12px rgba(102,126,234,0.07); margin-bottom:0; min-width:1100px;">
+                    <thead class="table-light">
                         <tr>
                             <?php if (!empty($fields)): ?>
                                 <?php foreach ($fields as $headerId): ?>
@@ -46,7 +46,7 @@
                                     <th><?= esc($columnName) ?></th>
                                 <?php endforeach; ?>
                             <?php endif; ?>
-                            <th style="width:72px; text-align:center; background:#f8fafc; border-bottom:2px solid #e2e8f0;">
+                            <th style="width:72px; text-align:center; border-bottom:2px solid #e2e8f0;">
                                 <div style="display:flex;align-items:center;justify-content:center;gap:8px;">
                                     <button id="addRowBtn" type="button" class="btn btn-sm btn-outline-primary" title="Add Row" style="border-radius:50%;box-shadow:0 2px 8px rgba(102,126,234,0.12);width:40px;height:40px;display:flex;align-items:center;justify-content:center;">
                                         <i class="fas fa-plus"></i>
@@ -65,26 +65,26 @@
                         <?php $taskData = is_array($task['data']) ? $task['data'] : json_decode($task['data'], true); ?>
                         <tr data-task-id="<?= esc($task['id']) ?>" class="task-row" style="transition:box-shadow 0.3s;">
                             <?php foreach ($fields as $headerId): ?>
-                                <?php $field = $headerMap[$headerId] ?? null; ?>
-                                <?php if (in_array($field, ['Tester Name','PIC'])): ?>
-                                    <td class="editable-cell user-dropdown-cell" tabindex="0" data-field="<?= esc($field) ?>"><span class="user-display"><?= esc($taskData[$field] ?? '') ?></span></td>
-                                <?php elseif (in_array($field, ['Start Date','End Date','Progress','Status'])): ?>
-                                    <td class="editable-cell" tabindex="0" data-field="<?= esc($field) ?>"><?= esc($taskData[$field] ?? '') ?></td>
-                                <?php elseif ($field === 'Image'): ?>
-                                    <td class="image-cell" data-field="Image" style="padding:1rem 1rem; font-size:1.05rem; border-bottom:1px solid #e2e8f0; min-width:110px; max-width:140px; text-align:center; vertical-align:middle;">
-                                        <div class="task-image-list" data-task-id="<?= esc($task['id']) ?>"></div>
-                                        <button class="btn btn-link p-0 upload-image-btn" title="Upload Image" data-task-id="<?= esc($task['id']) ?>" style="color:#667eea; font-size:1.5rem; display:inline-block;"><i class="fas fa-image"></i></button>
-                                        <input type="file" accept="image/*" class="d-none image-upload-input" data-task-id="<?= esc($task['id']) ?>" multiple>
-                                    </td>
-                                <?php elseif ($field === 'Last Modified'): ?>
-                                    <td style="color:#6b7280; padding:1rem 1rem; font-size:1.05rem; border-bottom:1px solid #e2e8f0;"></td>
-                                <?php else: ?>
-                                    <td contenteditable="true" class="editable-cell" tabindex="0" data-field="<?= esc($field) ?>" style="transition:background 0.2s; padding:1rem 1rem; font-size:1.05rem; border-bottom:1px solid #e2e8f0;"><?= esc($taskData[$field] ?? '') ?></td>
-                                <?php endif; ?>
+                            <?php $field = $headerMap[$headerId] ?? null; ?>
+                            <?php if (in_array($field, ['Tester Name','PIC'])): ?>
+                                <td class="editable-cell user-dropdown-cell" tabindex="0" data-field-id="<?= esc($headerId) ?>" data-field="<?= esc($field) ?>"><span class="user-display"><?= esc($taskData[$headerId] ?? '') ?></span></td>
+                            <?php elseif (in_array($field, ['Start Date','End Date','Progress','Status'])): ?>
+                                <td class="editable-cell" tabindex="0" data-field-id="<?= esc($headerId) ?>" data-field="<?= esc($field) ?>"><?= esc($taskData[$headerId] ?? '') ?></td>
+                            <?php elseif ($field === 'Image'): ?>
+                                <td class="image-cell" data-field-id="<?= esc($headerId) ?>" data-field="Image" style="padding:1rem 1rem; font-size:1.05rem; border-bottom:1px solid #e2e8f0; min-width:110px; max-width:140px; text-align:center; vertical-align:middle;">
+                                    <div class="task-image-list" data-task-id="<?= esc($task['id']) ?>"></div>
+                                    <button class="btn btn-link p-0 upload-image-btn" title="Upload Image" data-task-id="<?= esc($task['id']) ?>" style="color:#667eea; font-size:1.5rem; display:inline-block;"><i class="fas fa-image"></i></button>
+                                    <input type="file" accept="image/*" class="d-none image-upload-input" data-task-id="<?= esc($task['id']) ?>" multiple>
+                                </td>
+                            <?php elseif ($field === 'Last Modified'): ?>
+                                <td style="color:#6b7280; padding:1rem 1rem; font-size:1.05rem; border-bottom:1px solid #e2e8f0;"></td>
+                            <?php else: ?>
+                                <td contenteditable="true" class="editable-cell" tabindex="0" data-field-id="<?= esc($headerId) ?>" data-field="<?= esc($field) ?>" style="padding:1rem 1rem; font-size:1.05rem; border-bottom:1px solid #e2e8f0;"><?= esc($taskData[$headerId] ?? '') ?></td>
+                            <?php endif; ?>
                             <?php endforeach; ?>
                             <td class="text-center align-middle" style="width:72px;">
                                 <div style="display:flex;align-items:center;justify-content:center;gap:8px;">
-                                    <button type="button" class="btn btn-sm btn-link text-danger delete-row-btn" title="Delete Row" style="padding:0;border-radius:50%;background:#f8d7da;width:32px;height:32px;display:flex;align-items:center;justify-content:center;">
+                                    <button type="button" class="btn btn-sm btn-link text-danger delete-row-btn" title="Delete Row" style="padding:0;border-radius:50%;width:32px;height:32px;display:flex;align-items:center;justify-content:center;">
                                         <i class="fas fa-trash"></i>
                                     </button>
                                 </div>
@@ -99,14 +99,16 @@
                 </table>
             </div>
         </div>
+        <div class="mb-4">
+        <a href="javascript:history.back()" class="btn btn-outline-primary d-inline-flex align-items-center" style="gap:0.5rem;">
+            <i class="fas fa-arrow-left"></i>
+            <span>Back</span>
+        </a>
+    </div>
     </div>
 </div>
 <script>
-// --- Export Table Functionality ---
-// Requires jsPDF, SheetJS (xlsx), and FileSaver.js for full support. Assumes FontAwesome icons are available.
-// You may need to include these libraries in your assets if not already present.
 
-// PDF Export (jsPDF + html2canvas, table as image, with title)
 $('#exportPdfBtn').on('click', function() {
     if (typeof jsPDF === 'undefined' && !(window.jspdf && window.jspdf.jsPDF)) {
         Swal.fire('PDF Export Not Available', 'jsPDF is not loaded.', 'error');
@@ -214,9 +216,9 @@ $('#exportCsvBtn').on('click', function() {
         document.body.removeChild(link);
     }
 });
-// --- Patch: Always send project_id and template_code in AJAX ---
+// --- Patch: Always send project_id and template_id in AJAX ---
 const projectId = "<?= esc($project_id ?? $template['project_id'] ?? $project['id'] ?? '') ?>";
-const templateCode = "<?= esc($template['code'] ?? '') ?>";
+const templateId = "<?= esc($template_id ?? $template['id'] ?? '') ?>";
 
 // --- User dropdown for Tester Name and PIC ---
 let projectUsers = [];
@@ -253,7 +255,7 @@ function showUserDropdown(cell, currentValue) {
     overlay.on('blur change', function() {
         let val = this.value;
         cell.find('.user-display').text(val);
-        cell.css('background', '#fff');
+        cell.css('background', '');
         $('.cell-overlay-editor').remove();
         cell.trigger('blur');
     });
@@ -269,7 +271,7 @@ function colorRowsByModule() {
     const rows = document.querySelectorAll('#dynamicTaskTable tbody tr.task-row');
     let lastModule = null;
     let colorIdx = 0;
-    const colors = ['#fffbe6', '#e3f6fd']; // orange, blue
+    const colors = ['', '']; // no background colors
     rows.forEach(row => {
         const firstCell = row.querySelector('td');
         if (!firstCell) return;
@@ -278,7 +280,7 @@ function colorRowsByModule() {
             colorIdx = 1 - colorIdx; // alternate color when module changes
             lastModule = moduleVal;
         }
-        row.style.background = colors[colorIdx];
+        row.style.background = '';
     });
 }
 
@@ -331,7 +333,7 @@ new Sortable(document.querySelector('#dynamicTaskTable tbody'), {
 $('#dynamicTaskTable tbody').on('mouseenter', 'tr.task-row', function() {
     $(this).css({
         'box-shadow': '0 12px 32px rgba(102,126,234,0.13)',
-        'background': 'linear-gradient(90deg,#e9ecef 0%,#f8fafc 100%)'
+        'background': ''
     });
 });
 $('#dynamicTaskTable tbody').on('mouseleave', 'tr.task-row', function() {
@@ -343,7 +345,7 @@ $('#dynamicTaskTable tbody').on('mouseleave', 'tr.task-row', function() {
 // --- Refactored editable cell logic for dynamic fields ---
 $('#dynamicTaskTable').on('click', 'td.editable-cell', function(e) {
     if (e.target !== this) return;
-    $(this).css('background', '#e0e7ff');
+    $(this).css('background', '');
     const field = $(this).data('field');
     const cell = $(this);
     const cellOffset = cell.offset();
@@ -357,7 +359,7 @@ $('#dynamicTaskTable').on('click', 'td.editable-cell', function(e) {
         } else {
             cell.text(displayText || val);
         }
-        cell.css('background', '#fff');
+        cell.css('background', '');
         $('.cell-overlay-editor').remove();
         cell.trigger('blur');
     }
@@ -429,7 +431,7 @@ $('#dynamicTaskTable').on('click', 'td.editable-cell', function(e) {
 });
 
 $('#dynamicTaskTable').on('blur', 'td.editable-cell', function() {
-    $(this).css('background', '#fff');
+    $(this).css('background', '');
     const cell = $(this);
     const row = cell.closest('tr');
     let taskId = row.data('task-id');
@@ -438,6 +440,7 @@ $('#dynamicTaskTable').on('blur', 'td.editable-cell', function() {
     let progressCell = null;
     row.find('td.editable-cell').each(function() {
         const field = $(this).data('field');
+        const fieldId = $(this).data('field-id');
         let value;
         if (["Tester Name","PIC"].includes(field)) {
             value = $(this).find('.user-display').text().trim();
@@ -457,7 +460,8 @@ $('#dynamicTaskTable').on('blur', 'td.editable-cell', function() {
         } else {
             value = $(this).text();
         }
-        data[field] = value;
+        // Use header ID as key
+        data[fieldId] = value;
     });
     // If status is completed/done, set progress to 100%
     if (statusValue === 'completed' && progressCell) {
@@ -467,12 +471,13 @@ $('#dynamicTaskTable').on('blur', 'td.editable-cell', function() {
     // Restore cell display
     row.find('td.editable-cell').each(function() {
         const field = $(this).data('field');
+        const fieldId = $(this).data('field-id');
         if (["Tester Name","PIC"].includes(field)) {
-            $(this).find('.user-display').text(data[field]);
+            $(this).find('.user-display').text(data[fieldId]);
         } else if (field === 'Start Date' || field === 'End Date') {
-            $(this).text(data[field]);
+            $(this).text(data[fieldId]);
         } else if (field === 'Progress') {
-            $(this).text(data[field]);
+            $(this).text(data[fieldId]);
         } else if (field === 'Status') {
             const statusOptions = {
                 'pending': 'To Do',
@@ -480,12 +485,12 @@ $('#dynamicTaskTable').on('blur', 'td.editable-cell', function() {
                 'review': 'Review',
                 'completed': 'Done'
             };
-            $(this).text(statusOptions[data[field]] || data[field]);
+            $(this).text(statusOptions[data[fieldId]] || data[fieldId]);
         }
     });
-    // Always send project_id and template_code
+    // Always send project_id and template_id
     data['project_id'] = projectId;
-    data['template_code'] = templateCode;
+    data['template_id'] = templateId;
     // If no taskId, create new task
     if (!taskId) {
         $.ajax({
@@ -529,7 +534,7 @@ $('#addRowBtn').on('click', function() {
     headerIds.forEach(function(headerId, idx) {
         let field = headerMap[headerId] || '';
         if (idx === 0) {
-            rowHtml += '<td contenteditable="true" class="editable-cell" tabindex="0" data-field="'+field+'" style="transition:background 0.2s; padding:1rem 1rem; font-size:1.05rem; border-bottom:1px solid #e2e8f0;">'+firstColValue+'</td>';
+            rowHtml += '<td contenteditable="true" class="editable-cell" tabindex="0" data-field="'+field+'" style="padding:1rem 1rem; font-size:1.05rem; border-bottom:1px solid #e2e8f0;">'+firstColValue+'</td>';
         } else if (field === 'Last Modified') {
             rowHtml += '<td style="color:#6b7280; padding:1rem 1rem; font-size:1.05rem; border-bottom:1px solid #e2e8f0;"></td>';
         } else if (field === 'Image') {
@@ -539,17 +544,17 @@ $('#addRowBtn').on('click', function() {
             rowHtml += '<input type="file" accept="image/*" class="d-none image-upload-input" data-task-id="" multiple>';
             rowHtml += '</td>';
         } else if (["Start Date","End Date","Progress","Status"].includes(field)) {
-            rowHtml += '<td class="editable-cell" tabindex="0" data-field="'+field+'" style="transition:background 0.2s; padding:1rem 1rem; font-size:1.05rem; border-bottom:1px solid #e2e8f0;"></td>';
+            rowHtml += '<td class="editable-cell" tabindex="0" data-field="'+field+'" style="padding:1rem 1rem; font-size:1.05rem; border-bottom:1px solid #e2e8f0;"></td>';
         } else if (["Tester Name","PIC"].includes(field)) {
             rowHtml += '<td class="editable-cell user-dropdown-cell" tabindex="0" data-field="'+field+'"><span class="user-display"></span></td>';
         } else {
-            rowHtml += '<td contenteditable="true" class="editable-cell" tabindex="0" data-field="'+field+'" style="transition:background 0.2s; padding:1rem 1rem; font-size:1.05rem; border-bottom:1px solid #e2e8f0;"></td>';
+            rowHtml += '<td contenteditable="true" class="editable-cell" tabindex="0" data-field="'+field+'" style="padding:1rem 1rem; font-size:1.05rem; border-bottom:1px solid #e2e8f0;"></td>';
         }
     });
     // Only the trash button in the row
     rowHtml += '<td class="text-center align-middle" style="width:72px;">';
     rowHtml += '<div style="display:flex;align-items:center;justify-content:center;gap:8px;">';
-    rowHtml += '<button type="button" class="btn btn-sm btn-link text-danger delete-row-btn" title="Delete Row" style="padding:0;border-radius:50%;background:#f8d7da;width:32px;height:32px;display:flex;align-items:center;justify-content:center;"><i class="fas fa-trash"></i></button>';
+    rowHtml += '<button type="button" class="btn btn-sm btn-link text-danger delete-row-btn" title="Delete Row" style="padding:0;border-radius:50%;width:32px;height:32px;display:flex;align-items:center;justify-content:center;"><i class="fas fa-trash"></i></button>';
     rowHtml += '</div>';
     rowHtml += '</td>';
     rowHtml += '<td class="text-center drag-handle" style="cursor:move;width:32px;"><i class="fas fa-grip-vertical" style="color:#667eea;font-size:1.2rem;"></i></td>';
@@ -650,17 +655,24 @@ $('#dynamicTaskTable').on('click', '.task-thumb', function() {
 $('#deleteImageBtn').off('click').on('click', function() {
     const imageId = $(this).attr('data-image-id');
     if (!imageId) return;
+    // Find the cell and taskId before deleting
+    const thumb = $('.task-thumb[data-image-id="'+imageId+'"]').first();
+    const cell = thumb.closest('.image-cell');
+    const taskId = cell.closest('tr').data('task-id');
     $.post('<?= base_url('task-images/delete/') ?>' + imageId, function(res) {
         if (res.success) {
             const modalEl = document.getElementById('imageModal');
             const modal = bootstrap.Modal.getInstance(modalEl);
             modal.hide();
-            // Find the cell and reload images
-            $('.task-thumb[data-image-id="'+imageId+'"]').closest('.image-cell').each(function() {
-                const cell = $(this);
-                const taskId = cell.closest('tr').data('task-id');
+            // Only reload images for the affected cell/task
+            if (taskId && cell.length) {
                 loadTaskImages(taskId, cell);
-            });
+            }
+        } else if (res.message && res.message.toLowerCase().includes('not found')) {
+            // Suppress error if image is already gone
+            const modalEl = document.getElementById('imageModal');
+            const modal = bootstrap.Modal.getInstance(modalEl);
+            modal.hide();
         } else {
             Swal.fire('Delete Failed', res.message || 'Could not delete image.', 'error');
         }
@@ -712,32 +724,7 @@ $('#dynamicTaskTable').on('change', '.image-upload-input', function() {
     input.value = '';
 });
 
-// Click thumbnail to show modal
-$('#dynamicTaskTable').on('click', '.task-thumb', function() {
-    const img = $(this);
-    $('#modalImage').attr('src', img.data('image-src'));
-    $('#deleteImageBtn').attr('data-image-id', img.data('image-id'));
-    $('#imageModal').modal('show');
-});
 
-// Delete image from modal
-$('#deleteImageBtn').on('click', function() {
-    const imageId = $(this).attr('data-image-id');
-    if (!imageId) return;
-    $.post('<?= base_url('task-images/delete/') ?>' + imageId, function(res) {
-        if (res.success) {
-            $('#imageModal').modal('hide');
-            // Find the cell and reload images
-            $('.task-thumb[data-image-id="'+imageId+'"]').closest('.image-cell').each(function() {
-                const cell = $(this);
-                const taskId = cell.closest('tr').data('task-id');
-                loadTaskImages(taskId, cell);
-            });
-        } else {
-            Swal.fire('Delete Failed', res.message || 'Could not delete image.', 'error');
-        }
-    });
-});
 
 // --- Table Settings Modal ---
 const tableSettingsBtn = document.getElementById('tableSettingsBtn');
@@ -759,13 +746,12 @@ const modalHtml = `
           <label class="form-label">Current Headers (Drag to Sort):</label>
           <ul id="headerList" class="list-group mb-2" style="min-height:40px;"></ul>
         </div>
-        <div class="mb-3">
-          <label class="form-label">Add Header:</label>
-          <div class="input-group">
-            <select id="headerDropdown" class="form-select" style="max-width:220px;"></select>
-            <input id="customHeaderInput" type="text" class="form-control" placeholder="Custom header..." style="max-width:180px;">
-            <button id="addHeaderBtn" class="btn btn-primary" type="button"><i class="fas fa-plus"></i></button>
+        <div class="mb-3 d-flex align-items-end" style="gap:0.5rem;">
+          <div style="width:220px;">
+            <label class="form-label">Add Header:</label>
+            <select id="headerSelect2" class="form-select" style="width:100%;min-width:120px;max-width:220px;"></select>
           </div>
+          <button id="addHeaderBtn" class="btn btn-primary" type="button" style="height:38px;">Add</button>
         </div>
       </div>
       <div class="modal-footer">
@@ -780,8 +766,7 @@ if (!document.getElementById('tableSettingsModal')) {
 }
 tableSettingsBtn.addEventListener('click', function() {
     renderHeaderList();
-    renderHeaderDropdown();
-    document.getElementById('customHeaderInput').value = '';
+    renderHeaderSelect2();
     const modal = new bootstrap.Modal(document.getElementById('tableSettingsModal'));
     modal.show();
 });
@@ -793,13 +778,13 @@ function renderHeaderList() {
     list.style.gridTemplateColumns = 'repeat(5, minmax(0, 1fr))';
     list.style.gap = '0.5rem';
     list.style.border = 'none';
-    list.style.background = 'none';
+    list.style.background = '';
     currentHeaders.forEach((header, idx) => {
         const item = document.createElement('div');
         item.className = 'header-grid-item d-flex align-items-center justify-content-between';
         item.setAttribute('draggable', 'true');
         item.setAttribute('data-idx', idx);
-        item.style.background = '#f8fafc';
+        item.style.background = '';
         item.style.borderRadius = '0.7rem';
         item.style.padding = '0.5rem 0.7rem';
         item.style.fontSize = '0.98rem';
@@ -840,51 +825,145 @@ function renderHeaderList() {
         list.appendChild(item);
     });
 }
-function renderHeaderDropdown() {
-    const dropdown = document.getElementById('headerDropdown');
-    dropdown.innerHTML = '';
-    // Use header_lookup for dropdown options, allow duplicates
-    let headerLookupOptions = <?php echo json_encode($header_lookup ?? []); ?>;
-    headerLookupOptions.forEach(opt => {
-        const option = document.createElement('option');
-        option.value = opt.column_name;
-        option.textContent = opt.column_name;
-        dropdown.appendChild(option);
-    });
-}
-document.getElementById('addHeaderBtn').onclick = function() {
-    const dropdown = document.getElementById('headerDropdown');
-    const customInput = document.getElementById('customHeaderInput');
-    let val = customInput.value.trim();
-    if (!val && dropdown.value) val = dropdown.value;
-    if (val && !currentHeaders.includes(val)) {
-        currentHeaders.push(val);
-        renderHeaderList();
-        renderHeaderDropdown();
-        customInput.value = '';
+function renderHeaderSelect2() {
+    const select2El = $('#headerSelect2');
+    // Destroy if already initialized
+    if (select2El.hasClass('select2-hidden-accessible')) {
+        select2El.select2('destroy');
     }
-};
+    // Populate options
+    let headerLookupOptions = <?php echo json_encode($header_lookup ?? []); ?>;
+    select2El.empty();
+    headerLookupOptions.forEach(opt => {
+        select2El.append(new Option(opt.column_name, opt.column_name, false, false));
+    });
+    // Init Select2 with tags (allow custom input), single select
+    select2El.select2({
+        tags: true,
+        width: 200,
+        placeholder: 'Type or select header...',
+        dropdownParent: $('#tableSettingsModal'),
+        allowClear: true,
+        closeOnSelect: true,
+        multiple: false
+    });
+    // Clear value on open
+    select2El.val(null).trigger('change');
+}
+
+// Add header on button click or Enter
+$(document).off('click', '#addHeaderBtn').on('click', '#addHeaderBtn', function() {
+    const select2El = $('#headerSelect2');
+    let val = select2El.val();
+    if (val && val.trim() !== '') {
+        currentHeaders.push(val.trim());
+        renderHeaderList();
+        select2El.val(null).trigger('change');
+    }
+});
+$(document).off('keydown', '#headerSelect2').on('keydown', '#headerSelect2', function(e) {
+    if (e.key === 'Enter') {
+        e.preventDefault();
+        $('#addHeaderBtn').click();
+    }
+});
+// No addHeaderBtn needed; handled by Select2
+
+
 document.getElementById('saveHeadersBtn').onclick = function() {
     const templateId = window.templateId || <?php echo json_encode($template_id ?? null); ?>;
-    $.ajax({
-        url: '<?= base_url('projects/updateHeaders') ?>',
-        method: 'POST',
-        contentType: 'application/json',
-        data: JSON.stringify({ fields: currentHeaders, template_id: templateId }),
-        headers: { 'X-Requested-With': 'XMLHttpRequest' },
-        success: function(data) {
-            if (data.success) {
-                Swal.fire('Saved!', 'Table headers updated.', 'success');
-                const modal = bootstrap.Modal.getInstance(document.getElementById('tableSettingsModal'));
-                modal.hide();
-                location.reload();
-            } else {
-                Swal.fire('Error', data.message || 'Failed to save headers.', 'error');
-            }
-        },
-        error: function() {
-            Swal.fire('Error', 'Failed to save headers.', 'error');
+    let saveBtn = document.getElementById('saveHeadersBtn');
+    saveBtn.disabled = true;
+    // Only treat currentHeaders as an array of IDs. If a value is not a number, insert it and replace with new ID.
+    let headersToInsert = [];
+    let headerInsertIndices = [];
+    currentHeaders.forEach((headerIdOrName, idx) => {
+        if (typeof headerIdOrName === 'number' || (typeof headerIdOrName === 'string' && /^\d+$/.test(headerIdOrName))) {
+            // Already an ID, do nothing
+        } else {
+            // Not an ID, treat as name to insert
+            headersToInsert.push(headerIdOrName);
+            headerInsertIndices.push(idx);
         }
     });
+    if (headersToInsert.length === 0) {
+        // All are IDs, just save
+        $.ajax({
+            url: '<?= base_url('projects/updateHeaders') ?>',
+            method: 'POST',
+            contentType: 'application/json',
+            data: JSON.stringify({ fields: currentHeaders, template_id: templateId }),
+            headers: { 'X-Requested-With': 'XMLHttpRequest' },
+            success: function(data) {
+                saveBtn.disabled = false;
+                if (data.success) {
+                    Swal.fire('Saved!', 'Table headers updated.', 'success');
+                    const modal = bootstrap.Modal.getInstance(document.getElementById('tableSettingsModal'));
+                    modal.hide();
+                    location.reload();
+                } else {
+                    Swal.fire('Error', data.message || 'Failed to save headers.', 'error');
+                }
+            },
+            error: function() {
+                saveBtn.disabled = false;
+                Swal.fire('Error', 'Failed to save headers.', 'error');
+            }
+        });
+        return;
+    }
+    // Insert new headers sequentially, then update template
+    let i = 0;
+    function insertNextHeader() {
+        if (i < headersToInsert.length) {
+            let headerText = headersToInsert[i];
+            $.ajax({
+                url: '<?= base_url('projects/add_task_header') ?>',
+                method: 'POST',
+                data: { column_name: headerText },
+                success: function(res) {
+                    if (res && res.success && res.id) {
+                        // Place the new id in the correct position in currentHeaders
+                        let idx = headerInsertIndices[i];
+                        currentHeaders[idx] = res.id;
+                    } else {
+                        Swal.fire('Error', 'Failed to add header: ' + headerText, 'error');
+                    }
+                    i++;
+                    insertNextHeader();
+                },
+                error: function() {
+                    Swal.fire('Error', 'Failed to add header: ' + headerText, 'error');
+                    i++;
+                    insertNextHeader();
+                }
+            });
+        } else {
+            // All new headers inserted, now update template
+            $.ajax({
+                url: '<?= base_url('projects/updateHeaders') ?>',
+                method: 'POST',
+                contentType: 'application/json',
+                data: JSON.stringify({ fields: currentHeaders, template_id: templateId }),
+                headers: { 'X-Requested-With': 'XMLHttpRequest' },
+                success: function(data) {
+                    saveBtn.disabled = false;
+                    if (data.success) {
+                        Swal.fire('Saved!', 'Table headers updated.', 'success');
+                        const modal = bootstrap.Modal.getInstance(document.getElementById('tableSettingsModal'));
+                        modal.hide();
+                        location.reload();
+                    } else {
+                        Swal.fire('Error', data.message || 'Failed to save headers.', 'error');
+                    }
+                },
+                error: function() {
+                    saveBtn.disabled = false;
+                    Swal.fire('Error', 'Failed to save headers.', 'error');
+                }
+            });
+        }
+    }
+    insertNextHeader();
 };
 </script>

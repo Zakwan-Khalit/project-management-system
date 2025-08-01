@@ -22,6 +22,9 @@
 
     <!-- jQuery (must be before content for inline JS in views) -->
     <script src="<?= base_url('assets/js/jquery/jquery.min.js') ?>"></script>
+    <!-- Select2 CSS/JS -->
+    <link href="<?= base_url('assets/css/select2.min.css') ?>" rel="stylesheet" />
+    <script src="<?= base_url('assets/js/select2.min.js') ?>"></script>
 
     <!-- jsPDF, html2canvas, SheetJS (XLSX) for export buttons -->
     <script src="<?= base_url('assets/js/jspdf.umd.min.js') ?>"></script>
@@ -54,6 +57,39 @@
     
     <!-- Modern Template Styles - Inline for Maximum Compatibility -->
     <style>
+        
+        .export-btn-fix.btn-outline-primary:hover,
+        .export-btn-fix.btn-outline-primary:focus {
+            color: #fff !important;
+        }
+        .export-btn-fix.btn-outline-primary:hover *,
+        .export-btn-fix.btn-outline-primary:focus * {
+            color: #fff !important;
+        }
+        .export-btn-fix.btn-outline-success:hover,
+        .export-btn-fix.btn-outline-success:focus {
+            color: #fff !important;
+        }
+        .export-btn-fix.btn-outline-success:hover *,
+        .export-btn-fix.btn-outline-success:focus * {
+            color: #fff !important;
+        }
+        .export-btn-fix.btn-outline-warning:hover,
+        .export-btn-fix.btn-outline-warning:focus {
+            color: #fff !important;
+        }
+        .export-btn-fix.btn-outline-warning:hover *,
+        .export-btn-fix.btn-outline-warning:focus * {
+            color: #fff !important;
+        }
+        .export-btn-fix.btn-outline-danger:hover,
+        .export-btn-fix.btn-outline-danger:focus {
+            color: #fff !important;
+        }
+        .export-btn-fix.btn-outline-danger:hover *,
+        .export-btn-fix.btn-outline-danger:focus * {
+            color: #fff !important;
+        }
         /* CSS Variables */
         :root {
             --primary-color: #0d6efd;
@@ -825,6 +861,42 @@
             background: #0d6efd !important;
             color: white !important;
             box-shadow: 0 4px 12px rgba(13,110,253,0.3) !important;
+        }
+
+        .btn-outline-success {
+            border: 2px solid #198754 !important;
+            color: #198754 !important;
+            background: transparent !important;
+        }
+
+        .btn-outline-success:hover {
+            background: #198754 !important;
+            color: white !important;
+            box-shadow: 0 4px 12px rgba(25,135,84,0.3) !important;
+        }
+
+        .btn-outline-warning {
+            border: 2px solid #ffc107 !important;
+            color: #ffc107 !important;
+            background: transparent !important;
+        }
+
+        .btn-outline-warning:hover {
+            background: #ffc107 !important;
+            color: white !important;
+            box-shadow: 0 4px 12px rgba(255,193,7,0.3) !important;
+        }
+
+        .btn-outline-danger {
+            border: 2px solid #dc3545 !important;
+            color: #dc3545 !important;
+            background: transparent !important;
+        }
+
+        .btn-outline-danger:hover {
+            background: #dc3545 !important;
+            color: white !important;
+            box-shadow: 0 4px 12px rgba(220,53,69,0.3) !important;
         }
 
         /* Tables */

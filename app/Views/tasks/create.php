@@ -1,3 +1,7 @@
+<a href="javascript:history.back()" class="btn btn-outline-primary d-inline-flex align-items-center" style="gap:0.5rem;">
+    <i class="fas fa-arrow-left"></i>
+    <span>Back</span>
+</a>
 <!-- Task Create Form -->
 <div style="background: linear-gradient(135deg, #f8fafc 0%, #e2e8f0 100%); min-height: 100vh; padding: 2rem; font-family: 'Roboto', sans-serif;">
 

@@ -759,19 +759,12 @@ class Projects extends BaseController
         $fields = json_decode($template['fields'] ?? '[]', true);
         $taskData = [];
         $postData = $this->request->getPost();
-        foreach ($fields as $field) {
-            $normalized = str_replace(' ', '_', $field);
-            if (isset($postData[$field])) {
-                $taskData[$field] = $postData[$field];
-            } elseif (isset($postData[$normalized])) {
-                $taskData[$field] = $postData[$normalized];
+        // Accept header IDs as keys directly from POST data
+        foreach ($fields as $headerId) {
+            if (isset($postData[$headerId])) {
+                $taskData[$headerId] = $postData[$headerId];
             } else {
-                $lower = strtolower($normalized);
-                if (isset($postData[$lower])) {
-                    $taskData[$field] = $postData[$lower];
-                } else {
-                    $taskData[$field] = null;
-                }
+                $taskData[$headerId] = null;
             }
         }
         if (!$taskId) {
@@ -928,6 +921,25 @@ class Projects extends BaseController
             return $this->response->setJSON(['success' => true, 'id' => $templateId]);
         }
         return $this->response->setJSON(['success' => false, 'message' => 'Failed to create template']);
+    }
+    
+    /**
+     * Add a new task header and return its ID (for dynamic table headers)
+     * Accepts POST (or GET for dev), expects 'column_name' param
+     * Returns: { success: true, id: <header_id> } or { success: false, message: ... }
+     */
+    public function add_task_header()
+    {
+        $columnName = $this->request->getPost('column_name') ?? $this->request->getGet('column_name');
+        if (!$columnName) {
+            return $this->response->setJSON(['success' => false, 'message' => 'No column name provided']);
+        }
+        $id = $this->projectModel->insertTaskHeader($columnName);
+        if ($id) {
+            return $this->response->setJSON(['success' => true, 'id' => $id]);
+        } else {
+            return $this->response->setJSON(['success' => false, 'message' => 'Failed to add header']);
+        }
     }
 
 }

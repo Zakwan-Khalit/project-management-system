@@ -1,3 +1,7 @@
+<a href="javascript:history.back()" class="btn btn-outline-primary d-inline-flex align-items-center" style="gap:0.5rem;">
+    <i class="fas fa-arrow-left"></i>
+    <span>Back</span>
+</a>
 <div class="row mb-4">
     <div class="col-md-3">
         <div class="card bg-warning text-white">

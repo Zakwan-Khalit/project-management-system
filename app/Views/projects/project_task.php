@@ -32,15 +32,18 @@ $(document).ready(function() {
                         let sum = 0;
                         let count = 0;
                         taskRes.tasks.forEach(t => {
-                            let progressRaw = t.Progress || t.progress || '';
-                            if (typeof progressRaw === 'string') {
-                                progressRaw = progressRaw.replace(/[^\d.]/g, '');
-                            }
-                            let progressNum = parseFloat(progressRaw);
-                            if (!isNaN(progressNum)) {
-                                sum += progressNum;
-                                count++;
-                            }
+                            // Find any value in t that is a string containing a %
+                            let found = false;
+                            Object.values(t).forEach(val => {
+                                if (typeof val === 'string' && val.trim().endsWith('%')) {
+                                    let num = parseFloat(val.replace(/[^\d.]/g, ''));
+                                    if (!isNaN(num)) {
+                                        sum += num;
+                                        count++;
+                                        found = true;
+                                    }
+                                }
+                            });
                         });
                         if (count > 0) {
                             percent = Math.round(sum / count);
