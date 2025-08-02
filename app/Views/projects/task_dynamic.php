@@ -1,4 +1,8 @@
 <!-- Modern Dynamic Task Page - Enhanced UI -->
+<a href="javascript:history.back()" class="btn btn-outline-secondary d-inline-flex align-items-center" style="gap:0.5rem;">
+    <i class="fas fa-arrow-left"></i>
+    <span>Back</span>
+</a>
 <div style="min-height: 100vh; padding: 2rem; font-family: 'Roboto', sans-serif;">
     <div style="max-width: 1400px; margin: 0 auto;">
         <h2 id="taskTableTitle" style="font-family: 'Poppins', sans-serif; font-weight: 700; color: #3b3b3b; letter-spacing: -1px; margin-bottom: 2.5rem; font-size:2.4rem; text-align:center;">
@@ -7,65 +11,96 @@
         <div style="border-radius: 2rem; box-shadow: 0 16px 48px rgba(102,126,234,0.13); border: none; padding: 2.5rem 2.5rem 2rem 2.5rem; margin-bottom:2rem;">
         <!-- Image Preview Modal -->
         <div class="modal fade" id="imageModal" tabindex="-1" aria-labelledby="imageModalLabel" aria-hidden="true">
-        <div class="modal-dialog modal-dialog-centered">
-            <div class="modal-content" style="border-radius:1.2rem;">
-            <div class="modal-header" style="border-bottom:0;">
-                <h5 class="modal-title" id="imageModalLabel">Image Preview</h5>
-                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-            </div>
-            <div class="modal-body text-center">
-                <img id="modalImage" src="" alt="Task Image" style="max-width:100%;max-height:400px;border-radius:0.7rem;box-shadow:0 2px 12px rgba(102,126,234,0.13);margin-bottom:1rem;" />
-            </div>
-            <div class="modal-footer" style="border-top:0;justify-content:center;">
-                <button id="deleteImageBtn" type="button" class="btn btn-danger" data-image-id=""><i class="fas fa-trash-alt me-1"></i>Delete Image</button>
-                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
-            </div>
-            </div>
-        </div>
-        </div>
-            <!-- Export Buttons -->
-            <div class="d-flex justify-content-between align-items-center mb-3">
-                <div class="d-flex gap-2" id="exportBtnGroupLeft">
-                    <button id="exportCsvBtn" class="btn btn-outline-primary export-btn-fix" type="button"><i class="fas fa-file-csv me-1"></i> CSV</button>
-                    <button id="exportExcelBtn" class="btn btn-outline-success export-btn-fix" type="button"><i class="fas fa-file-excel me-1"></i> Excel</button>
-                    <button id="exportPdfBtn" class="btn btn-outline-danger export-btn-fix" type="button"><i class="fas fa-file-pdf me-1"></i> PDF</button>
+        <div class="modal-dialog modal-xl modal-dialog-centered">
+            <div class="modal-content" style="border-radius:1.2rem; max-width:900px; margin:auto;">
+                <div class="modal-header" style="border-bottom:0;">
+                    <h5 class="modal-title" id="imageModalLabel">Image Preview</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
                 </div>
-                <div>
-                    <button id="tableSettingsBtn" class="btn btn-outline-secondary" type="button" title="Table Settings" style="border-radius:50%;width:40px;height:40px;display:flex;align-items:center;justify-content:center;">
-                        <i class="fas fa-cog"></i>
+                <div class="modal-body text-center">
+                    <img id="modalImage" src="" alt="Task Image" style="max-width:100%;max-height:700px;border-radius:0.7rem;box-shadow:0 2px 12px rgba(102,126,234,0.13);margin-bottom:1rem;" />
+                </div>
+                <div class="modal-footer" style="border-top:0;justify-content:center;">
+                    <button id="deleteImageBtn" type="button" class="btn btn-danger" data-image-id=""><i class="fas fa-trash-alt me-1"></i>Delete Image</button>
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+                </div>
+            </div>
+        </div>
+        </div>
+            <?php 
+            // Ensure $fields is an array and validate header IDs
+            $validFields = [];
+            if (!empty($fields) && is_array($fields)) {
+                foreach ($fields as $headerId) {
+                    // Only include valid header IDs (numeric or string that can be used as array key)
+                    if (is_scalar($headerId) && isset($headerMap[$headerId])) {
+                        $validFields[] = $headerId;
+                    }
+                }
+            }
+            $hasValidFields = !empty($validFields);
+            ?>
+            
+            <?php if ($hasValidFields): ?>
+                <!-- Export Buttons -->
+                <div class="d-flex justify-content-between align-items-center mb-3">
+                    <div class="d-flex gap-2" id="exportBtnGroupLeft">
+                        <button id="exportCsvBtn" class="btn btn-outline-primary export-btn-fix" type="button"><i class="fas fa-file-csv me-1"></i> CSV</button>
+                        <button id="exportExcelBtn" class="btn btn-outline-success export-btn-fix" type="button"><i class="fas fa-file-excel me-1"></i> Excel</button>
+                        <button id="exportPdfBtn" class="btn btn-outline-danger export-btn-fix" type="button"><i class="fas fa-file-pdf me-1"></i> PDF</button>
+                    </div>
+                    <div>
+                        <button id="tableSettingsBtn" class="btn btn-outline-secondary" type="button" title="Table Settings" style="border-radius:50%;width:40px;height:40px;display:flex;align-items:center;justify-content:center;">
+                            <i class="fas fa-cog"></i>
+                        </button>
+                    </div>
+                </div>
+            <?php endif; ?>
+            
+            <?php if (!$hasValidFields): ?>
+                <!-- Empty state when no table structure exists -->
+                <div class="text-center py-5" style="background: linear-gradient(135deg, #f8fafc 0%, #e2e8f0 100%); border-radius: 1.5rem; border: 2px dashed #cbd5e1;">
+                    <div class="mb-4">
+                        <i class="fas fa-table" style="font-size: 4rem; color: #94a3b8; margin-bottom: 1rem;"></i>
+                    </div>
+                    <h4 style="color: #475569; font-family: 'Poppins', sans-serif; font-weight: 600; margin-bottom: 1rem;">
+                        No Table Structure Yet
+                    </h4>
+                    <p style="color: #64748b; font-size: 1.1rem; margin-bottom: 2rem; max-width: 500px; margin-left: auto; margin-right: auto;">
+                        This component doesn't have any table headers configured yet. Get started by adding some table columns to organize your tasks and data.
+                    </p>
+                    <button id="configureTableBtn" class="btn btn-primary btn-lg" style="padding: 0.75rem 2rem; font-size: 1.1rem; border-radius: 0.75rem; box-shadow: 0 4px 12px rgba(102,126,234,0.3);">
+                        <i class="fas fa-cog me-2"></i>
+                        Configure Table Structure
                     </button>
                 </div>
-            </div>
-            <div style="overflow-x:auto;">
-                <table class="table table-hover table-bordered" id="dynamicTaskTable" style="border-radius: 1.2rem; overflow: visible; box-shadow: 0 2px 12px rgba(102,126,234,0.07); margin-bottom:0; min-width:1100px;">
-                    <thead class="table-light">
-                        <tr>
-                            <?php if (!empty($fields)): ?>
-                                <?php foreach ($fields as $headerId): ?>
+            <?php else: ?>
+                <div style="overflow-x:auto;">
+                    <table class="table table-hover table-bordered" id="dynamicTaskTable" style="border-radius: 1.2rem; overflow: visible; box-shadow: 0 2px 12px rgba(102,126,234,0.07); margin-bottom:0; min-width:1100px;">
+                        <thead class="table-light">
+                            <tr>
+                                <?php foreach ($validFields as $headerId): ?>
                                     <?php $columnName = $headerMap[$headerId] ?? null; ?>
                                     <th><?= esc($columnName) ?></th>
                                 <?php endforeach; ?>
-                            <?php endif; ?>
-                            <th style="width:72px; text-align:center; border-bottom:2px solid #e2e8f0;">
-                                <div style="display:flex;align-items:center;justify-content:center;gap:8px;">
-                                    <button id="addRowBtn" type="button" class="btn btn-sm btn-outline-primary" title="Add Row" style="border-radius:50%;box-shadow:0 2px 8px rgba(102,126,234,0.12);width:40px;height:40px;display:flex;align-items:center;justify-content:center;">
-                                        <i class="fas fa-plus"></i>
-                                    </button>
-                                </div>
-                            </th>
-                            <th style="width:32px;"></th>
-                    </thead>
-                    <tbody>
-                        <?php if (empty($fields)): ?>
-                            <tr><td class="text-center text-muted" colspan="100%">No template fields available.</td></tr>
-                        <?php elseif (empty($tasks)): ?>
-                            <!-- No tasks: show nothing, allow adding rows -->
-                        <?php else: ?>
-                            <?php foreach ($tasks as $task): ?>
-                        <?php $taskData = is_array($task['data']) ? $task['data'] : json_decode($task['data'], true); ?>
-                        <tr data-task-id="<?= esc($task['id']) ?>" class="task-row" style="transition:box-shadow 0.3s;">
-                            <?php foreach ($fields as $headerId): ?>
-                            <?php $field = $headerMap[$headerId] ?? null; ?>
+                                <th style="width:72px; text-align:center; border-bottom:2px solid #e2e8f0;">
+                                    <div style="display:flex;align-items:center;justify-content:center;gap:8px;">
+                                        <button id="addRowBtn" type="button" class="btn btn-sm btn-outline-primary" title="Add Row" style="border-radius:50%;box-shadow:0 2px 8px rgba(102,126,234,0.12);width:40px;height:40px;display:flex;align-items:center;justify-content:center;">
+                                            <i class="fas fa-plus"></i>
+                                        </button>
+                                    </div>
+                                </th>
+                                <th style="width:32px;"></th>
+                        </thead>
+                        <tbody>
+                            <?php if (empty($tasks)): ?>
+                                <!-- No tasks: show nothing, allow adding rows -->
+                            <?php else: ?>
+                                <?php foreach ($tasks as $task): ?>
+                            <?php $taskData = is_array($task['data']) ? $task['data'] : json_decode($task['data'], true); ?>
+                            <tr data-task-id="<?= esc($task['id']) ?>" class="task-row" style="transition:box-shadow 0.3s;">
+                                <?php foreach ($validFields as $headerId): ?>
+                                <?php $field = $headerMap[$headerId] ?? null; ?>
                             <?php if (in_array($field, ['Tester Name','PIC'])): ?>
                                 <td class="editable-cell user-dropdown-cell" tabindex="0" data-field-id="<?= esc($headerId) ?>" data-field="<?= esc($field) ?>"><span class="user-display"><?= esc($taskData[$headerId] ?? '') ?></span></td>
                             <?php elseif (in_array($field, ['Start Date','End Date','Progress','Status'])): ?>
@@ -95,15 +130,12 @@
                         </tr>
                     <?php endforeach; ?>
                         <?php endif; ?>
-                    </tbody>
-                </table>
-            </div>
+                        </tbody>
+                    </table>
+                </div>
+            <?php endif; ?>
         </div>
         <div class="mb-4">
-        <a href="javascript:history.back()" class="btn btn-outline-primary d-inline-flex align-items-center" style="gap:0.5rem;">
-            <i class="fas fa-arrow-left"></i>
-            <span>Back</span>
-        </a>
     </div>
     </div>
 </div>
@@ -231,6 +263,10 @@ function fetchProjectUsers() {
             if (res.success) {
                 projectUsers = res.users;
             }
+        },
+        error: function(xhr, status, error) {
+            console.error('Error fetching project users:', error);
+            Swal.fire('Error', 'Failed to load project users.', 'error');
         }
     });
 }
@@ -266,80 +302,55 @@ function showUserDropdown(cell, currentValue) {
     });
 }
 
-// --- Row coloring by module cell content ---
-function colorRowsByModule() {
-    const rows = document.querySelectorAll('#dynamicTaskTable tbody tr.task-row');
-    let lastModule = null;
-    let colorIdx = 0;
-    const colors = ['', '']; // no background colors
-    rows.forEach(row => {
-        const firstCell = row.querySelector('td');
-        if (!firstCell) return;
-        const moduleVal = firstCell.textContent.trim();
-        if (moduleVal !== lastModule) {
-            colorIdx = 1 - colorIdx; // alternate color when module changes
-            lastModule = moduleVal;
-        }
-        row.style.background = '';
-    });
-}
-
-// Initial coloring after page load
-$(document).ready(function() {
-    colorRowsByModule();
-});
-
-// Recolor after adding a row
-$('#addRowBtn').on('click', function() {
-    setTimeout(colorRowsByModule, 50);
-});
-
-// Recolor after deleting a row
-$('#dynamicTaskTable').on('click', '.delete-row-btn', function() {
-    setTimeout(colorRowsByModule, 50);
-});
-
 // Recolor after sorting
-new Sortable(document.querySelector('#dynamicTaskTable tbody'), {
-    handle: '.drag-handle',
-    animation: 150,
-    ghostClass: 'bg-light',
-    onEnd: function(evt) {
-        // Send new task_order to backend
-        const task_order = Array.from(document.querySelectorAll('#dynamicTaskTable tbody tr.task-row'))
-            .map(row => row.getAttribute('data-task-id'))
-            .filter(id => id);
-        $.ajax({
-            url: '<?= base_url('projects/update_task_order') ?>',
-            method: 'POST',
-            data: { task_order: task_order },
-            success: function(res) {
-                if (res.success) {
-                    // Optionally show a success message
-                } else {
-                    Swal.fire({
-                        icon: 'error',
-                        title: 'task order Save Failed',
-                        text: res.message || 'Could not save task_order.'
-                    });
+const sortableTableBody = document.querySelector('#dynamicTaskTable tbody');
+if (sortableTableBody) {
+    new Sortable(sortableTableBody, {
+        handle: '.drag-handle',
+        animation: 150,
+        ghostClass: 'bg-light',
+        onEnd: function(evt) {
+            // Send new task_order to backend
+            const task_order = Array.from(document.querySelectorAll('#dynamicTaskTable tbody tr.task-row'))
+                .map(row => row.getAttribute('data-task-id'))
+                .filter(id => id);
+            $.ajax({
+                url: '<?= base_url('projects/update_task_order') ?>',
+                method: 'POST',
+                data: { 
+                    task_order: task_order,
+                    template_id: templateId,
+                    project_id: projectId
+                },
+                dataType: 'json',
+                success: function(res) {
+                    if (res.success) {
+                        // Optionally show a success message
+                    } else {
+                        Swal.fire({
+                            icon: 'error',
+                            title: 'Task Order Save Failed',
+                            text: res.message || 'Could not save task order.'
+                        });
+                    }
+                },
+                error: function(xhr, status, error) {
+                    console.error('Error updating task order:', error);
+                    Swal.fire('Error', 'Failed to update task order.', 'error');
                 }
-            }
-        });
-        setTimeout(colorRowsByModule, 50);
-    }
-});
+            });
+        }
+    });
+} else {
+    console.log('Sortable table body not found, skipping second Sortable initialization');
+}
 
 // Row hover effect for modern look
 $('#dynamicTaskTable tbody').on('mouseenter', 'tr.task-row', function() {
-    $(this).css({
-        'box-shadow': '0 12px 32px rgba(102,126,234,0.13)',
-        'background': ''
-    });
+    $(this).css('box-shadow', '0 12px 32px rgba(102,126,234,0.13)');
 });
 $('#dynamicTaskTable tbody').on('mouseleave', 'tr.task-row', function() {
     $(this).css('box-shadow', 'none');
-    // Restore color by module
-    colorRowsByModule();
 });
 // Editable cell focus effect
 // --- Refactored editable cell logic for dynamic fields ---
@@ -435,6 +446,10 @@ $('#dynamicTaskTable').on('blur', 'td.editable-cell', function() {
     const cell = $(this);
     const row = cell.closest('tr');
     let taskId = row.data('task-id');
+    
+    // Debug: Log the task ID
+    console.log('Saving task. Task ID:', taskId, 'Type:', typeof taskId);
+    
     const data = {};
     let statusValue = null;
     let progressCell = null;
@@ -491,32 +506,72 @@ $('#dynamicTaskTable').on('blur', 'td.editable-cell', function() {
     // Always send project_id and template_id
     data['project_id'] = projectId;
     data['template_id'] = templateId;
+    
     // If no taskId, create new task
     if (!taskId) {
         $.ajax({
             url: '<?= base_url('projects/save_task') ?>',
             method: 'POST',
             data: data,
+            dataType: 'json',
             success: function(res) {
                 if (res.success && res.task_id) {
                     row.attr('data-task-id', res.task_id);
+                } else {
+                    console.error('Failed to create task:', res.message);
+                    Swal.fire('Error', 'Failed to create new task.', 'error');
                 }
+            },
+            error: function(xhr, status, error) {
+                console.error('Error creating task:', error);
+                Swal.fire('Error', 'Failed to create new task.', 'error');
             }
         });
     } else {
+        // IMPORTANT: Include the task ID for updates
+        data['id'] = taskId;
+        
+        // Debug: Log what data is being sent
+        console.log('Updating existing task. Data being sent:', data);
+        
         $.ajax({
             url: '<?= base_url('projects/save_task') ?>',
             method: 'POST',
-            data: { id: taskId, ...data },
+            data: data,
+            dataType: 'json',
             success: function(res) {
-                // No SweetAlert
+                console.log('Update response:', res);
+                if (!res.success) {
+                    console.error('Failed to update task:', res.message);
+                    Swal.fire('Error', 'Failed to update task.', 'error');
+                }
+            },
+            error: function(xhr, status, error) {
+                console.error('Error updating task:', error);
+                Swal.fire('Error', 'Failed to update task.', 'error');
             }
         });
     }
 });
 
-// Add new row functionality
+// Add new row functionality - only if table structure exists
 $('#addRowBtn').on('click', function() {
+    const headerIds = <?php echo json_encode($validFields ?? []); ?>;
+    if (!headerIds || !Array.isArray(headerIds) || headerIds.length === 0) {
+        Swal.fire({
+            icon: 'info',
+            title: 'No Table Structure',
+            text: 'Please configure the table structure first by clicking the settings button.',
+            confirmButtonText: 'Configure Now'
+        }).then((result) => {
+            if (result.isConfirmed) {
+                // Trigger the modal opening function
+                openTableSettingsModal();
+            }
+        });
+        return;
+    }
+    
     const table = $('#dynamicTaskTable tbody');
     const lastRow = table.find('tr.task-row:last');
     let firstColValue = '';
@@ -525,30 +580,41 @@ $('#addRowBtn').on('click', function() {
     }
     // --- Refactored: Use JS for dynamic field handling ---
     let rowHtml = '<tr class="task-row" style="transition:box-shadow 0.3s;">';
-    // Get header IDs and mapping from PHP variables
-    let headerIds = <?php echo json_encode($fields ?? []); ?>;
     let allHeaderOptions = <?php echo json_encode($all_headers ?? []); ?>;
     let headerMap = {};
-    allHeaderOptions.forEach(h => { headerMap[h.id] = h.column_name; });
+    
+    // Safety check for variables
+    if (!allHeaderOptions || !Array.isArray(allHeaderOptions)) {
+        allHeaderOptions = [];
+        console.warn('Header options not available');
+        return;
+    }
+    
+    allHeaderOptions.forEach(h => { 
+        if (h && h.id && h.column_name) {
+            headerMap[h.id] = h.column_name; 
+        }
+    });
     // For each header, generate the correct cell type
     headerIds.forEach(function(headerId, idx) {
         let field = headerMap[headerId] || '';
+        let dataFieldIdAttr = ' data-field-id="'+headerId+'"';
         if (idx === 0) {
-            rowHtml += '<td contenteditable="true" class="editable-cell" tabindex="0" data-field="'+field+'" style="padding:1rem 1rem; font-size:1.05rem; border-bottom:1px solid #e2e8f0;">'+firstColValue+'</td>';
+            rowHtml += '<td contenteditable="true" class="editable-cell" tabindex="0" data-field="'+field+'"'+dataFieldIdAttr+' style="padding:1rem 1rem; font-size:1.05rem; border-bottom:1px solid #e2e8f0;">'+firstColValue+'</td>';
         } else if (field === 'Last Modified') {
-            rowHtml += '<td style="color:#6b7280; padding:1rem 1rem; font-size:1.05rem; border-bottom:1px solid #e2e8f0;"></td>';
+            rowHtml += '<td'+dataFieldIdAttr+' style="color:#6b7280; padding:1rem 1rem; font-size:1.05rem; border-bottom:1px solid #e2e8f0;"></td>';
         } else if (field === 'Image') {
-            rowHtml += '<td class="image-cell" data-field="Image" style="padding:1rem 1rem; font-size:1.05rem; border-bottom:1px solid #e2e8f0; min-width:110px; max-width:140px; text-align:center; vertical-align:middle;">';
+            rowHtml += '<td class="image-cell" data-field="Image"'+dataFieldIdAttr+' style="padding:1rem 1rem; font-size:1.05rem; border-bottom:1px solid #e2e8f0; min-width:110px; max-width:140px; text-align:center; vertical-align:middle;">';
             rowHtml += '<div class="task-image-list" data-task-id=""></div>';
             rowHtml += '<button class="btn btn-link p-0 upload-image-btn" title="Upload Image" data-task-id="" style="color:#667eea; font-size:1.5rem; display:inline-block;"><i class="fas fa-image"></i></button>';
             rowHtml += '<input type="file" accept="image/*" class="d-none image-upload-input" data-task-id="" multiple>';
             rowHtml += '</td>';
         } else if (["Start Date","End Date","Progress","Status"].includes(field)) {
-            rowHtml += '<td class="editable-cell" tabindex="0" data-field="'+field+'" style="padding:1rem 1rem; font-size:1.05rem; border-bottom:1px solid #e2e8f0;"></td>';
+            rowHtml += '<td class="editable-cell" tabindex="0" data-field="'+field+'"'+dataFieldIdAttr+' style="padding:1rem 1rem; font-size:1.05rem; border-bottom:1px solid #e2e8f0;"></td>';
         } else if (["Tester Name","PIC"].includes(field)) {
-            rowHtml += '<td class="editable-cell user-dropdown-cell" tabindex="0" data-field="'+field+'"><span class="user-display"></span></td>';
+            rowHtml += '<td class="editable-cell user-dropdown-cell" tabindex="0" data-field="'+field+'"'+dataFieldIdAttr+'><span class="user-display"></span></td>';
         } else {
-            rowHtml += '<td contenteditable="true" class="editable-cell" tabindex="0" data-field="'+field+'" style="padding:1rem 1rem; font-size:1.05rem; border-bottom:1px solid #e2e8f0;"></td>';
+            rowHtml += '<td contenteditable="true" class="editable-cell" tabindex="0" data-field="'+field+'"'+dataFieldIdAttr+' style="padding:1rem 1rem; font-size:1.05rem; border-bottom:1px solid #e2e8f0;"></td>';
         }
     });
     // Only the trash button in the row
@@ -562,71 +628,102 @@ $('#addRowBtn').on('click', function() {
     table.append(rowHtml);
 });
 
-// Delete row functionality
+// Delete row functionality with SweetAlert2 confirmation
 $('#dynamicTaskTable').on('click', '.delete-row-btn', function() {
     const row = $(this).closest('tr');
     const taskId = row.data('task-id');
-    if (taskId) {
-        $.ajax({
-            url: '<?= base_url('projects/delete_task') ?>',
-            method: 'POST',
-            data: { id: taskId },
-            success: function(res) {
-                if (res.success) {
-                    row.remove();
-                } else {
-                    Swal.fire({
-                        icon: 'error',
-                        title: 'Delete Failed',
-                        text: res.message || 'Could not delete task.'
-                    });
-                }
+    Swal.fire({
+        title: 'Delete Row?',
+        text: 'Are you sure you want to delete this row? This action cannot be undone.',
+        icon: 'warning',
+        showCancelButton: true,
+        confirmButtonColor: '#d33',
+        cancelButtonColor: '#6c757d',
+        confirmButtonText: 'Yes, delete it',
+        cancelButtonText: 'Cancel',
+        focusCancel: true
+    }).then((result) => {
+        if (result.isConfirmed) {
+            if (taskId) {
+                $.ajax({
+                    url: '<?= base_url('projects/delete_task') ?>',
+                    method: 'POST',
+                    data: { id: taskId },
+                    success: function(res) {
+                        if (res.success) {
+                            row.remove();
+                        } else {
+                            Swal.fire({
+                                icon: 'error',
+                                title: 'Delete Failed',
+                                text: res.message || 'Could not delete task.'
+                            });
+                        }
+                    }
+                });
+            } else {
+                row.remove(); // Just remove if not saved in DB
             }
-        });
-    } else {
-        row.remove(); // Just remove if not saved in DB
-    }
+        }
+    });
 });
 
-// Make rows sortable
-new Sortable(document.querySelector('#dynamicTaskTable tbody'), {
-    handle: '.drag-handle',
-    animation: 150,
-    ghostClass: 'bg-light',
-    onEnd: function(evt) {
-        // Send new task_order to backend
-        const task_order = Array.from(document.querySelectorAll('#dynamicTaskTable tbody tr.task-row'))
-            .map(row => row.getAttribute('data-task-id'))
-            .filter(id => id);
-        $.ajax({
-            url: '<?= base_url('projects/update_task_order') ?>',
-            method: 'POST',
-            data: { task_order: task_order },
-            success: function(res) {
-                if (res.success) {
-                    // Optionally show a success message
-                } else {
-                    Swal.fire({
-                        icon: 'error',
-                        title: 'task order Save Failed',
-                        text: res.message || 'Could not save task_order.'
-                    });
+// Make rows sortable - only if table exists
+const tableBody = document.querySelector('#dynamicTaskTable tbody');
+if (tableBody) {
+    new Sortable(tableBody, {
+        handle: '.drag-handle',
+        animation: 150,
+        ghostClass: 'bg-light',
+        onEnd: function(evt) {
+            // Send new task_order to backend
+            const task_order = Array.from(document.querySelectorAll('#dynamicTaskTable tbody tr.task-row'))
+                .map(row => row.getAttribute('data-task-id'))
+                .filter(id => id);
+            $.ajax({
+                url: '<?= base_url('projects/update_task_order') ?>',
+                method: 'POST',
+                data: { 
+                    task_order: task_order,
+                    template_id: templateId,
+                    project_id: projectId
+                },
+                dataType: 'json',
+                success: function(res) {
+                    if (res.success) {
+                        // Optionally show a success message
+                    } else {
+                        Swal.fire({
+                            icon: 'error',
+                            title: 'Task Order Save Failed',
+                            text: res.message || 'Could not save task order.'
+                        });
+                    }
+                },
+                error: function(xhr, status, error) {
+                    console.error('Error updating task order:', error);
+                    Swal.fire('Error', 'Failed to update task order.', 'error');
                 }
-            }
-        });
-        setTimeout(colorRowsByModule, 50);
-    }
-});
+            });
+        }
+    });
+} else {
+    console.log('Table body not found, skipping Sortable initialization');
+}
 
 function loadTaskImages(taskId, cell) {
-    $.get('<?= base_url('task-images/list/') ?>' + taskId, function(res) {
-        if (res.success) {
-            const list = cell.find('.task-image-list');
-            list.empty();
-            res.images.forEach(img => {
-                // Use controller route to serve images from writable using file_address (random filename)
-                // file_address is like 'task_image/abc123.jpg', so we want only the filename part
-                let filename = img.file_address;
+    $.ajax({
+        url: '<?= base_url('task-images/list/') ?>' + taskId,
+        method: 'GET',
+        dataType: 'json',
+        success: function(res) {
+            if (res.success) {
+                const list = cell.find('.task-image-list');
+                list.empty();
+                res.images.forEach(img => {
+                    // Use controller route to serve images from writable using file_address (random filename)
+                    // file_address is like 'task_image/abc123.jpg', so we want only the filename part
+                    let filename = img.file_address;
                 if (filename && filename.includes('/')) {
                     filename = filename.substring(filename.lastIndexOf('/') + 1);
                 }
@@ -640,6 +737,11 @@ function loadTaskImages(taskId, cell) {
                 list.append(thumb);
             });
         }
+    },
+    error: function(xhr, status, error) {
+        console.error('Error loading task images:', error);
+        // Don't show error to user for images, just log it
+    }
     });
 }
 
@@ -659,10 +761,14 @@ $('#deleteImageBtn').off('click').on('click', function() {
     const thumb = $('.task-thumb[data-image-id="'+imageId+'"]').first();
     const cell = thumb.closest('.image-cell');
     const taskId = cell.closest('tr').data('task-id');
-    $.post('<?= base_url('task-images/delete/') ?>' + imageId, function(res) {
-        if (res.success) {
-            const modalEl = document.getElementById('imageModal');
-            const modal = bootstrap.Modal.getInstance(modalEl);
+    $.ajax({
+        url: '<?= base_url('task-images/delete/') ?>' + imageId,
+        method: 'POST',
+        dataType: 'json',
+        success: function(res) {
+            if (res.success) {
+                const modalEl = document.getElementById('imageModal');
+                const modal = bootstrap.Modal.getInstance(modalEl);
             modal.hide();
             // Only reload images for the affected cell/task
             if (taskId && cell.length) {
@@ -676,6 +782,11 @@ $('#deleteImageBtn').off('click').on('click', function() {
         } else {
             Swal.fire('Delete Failed', res.message || 'Could not delete image.', 'error');
         }
+    },
+    error: function(xhr, status, error) {
+        console.error('Error deleting image:', error);
+        Swal.fire('Error', 'Failed to delete image.', 'error');
+    }
     });
 });
 
@@ -712,12 +823,17 @@ $('#dynamicTaskTable').on('change', '.image-upload-input', function() {
             data: formData,
             processData: false,
             contentType: false,
+            dataType: 'json',
             success: function(res) {
                 if (res.success) {
                     loadTaskImages(taskId, cell);
                 } else {
                     Swal.fire('Upload Failed', res.message || 'Could not upload image.', 'error');
                 }
+            },
+            error: function(xhr, status, error) {
+                console.error('Error uploading image:', error);
+                Swal.fire('Error', 'Failed to upload image.', 'error');
             }
         });
     }
@@ -727,58 +843,216 @@ $('#dynamicTaskTable').on('change', '.image-upload-input', function() {
 
 
 // --- Table Settings Modal ---
-const tableSettingsBtn = document.getElementById('tableSettingsBtn');
-let headerIds = <?php echo json_encode($fields ?? []); ?>;
+let headerIds = <?php echo json_encode($validFields ?? []); ?>;
 let allHeaderOptions = <?php echo json_encode($all_headers ?? []); ?>;
 let headerMap = {};
-allHeaderOptions.forEach(h => { headerMap[h.id] = h.column_name; });
-let currentHeaders = headerIds.map(id => headerMap[id] || '');
-const modalHtml = `
-<div class="modal fade" id="tableSettingsModal" tabindex="-1" aria-labelledby="tableSettingsModalLabel" aria-hidden="true">
-  <div class="modal-dialog modal-lg">
-    <div class="modal-content">
-      <div class="modal-header">
-        <h5 class="modal-title" id="tableSettingsModalLabel"><i class='fas fa-cog'></i> Table Header Settings</h5>
-        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-      </div>
-      <div class="modal-body">
-        <div class="mb-3">
-          <label class="form-label">Current Headers (Drag to Sort):</label>
-          <ul id="headerList" class="list-group mb-2" style="min-height:40px;"></ul>
-        </div>
-        <div class="mb-3 d-flex align-items-end" style="gap:0.5rem;">
-          <div style="width:220px;">
-            <label class="form-label">Add Header:</label>
-            <select id="headerSelect2" class="form-select" style="width:100%;min-width:120px;max-width:220px;"></select>
-          </div>
-          <button id="addHeaderBtn" class="btn btn-primary" type="button" style="height:38px;">Add</button>
-        </div>
-      </div>
-      <div class="modal-footer">
-        <button id="saveHeadersBtn" class="btn btn-success" type="button">Save</button>
-        <button class="btn btn-secondary" data-bs-dismiss="modal" type="button">Cancel</button>
-      </div>
-    </div>
-  </div>
-</div>`;
-if (!document.getElementById('tableSettingsModal')) {
-    document.body.insertAdjacentHTML('beforeend', modalHtml);
+
+// Safety checks for PHP variables
+if (!headerIds || !Array.isArray(headerIds)) {
+    headerIds = [];
 }
-tableSettingsBtn.addEventListener('click', function() {
+if (!allHeaderOptions || !Array.isArray(allHeaderOptions)) {
+    allHeaderOptions = [];
+}
+
+allHeaderOptions.forEach(h => { 
+    if (h && h.id && h.column_name) {
+        headerMap[h.id] = h.column_name; 
+    }
+});
+
+let currentHeaders = headerIds.map(id => headerMap[id] || '');
+
+// Initialize event handlers when DOM is ready
+$(document).ready(function() {
+    // Setup button click handler for Configure Table Structure
+    $(document).on('click', '#configureTableBtn', function() {
+        console.log('Configure Table button clicked');
+        showTableModal();
+    });
+    
+    // Setup button click handler for Table Settings (gear icon)
+    $(document).on('click', '#tableSettingsBtn', function() {
+        console.log('Table Settings button clicked');
+        showTableModal();
+    });
+});
+
+// Simple function to show the modal
+function showTableModal() {
+    // Ensure modal exists first
+    if (!document.getElementById('tableSettingsModal')) {
+        createTableModal();
+    }
+    
+    const modalElement = $('#tableSettingsModal');
+    if (modalElement.length === 0) {
+        console.error('Modal element not found!');
+        return;
+    }
+    
     renderHeaderList();
     renderHeaderSelect2();
-    const modal = new bootstrap.Modal(document.getElementById('tableSettingsModal'));
-    modal.show();
-});
+    modalElement.modal('show');
+}
+
+// Function to create the modal if it doesn't exist
+function createTableModal() {
+    const modalHtml = `
+    <div class="modal fade" id="tableSettingsModal" tabindex="-1" aria-labelledby="tableSettingsModalLabel" aria-hidden="true">
+      <div class="modal-dialog modal-lg">
+        <div class="modal-content">
+          <div class="modal-header">
+            <h5 class="modal-title" id="tableSettingsModalLabel"><i class='fas fa-cog'></i> Table Header Settings</h5>
+            <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+          </div>
+          <div class="modal-body">
+            <div class="mb-3">
+              <label class="form-label">Current Headers (Drag to Sort):</label>
+              <ul id="headerList" class="list-group mb-2" style="min-height:40px;"></ul>
+            </div>
+            <div class="mb-3 d-flex align-items-end" style="gap:0.5rem;">
+              <div style="width:220px;">
+                <label class="form-label">Add Header:</label>
+                <select id="headerSelect2" class="form-select" style="width:100%;min-width:120px;max-width:220px;"></select>
+              </div>
+              <button id="addHeaderBtn" class="btn btn-primary" type="button" style="height:38px;">Add</button>
+            </div>
+          </div>
+          <div class="modal-footer">
+            <button id="saveHeadersBtn" class="btn btn-success" type="button">Save</button>
+            <button class="btn btn-secondary" data-bs-dismiss="modal" type="button">Cancel</button>
+          </div>
+        </div>
+      </div>
+    </div>`;
+    
+    document.body.insertAdjacentHTML('beforeend', modalHtml);
+    
+    // Add the save button event listener
+    document.getElementById('saveHeadersBtn').onclick = function() {
+        const templateId = window.templateId || <?php echo json_encode($template_id ?? null); ?>;
+        let saveBtn = document.getElementById('saveHeadersBtn');
+        saveBtn.disabled = true;
+        // Only treat currentHeaders as an array of IDs. If a value is not a number, insert it and replace with new ID.
+        let headersToInsert = [];
+        let headerInsertIndices = [];
+        currentHeaders.forEach((headerIdOrName, idx) => {
+            if (typeof headerIdOrName === 'number' || (typeof headerIdOrName === 'string' && /^\d+$/.test(headerIdOrName))) {
+                // Already an ID, do nothing
+            } else {
+                // Not an ID, treat as name to insert
+                headersToInsert.push(headerIdOrName);
+                headerInsertIndices.push(idx);
+            }
+        });
+        if (headersToInsert.length === 0) {
+            // All are IDs, just save
+            $.ajax({
+                url: '<?= base_url('projects/updateHeaders') ?>',
+                method: 'POST',
+                contentType: 'application/json',
+                data: JSON.stringify({ fields: currentHeaders, template_id: templateId }),
+                headers: { 'X-Requested-With': 'XMLHttpRequest' },
+                dataType: 'json',
+                success: function(data) {
+                    saveBtn.disabled = false;
+                    if (data.success) {
+                        Swal.fire('Saved!', 'Table headers updated.', 'success');
+                        const modal = bootstrap.Modal.getInstance(document.getElementById('tableSettingsModal'));
+                        modal.hide();
+                        location.reload();
+                    } else {
+                        Swal.fire('Error', data.message || 'Failed to save headers.', 'error');
+                    }
+                },
+                error: function(xhr, status, error) {
+                    console.error('Error saving headers:', error);
+                    saveBtn.disabled = false;
+                    Swal.fire('Error', 'Failed to save headers.', 'error');
+                }
+            });
+            return;
+        }
+        // Insert new headers sequentially, then update template
+        let i = 0;
+        function insertNextHeader() {
+            if (i < headersToInsert.length) {
+                let headerText = headersToInsert[i];
+                $.ajax({
+                    url: '<?= base_url('projects/add_task_header') ?>',
+                    method: 'POST',
+                    data: { 
+                        column_name: headerText,
+                        template_id: templateId,
+                        project_id: projectId
+                    },
+                    dataType: 'json',
+                    success: function(res) {
+                        if (res && res.success && res.id) {
+                            // Place the new id in the correct position in currentHeaders
+                            let idx = headerInsertIndices[i];
+                            currentHeaders[idx] = res.id;
+                        } else {
+                            Swal.fire('Error', 'Failed to add header: ' + headerText, 'error');
+                        }
+                        i++;
+                        insertNextHeader();
+                    },
+                    error: function(xhr, status, error) {
+                        console.error('Error adding header:', error);
+                        Swal.fire('Error', 'Failed to add header: ' + headerText, 'error');
+                        i++;
+                        insertNextHeader();
+                    }
+                });
+            } else {
+                // All new headers inserted, now update template
+                $.ajax({
+                    url: '<?= base_url('projects/updateHeaders') ?>',
+                    method: 'POST',
+                    contentType: 'application/json',
+                    data: JSON.stringify({ fields: currentHeaders, template_id: templateId }),
+                    headers: { 'X-Requested-With': 'XMLHttpRequest' },
+                    dataType: 'json',
+                    success: function(data) {
+                        saveBtn.disabled = false;
+                        if (data.success) {
+                            Swal.fire('Saved!', 'Table headers updated.', 'success');
+                            const modal = bootstrap.Modal.getInstance(document.getElementById('tableSettingsModal'));
+                            modal.hide();
+                            location.reload();
+                        } else {
+                            Swal.fire('Error', data.message || 'Failed to save headers.', 'error');
+                        }
+                    },
+                    error: function(xhr, status, error) {
+                        console.error('Error updating headers:', error);
+                        saveBtn.disabled = false;
+                        Swal.fire('Error', 'Failed to save headers.', 'error');
+                    }
+                });
+            }
+        }
+        insertNextHeader();
+    };
+}
 function renderHeaderList() {
     const list = document.getElementById('headerList');
+    if (!list) return;
+    
     list.innerHTML = '';
-    // Use CSS grid for compact multi-row layout
     list.style.display = 'grid';
     list.style.gridTemplateColumns = 'repeat(5, minmax(0, 1fr))';
     list.style.gap = '0.5rem';
     list.style.border = 'none';
     list.style.background = '';
+    
+    if (!currentHeaders || currentHeaders.length === 0) {
+        list.innerHTML = '<div style="grid-column: 1 / -1; text-align: center; color: #6b7280; padding: 1rem;">No headers added yet. Use the dropdown below to add some.</div>';
+        return;
+    }
+    
     currentHeaders.forEach((header, idx) => {
         const item = document.createElement('div');
         item.className = 'header-grid-item d-flex align-items-center justify-content-between';
@@ -793,10 +1067,13 @@ function renderHeaderList() {
         item.style.border = '1px solid #e2e8f0';
         item.style.cursor = 'grab';
         item.innerHTML = `<span style="flex:1;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">${header}</span><button class='btn btn-sm btn-link text-danger remove-header-btn' title='Remove' style='margin-left:8px;'><i class='fas fa-times'></i></button>`;
+        
         item.querySelector('.remove-header-btn').onclick = function() {
             currentHeaders.splice(idx, 1);
             renderHeaderList();
         };
+        
+        // Drag and drop functionality
         item.addEventListener('dragstart', function(e) {
             e.dataTransfer.setData('text/plain', idx);
             item.classList.add('dragging');
@@ -822,22 +1099,37 @@ function renderHeaderList() {
                 renderHeaderList();
             }
         });
+        
         list.appendChild(item);
     });
 }
 function renderHeaderSelect2() {
     const select2El = $('#headerSelect2');
+    if (select2El.length === 0) return;
+    
     // Destroy if already initialized
     if (select2El.hasClass('select2-hidden-accessible')) {
         select2El.select2('destroy');
     }
-    // Populate options
+    
     let headerLookupOptions = <?php echo json_encode($header_lookup ?? []); ?>;
+    if (!headerLookupOptions || !Array.isArray(headerLookupOptions)) {
+        headerLookupOptions = [];
+    }
+    
     select2El.empty();
     headerLookupOptions.forEach(opt => {
-        select2El.append(new Option(opt.column_name, opt.column_name, false, false));
+        if (opt && opt.column_name) {
+            select2El.append(new Option(opt.column_name, opt.column_name, false, false));
+        }
     });
-    // Init Select2 with tags (allow custom input), single select
+    
+    // Check if Select2 is available
+    if (typeof select2El.select2 !== 'function') {
+        return;
+    }
+    
+    // Init Select2
     select2El.select2({
         tags: true,
         width: 200,
@@ -847,11 +1139,10 @@ function renderHeaderSelect2() {
         closeOnSelect: true,
         multiple: false
     });
-    // Clear value on open
     select2El.val(null).trigger('change');
 }
 
-// Add header on button click or Enter
+// Add header functionality
 $(document).off('click', '#addHeaderBtn').on('click', '#addHeaderBtn', function() {
     const select2El = $('#headerSelect2');
     let val = select2El.val();
@@ -861,109 +1152,12 @@ $(document).off('click', '#addHeaderBtn').on('click', '#addHeaderBtn', function(
         select2El.val(null).trigger('change');
     }
 });
+
 $(document).off('keydown', '#headerSelect2').on('keydown', '#headerSelect2', function(e) {
     if (e.key === 'Enter') {
         e.preventDefault();
         $('#addHeaderBtn').click();
     }
 });
-// No addHeaderBtn needed; handled by Select2
 
-
-document.getElementById('saveHeadersBtn').onclick = function() {
-    const templateId = window.templateId || <?php echo json_encode($template_id ?? null); ?>;
-    let saveBtn = document.getElementById('saveHeadersBtn');
-    saveBtn.disabled = true;
-    // Only treat currentHeaders as an array of IDs. If a value is not a number, insert it and replace with new ID.
-    let headersToInsert = [];
-    let headerInsertIndices = [];
-    currentHeaders.forEach((headerIdOrName, idx) => {
-        if (typeof headerIdOrName === 'number' || (typeof headerIdOrName === 'string' && /^\d+$/.test(headerIdOrName))) {
-            // Already an ID, do nothing
-        } else {
-            // Not an ID, treat as name to insert
-            headersToInsert.push(headerIdOrName);
-            headerInsertIndices.push(idx);
-        }
-    });
-    if (headersToInsert.length === 0) {
-        // All are IDs, just save
-        $.ajax({
-            url: '<?= base_url('projects/updateHeaders') ?>',
-            method: 'POST',
-            contentType: 'application/json',
-            data: JSON.stringify({ fields: currentHeaders, template_id: templateId }),
-            headers: { 'X-Requested-With': 'XMLHttpRequest' },
-            success: function(data) {
-                saveBtn.disabled = false;
-                if (data.success) {
-                    Swal.fire('Saved!', 'Table headers updated.', 'success');
-                    const modal = bootstrap.Modal.getInstance(document.getElementById('tableSettingsModal'));
-                    modal.hide();
-                    location.reload();
-                } else {
-                    Swal.fire('Error', data.message || 'Failed to save headers.', 'error');
-                }
-            },
-            error: function() {
-                saveBtn.disabled = false;
-                Swal.fire('Error', 'Failed to save headers.', 'error');
-            }
-        });
-        return;
-    }
-    // Insert new headers sequentially, then update template
-    let i = 0;
-    function insertNextHeader() {
-        if (i < headersToInsert.length) {
-            let headerText = headersToInsert[i];
-            $.ajax({
-                url: '<?= base_url('projects/add_task_header') ?>',
-                method: 'POST',
-                data: { column_name: headerText },
-                success: function(res) {
-                    if (res && res.success && res.id) {
-                        // Place the new id in the correct position in currentHeaders
-                        let idx = headerInsertIndices[i];
-                        currentHeaders[idx] = res.id;
-                    } else {
-                        Swal.fire('Error', 'Failed to add header: ' + headerText, 'error');
-                    }
-                    i++;
-                    insertNextHeader();
-                },
-                error: function() {
-                    Swal.fire('Error', 'Failed to add header: ' + headerText, 'error');
-                    i++;
-                    insertNextHeader();
-                }
-            });
-        } else {
-            // All new headers inserted, now update template
-            $.ajax({
-                url: '<?= base_url('projects/updateHeaders') ?>',
-                method: 'POST',
-                contentType: 'application/json',
-                data: JSON.stringify({ fields: currentHeaders, template_id: templateId }),
-                headers: { 'X-Requested-With': 'XMLHttpRequest' },
-                success: function(data) {
-                    saveBtn.disabled = false;
-                    if (data.success) {
-                        Swal.fire('Saved!', 'Table headers updated.', 'success');
-                        const modal = bootstrap.Modal.getInstance(document.getElementById('tableSettingsModal'));
-                        modal.hide();
-                        location.reload();
-                    } else {
-                        Swal.fire('Error', data.message || 'Failed to save headers.', 'error');
-                    }
-                },
-                error: function() {
-                    saveBtn.disabled = false;
-                    Swal.fire('Error', 'Failed to save headers.', 'error');
-                }
-            });
-        }
-    }
-    insertNextHeader();
-};
 </script>

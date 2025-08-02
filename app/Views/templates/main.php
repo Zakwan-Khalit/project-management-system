@@ -1105,7 +1105,7 @@
             </a>
             <a href="<?= base_url('projects/project_list') ?>" class="nav-link<?= strpos($url, 'project_list') !== false ? ' active' : '' ?>" data-tooltip="Tasks">
                 <i class="fas fa-list"></i>
-                <span>Tasks</span>
+                <span>Activities</span>
             </a>
             <a href="<?= base_url('tasks/kanban_select') ?>" class="nav-link<?= strpos($url, 'kanban') !== false ? ' active' : '' ?>" data-tooltip="Kanban">
                 <i class="fas fa-columns"></i>

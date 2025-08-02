@@ -9,36 +9,6 @@ use App\Models\ActivityLogModel;
 
 class Projects extends BaseController
 {
-
-    // AJAX: Get all tasks for a template and project (for dynamic progress bar)
-    public function get_tasks_by_template($template_code, $project_id)
-    {
-        // Security: check user session
-        $userData = session('userdata');
-        $userId = $userData['id'] ?? null;
-        if (!$userId) {
-            return $this->response->setJSON([
-                'success' => false,
-                'message' => 'User not authenticated'
-            ]);
-        }
-        // Fetch tasks for this template and project (by template ID)
-        $tasks = $this->projectModel->getTasksByTemplateIdAndProject($template_code, $project_id); // $template_code is now template_id
-        // Decode progress from data JSON for each task
-        foreach ($tasks as &$task) {
-            $dataArr = is_array($task['data']) ? $task['data'] : json_decode($task['data'], true);
-            if (is_array($dataArr)) {
-                foreach ($dataArr as $k => $v) {
-                    $task[$k] = $v;
-                }
-            }
-        }
-        unset($task);
-        return $this->response->setJSON([
-            'success' => true,
-            'tasks' => $tasks
-        ]);
-    }
     protected $projectModel;
     protected $taskModel;
     protected $userModel;
@@ -108,6 +78,7 @@ class Projects extends BaseController
     
     public function index()
     {
+        // pr(session('userdata'));
         $userData = session('userdata');
         $userId = $userData['id'] ?? null;
         
@@ -625,7 +596,8 @@ class Projects extends BaseController
             return [
                 'user_id' => $m['user_id'],
                 'first_name' => $m['first_name'],
-                'last_name' => $m['last_name']
+                'last_name' => $m['last_name'],
+                'role' => $m['role'],
             ];
         }, $members);
         return $this->response->setJSON([
@@ -942,4 +914,564 @@ class Projects extends BaseController
         }
     }
 
+    /**
+     * AJAX: Add multiple project members (from modal, department+users)
+     * POST: project_id, department_id, user_ids[]
+     * Returns: { success, added, failed }
+     */
+    public function add_project_members()
+    {
+        if (!$this->request->isAJAX()) {
+            return $this->response->setJSON(['success' => false, 'message' => 'Invalid request']);
+        }
+        $userData = session('userdata');
+        $assignedBy = $userData['id'] ?? null;
+        $projectId = $this->request->getPost('project_id');
+        $departmentId = $this->request->getPost('department_id');
+        $userIds = $this->request->getPost('user_ids');
+        if (!$projectId || !$userIds || !is_array($userIds)) {
+            return $this->response->setJSON(['success' => false, 'message' => 'Missing data']);
+        }
+        $result = $this->projectModel->addProjectMembersBulk($projectId, $userIds, $departmentId, 'member', $assignedBy);
+        return $this->response->setJSON($result);
+    }
+
+    /**
+     * API: Get all departments for dropdown
+     */
+    public function departments()
+    {
+        $departments = $this->projectModel->getDepartments();
+        return $this->response->setJSON([
+            'success' => true,
+            'departments' => $departments
+        ]);
+    }
+
+    /**
+     * API: Get users by department for dropdown (exclude users already in the project)
+     */
+    public function departmentUsers($departmentId)
+    {
+        $projectId = $this->request->getGet('project_id');
+        $model = new \App\Models\ProjectModel();
+        $users = $model->getUsersByDepartment($departmentId, $projectId);
+        return $this->response->setJSON([
+            'success' => true,
+            'users' => $users
+        ]);
+    }
+
+    // AJAX: Get all tasks for a template and project (for dynamic progress bar)
+    public function get_tasks_by_template($template_code, $project_id)
+    {
+        // Security: check user session
+        $userData = session('userdata');
+        $userId = $userData['id'] ?? null;
+        if (!$userId) {
+            return $this->response->setJSON([
+                'success' => false,
+                'message' => 'User not authenticated'
+            ]);
+        }
+        // Fetch tasks for this template and project (by template ID)
+        $tasks = $this->projectModel->getTasksByTemplateIdAndProject($template_code, $project_id); // $template_code is now template_id
+        // Decode progress from data JSON for each task
+        foreach ($tasks as &$task) {
+            $dataArr = is_array($task['data']) ? $task['data'] : json_decode($task['data'], true);
+            if (is_array($dataArr)) {
+                foreach ($dataArr as $k => $v) {
+                    $task[$k] = $v;
+                }
+            }
+        }
+        unset($task);
+        return $this->response->setJSON([
+            'success' => true,
+            'tasks' => $tasks
+        ]);
+    }
+
+    // AJAX: Get all scopes for a project
+    public function get_project_scopes()
+    {
+        $userData = session('userdata');
+        $userId = $userData['id'] ?? null;
+        if (!$userId) {
+            return $this->response->setJSON(['success' => false, 'message' => 'Unauthorized']);
+        }
+
+        $projectId = $this->request->getGet('project_id');
+        if (!$projectId) {
+            return $this->response->setJSON(['success' => false, 'message' => 'Project ID required']);
+        }
+
+        $scopes = $this->projectModel->getProjectScopes($projectId);
+        
+        return $this->response->setJSON([
+            'success' => true,
+            'scopes' => $scopes
+        ]);
+    }
+
+    // AJAX: Create new scope
+    public function create_scope()
+    {
+        $userData = session('userdata');
+        $userId = $userData['id'] ?? null;
+        if (!$userId) {
+            return $this->response->setJSON(['success' => false, 'message' => 'Unauthorized']);
+        }
+
+        $projectId = $this->request->getPost('project_id');
+        $name = $this->request->getPost('name');
+        $description = $this->request->getPost('description');
+
+        if (!$projectId || !$name) {
+            return $this->response->setJSON(['success' => false, 'message' => 'Project ID and scope name are required']);
+        }
+
+        $scopeId = $this->projectModel->createScope($projectId, $name, $description);
+        
+        if ($scopeId) {
+            return $this->response->setJSON([
+                'success' => true,
+                'message' => 'Scope created successfully',
+                'scope_id' => $scopeId
+            ]);
+        } else {
+            return $this->response->setJSON(['success' => false, 'message' => 'Failed to create scope']);
+        }
+    }
+
+    // AJAX: Update scope
+    public function update_scope()
+    {
+        $userData = session('userdata');
+        $userId = $userData['id'] ?? null;
+        if (!$userId) {
+            return $this->response->setJSON(['success' => false, 'message' => 'Unauthorized']);
+        }
+
+        $scopeId = $this->request->getPost('scope_id');
+        $name = $this->request->getPost('name');
+        $description = $this->request->getPost('description');
+
+        if (!$scopeId || !$name) {
+            return $this->response->setJSON(['success' => false, 'message' => 'Scope ID and name are required']);
+        }
+
+        $result = $this->projectModel->updateScope($scopeId, $name, $description);
+        
+        if ($result) {
+            return $this->response->setJSON([
+                'success' => true,
+                'message' => 'Scope updated successfully'
+            ]);
+        } else {
+            return $this->response->setJSON(['success' => false, 'message' => 'Failed to update scope']);
+        }
+    }
+
+    // AJAX: Delete scope
+    public function delete_scope()
+    {
+        $userData = session('userdata');
+        $userId = $userData['id'] ?? null;
+        if (!$userId) {
+            return $this->response->setJSON(['success' => false, 'message' => 'Unauthorized']);
+        }
+
+        $scopeId = $this->request->getPost('scope_id');
+
+        if (!$scopeId) {
+            return $this->response->setJSON(['success' => false, 'message' => 'Scope ID is required']);
+        }
+
+        $result = $this->projectModel->deleteScope($scopeId);
+        
+        if ($result) {
+            return $this->response->setJSON([
+                'success' => true,
+                'message' => 'Scope deleted successfully'
+            ]);
+        } else {
+            return $this->response->setJSON(['success' => false, 'message' => 'Failed to delete scope']);
+        }
+    }
+
+    // AJAX: Update template order within scope
+    public function update_template_order()
+    {
+        $userData = session('userdata');
+        $userId = $userData['id'] ?? null;
+        if (!$userId) {
+            return $this->response->setJSON(['success' => false, 'message' => 'Unauthorized']);
+        }
+
+        $templateOrderJson = $this->request->getPost('template_order');
+        $scopeId = $this->request->getPost('scope_id');
+        $projectId = $this->request->getPost('project_id');
+
+        if (!$templateOrderJson || !$scopeId) {
+            return $this->response->setJSON(['success' => false, 'message' => 'Invalid template order data']);
+        }
+
+        // Parse JSON if it's a string
+        $templateOrder = is_string($templateOrderJson) ? json_decode($templateOrderJson, true) : $templateOrderJson;
+        
+        if (!is_array($templateOrder)) {
+            return $this->response->setJSON(['success' => false, 'message' => 'Invalid template order format']);
+        }
+
+        $result = $this->projectModel->updateTemplateOrder($templateOrder, $scopeId);
+        
+        if ($result) {
+            return $this->response->setJSON([
+                'success' => true,
+                'message' => 'Template order updated successfully'
+            ]);
+        } else {
+            return $this->response->setJSON(['success' => false, 'message' => 'Failed to update template order']);
+        }
+    }
+
+    // AJAX: Add template to scope
+    public function add_template_to_scope()
+    {
+        $userData = session('userdata');
+        $userId = $userData['id'] ?? null;
+        if (!$userId) {
+            return $this->response->setJSON(['success' => false, 'message' => 'Unauthorized']);
+        }
+
+        $scopeId = $this->request->getPost('scope_id');
+        $templateIds = $this->request->getPost('template_ids');
+        $projectId = $this->request->getPost('project_id');
+
+        if (!is_array($templateIds)) {
+            return $this->response->setJSON(['success' => false, 'message' => 'Template IDs must be an array']);
+        }
+
+        // Handle both adding to scope (scopeId provided) and removing from scope (scopeId is null)
+        $result = $this->projectModel->addTemplatesToScope($scopeId, $templateIds);
+        
+        if ($result) {
+            $message = $scopeId ? 'Templates added to scope successfully' : 'Templates removed from scope successfully';
+            return $this->response->setJSON([
+                'success' => true,
+                'message' => $message
+            ]);
+        } else {
+            $message = $scopeId ? 'Failed to add templates to scope' : 'Failed to remove templates from scope';
+            return $this->response->setJSON(['success' => false, 'message' => $message]);
+        }
+    }
+
+    // AJAX: Add custom templates to scope
+    public function add_custom_template_to_scope()
+    {
+        $userData = session('userdata');
+        $userId = $userData['id'] ?? null;
+        if (!$userId) {
+            return $this->response->setJSON(['success' => false, 'message' => 'Unauthorized']);
+        }
+
+        $scopeId = $this->request->getPost('scope_id');
+        $projectId = $this->request->getPost('project_id');
+        $componentsJson = $this->request->getPost('components');
+
+        if (!$scopeId || !$projectId || !$componentsJson) {
+            return $this->response->setJSON(['success' => false, 'message' => 'Missing required parameters']);
+        }
+
+        $components = json_decode($componentsJson, true);
+        if (!is_array($components) || empty($components)) {
+            return $this->response->setJSON(['success' => false, 'message' => 'No components provided']);
+        }
+
+        try {
+            $createdTemplates = [];
+            
+            // Get the next order number for this scope
+            $builder = $this->db->table('task_templates');
+            $builder->selectMax('component_order');
+            $builder->where('scope_id', $scopeId);
+            $builder->where('is_delete', 0);
+            $result = $builder->get()->getRowArray();
+            $nextOrder = ($result['component_order'] ?? 0) + 1;
+
+            foreach ($components as $component) {
+                $templateName = $component['name'] ?? '';
+                $templateType = $component['type'] ?? 'custom';
+
+                if (empty($templateName)) {
+                    continue;
+                }
+
+                // Create basic task template structure based on the template name
+                $fields = $this->generateTemplateFields($templateName, $templateType);
+
+                $templateData = [
+                    'project_id' => $projectId,
+                    'scope_id' => $scopeId,
+                    'name' => $templateName,
+                    'fields' => json_encode($fields),
+                    'component_order' => $nextOrder++,
+                    'is_active' => 1,
+                    'is_delete' => 0,
+                    'date_created' => date('Y-m-d H:i:s'),
+                    'date_modified' => date('Y-m-d H:i:s')
+                ];
+
+                $this->db->table('task_templates')->insert($templateData);
+                $templateId = $this->db->insertID();
+                
+                if ($templateId) {
+                    $createdTemplates[] = [
+                        'id' => $templateId,
+                        'name' => $templateName,
+                        'type' => $templateType
+                    ];
+                }
+            }
+
+            if (!empty($createdTemplates)) {
+                return $this->response->setJSON([
+                    'success' => true,
+                    'message' => 'Components added successfully',
+                    'templates' => $createdTemplates
+                ]);
+            } else {
+                return $this->response->setJSON(['success' => false, 'message' => 'No components were created']);
+            }
+
+        } catch (\Exception $e) {
+            log_message('error', 'Error adding custom templates to scope: ' . $e->getMessage());
+            return $this->response->setJSON(['success' => false, 'message' => 'Failed to add components']);
+        }
+    }
+
+    // Generate template fields based on template name and type
+    private function generateTemplateFields($templateName, $templateType)
+    {
+        // Default fields that all templates will have
+        $defaultFields = [
+            [
+                'name' => 'Task',
+                'type' => 'text',
+                'required' => true,
+                'description' => 'Task description'
+            ],
+            [
+                'name' => 'Status',
+                'type' => 'select',
+                'required' => true,
+                'options' => ['Not Started', 'In Progress', 'Completed', 'On Hold'],
+                'description' => 'Current status of the task'
+            ],
+            [
+                'name' => 'Priority',
+                'type' => 'select',
+                'required' => false,
+                'options' => ['Low', 'Medium', 'High', 'Critical'],
+                'description' => 'Task priority level'
+            ],
+            [
+                'name' => 'Assigned To',
+                'type' => 'text',
+                'required' => false,
+                'description' => 'Person responsible for the task'
+            ],
+            [
+                'name' => 'Due Date',
+                'type' => 'date',
+                'required' => false,
+                'description' => 'Expected completion date'
+            ],
+            [
+                'name' => 'Progress',
+                'type' => 'percentage',
+                'required' => false,
+                'description' => 'Completion percentage'
+            ]
+        ];
+
+        // Add specific fields based on template type
+        $specificFields = [];
+        
+        $lowerName = strtolower($templateName);
+        
+        if (strpos($lowerName, 'requirement') !== false || strpos($lowerName, 'specification') !== false) {
+            $specificFields = [
+                [
+                    'name' => 'Requirement ID',
+                    'type' => 'text',
+                    'required' => true,
+                    'description' => 'Unique requirement identifier'
+                ],
+                [
+                    'name' => 'Category',
+                    'type' => 'select',
+                    'required' => false,
+                    'options' => ['Functional', 'Non-Functional', 'Business', 'Technical'],
+                    'description' => 'Requirement category'
+                ],
+                [
+                    'name' => 'Complexity',
+                    'type' => 'select',
+                    'required' => false,
+                    'options' => ['Simple', 'Medium', 'Complex'],
+                    'description' => 'Implementation complexity'
+                ]
+            ];
+        } elseif (strpos($lowerName, 'testing') !== false || strpos($lowerName, 'qa') !== false) {
+            $specificFields = [
+                [
+                    'name' => 'Test Case ID',
+                    'type' => 'text',
+                    'required' => true,
+                    'description' => 'Unique test case identifier'
+                ],
+                [
+                    'name' => 'Test Type',
+                    'type' => 'select',
+                    'required' => false,
+                    'options' => ['Unit', 'Integration', 'System', 'Acceptance', 'Performance', 'Security'],
+                    'description' => 'Type of testing'
+                ],
+                [
+                    'name' => 'Test Result',
+                    'type' => 'select',
+                    'required' => false,
+                    'options' => ['Pass', 'Fail', 'Blocked', 'Not Tested'],
+                    'description' => 'Test execution result'
+                ]
+            ];
+        } elseif (strpos($lowerName, 'development') !== false || strpos($lowerName, 'coding') !== false) {
+            $specificFields = [
+                [
+                    'name' => 'Feature/Module',
+                    'type' => 'text',
+                    'required' => false,
+                    'description' => 'Feature or module being developed'
+                ],
+                [
+                    'name' => 'Technology',
+                    'type' => 'text',
+                    'required' => false,
+                    'description' => 'Technology/framework used'
+                ],
+                [
+                    'name' => 'Code Review Status',
+                    'type' => 'select',
+                    'required' => false,
+                    'options' => ['Pending', 'In Review', 'Approved', 'Needs Changes'],
+                    'description' => 'Code review status'
+                ]
+            ];
+        } elseif (strpos($lowerName, 'design') !== false || strpos($lowerName, 'documentation') !== false) {
+            $specificFields = [
+                [
+                    'name' => 'Document Type',
+                    'type' => 'select',
+                    'required' => false,
+                    'options' => ['Technical Spec', 'User Guide', 'API Doc', 'Design Doc', 'Architecture'],
+                    'description' => 'Type of document'
+                ],
+                [
+                    'name' => 'Review Status',
+                    'type' => 'select',
+                    'required' => false,
+                    'options' => ['Draft', 'Under Review', 'Approved', 'Published'],
+                    'description' => 'Document review status'
+                ]
+            ];
+        }
+
+        // Merge default and specific fields
+        return array_merge($defaultFields, $specificFields);
+    }
+
+    // AJAX: Update component/template name
+    public function update_component_name()
+    {
+        $userData = session('userdata');
+        $userId = $userData['id'] ?? null;
+        if (!$userId) {
+            return $this->response->setJSON(['success' => false, 'message' => 'Unauthorized']);
+        }
+
+        $templateId = $this->request->getPost('template_id');
+        $name = $this->request->getPost('name');
+        $projectId = $this->request->getPost('project_id');
+
+        if (!$templateId || !$name || !$projectId) {
+            return $this->response->setJSON(['success' => false, 'message' => 'Missing required parameters']);
+        }
+
+        try {
+            $result = $this->db->table('task_templates')
+                ->where('id', $templateId)
+                ->where('project_id', $projectId)
+                ->update([
+                    'name' => trim($name),
+                    'date_modified' => date('Y-m-d H:i:s')
+                ]);
+            
+            if ($result) {
+                return $this->response->setJSON([
+                    'success' => true,
+                    'message' => 'Component name updated successfully'
+                ]);
+            } else {
+                return $this->response->setJSON(['success' => false, 'message' => 'Failed to update component name']);
+            }
+
+        } catch (\Exception $e) {
+            log_message('error', 'Error updating component name: ' . $e->getMessage());
+            return $this->response->setJSON(['success' => false, 'message' => 'Failed to update component name']);
+        }
+    }
+
+    // AJAX: Soft delete component (set is_active=0, is_delete=1)
+    public function soft_delete_component()
+    {
+        $userData = session('userdata');
+        $userId = $userData['id'] ?? null;
+        if (!$userId) {
+            return $this->response->setJSON(['success' => false, 'message' => 'Unauthorized']);
+        }
+
+        $templateId = $this->request->getPost('template_id');
+        $projectId = $this->request->getPost('project_id');
+
+        if (!$templateId || !$projectId) {
+            return $this->response->setJSON(['success' => false, 'message' => 'Missing required parameters']);
+        }
+
+        try {
+            $result = $this->db->table('task_templates')
+                ->where('id', $templateId)
+                ->where('project_id', $projectId)
+                ->update([
+                    'is_active' => 0,
+                    'is_delete' => 1,
+                    'date_modified' => date('Y-m-d H:i:s')
+                ]);
+            
+            if ($result) {
+                return $this->response->setJSON([
+                    'success' => true,
+                    'message' => 'Component deleted successfully'
+                ]);
+            } else {
+                return $this->response->setJSON(['success' => false, 'message' => 'Failed to delete component']);
+            }
+
+        } catch (\Exception $e) {
+            log_message('error', 'Error deleting component: ' . $e->getMessage());
+            return $this->response->setJSON(['success' => false, 'message' => 'Failed to delete component']);
+        }
+    }
 }

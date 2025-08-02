@@ -1,7 +1,3 @@
-<a href="javascript:history.back()" class="btn btn-outline-primary d-inline-flex align-items-center" style="gap:0.5rem;">
-    <i class="fas fa-arrow-left"></i>
-    <span>Back</span>
-</a>
 <!-- Project Create Form -->
 <div style="background: linear-gradient(135deg, #f8fafc 0%, #e2e8f0 100%); min-height: 100vh; padding: 2rem; font-family: 'Roboto', sans-serif;">
 
@@ -26,8 +22,9 @@
     <div style="background: white; border-radius: 1.5rem; padding: 3rem; box-shadow: 0 10px 25px rgba(0,0,0,0.1); max-width: 1000px; margin: 0 auto;">
         <form id="projectForm" onsubmit="submitProject(event)">
             <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 2rem; margin-bottom: 2rem;">
-                <!-- Project Name -->
-                <div style="grid-column: 1 / -1;">
+                <!-- Left Column -->
+                <div>
+                    <!-- Project Name -->
                     <label style="display: block; font-weight: 600; color: #2d3748; margin-bottom: 0.5rem; font-size: 1rem;">
                         Project Name *
                     </label>
@@ -38,11 +35,9 @@
                            onfocus="this.style.borderColor='#4299e1'; this.style.background='white'; this.style.boxShadow='0 0 0 3px rgba(66,153,225,0.1)'"
                            onblur="this.style.borderColor='#e2e8f0'; this.style.background='#f8fafc'; this.style.boxShadow='none'"
                            placeholder="Enter project name">
-                </div>
 
-                <!-- Project Code -->
-                <div>
-                    <label style="display: block; font-weight: 600; color: #2d3748; margin-bottom: 0.5rem; font-size: 1rem;">
+                    <!-- Project Code -->
+                    <label style="display: block; font-weight: 600; color: #2d3748; margin-bottom: 0.5rem; font-size: 1rem; margin-top: 2rem;">
                         Project Code
                     </label>
                     <input type="text" name="code" 
@@ -52,51 +47,9 @@
                            onfocus="this.style.borderColor='#4299e1'; this.style.background='white'; this.style.boxShadow='0 0 0 3px rgba(66,153,225,0.1)'"
                            onblur="this.style.borderColor='#e2e8f0'; this.style.background='#f8fafc'; this.style.boxShadow='none'"
                            placeholder="PRJ-2025-001">
-                </div>
 
-                <!-- Start Date -->
-                <div>
-                    <label style="display: block; font-weight: 600; color: #2d3748; margin-bottom: 0.5rem; font-size: 1rem;">
-                        Start Date
-                    </label>
-                    <input type="date" name="start_date" 
-                           style="width: 100%; padding: 1rem 1.25rem; border: 2px solid #e2e8f0; border-radius: 0.75rem; font-size: 1rem; transition: all 0.3s ease; background: #f8fafc;"
-                           onmouseenter="this.style.borderColor='#4299e1'"
-                           onmouseleave="this.style.borderColor='#e2e8f0'"
-                           onfocus="this.style.borderColor='#4299e1'; this.style.background='white'"
-                           onblur="this.style.borderColor='#e2e8f0'; this.style.background='#f8fafc'">
-                </div>
-
-                <!-- Budget -->
-                <div>
-                    <label style="display: block; font-weight: 600; color: #2d3748; margin-bottom: 0.5rem; font-size: 1rem;">
-                        Budget
-                    </label>
-                    <input type="number" name="budget" step="0.01" 
-                           style="width: 100%; padding: 1rem 1.25rem; border: 2px solid #e2e8f0; border-radius: 0.75rem; font-size: 1rem; transition: all 0.3s ease; background: #f8fafc;"
-                           onmouseenter="this.style.borderColor='#4299e1'"
-                           onmouseleave="this.style.borderColor='#e2e8f0'"
-                           onfocus="this.style.borderColor='#4299e1'; this.style.background='white'"
-                           onblur="this.style.borderColor='#e2e8f0'; this.style.background='#f8fafc'"
-                           placeholder="0.00">
-                </div>
-
-                <!-- End Date -->
-                <div>
-                    <label style="display: block; font-weight: 600; color: #2d3748; margin-bottom: 0.5rem; font-size: 1rem;">
-                        End Date
-                    </label>
-                    <input type="date" name="end_date" 
-                           style="width: 100%; padding: 1rem 1.25rem; border: 2px solid #e2e8f0; border-radius: 0.75rem; font-size: 1rem; transition: all 0.3s ease; background: #f8fafc;"
-                           onmouseenter="this.style.borderColor='#4299e1'"
-                           onmouseleave="this.style.borderColor='#e2e8f0'"
-                           onfocus="this.style.borderColor='#4299e1'; this.style.background='white'"
-                           onblur="this.style.borderColor='#e2e8f0'; this.style.background='#f8fafc'">
-                </div>
-
-                <!-- Status -->
-                <div>
-                    <label style="display: block; font-weight: 600; color: #2d3748; margin-bottom: 0.5rem; font-size: 1rem;">
+                    <!-- Status -->
+                    <label style="display: block; font-weight: 600; color: #2d3748; margin-bottom: 0.5rem; font-size: 1rem; margin-top: 2rem;">
                         Status
                     </label>
                     <select name="status" 
@@ -112,18 +65,41 @@
                     </select>
                 </div>
 
-                <!-- Description -->
-                <div style="grid-column: 1 / -1;">
+                <!-- Right Column -->
+                <div>
+                    <!-- Start Date -->
                     <label style="display: block; font-weight: 600; color: #2d3748; margin-bottom: 0.5rem; font-size: 1rem;">
-                        Description
+                        Start Date
                     </label>
-                    <textarea name="description" rows="4" 
-                              style="width: 100%; padding: 1rem 1.25rem; border: 2px solid #e2e8f0; border-radius: 0.75rem; font-size: 1rem; transition: all 0.3s ease; background: #f8fafc; resize: vertical;"
-                              onmouseenter="this.style.borderColor='#4299e1'"
-                              onmouseleave="this.style.borderColor='#e2e8f0'"
-                              onfocus="this.style.borderColor='#4299e1'; this.style.background='white'; this.style.boxShadow='0 0 0 3px rgba(66,153,225,0.1)'"
-                              onblur="this.style.borderColor='#e2e8f0'; this.style.background='#f8fafc'; this.style.boxShadow='none'"
-                              placeholder="Describe the project goals, objectives, and scope"></textarea>
+                    <input type="date" name="start_date" 
+                           style="width: 100%; padding: 1rem 1.25rem; border: 2px solid #e2e8f0; border-radius: 0.75rem; font-size: 1rem; transition: all 0.3s ease; background: #f8fafc;"
+                           onmouseenter="this.style.borderColor='#4299e1'"
+                           onmouseleave="this.style.borderColor='#e2e8f0'"
+                           onfocus="this.style.borderColor='#4299e1'; this.style.background='white'"
+                           onblur="this.style.borderColor='#e2e8f0'; this.style.background='#f8fafc'">
+
+                    <!-- End Date -->
+                    <label style="display: block; font-weight: 600; color: #2d3748; margin-bottom: 0.5rem; font-size: 1rem; margin-top: 2rem;">
+                        End Date
+                    </label>
+                    <input type="date" name="end_date" 
+                           style="width: 100%; padding: 1rem 1.25rem; border: 2px solid #e2e8f0; border-radius: 0.75rem; font-size: 1rem; transition: all 0.3s ease; background: #f8fafc;"
+                           onmouseenter="this.style.borderColor='#4299e1'"
+                           onmouseleave="this.style.borderColor='#e2e8f0'"
+                           onfocus="this.style.borderColor='#4299e1'; this.style.background='white'"
+                           onblur="this.style.borderColor='#e2e8f0'; this.style.background='#f8fafc'">
+
+                    <!-- Client -->
+                    <label style="display: block; font-weight: 600; color: #2d3748; margin-bottom: 0.5rem; font-size: 1rem; margin-top: 2rem;">
+                        Client
+                    </label>
+                    <input type="text" name="client" 
+                           style="width: 100%; padding: 1rem 1.25rem; border: 2px solid #e2e8f0; border-radius: 0.75rem; font-size: 1rem; transition: all 0.3s ease; background: #f8fafc;"
+                           onmouseenter="this.style.borderColor='#4299e1'"
+                           onmouseleave="this.style.borderColor='#e2e8f0'"
+                           onfocus="this.style.borderColor='#4299e1'; this.style.background='white'; this.style.boxShadow='0 0 0 3px rgba(66,153,225,0.1)'"
+                           onblur="this.style.borderColor='#e2e8f0'; this.style.background='#f8fafc'; this.style.boxShadow='none'"
+                           placeholder="Enter client name">
                 </div>
             </div>
 

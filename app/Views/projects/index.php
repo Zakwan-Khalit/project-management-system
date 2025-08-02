@@ -1,7 +1,3 @@
-<a href="javascript:history.back()" class="btn btn-outline-primary d-inline-flex align-items-center" style="gap:0.5rem;">
-    <i class="fas fa-arrow-left"></i>
-    <span>Back</span>
-</a>
 <!-- Projects Header -->
 <div style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white; border-radius: 1.5rem; padding: 2rem; margin-bottom: 2rem; box-shadow: 0 20px 60px rgba(102,126,234,0.2); position: relative; overflow: hidden;">
     <!-- Decorative Elements -->
@@ -14,18 +10,14 @@
                 <i class="fas fa-project-diagram" style="margin-right: 1rem; color: rgba(255,255,255,0.9);"></i>
                 My Projects
             </h1>
-            <p style="color: rgba(255,255,255,0.95); font-size: 1.1rem; margin-bottom: 0; font-weight: 400;">
-                Manage and track your projects efficiently
-            </p>
         </div>
         <div style="display: flex; gap: 1rem;">
+            <?php $userData = session('userdata'); $roleId = $userData['role_id'] ?? null; if (in_array($roleId, [1,2,3,4])): ?>
             <button onclick="createNewProject()" style="background: rgba(255,255,255,0.2); border: 2px solid rgba(255,255,255,0.3); color: white; border-radius: 1rem; padding: 0.75rem 1.5rem; font-weight: 600; font-size: 1rem; cursor: pointer; transition: all 0.3s ease; backdrop-filter: blur(10px);" onmouseover="this.style.background='rgba(255,255,255,0.3)'; this.style.transform='translateY(-2px)'; this.style.boxShadow='0 10px 25px rgba(0,0,0,0.2)';" onmouseout="this.style.background='rgba(255,255,255,0.2)'; this.style.transform='translateY(0)'; this.style.boxShadow='none';">
                 <i class="fas fa-plus" style="margin-right: 0.5rem;"></i>
                 New Project
             </button>
-            <button onclick="toggleView()" id="viewToggleBtn" style="background: rgba(255,255,255,0.15); border: 2px solid rgba(255,255,255,0.3); color: white; border-radius: 1rem; padding: 0.75rem; font-weight: 600; cursor: pointer; transition: all 0.3s ease; backdrop-filter: blur(10px);" onmouseover="this.style.background='rgba(255,255,255,0.25)';" onmouseout="this.style.background='rgba(255,255,255,0.15)';">
-                <i class="fas fa-th" id="viewToggleIcon"></i>
-            </button>
+            <?php endif; ?>
         </div>
     </div>
 </div>
@@ -175,10 +167,12 @@
             </div>
             <h4 style="color: #6b7280; font-weight: 600; margin-bottom: 0.5rem; font-family: 'Poppins', sans-serif;">No Projects Found</h4>
             <p style="color: #9ca3af; font-size: 0.95rem; margin-bottom: 1.5rem;">Start your journey by creating your first project or adjust your search filters.</p>
+            <?php if (in_array($roleId, [1,2,3,4])): ?>
             <button onclick="createNewProject()" style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white; border: none; border-radius: 12px; padding: 0.7rem 1.4rem; font-weight: 600; font-size: 0.9rem; cursor: pointer; transition: all 0.3s ease; box-shadow: 0 4px 12px rgba(102, 126, 234, 0.3);" onmouseover="this.style.transform='translateY(-2px)'; this.style.boxShadow='0 6px 18px rgba(102, 126, 234, 0.4)';" onmouseout="this.style.transform='translateY(0)'; this.style.boxShadow='0 4px 12px rgba(102, 126, 234, 0.3)';">
                 <i class="fas fa-plus" style="margin-right: 0.5rem;"></i>
                 Create Your First Project
             </button>
+            <?php endif; ?>
         </div>
     </div>
 </div>
@@ -230,12 +224,6 @@ document.addEventListener('DOMContentLoaded', function() {
 
 function initializePage() {
     console.log('Initializing page...');
-    
-    // Initialize the view toggle button
-    const viewToggleIcon = document.getElementById('viewToggleIcon');
-    if (viewToggleIcon) {
-        viewToggleIcon.className = currentView === 'grid' ? 'fas fa-th' : 'fas fa-th-list';
-    }
     
     // Setup search functionality
     const searchInput = document.getElementById('searchInput');
@@ -779,9 +767,8 @@ function toggleView() {
     
     const gridView = document.getElementById('gridView');
     const tableView = document.getElementById('tableView');
-    const toggleIcon = document.getElementById('viewToggleIcon');
     
-    if (!gridView || !tableView || !toggleIcon) {
+    if (!gridView || !tableView) {
         console.error('Required elements for view toggle not found');
         return;
     }
@@ -790,14 +777,12 @@ function toggleView() {
         currentView = 'table';
         gridView.style.display = 'none';
         tableView.style.display = 'block';
-        toggleIcon.className = 'fas fa-th-list';
         console.log('Switched to table view');
         renderTableView();
     } else {
         currentView = 'grid';
         tableView.style.display = 'none';
         gridView.style.display = 'block';
-        toggleIcon.className = 'fas fa-th';
         console.log('Switched to grid view');
         renderGridView();
     }

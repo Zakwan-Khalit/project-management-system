@@ -374,20 +374,35 @@ CREATE TABLE IF NOT EXISTS `task_headers` (
     `date_modified` TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
--- Task Template Table
-CREATE TABLE IF NOT EXISTS `task_templates` (
+-- Project Scopes Table
+CREATE TABLE IF NOT EXISTS `project_scopes` (
     `id` int(11) NOT NULL AUTO_INCREMENT,
-    `code` varchar(32) NOT NULL,
-    `project_id` int(11),
+    `project_id` int(11) NOT NULL,
     `name` varchar(128) NOT NULL,
     `description` text,
-    `fields` text,
+    `scope_order` int(11) DEFAULT 0,
     `is_active` tinyint(1) DEFAULT 1,
     `is_delete` tinyint(1) DEFAULT 0,
     `date_created` TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
     `date_modified` TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
     PRIMARY KEY (`id`),
-    UNIQUE KEY `code` (`code`),
+    KEY `is_delete` (`is_delete`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+
+-- Task Template Table
+CREATE TABLE IF NOT EXISTS `task_templates` (
+    `id` int(11) NOT NULL AUTO_INCREMENT,
+    `project_id` int(11),
+    `scope_id` int(11),
+    `name` varchar(128) NOT NULL,
+    `description` text,
+    `fields` text,
+    `component_order` int(11) DEFAULT 0,
+    `is_active` tinyint(1) DEFAULT 1,
+    `is_delete` tinyint(1) DEFAULT 0,
+    `date_created` TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    `date_modified` TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+    PRIMARY KEY (`id`),
     KEY `is_delete` (`is_delete`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
@@ -413,8 +428,10 @@ ALTER TABLE `project_members` ADD CONSTRAINT `fk_members_project` FOREIGN KEY (`
 ALTER TABLE `project_members` ADD CONSTRAINT `fk_members_user` FOREIGN KEY (`user_id`) REFERENCES `users` (`id`) ON DELETE CASCADE;
 ALTER TABLE `project_members` ADD CONSTRAINT `fk_members_assigned_by` FOREIGN KEY (`assigned_by`) REFERENCES `users` (`id`) ON DELETE SET NULL;
 ALTER TABLE `project_client` ADD CONSTRAINT `fk_client_project` FOREIGN KEY (`project_id`) REFERENCES `projects` (`id`) ON DELETE CASCADE;
+ALTER TABLE `project_scopes` ADD CONSTRAINT `fk_scope_project` FOREIGN KEY (`project_id`) REFERENCES `projects` (`id`) ON DELETE CASCADE;
 ALTER TABLE `tasks` ADD CONSTRAINT `fk_tasks_project` FOREIGN KEY (`project_id`) REFERENCES `projects` (`id`) ON DELETE CASCADE;
 ALTER TABLE `tasks` ADD CONSTRAINT `fk_tasks_template` FOREIGN KEY (`template_id`) REFERENCES `task_templates` (`id`) ON DELETE SET NULL;
+ALTER TABLE `task_templates` ADD CONSTRAINT `fk_template_scope` FOREIGN KEY (`scope_id`) REFERENCES `project_scopes` (`id`) ON DELETE SET NULL;
 ALTER TABLE `task_status` ADD CONSTRAINT `fk_task_status_task` FOREIGN KEY (`task_id`) REFERENCES `tasks` (`id`) ON DELETE CASCADE;
 ALTER TABLE `task_status` ADD CONSTRAINT `fk_task_status_status` FOREIGN KEY (`status_id`) REFERENCES `status_lookup` (`id`) ON DELETE CASCADE;
 ALTER TABLE `task_status` ADD CONSTRAINT `fk_task_status_changed_by` FOREIGN KEY (`changed_by`) REFERENCES `users` (`id`) ON DELETE SET NULL;

@@ -6,6 +6,40 @@ use CodeIgniter\Model;
 class ProjectModel extends Model
 {
     /**
+     * Get all departments from department_lookup
+     */
+    public function getDepartments()
+    {
+        return $this->db->table('department_lookup')
+            ->select('id, code, name')
+            ->orderBy('name', 'ASC')
+            ->get()->getResultArray();
+    }
+
+    /**
+     * Get all users in a department (by department_lookup.id), excluding users already in the project
+     * Joins user_rel, users, user_profile
+     * @param int $departmentId
+     * @param int|null $projectId
+     * @return array
+     */
+    public function getUsersByDepartment($departmentId, $projectId = null)
+    {
+        $builder = $this->db->table('users u');
+        $builder->select('u.id, up.first_name, up.last_name, u.email');
+        $builder->join('user_rel ur', 'ur.user_id = u.id AND ur.is_active = 1 AND ur.is_delete = 0', 'inner');
+        $builder->join('user_profile up', 'up.user_id = u.id AND up.is_delete = 0', 'left');
+        $builder->where('u.is_active', 1);
+        $builder->where('u.is_delete', 0);
+        $builder->where('ur.department_id', $departmentId);
+        if ($projectId !== null) {
+            $builder->where('u.id NOT IN (SELECT user_id FROM project_members WHERE project_id = ' . (int)$projectId . ' AND is_active = 1 AND is_delete = 0)');
+        }
+        $builder->groupBy('u.id');
+        $builder->orderBy('up.first_name', 'ASC');
+        return $builder->get()->getResultArray();
+    }
+    /**
      * Create a new project and return its ID
      * @param array $data
      * @return int|false New project ID or false on failure
@@ -316,13 +350,16 @@ class ProjectModel extends Model
     {
         $builder = $this->db->table('project_members pm');
         $builder->select('
-            pm.*,
+            pm.user_id,
             u.email,
             up.first_name,
             up.last_name,
+            pl.name as role,
         ');
         $builder->join('users u', 'u.id = pm.user_id AND u.is_delete = 0');
         $builder->join('user_profile up', 'up.user_id = u.id AND up.is_delete = 0', 'left');
+        $builder->join('user_rel ur', 'ur.user_id = u.id AND ur.is_active = 1 AND ur.is_delete = 0', 'left');
+        $builder->join('position_lookup pl', 'pl.id = ur.position_id AND pl.is_delete = 0', 'left');
         $builder->where('pm.project_id', $projectId);
         $builder->where('pm.is_active', 1);
         $builder->where('pm.is_delete', 0);
@@ -632,7 +669,7 @@ class ProjectModel extends Model
         if (!$taskId) return false;
         // Soft delete: set is_delete=1 if column exists, else hard delete
         if ($this->db->getFieldData('tasks', 'is_delete')) {
-            return $this->db->table('tasks')->where('id', $taskId)->update(['is_delete' => 1]);
+            return $this->db->table('tasks')->where('id', $taskId)->update(['is_delete' => 1, 'is_active' => 0]);
         } else {
             return $this->db->table('tasks')->where('id', $taskId)->delete();
         }
@@ -798,5 +835,205 @@ class ProjectModel extends Model
             if ($row) $headers[] = $row;
         }
         return $headers;
+    }
+
+    public function addProjectMembersBulk($projectId, $userIds, $departmentId = null, $role = 'member', $assignedBy = null)
+    {
+        $added = [];
+        $failed = [];
+        if (!is_array($userIds) || empty($userIds)) return ['success' => false, 'added' => [], 'failed' => []];
+        foreach ($userIds as $userId) {
+            // Optionally, check department match here if needed
+            $result = $this->addProjectMember($projectId, $userId, $role, $assignedBy);
+            if ($result) {
+                $added[] = $userId;
+            } else {
+                $failed[] = $userId;
+            }
+        }
+        return ['success' => count($added) > 0, 'added' => $added, 'failed' => $failed];
+    }
+
+    // Scope Management Methods
+    
+    /**
+     * Get all scopes for a project with their templates
+     */
+    public function getProjectScopes($projectId)
+    {
+        $builder = $this->db->table('project_scopes ps');
+        $builder->select('ps.*, COUNT(tt.id) as template_count');
+        $builder->join('task_templates tt', 'tt.scope_id = ps.id AND tt.is_delete = 0', 'left');
+        $builder->where('ps.project_id', $projectId);
+        $builder->where('ps.is_delete', 0);
+        $builder->where('ps.is_active', 1);
+        $builder->groupBy('ps.id');
+        $builder->orderBy('ps.scope_order', 'ASC');
+        $scopes = $builder->get()->getResultArray();
+        
+        // Get templates for each scope
+        foreach ($scopes as &$scope) {
+            $scope['templates'] = $this->getScopeTemplates($scope['id']);
+        }
+        
+        return $scopes;
+    }
+
+    /**
+     * Get templates for a specific scope
+     */
+    public function getScopeTemplates($scopeId)
+    {
+        $builder = $this->db->table('task_templates');
+        $builder->where('scope_id', $scopeId);
+        $builder->where('is_delete', 0);
+        $builder->where('is_active', 1);
+        $builder->orderBy('component_order', 'ASC');
+        return $builder->get()->getResultArray();
+    }
+
+    /**
+     * Create a new scope
+     */
+    public function createScope($projectId, $name, $description = null)
+    {
+        // Get the next order number
+        $builder = $this->db->table('project_scopes');
+        $builder->selectMax('scope_order');
+        $builder->where('project_id', $projectId);
+        $builder->where('is_delete', 0);
+        $result = $builder->get()->getRowArray();
+        $nextOrder = ($result['scope_order'] ?? 0) + 1;
+
+        $data = [
+            'project_id' => $projectId,
+            'name' => $name,
+            'description' => $description,
+            'scope_order' => $nextOrder,
+            'is_active' => 1,
+            'is_delete' => 0,
+            'date_created' => date('Y-m-d H:i:s'),
+            'date_modified' => date('Y-m-d H:i:s')
+        ];
+
+        if ($this->db->table('project_scopes')->insert($data)) {
+            return $this->db->insertID();
+        }
+        return false;
+    }
+
+    /**
+     * Update a scope
+     */
+    public function updateScope($scopeId, $name, $description = null)
+    {
+        $data = [
+            'name' => $name,
+            'description' => $description,
+            'date_modified' => date('Y-m-d H:i:s')
+        ];
+
+        return $this->db->table('project_scopes')
+            ->where('id', $scopeId)
+            ->where('is_delete', 0)
+            ->update($data);
+    }
+
+    /**
+     * Delete a scope (soft delete)
+     */
+    public function deleteScope($scopeId)
+    {
+        // First, remove templates from this scope
+        $this->db->table('task_templates')
+            ->where('scope_id', $scopeId)
+            ->update(['scope_id' => null, 'date_modified' => date('Y-m-d H:i:s')]);
+
+        // Then soft delete the scope
+        return $this->db->table('project_scopes')
+            ->where('id', $scopeId)
+            ->update([
+                'is_delete' => 1,
+                'is_active' => 0,
+                'date_modified' => date('Y-m-d H:i:s')
+            ]);
+    }
+
+    /**
+     * Update scope order
+     */
+    public function updateScopeOrder($scopeOrder)
+    {
+        if (!is_array($scopeOrder)) return false;
+        
+        foreach ($scopeOrder as $index => $scopeId) {
+            $this->db->table('project_scopes')
+                ->where('id', $scopeId)
+                ->update([
+                    'scope_order' => $index + 1,
+                    'date_modified' => date('Y-m-d H:i:s')
+                ]);
+        }
+        return true;
+    }
+
+    /**
+     * Update template order within a scope
+     */
+    public function updateTemplateOrder($templateOrder, $scopeId)
+    {
+        if (!is_array($templateOrder)) return false;
+        
+        foreach ($templateOrder as $index => $templateId) {
+            $this->db->table('task_templates')
+                ->where('id', $templateId)
+                ->where('scope_id', $scopeId)
+                ->update([
+                    'component_order' => $index + 1,
+                    'date_modified' => date('Y-m-d H:i:s')
+                ]);
+        }
+        return true;
+    }
+
+    /**
+     * Add templates to a scope
+     */
+    public function addTemplatesToScope($scopeId, $templateIds)
+    {
+        if (!is_array($templateIds)) return false;
+        
+        // Get the next order number for this scope
+        $builder = $this->db->table('task_templates');
+        $builder->selectMax('component_order');
+        $builder->where('scope_id', $scopeId);
+        $builder->where('is_delete', 0);
+        $result = $builder->get()->getRowArray();
+        $nextOrder = ($result['component_order'] ?? 0) + 1;
+
+        foreach ($templateIds as $templateId) {
+            $this->db->table('task_templates')
+                ->where('id', $templateId)
+                ->update([
+                    'scope_id' => $scopeId,
+                    'component_order' => $nextOrder++,
+                    'date_modified' => date('Y-m-d H:i:s')
+                ]);
+        }
+        return true;
+    }
+
+    /**
+     * Get available templates (not assigned to any scope) for a project
+     */
+    public function getAvailableTemplates($projectId)
+    {
+        $builder = $this->db->table('task_templates');
+        $builder->where('project_id', $projectId);
+        $builder->where('scope_id IS NULL');
+        $builder->where('is_delete', 0);
+        $builder->where('is_active', 1);
+        $builder->orderBy('name', 'ASC');
+        return $builder->get()->getResultArray();
     }
 }

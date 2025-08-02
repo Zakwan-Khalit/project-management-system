@@ -1,8 +1,3 @@
-<a href="javascript:history.back()" class="btn btn-outline-primary d-inline-flex align-items-center" style="gap:0.5rem;">
-    <i class="fas fa-arrow-left"></i>
-    <span>Back</span>
-</a>
-
 <!-- Modern Project List View -->
 <div style="background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%); min-height: 100vh; padding: 2rem; font-family: 'Roboto', sans-serif;">
     <div style="max-width: 1200px; margin: 0 auto;">

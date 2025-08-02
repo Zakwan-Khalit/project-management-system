@@ -34,31 +34,24 @@ INSERT INTO `priority_lookup` (`type`, `code`, `name`, `description`, `color`, `
 
 -- Insert department lookup data
 INSERT INTO `department_lookup` (`code`, `name`, `description`) VALUES
-('IT', 'Information Technology', 'Information Technology Department'),
-('HR', 'Human Resources', 'Human Resources Department'),
-('FIN', 'Finance', 'Finance Department'),
-('MKT', 'Marketing', 'Marketing Department'),
-('OPS', 'Operations', 'Operations Department'),
-('DEV', 'Development', 'Software Development Department'),
-('QA', 'Quality Assurance', 'Quality Assurance Department'),
-('PM', 'Project Management', 'Project Management Office');
+('PMO', 'Project Management Office', 'Project Management Office Department'),
+('USB', 'Usability', 'Usability Department'),
+('SWE', 'Software Engineering', 'Software Engineering Department'),
+('INF', 'Infrastructure', 'Infrastructure Department'),
+('DATA', 'Data', 'Data Department'),
+('FIN', 'Finance', 'Finance Department');
 
 -- Insert position lookup data
 INSERT INTO `position_lookup` (`code`, `name`, `description`, `level`) VALUES
-('CEO', 'Chief Executive Officer', 'Chief Executive Officer', 10),
-('CTO', 'Chief Technology Officer', 'Chief Technology Officer', 9),
-('VP_ENG', 'VP Engineering', 'Vice President of Engineering', 8),
-('DIR_DEV', 'Director of Development', 'Director of Development', 7),
-('SR_PM', 'Senior Project Manager', 'Senior Project Manager', 6),
-('PM', 'Project Manager', 'Project Manager', 5),
-('JR_PM', 'Junior Project Manager', 'Junior Project Manager', 4),
-('SR_DEV', 'Senior Developer', 'Senior Software Developer', 6),
+('PM', 'Project Manager', 'Project Manager', 6),
+('PE', 'Project Executive', 'Project Executive', 7),
+('SA', 'System Analyst', 'System Analyst', 5),
+('FE', 'Functional Engineer', 'Functional Engineer', 4),
 ('DEV', 'Developer', 'Software Developer', 4),
-('JR_DEV', 'Junior Developer', 'Junior Software Developer', 3),
-('SR_ANALYST', 'Senior System Analyst', 'Senior System Analyst', 5),
-('ANALYST', 'System Analyst', 'System Analyst', 4),
-('QA_LEAD', 'QA Lead', 'Quality Assurance Lead', 5),
-('QA_ENG', 'QA Engineer', 'Quality Assurance Engineer', 4);
+('SE', 'System Engineer', 'System Engineer', 5),
+('DBA', 'Database Administrator', 'Database Administrator', 5),
+('DA', 'Data Analyst', 'Data Analyst', 4),
+('FIN', 'Finance', 'Finance Specialist', 4);
 
 -- Insert user role lookup data
 INSERT INTO `user_role_lookup` (`code`, `name`, `description`, `permissions`, `level`) VALUES
@@ -71,15 +64,18 @@ INSERT INTO `user_role_lookup` (`code`, `name`, `description`, `permissions`, `l
 
 -- Insert default superadmin user (password: admin123)
 INSERT INTO `users` (`email`, `password`, `is_active`, `email_verified_at`) VALUES
-('admin@projectmanagement.local', '$2y$10$52N2nJ9b3o/bhozS/staJuACX6T4sKFtp8UPdLw.JqDF8E.Yb.cza', 1, NOW());
+('admin@projectmanagement.local', '$2y$10$52N2nJ9b3o/bhozS/staJuACX6T4sKFtp8UPdLw.JqDF8E.Yb.cza', 1, NOW()),
+('analyst@zanko.com', '$2y$10$52N2nJ9b3o/bhozS/staJuACX6T4sKFtp8UPdLw.JqDF8E.Yb.cza', 1, NOW());
 
 -- Insert user profile for admin
 INSERT INTO `user_profile` (`user_id`, `first_name`, `last_name`, `phone`, `bio`, `timezone`) VALUES
-(1, 'Super', 'Admin', '+1234567890', 'System Administrator with full access', 'America/New_York');
+(1, 'Super', 'Admin', '+1234567890', 'System Administrator with full access', 'America/New_York'),
+(2, 'Natasha', 'Nazrin', '+1234567891', 'System Analyst specializing in requirements analysis', 'America/New_York');
 
--- Assign superadmin role to the user
+-- Assign superadmin role to the admin user
 INSERT INTO `user_role` (`user_id`, `role_id`, `assigned_by`) VALUES
-(1, 1, 1);
+(1, 1, 1),
+(2, 5, 1);
 
 -- Insert sample project
 INSERT INTO `projects` (`name`, `code`, `description`, `budget`, `start_date`, `end_date`) VALUES
@@ -95,17 +91,24 @@ INSERT INTO `project_priority` (`project_id`, `priority_id`, `changed_by`, `note
 
 -- Add admin to the sample project as manager
 INSERT INTO `project_members` (`project_id`, `user_id`, `role`, `assigned_by`) VALUES
-(1, 1, 'manager', 1);
+(1, 1, 'manager', 1),
+(1, 2, 'analyst', 1);
 
 -- Add project client information
 INSERT INTO `project_client` (`project_id`, `client_name`, `client_email`, `client_phone`, `contact_person`, `contract_value`) VALUES
 (1, 'Tech Solutions Inc.', 'contact@techsolutions.com', '+1-555-123-4567', 'John Smith', 50000.00);
 
--- Insert task templates with header IDs (see task_headers table for correct IDs)
-INSERT INTO `task_templates` (`id`, `code`, `project_id`, `name`, `description`, `fields`) VALUES
-(1, 'brs', '1', 'Business Requirement Specification', 'BRS Template', '[1,2,3,4,5,6,7,8,9,10,11,12,13]'),
-(2, 'uat', '1', 'User Acceptance Testing', 'UAT Template', '[1,2,3,4,5,6,7,8,9,10,11,12,13]'),
-(3, 'fat', '1', 'Factory Acceptance Testing', 'FAT Template', '[1,2,3,4,5,6,7,8,9,10,11,12,13]');
+-- Insert project scopes
+INSERT INTO `project_scopes` (`id`, `project_id`, `name`, `description`, `scope_order`) VALUES
+(1, 1, 'System Analysis', 'Business requirement analysis and system design', 1),
+(2, 1, 'Quality Assurance', 'Testing and quality assurance activities', 2),
+(3, 1, 'Development', 'Software development and implementation', 3);
+
+-- Insert task templates with scopes
+INSERT INTO `task_templates` (`id`, `project_id`, `scope_id`, `name`, `description`, `fields`, `component_order`) VALUES
+(1, 1, 1, 'Business Requirement Specification', 'BRS Template', '[1,2,3,4,5,6,7,8,9,10,11,12,13]', 1),
+(2, 1, 2, 'User Acceptance Testing', 'UAT Template', '[1,2,3,4,5,6,7,8,9,10,11,12,13]', 1),
+(3, 1, 2, 'Factory Acceptance Testing', 'FAT Template', '[1,2,3,4,5,6,7,8,9,10,11,12,13]', 2);
 
 INSERT INTO `tasks` (`project_id`, `template_id`, `data`, `is_active`, `is_delete`, `task_order`, `date_created`, `date_modified`) VALUES
  (1, 2, '{"1":"Login","2":"Ali","3":"Frontend Developer","4":"UI needs improvement","5":"Login Button","6":"","7":"Ali","8":"in_progress","9":60,"10":"UI needs improvement","11":"2025-01-02","12":"2025-01-05","13":"2025-01-05"}', 1, 0, 1, NOW(), NOW()),
