@@ -12,8 +12,7 @@ class TaskCommentModel extends Model
         $builder->select('
             tc.*,
             u.email,
-            up.first_name,
-            up.last_name,
+            up.full_name,
         ');
         $builder->join('users u', 'u.id = tc.user_id AND u.is_delete = 0', 'left');
         $builder->join('user_profile up', 'up.user_id = u.id AND up.is_delete = 0', 'left');
@@ -79,14 +78,14 @@ class TaskCommentModel extends Model
 
     private function isAdmin($userId)
     {
-        $builder = $this->db->table('user_role ur');
-        $builder->join('user_role_lookup url', 'url.id = ur.role_id');
+        $builder = $this->db->table('user_rel ur');
+        $builder->join('position_lookup pl', 'pl.id = ur.position_id');
         $builder->where('ur.user_id', $userId);
         $builder->where('ur.is_active', 1);
         $builder->where('ur.is_delete', 0);
         $builder->groupStart();
-        $builder->where('url.code', 'admin');
-        $builder->orWhere('url.code', 'superadmin');
+        $builder->where('pl.code', 'SA'); // Super Admin
+        $builder->orWhere('pl.code', 'PM'); // Project Manager  
         $builder->groupEnd();
         return $builder->countAllResults() > 0;
     }

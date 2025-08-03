@@ -1,0 +1,381 @@
+<!-- Events & Schedule Dashboard -->
+<div class="container-fluid">
+    <!-- Error Display -->
+    <?php if (isset($error_message)): ?>
+        <div class="alert alert-danger">
+            <i class="fas fa-exclamation-triangle me-2"></i>
+            <?= esc($error_message) ?>
+        </div>
+    <?php endif; ?>
+
+    <!-- Success/Error Messages -->
+    <?php if (session()->getFlashdata('success')): ?>
+        <div class="alert alert-success alert-dismissible fade show">
+            <i class="fas fa-check-circle me-2"></i>
+            <?= session()->getFlashdata('success') ?>
+            <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+        </div>
+    <?php endif; ?>
+
+    <?php if (session()->getFlashdata('error')): ?>
+        <div class="alert alert-danger alert-dismissible fade show">
+            <i class="fas fa-exclamation-triangle me-2"></i>
+            <?= session()->getFlashdata('error') ?>
+            <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+        </div>
+    <?php endif; ?>
+
+    <!-- Page Header -->
+    <div class="row mb-4">
+        <div class="col-12">
+            <!-- Breadcrumbs -->
+            <nav aria-label="breadcrumb" style="margin-bottom: 1.5rem;">
+                <ol style="display: flex; list-style: none; padding: 1rem 1.25rem; margin: 0; background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); border-radius: 0.75rem; box-shadow: 0 4px 15px rgba(102, 126, 234, 0.2); border: none;">
+                    <li style="color: #f7fafc; font-weight: 600; font-size: 0.95rem; display: flex; align-items: center; padding: 0.25rem 0.5rem; background: rgba(255,255,255,0.1); border-radius: 0.375rem; backdrop-filter: blur(10px);">
+                        <i class="fas fa-calendar-alt" style="margin-right: 0.5rem; font-size: 0.9rem; opacity: 0.9;"></i>
+                        Events & Schedule
+                    </li>
+                </ol>
+            </nav>
+            
+            <!-- Modern Header -->
+            <div style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white; border-radius: 1.5rem; padding: 2rem; margin-bottom: 2rem; box-shadow: 0 20px 60px rgba(102,126,234,0.2); position: relative; overflow: hidden;">
+                <!-- Decorative Elements -->
+                <div style="position: absolute; top: -50px; right: -50px; width: 200px; height: 200px; background: rgba(255,255,255,0.1); border-radius: 50%; opacity: 0.3;"></div>
+                <div style="position: absolute; bottom: -30px; left: -30px; width: 120px; height: 120px; background: rgba(255,255,255,0.05); border-radius: 50%;"></div>
+                
+                <div style="display: flex; justify-content: space-between; align-items: center; position: relative; z-index: 2;">
+                    <div>
+                        <h1 style="color: white; font-size: 2.5rem; font-weight: 800; margin-bottom: 0.5rem; font-family: 'Poppins', sans-serif; text-shadow: 0 2px 4px rgba(0,0,0,0.1);">
+                            <i class="fas fa-calendar-alt" style="margin-right: 1rem; color: rgba(255,255,255,0.9);"></i>
+                            Events & Schedule
+                        </h1>
+                        <p style="color: rgba(255,255,255,0.95); font-size: 1.1rem; margin-bottom: 0; font-weight: 400;">
+                            Manage meetings, deadlines, milestones, and team activities
+                        </p>
+                    </div>
+                    <div style="display: flex; gap: 1rem;">
+                        <button onclick="window.location.href='<?= base_url('events/create') ?>'" style="background: rgba(255,255,255,0.2); border: 2px solid rgba(255,255,255,0.3); color: white; border-radius: 1rem; padding: 0.75rem 1.5rem; font-weight: 600; font-size: 1rem; cursor: pointer; transition: all 0.3s ease; backdrop-filter: blur(10px);" onmouseover="this.style.background='rgba(255,255,255,0.3)'; this.style.transform='translateY(-2px)'; this.style.boxShadow='0 10px 25px rgba(0,0,0,0.2)';" onmouseout="this.style.background='rgba(255,255,255,0.2)'; this.style.transform='translateY(0)'; this.style.boxShadow='none';">
+                            <i class="fas fa-plus" style="margin-right: 0.5rem;"></i>
+                            Create Event
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Calendar View -->
+    <div class="row mb-3">
+        <div class="col-12">
+            <div class="calendar-card">
+                <div class="card-header">
+                    <h5 class="card-title">
+                        <i class="fas fa-calendar me-2"></i>
+                        Calendar View
+                    </h5>
+                    <div class="calendar-controls">
+                        <button class="btn btn-outline-primary btn-sm" id="calendarToday">Today</button>
+                        <button class="btn btn-outline-secondary btn-sm" id="calendarPrev">
+                            <i class="fas fa-chevron-left"></i>
+                        </button>
+                        <button class="btn btn-outline-secondary btn-sm" id="calendarNext">
+                            <i class="fas fa-chevron-right"></i>
+                        </button>
+                    </div>
+                </div>
+                <div class="card-body">
+                    <div id="calendar"></div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Events List -->
+    <div class="row">
+        <div class="col-12">
+            <div class="events-list-card">
+                <div class="card-header">
+                    <h5 class="card-title">
+                        <i class="fas fa-list me-2"></i>
+                        Upcoming Events
+                    </h5>
+                    <div class="filter-controls">
+                        <select class="form-select form-select-sm" id="eventTypeFilter">
+                            <option value="">All Types</option>
+                            <option value="meeting">Meetings</option>
+                            <option value="deadline">Deadlines</option>
+                            <option value="milestone">Milestones</option>
+                            <option value="training">Training</option>
+                            <option value="review">Reviews</option>
+                            <option value="other">Other</option>
+                        </select>
+                        <select class="form-select form-select-sm" id="projectFilter">
+                            <option value="">All Projects</option>
+                            <?php foreach ($projects as $project): ?>
+                                <option value="<?= $project['id'] ?>"><?= esc($project['name']) ?></option>
+                            <?php endforeach; ?>
+                        </select>
+                    </div>
+                </div>
+                <div class="card-body">
+                    <div class="events-list">
+                        <?php if (empty($events)): ?>
+                            <div class="no-events">
+                                <i class="fas fa-calendar-times"></i>
+                                <h6>No Events Found</h6>
+                                <p>No events have been scheduled yet. <a href="<?= base_url('events/create') ?>">Create your first event</a></p>
+                            </div>
+                        <?php else: ?>
+                            <?php foreach ($events as $event): ?>
+                                <div class="event-item" data-type="<?= esc($event['event_type']) ?>" data-project="<?= esc($event['project_id'] ?? '') ?>">
+                                    <div class="event-type-indicator bg-<?= getEventTypeColor($event['event_type']) ?>"></div>
+                                    <div class="event-content">
+                                        <div class="event-header">
+                                            <h6 class="event-title"><?= esc($event['title']) ?></h6>
+                                            <div class="event-meta">
+                                                <span class="event-type badge bg-<?= getEventTypeColor($event['event_type']) ?>">
+                                                    <?= ucfirst(str_replace('_', ' ', $event['event_type'])) ?>
+                                                </span>
+                                                <?php if ($event['project_name']): ?>
+                                                    <span class="event-project badge bg-secondary">
+                                                        <?= esc($event['project_name']) ?>
+                                                    </span>
+                                                <?php endif; ?>
+                                            </div>
+                                        </div>
+                                        <div class="event-details">
+                                            <div class="event-datetime">
+                                                <i class="fas fa-clock me-1"></i>
+                                                <?= date('M d, Y g:i A', strtotime($event['start_datetime'])) ?>
+                                                <?php if ($event['start_datetime'] !== $event['end_datetime']): ?>
+                                                    - <?= date('g:i A', strtotime($event['end_datetime'])) ?>
+                                                <?php endif; ?>
+                                            </div>
+                                            <?php if ($event['location']): ?>
+                                                <div class="event-location">
+                                                    <i class="fas fa-map-marker-alt me-1"></i>
+                                                    <?= esc($event['location']) ?>
+                                                </div>
+                                            <?php endif; ?>
+                                            <?php if ($event['description']): ?>
+                                                <div class="event-description">
+                                                    <?= esc($event['description']) ?>
+                                                </div>
+                                            <?php endif; ?>
+                                            <?php if ($event['attendees_names']): ?>
+                                                <div class="event-attendees">
+                                                    <i class="fas fa-users me-1"></i>
+                                                    <?= esc($event['attendees_names']) ?>
+                                                </div>
+                                            <?php endif; ?>
+                                        </div>
+                                    </div>
+                                    <div class="event-actions">
+                                        <a href="<?= base_url('events/edit/' . $event['id']) ?>" class="btn btn-outline-primary btn-sm">
+                                            <i class="fas fa-edit"></i>
+                                        </a>
+                                        <button class="btn btn-outline-danger btn-sm" onclick="deleteEvent(<?= $event['id'] ?>)">
+                                            <i class="fas fa-trash"></i>
+                                        </button>
+                                    </div>
+                                </div>
+                            <?php endforeach; ?>
+                        <?php endif; ?>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Event Quick View Modal -->
+<div class="modal fade" id="eventModal" tabindex="-1">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="eventModalTitle">Event Details</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body" id="eventModalBody">
+                <!-- Event details will be loaded here -->
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+                <a href="#" class="btn btn-primary" id="eventEditBtn">Edit Event</a>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Link to external CSS file -->
+<link rel="stylesheet" href="<?= base_url('assets/css/events.css') ?>">
+
+<!-- FullCalendar CSS and JS are included in main.php -->
+
+<!-- Events JavaScript -->
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    // Initialize FullCalendar
+    var calendarEl = document.getElementById('calendar');
+    var calendar = new FullCalendar.Calendar(calendarEl, {
+        initialView: 'dayGridMonth',
+        headerToolbar: {
+            left: 'prev,next today',
+            center: 'title',
+            right: 'dayGridMonth,timeGridWeek,timeGridDay'
+        },
+        eventTimeFormat: {
+            hour: 'numeric',
+            minute: '2-digit',
+            meridiem: 'short'
+        },
+        dayMaxEvents: 3,
+        moreLinkClick: 'popover',
+        height: 'auto',
+        events: function(info, successCallback, failureCallback) {
+            fetch('<?= base_url("events/getCalendarEvents") ?>')
+                .then(response => response.json())
+                .then(data => {
+                    if (data.error) {
+                        failureCallback(data.error);
+                    } else {
+                        successCallback(data);
+                    }
+                })
+                .catch(error => failureCallback(error));
+        },
+        eventClick: function(info) {
+            showEventDetails(info.event);
+        },
+        eventMouseEnter: function(info) {
+            // Add hover effects
+            info.el.style.transform = 'scale(1.02)';
+        },
+        eventMouseLeave: function(info) {
+            info.el.style.transform = 'scale(1)';
+        }
+    });
+
+    calendar.render();
+
+    // Calendar controls
+    document.getElementById('calendarToday').addEventListener('click', function() {
+        calendar.today();
+    });
+
+    document.getElementById('calendarPrev').addEventListener('click', function() {
+        calendar.prev();
+    });
+
+    document.getElementById('calendarNext').addEventListener('click', function() {
+        calendar.next();
+    });
+
+    // Event filtering
+    document.getElementById('eventTypeFilter').addEventListener('change', filterEvents);
+    document.getElementById('projectFilter').addEventListener('change', filterEvents);
+
+    function filterEvents() {
+        const typeFilter = document.getElementById('eventTypeFilter').value;
+        const projectFilter = document.getElementById('projectFilter').value;
+        const eventItems = document.querySelectorAll('.event-item');
+
+        eventItems.forEach(item => {
+            const eventType = item.dataset.type;
+            const eventProject = item.dataset.project;
+            
+            let showItem = true;
+            
+            if (typeFilter && eventType !== typeFilter) {
+                showItem = false;
+            }
+            
+            if (projectFilter && eventProject !== projectFilter) {
+                showItem = false;
+            }
+            
+            item.style.display = showItem ? 'flex' : 'none';
+        });
+    }
+
+    function showEventDetails(event) {
+        document.getElementById('eventModalTitle').textContent = event.title;
+        
+        let details = `
+            <div class="event-detail-item">
+                <strong>Type:</strong> ${event.extendedProps.type}
+            </div>
+            <div class="event-detail-item">
+                <strong>Start:</strong> ${new Date(event.start).toLocaleString()}
+            </div>
+            <div class="event-detail-item">
+                <strong>End:</strong> ${new Date(event.end).toLocaleString()}
+            </div>
+        `;
+        
+        if (event.extendedProps.description) {
+            details += `
+                <div class="event-detail-item">
+                    <strong>Description:</strong> ${event.extendedProps.description}
+                </div>
+            `;
+        }
+        
+        if (event.extendedProps.location) {
+            details += `
+                <div class="event-detail-item">
+                    <strong>Location:</strong> ${event.extendedProps.location}
+                </div>
+            `;
+        }
+        
+        if (event.extendedProps.project) {
+            details += `
+                <div class="event-detail-item">
+                    <strong>Project:</strong> ${event.extendedProps.project}
+                </div>
+            `;
+        }
+        
+        document.getElementById('eventModalBody').innerHTML = details;
+        document.getElementById('eventEditBtn').href = `<?= base_url('events/edit/') ?>${event.id}`;
+        
+        new bootstrap.Modal(document.getElementById('eventModal')).show();
+    }
+
+    // Make showEventDetails globally available
+    window.showEventDetails = showEventDetails;
+});
+
+function deleteEvent(eventId) {
+    Swal.fire({
+        title: 'Are you sure?',
+        text: "You won't be able to revert this!",
+        icon: 'warning',
+        showCancelButton: true,
+        confirmButtonColor: '#d33',
+        cancelButtonColor: '#3085d6',
+        confirmButtonText: 'Yes, delete it!'
+    }).then((result) => {
+        if (result.isConfirmed) {
+            window.location.href = `<?= base_url('events/delete/') ?>${eventId}`;
+        }
+    });
+}
+</script>
+
+<?php
+// Helper function for event type colors
+function getEventTypeColor($type) {
+    $colors = [
+        'meeting' => 'primary',
+        'deadline' => 'danger',
+        'milestone' => 'success',
+        'training' => 'warning',
+        'review' => 'info',
+        'other' => 'secondary'
+    ];
+    return $colors[$type] ?? 'secondary';
+}
+?>

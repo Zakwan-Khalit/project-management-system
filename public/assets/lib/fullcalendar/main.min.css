@@ -1,0 +1,25 @@
+/* FullCalendar CSS - Download from https://cdn.jsdelivr.net/npm/fullcalendar@6.1.10/index.global.min.css */
+/* This is a placeholder - Please download the actual FullCalendar CSS from the CDN */
+
+/* Basic fallback styles */
+.fc {
+    max-width: 100%;
+    margin: 0 auto;
+}
+
+.fc-event {
+    cursor: pointer;
+    padding: 2px 4px;
+    margin: 1px;
+    border-radius: 3px;
+}
+
+.fc-header-toolbar {
+    margin-bottom: 1em;
+    display: flex;
+    justify-content: space-between;
+}
+
+.fc-daygrid-event {
+    margin-bottom: 1px;
+}

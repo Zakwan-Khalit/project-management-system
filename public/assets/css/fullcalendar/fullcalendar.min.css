@@ -1,0 +1,92 @@
+/* FullCalendar CSS is included in the JS bundle, but we can add custom styles here */
+
+/* FullCalendar Custom Styles for Project Management System */
+.fc {
+    font-family: 'Poppins', sans-serif;
+}
+
+.fc-header-toolbar {
+    margin-bottom: 1.5rem;
+    padding: 0.5rem;
+}
+
+.fc-button {
+    background-color: #3788d8;
+    border-color: #3788d8;
+    color: white;
+    border-radius: 0.375rem;
+    padding: 0.375rem 0.75rem;
+    font-weight: 500;
+}
+
+.fc-button:hover {
+    background-color: #2c5aa0;
+    border-color: #2c5aa0;
+}
+
+.fc-button:focus {
+    box-shadow: 0 0 0 0.2rem rgba(55, 136, 216, 0.25);
+}
+
+.fc-event {
+    border-radius: 4px;
+    border: none;
+    padding: 2px 4px;
+    font-size: 0.85rem;
+    font-weight: 500;
+    transition: transform 0.2s ease, box-shadow 0.2s ease;
+    cursor: pointer;
+}
+
+.fc-event:hover {
+    transform: scale(1.02);
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
+}
+
+.fc-daygrid-event {
+    margin: 1px 2px;
+}
+
+.fc-daygrid-day-number {
+    color: #4a5568;
+    font-weight: 500;
+}
+
+.fc-day-today {
+    background-color: rgba(55, 136, 216, 0.1) !important;
+}
+
+.fc-day-today .fc-daygrid-day-number {
+    background-color: #3788d8;
+    color: white;
+    border-radius: 50%;
+    width: 24px;
+    height: 24px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin: 4px;
+}
+
+.fc-col-header-cell {
+    background-color: #f8fafc;
+    font-weight: 600;
+    color: #2d3748;
+    border-color: #e2e8f0;
+}
+
+.fc-scrollgrid {
+    border-color: #e2e8f0;
+}
+
+.fc-daygrid-day {
+    border-color: #e2e8f0;
+}
+
+/* Event type specific colors */
+.fc-event.meeting { background-color: #3788d8; }
+.fc-event.deadline { background-color: #dc3545; }
+.fc-event.milestone { background-color: #28a745; }
+.fc-event.training { background-color: #fd7e14; }
+.fc-event.review { background-color: #6f42c1; }
+.fc-event.other { background-color: #6c757d; }

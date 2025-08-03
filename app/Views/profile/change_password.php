@@ -44,6 +44,31 @@
                             </button>
                         </div>
                         <div class="form-text">Password must be at least 6 characters long</div>
+                        <div id="password_requirements" class="mt-2">
+                            <small class="text-muted">Password requirements:</small>
+                            <div class="mt-1">
+                                <small id="req_length" class="d-block text-muted">
+                                    <i class="fas fa-circle me-1" style="font-size: 0.5rem;"></i>
+                                    At least 6 characters
+                                </small>
+                                <small id="req_lowercase" class="d-block text-muted">
+                                    <i class="fas fa-circle me-1" style="font-size: 0.5rem;"></i>
+                                    At least one lowercase letter
+                                </small>
+                                <small id="req_uppercase" class="d-block text-muted">
+                                    <i class="fas fa-circle me-1" style="font-size: 0.5rem;"></i>
+                                    At least one uppercase letter
+                                </small>
+                                <small id="req_number" class="d-block text-muted">
+                                    <i class="fas fa-circle me-1" style="font-size: 0.5rem;"></i>
+                                    At least one number
+                                </small>
+                                <small id="req_special" class="d-block text-muted">
+                                    <i class="fas fa-circle me-1" style="font-size: 0.5rem;"></i>
+                                    At least one special character
+                                </small>
+                            </div>
+                        </div>
                     </div>
                     
                     <div class="mb-3">
@@ -53,6 +78,14 @@
                             <button class="btn btn-outline-secondary" type="button" onclick="togglePassword('confirm_password')">
                                 <i class="fas fa-eye" id="confirm_password_icon"></i>
                             </button>
+                        </div>
+                        <div id="password_match_feedback" class="form-text" style="display: none;">
+                            <i class="fas fa-check-circle text-success me-1"></i>
+                            Passwords match
+                        </div>
+                        <div id="password_mismatch_feedback" class="form-text text-danger" style="display: none;">
+                            <i class="fas fa-times-circle me-1"></i>
+                            Passwords do not match
                         </div>
                     </div>
                     
@@ -149,16 +182,33 @@ function checkPasswordStrength(password) {
     const strengthBar = document.getElementById('passwordStrength');
     const strengthText = document.getElementById('passwordStrengthText');
     
+    // Check individual requirements
+    const requirements = {
+        length: password.length >= 6,
+        lowercase: /[a-z]/.test(password),
+        uppercase: /[A-Z]/.test(password),
+        number: /[0-9]/.test(password),
+        special: /[^A-Za-z0-9]/.test(password)
+    };
+    
+    // Update requirement indicators
+    updateRequirementIndicator('req_length', requirements.length);
+    updateRequirementIndicator('req_lowercase', requirements.lowercase);
+    updateRequirementIndicator('req_uppercase', requirements.uppercase);
+    updateRequirementIndicator('req_number', requirements.number);
+    updateRequirementIndicator('req_special', requirements.special);
+    
+    // Calculate strength
     let strength = 0;
+    Object.values(requirements).forEach(met => {
+        if (met) strength += 1;
+    });
+    
+    // Add extra point for longer passwords
+    if (password.length >= 8) strength += 1;
+    
     let strengthLabel = '';
     let strengthColor = '';
-    
-    if (password.length >= 6) strength += 1;
-    if (password.length >= 8) strength += 1;
-    if (/[a-z]/.test(password)) strength += 1;
-    if (/[A-Z]/.test(password)) strength += 1;
-    if (/[0-9]/.test(password)) strength += 1;
-    if (/[^A-Za-z0-9]/.test(password)) strength += 1;
     
     switch (strength) {
         case 0:
@@ -189,6 +239,58 @@ function checkPasswordStrength(password) {
     strengthText.style.color = strengthColor;
 }
 
+// Update requirement indicator
+function updateRequirementIndicator(elementId, isMet) {
+    const element = document.getElementById(elementId);
+    const icon = element.querySelector('i');
+    
+    if (isMet) {
+        element.classList.remove('text-muted');
+        element.classList.add('text-success');
+        icon.classList.remove('fa-circle');
+        icon.classList.add('fa-check-circle');
+    } else {
+        element.classList.remove('text-success');
+        element.classList.add('text-muted');
+        icon.classList.remove('fa-check-circle');
+        icon.classList.add('fa-circle');
+    }
+}
+
+// Password matching checker
+function checkPasswordMatch() {
+    const newPassword = document.getElementById('new_password').value;
+    const confirmPassword = document.getElementById('confirm_password').value;
+    const confirmField = document.getElementById('confirm_password');
+    const matchFeedback = document.getElementById('password_match_feedback');
+    const mismatchFeedback = document.getElementById('password_mismatch_feedback');
+    
+    // Only check if both fields have values
+    if (newPassword && confirmPassword) {
+        if (newPassword === confirmPassword) {
+            // Passwords match
+            confirmField.classList.remove('is-invalid');
+            confirmField.classList.add('is-valid');
+            matchFeedback.style.display = 'block';
+            mismatchFeedback.style.display = 'none';
+            confirmField.setCustomValidity('');
+        } else {
+            // Passwords don't match
+            confirmField.classList.remove('is-valid');
+            confirmField.classList.add('is-invalid');
+            matchFeedback.style.display = 'none';
+            mismatchFeedback.style.display = 'block';
+            confirmField.setCustomValidity('Passwords do not match');
+        }
+    } else {
+        // Clear validation states if fields are empty
+        confirmField.classList.remove('is-valid', 'is-invalid');
+        matchFeedback.style.display = 'none';
+        mismatchFeedback.style.display = 'none';
+        confirmField.setCustomValidity('');
+    }
+}
+
 document.addEventListener('DOMContentLoaded', function() {
     const newPasswordField = document.getElementById('new_password');
     const confirmPasswordField = document.getElementById('confirm_password');
@@ -197,15 +299,21 @@ document.addEventListener('DOMContentLoaded', function() {
     // Check password strength on input
     newPasswordField.addEventListener('input', function() {
         checkPasswordStrength(this.value);
+        checkPasswordMatch(); // Also check password match when new password changes
     });
     
-    // Validate password confirmation
+    // Validate password confirmation on input
     confirmPasswordField.addEventListener('input', function() {
-        if (this.value !== newPasswordField.value) {
-            this.setCustomValidity('Passwords do not match');
-        } else {
-            this.setCustomValidity('');
-        }
+        checkPasswordMatch();
+    });
+    
+    // Also check on paste events
+    newPasswordField.addEventListener('paste', function() {
+        setTimeout(checkPasswordMatch, 10); // Small delay to allow paste to complete
+    });
+    
+    confirmPasswordField.addEventListener('paste', function() {
+        setTimeout(checkPasswordMatch, 10);
     });
     
     // Handle form submission
@@ -231,7 +339,12 @@ document.addEventListener('DOMContentLoaded', function() {
                 'X-Requested-With': 'XMLHttpRequest'
             }
         })
-        .then(response => response.json())
+        .then(response => {
+            if (!response.ok) {
+                throw new Error('Network response was not ok');
+            }
+            return response.json();
+        })
         .then(data => {
             if (data.success) {
                 Swal.fire({
@@ -243,12 +356,14 @@ document.addEventListener('DOMContentLoaded', function() {
                     window.location.href = '<?= base_url('profile') ?>';
                 });
             } else {
-                Swal.fire({
-                    icon: 'error',
-                    title: 'Error!',
-                    text: data.message,
-                    confirmButtonColor: '#667eea'
-                });
+                let errorMessage = data.message || 'Password change failed';
+                if (data.errors) {
+                    errorMessage += '\n\nErrors:\n';
+                    Object.values(data.errors).forEach(error => {
+                        errorMessage += '• ' + error + '\n';
+                    });
+                }
+                throw new Error(errorMessage);
             }
         })
         .catch(error => {
@@ -256,7 +371,7 @@ document.addEventListener('DOMContentLoaded', function() {
             Swal.fire({
                 icon: 'error',
                 title: 'Error!',
-                text: 'An unexpected error occurred',
+                text: error.message || 'An unexpected error occurred',
                 confirmButtonColor: '#667eea'
             });
         });

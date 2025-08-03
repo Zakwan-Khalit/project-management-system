@@ -48,6 +48,12 @@
     <!-- SweetAlert2 -->
     <script src="<?= base_url('assets/js/sweetalert2/sweetalert2.all.min.js') ?>"></script>
     
+    <!-- FullCalendar CSS -->
+    <link href="<?= base_url('assets/css/fullcalendar/fullcalendar.min.css') ?>" rel="stylesheet">
+    
+    <!-- FullCalendar JS -->
+    <script src="<?= base_url('assets/js/fullcalendar/fullcalendar.min.js') ?>"></script>
+    
     <!-- Additional CSS files -->
     <?php if (isset($css_files) && is_array($css_files)): ?>
         <?php foreach ($css_files as $css_file): ?>
@@ -58,38 +64,6 @@
     <!-- Modern Template Styles - Inline for Maximum Compatibility -->
     <style>
         
-        .export-btn-fix.btn-outline-primary:hover,
-        .export-btn-fix.btn-outline-primary:focus {
-            color: #fff !important;
-        }
-        .export-btn-fix.btn-outline-primary:hover *,
-        .export-btn-fix.btn-outline-primary:focus * {
-            color: #fff !important;
-        }
-        .export-btn-fix.btn-outline-success:hover,
-        .export-btn-fix.btn-outline-success:focus {
-            color: #fff !important;
-        }
-        .export-btn-fix.btn-outline-success:hover *,
-        .export-btn-fix.btn-outline-success:focus * {
-            color: #fff !important;
-        }
-        .export-btn-fix.btn-outline-warning:hover,
-        .export-btn-fix.btn-outline-warning:focus {
-            color: #fff !important;
-        }
-        .export-btn-fix.btn-outline-warning:hover *,
-        .export-btn-fix.btn-outline-warning:focus * {
-            color: #fff !important;
-        }
-        .export-btn-fix.btn-outline-danger:hover,
-        .export-btn-fix.btn-outline-danger:focus {
-            color: #fff !important;
-        }
-        .export-btn-fix.btn-outline-danger:hover *,
-        .export-btn-fix.btn-outline-danger:focus * {
-            color: #fff !important;
-        }
         /* CSS Variables */
         :root {
             --primary-color: #0d6efd;
@@ -169,12 +143,12 @@
         }
 
         .sidebar-header {
-            padding: 0.75rem 1rem !important;
+            padding: 0.5rem 0.75rem !important;
             border-bottom: 1px solid #e9ecef !important;
             background: linear-gradient(135deg, #667eea 0%, #764ba2 100%) !important;
             color: white !important;
             text-align: center !important;
-            min-height: 70px !important;
+            min-height: 60px !important;
             display: flex !important;
             align-items: center !important;
             justify-content: center !important;
@@ -182,7 +156,7 @@
 
         .sidebar-header h4 {
             margin: 0 !important;
-            font-size: 1.125rem !important;
+            font-size: 1rem !important;
             font-weight: 600 !important;
             color: white !important;
             display: flex !important;
@@ -192,8 +166,8 @@
         }
 
         .sidebar-header h4 i {
-            margin-right: 0.5rem !important;
-            font-size: 1.25rem !important;
+            margin-right: 0.25rem !important;
+            font-size: 1rem !important;
             transition: all 0.3s ease !important;
         }
 
@@ -208,19 +182,19 @@
         }
 
         .sidebar-menu {
-            padding: 1rem 0 !important;
+            padding: 0.5rem 0 !important;
         }
 
         .sidebar-menu .nav-link {
             display: flex !important;
             align-items: center !important;
-            padding: 0.875rem 1rem !important;
+            padding: 0.6rem 0.75rem !important;
             color: #495057 !important;
             text-decoration: none !important;
             transition: all 0.2s ease !important;
             border-left: 3px solid transparent !important;
-            margin: 0.125rem 0.5rem !important;
-            border-radius: 0.5rem !important;
+            margin: 0.1rem 0.4rem !important;
+            border-radius: 0.4rem !important;
             position: relative !important;
             white-space: nowrap !important;
         }
@@ -240,15 +214,15 @@
         }
 
         .sidebar-menu .nav-link i {
-            width: 20px !important;
-            margin-right: 0.75rem !important;
+            width: 18px !important;
+            margin-right: 0.5rem !important;
             text-align: center !important;
-            font-size: 1rem !important;
+            font-size: 0.9rem !important;
             flex-shrink: 0 !important;
         }
 
         .sidebar-menu .nav-link span {
-            font-size: 0.875rem !important;
+            font-size: 0.8rem !important;
             font-weight: 400 !important;
             transition: all 0.3s ease !important;
         }
@@ -317,7 +291,7 @@
         .top-navbar {
             background: linear-gradient(135deg, #667eea 0%, #764ba2 100%) !important;
             color: white !important;
-            padding: 0.75rem 1.5rem !important;
+            padding: 0.5rem 1rem !important;
             box-shadow: 0 2px 10px rgba(0,0,0,0.1) !important;
             position: sticky !important;
             top: 0 !important;
@@ -325,7 +299,7 @@
             display: flex !important;
             justify-content: space-between !important;
             align-items: center !important;
-            min-height: 70px !important;
+            min-height: 60px !important;
         }
 
         .navbar-left {
@@ -461,9 +435,9 @@
 
         /* Main Content */
         .main-content {
-            padding: 2rem !important;
+            padding: 1.5rem !important;
             background-color: #f5f7fa !important;
-            min-height: calc(100vh - 70px) !important;
+            min-height: calc(100vh - 60px) !important;
         }
 
         /* Dashboard Cards */
@@ -472,17 +446,11 @@
             border: none !important;
             border-radius: 0.75rem !important;
             box-shadow: 0 4px 6px rgba(0,0,0,0.05) !important;
-            transition: all 0.2s ease !important;
             overflow: hidden !important;
         }
 
-        .card:hover {
-            box-shadow: 0 8px 25px rgba(0,0,0,0.1) !important;
-            transform: translateY(-2px) !important;
-        }
-
         .card-body {
-            padding: 1.5rem !important;
+            padding: 1rem !important;
         }
 
         .card-title {
@@ -495,15 +463,15 @@
         .card-header {
             background: #f8f9fa !important;
             border-bottom: 1px solid #e9ecef !important;
-            padding: 1rem 1.5rem !important;
+            padding: 0.75rem 1rem !important;
         }
 
         /* Modern Stat Cards */
         .stat-card {
             background: white !important;
-            border-radius: 1rem !important;
-            padding: 2rem 1.5rem !important;
-            box-shadow: 0 10px 30px rgba(0,0,0,0.08) !important;
+            border-radius: 0.75rem !important;
+            padding: 1.25rem 1rem !important;
+            box-shadow: 0 8px 25px rgba(0,0,0,0.06) !important;
             border: 1px solid #f1f3f4 !important;
             transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1) !important;
             position: relative !important;
@@ -522,8 +490,8 @@
         }
 
         .stat-card:hover {
-            transform: translateY(-8px) !important;
-            box-shadow: 0 20px 40px rgba(0,0,0,0.12) !important;
+            transform: translateY(-4px) !important;
+            box-shadow: 0 15px 35px rgba(0,0,0,0.1) !important;
         }
 
         .stat-card.bg-success::before {
@@ -543,29 +511,29 @@
         }
 
         .stat-card .stat-number {
-            font-size: 2.5rem !important;
+            font-size: 2rem !important;
             font-weight: 700 !important;
             color: #1f2937 !important;
-            margin-bottom: 0.5rem !important;
+            margin-bottom: 0.25rem !important;
             line-height: 1 !important;
         }
 
         .stat-card p {
             color: #6b7280 !important;
             font-weight: 600 !important;
-            margin-bottom: 0.25rem !important;
-            font-size: 0.95rem !important;
+            margin-bottom: 0.1rem !important;
+            font-size: 0.85rem !important;
         }
 
         .stat-card small {
             color: #9ca3af !important;
-            font-size: 0.825rem !important;
+            font-size: 0.75rem !important;
             font-weight: 500 !important;
         }
 
         .stat-card i {
             color: #e5e7eb !important;
-            font-size: 3rem !important;
+            font-size: 2.5rem !important;
             opacity: 0.3 !important;
         }
 
@@ -573,29 +541,29 @@
         .dashboard-header {
             background: linear-gradient(135deg, #667eea 0%, #764ba2 100%) !important;
             color: white !important;
-            border-radius: 1rem !important;
-            padding: 2rem !important;
-            margin-bottom: 2rem !important;
+            border-radius: 0.75rem !important;
+            padding: 1.25rem !important;
+            margin-bottom: 1.5rem !important;
         }
 
         .dashboard-header h1 {
             color: white !important;
-            font-size: 2rem !important;
+            font-size: 1.6rem !important;
             font-weight: 700 !important;
-            margin-bottom: 0.5rem !important;
+            margin-bottom: 0.25rem !important;
         }
 
         .dashboard-header p {
             color: rgba(255,255,255,0.9) !important;
-            font-size: 1rem !important;
+            font-size: 0.9rem !important;
             margin-bottom: 0 !important;
         }
 
         /* Modern Chart Cards */
         .chart-card {
             background: white !important;
-            border-radius: 1rem !important;
-            box-shadow: 0 10px 30px rgba(0,0,0,0.08) !important;
+            border-radius: 0.75rem !important;
+            box-shadow: 0 8px 25px rgba(0,0,0,0.06) !important;
             border: 1px solid #f1f3f4 !important;
             overflow: hidden !important;
         }
@@ -603,13 +571,13 @@
         .chart-card .card-header {
             background: linear-gradient(135deg, #f8fafc 0%, #f1f5f9 100%) !important;
             border-bottom: 1px solid #e2e8f0 !important;
-            padding: 1.5rem !important;
+            padding: 1rem !important;
         }
 
         .chart-card .card-title {
             color: #374151 !important;
             font-weight: 600 !important;
-            font-size: 1.1rem !important;
+            font-size: 1rem !important;
             margin: 0 !important;
         }
 
@@ -617,7 +585,7 @@
         .project-list .list-group-item {
             border: none !important;
             border-bottom: 1px solid #f1f5f9 !important;
-            padding: 1.25rem 1.5rem !important;
+            padding: 1rem 1.25rem !important;
             transition: all 0.2s ease !important;
             cursor: pointer !important;
         }
@@ -662,9 +630,9 @@
         .task-item {
             background: white !important;
             border: 1px solid #e5e7eb !important;
-            border-radius: 0.75rem !important;
-            padding: 1.25rem !important;
-            margin-bottom: 1rem !important;
+            border-radius: 0.5rem !important;
+            padding: 1rem !important;
+            margin-bottom: 0.75rem !important;
             transition: all 0.2s ease !important;
             cursor: pointer !important;
         }
@@ -723,7 +691,7 @@
         .activity-item {
             display: flex !important;
             align-items: flex-start !important;
-            padding: 1rem 0 !important;
+            padding: 0.75rem 0 !important;
             border-bottom: 1px solid #f1f5f9 !important;
         }
 
@@ -732,13 +700,13 @@
         }
 
         .activity-icon {
-            width: 40px !important;
-            height: 40px !important;
+            width: 35px !important;
+            height: 35px !important;
             border-radius: 50% !important;
             display: flex !important;
             align-items: center !important;
             justify-content: center !important;
-            margin-right: 1rem !important;
+            margin-right: 0.75rem !important;
             flex-shrink: 0 !important;
         }
 
@@ -757,20 +725,20 @@
         }
 
         .activity-content h6 {
-            margin: 0 0 0.25rem 0 !important;
-            font-size: 0.925rem !important;
+            margin: 0 0 0.1rem 0 !important;
+            font-size: 0.85rem !important;
             font-weight: 600 !important;
             color: #374151 !important;
         }
 
         .activity-content p {
             margin: 0 !important;
-            font-size: 0.85rem !important;
+            font-size: 0.8rem !important;
             color: #6b7280 !important;
         }
 
         .activity-time {
-            font-size: 0.775rem !important;
+            font-size: 0.7rem !important;
             color: #9ca3af !important;
             text-align: right !important;
         }
@@ -829,8 +797,8 @@
 
         /* Buttons */
         .btn {
-            border-radius: 0.5rem !important;
-            padding: 0.625rem 1.25rem !important;
+            border-radius: 0.4rem !important;
+            padding: 0.5rem 1rem !important;
             font-weight: 500 !important;
             transition: all 0.2s ease !important;
             border: none !important;
@@ -913,12 +881,12 @@
             border-bottom: 2px solid #e9ecef !important;
             font-weight: 600 !important;
             color: #495057 !important;
-            padding: 1rem !important;
+            padding: 0.75rem !important;
             border-top: none !important;
         }
 
         .table tbody td {
-            padding: 1rem !important;
+            padding: 0.75rem !important;
             border-bottom: 1px solid #e9ecef !important;
             vertical-align: middle !important;
         }
@@ -967,7 +935,7 @@
             }
             
             .main-content {
-                padding: 1rem !important;
+                padding: 0.75rem !important;
             }
             
             /* Mobile menu button */
@@ -1075,6 +1043,82 @@
             border-color: #0d6efd !important;
             color: #0d6efd !important;
         }
+        
+        /* Export Button Fix - Final Override - Ensure text and icons are white on hover */
+        .export-btn-fix.btn-outline-primary:hover,
+        .export-btn-fix.btn-outline-primary:focus,
+        #exportCsvBtn:hover {
+            color: #fff !important;
+            border-color: #0d6efd !important;
+            background-color: #0d6efd !important;
+        }
+        .export-btn-fix.btn-outline-primary:hover *,
+        .export-btn-fix.btn-outline-primary:focus *,
+        #exportCsvBtn:hover * {
+            color: #fff !important;
+        }
+        .export-btn-fix.btn-outline-success:hover,
+        .export-btn-fix.btn-outline-success:focus,
+        #exportExcelBtn:hover {
+            color: #fff !important;
+            border-color: #198754 !important;
+            background-color: #198754 !important;
+        }
+        .export-btn-fix.btn-outline-success:hover *,
+        .export-btn-fix.btn-outline-success:focus *,
+        #exportExcelBtn:hover * {
+            color: #fff !important;
+        }
+        .export-btn-fix.btn-outline-warning:hover,
+        .export-btn-fix.btn-outline-warning:focus {
+            color: #fff !important;
+            border-color: #ffc107 !important;
+            background-color: #ffc107 !important;
+        }
+        .export-btn-fix.btn-outline-warning:hover *,
+        .export-btn-fix.btn-outline-warning:focus * {
+            color: #fff !important;
+        }
+        .export-btn-fix.btn-outline-danger:hover,
+        .export-btn-fix.btn-outline-danger:focus,
+        #exportPdfBtn:hover {
+            color: #fff !important;
+            border-color: #dc3545 !important;
+            background-color: #dc3545 !important;
+        }
+        .export-btn-fix.btn-outline-danger:hover *,
+        .export-btn-fix.btn-outline-danger:focus *,
+        #exportPdfBtn:hover * {
+            color: #fff !important;
+        }
+        
+        /* Ultra-specific targeting for export button text nodes */
+        #exportCsvBtn:hover,
+        #exportExcelBtn:hover,
+        #exportPdfBtn:hover {
+            color: #fff !important;
+        }
+        
+        /* Target text content specifically */
+        #exportCsvBtn:hover::after,
+        #exportExcelBtn:hover::after,
+        #exportPdfBtn:hover::after,
+        .export-btn-fix:hover {
+            color: #fff !important;
+        }
+        
+        /* Force override for text nodes - Nuclear option */
+        button#exportCsvBtn:hover,
+        button#exportExcelBtn:hover, 
+        button#exportPdfBtn:hover,
+        button.export-btn-fix:hover {
+            color: white !important;
+        }
+        
+        /* Text node targeting with higher specificity */
+        .btn.export-btn-fix:hover {
+            color: white !important;
+        }
     </style>
     
     <!-- Inline CSS (for dynamic styles only) -->
@@ -1090,7 +1134,7 @@
         <div class="sidebar-header">
             <h4>
                 <i class="fas fa-project-diagram"></i>
-                <span>ProMSys</span>
+                <span>KerTask</span>
             </h4>
         </div>
         <div class="sidebar-menu">
@@ -1099,11 +1143,11 @@
                 <i class="fas fa-tachometer-alt"></i>
                 <span>Dashboard</span>
             </a>
-            <a href="<?= base_url('projects') ?>" class="nav-link<?= strpos($url, 'projects') !== false && strpos($url, 'project_list') === false ? ' active' : '' ?>" data-tooltip="Projects">
+            <a href="<?= base_url('projects') ?>" class="nav-link<?= strpos($url, 'projects') !== false ? ' active' : '' ?>" data-tooltip="Projects">
                 <i class="fas fa-project-diagram"></i>
                 <span>Projects</span>
             </a>
-            <a href="<?= base_url('projects/project_list') ?>" class="nav-link<?= strpos($url, 'project_list') !== false ? ' active' : '' ?>" data-tooltip="Tasks">
+            <a href="<?= base_url('activity') ?>" class="nav-link<?= strpos($url, 'activity') !== false ? ' active' : '' ?>" data-tooltip="Activities">
                 <i class="fas fa-list"></i>
                 <span>Activities</span>
             </a>
@@ -1114,6 +1158,14 @@
             <a href="<?= base_url('reports') ?>" class="nav-link<?= strpos($url, 'reports') !== false ? ' active' : '' ?>" data-tooltip="Reports">
                 <i class="fas fa-chart-bar"></i>
                 <span>Reports</span>
+            </a>
+            <a href="<?= base_url('events') ?>" class="nav-link<?= strpos($url, 'events') !== false ? ' active' : '' ?>" data-tooltip="Events">
+                <i class="fas fa-calendar-alt"></i>
+                <span>Events</span>
+            </a>
+            <a href="<?= base_url('users') ?>" class="nav-link<?= strpos($url, 'users') !== false ? ' active' : '' ?>" data-tooltip="Users">
+                <i class="fas fa-users"></i>
+                <span>Users</span>
             </a>
             <a href="<?= base_url('profile') ?>" class="nav-link<?= strpos($url, 'profile') !== false ? ' active' : '' ?>" data-tooltip="Profile">
                 <i class="fas fa-user"></i>
@@ -1137,23 +1189,6 @@
                 <button class="mobile-menu-btn" id="mobileMenuBtn" type="button">
                     <i class="fas fa-bars"></i>
                 </button>
-                <?php if (isset($breadcrumbs) && !empty($breadcrumbs)): ?>
-                    <nav aria-label="breadcrumb">
-                        <ol class="breadcrumb">
-                            <?php foreach ($breadcrumbs as $breadcrumb): ?>
-                                <?php if (isset($breadcrumb['url'])): ?>
-                                    <li class="breadcrumb-item">
-                                        <a href="<?= $breadcrumb['url'] ?>"><?= $breadcrumb['title'] ?></a>
-                                    </li>
-                                <?php else: ?>
-                                    <li class="breadcrumb-item active" aria-current="page">
-                                        <?= $breadcrumb['title'] ?>
-                                    </li>
-                                <?php endif; ?>
-                            <?php endforeach; ?>
-                        </ol>
-                    </nav>
-                <?php endif; ?>
             </div>
             <div class="navbar-right">
                 <?php 

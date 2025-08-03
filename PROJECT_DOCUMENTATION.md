@@ -107,7 +107,43 @@ This is a comprehensive **Project Management System** built with **CodeIgniter 4
   - Critical path identification
   - Dependency conflict resolution
 
-### 4. Reporting & Analytics
+### 4. Events & Schedule Management (Calendar Module)
+- **Event Creation & Management**
+  - Comprehensive event creation with title, description, and type
+  - Multiple event types: meetings, deadlines, milestones, training, reviews
+  - Date and time management with start/end times
+  - Location tracking (physical addresses or online meeting links)
+  - Project-based event organization
+
+- **Interactive Calendar Interface**
+  - **FullCalendar v6.1.18** - Modern, responsive calendar library
+  - Multiple calendar views (month, week, day, agenda)
+  - Drag-and-drop event scheduling and rescheduling
+  - Color-coded events by type for visual organization
+  - Real-time event updates and synchronization
+
+- **Attendee Management System**
+  - Project-based attendee filtering and selection
+  - Multi-user event invitations with Select2 interface
+  - RSVP status tracking (invited, accepted, declined, tentative)
+  - Attendee response management and notifications
+  - Team member availability checking
+
+- **Advanced Calendar Features**
+  - Live preview during event creation and editing
+  - Project integration for team-specific event filtering
+  - Responsive design optimized for mobile scheduling
+  - Dashboard integration with upcoming events widget
+  - Event conflict detection and resolution
+  - Recurring event support (future enhancement)
+
+- **Database Integration**
+  - `events` table for main event storage
+  - `event_attendees` table for participant tracking
+  - Foreign key relationships with projects and users
+  - Status lookup integration for event types and attendance
+
+### 5. Reporting & Analytics
 - **Project Reports**
   - Project progress summaries
   - Resource utilization reports
@@ -151,6 +187,11 @@ The system uses a fully normalized MySQL database with proper relationships, ind
 - **projects** - Project master data
 - **tasks** - Task management
 - **project_members** - Project team assignments
+
+#### Events & Calendar Management
+- **events** - Main events storage with scheduling details
+- **event_attendees** - Event participation and RSVP tracking
+- Event types and attendance statuses stored in **status_lookup**
 
 #### Status & Priority Management
 - **status_lookup** - Configurable status types for projects/tasks

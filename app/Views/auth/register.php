@@ -14,29 +14,17 @@
         <!-- Register Form -->
         <div style="padding: 30px;">
             <form id="registerForm">
-                <!-- Name Fields -->
-                <div style="display: flex; gap: 15px; margin-bottom: 20px;">
-                    <div style="flex: 1;">
-                        <label style="display: block; margin-bottom: 6px; color: #333; font-weight: 500; font-size: 0.85rem;">
-                            <i class="fas fa-user" style="margin-right: 6px; color: #28a745;"></i>
-                            First Name
-                        </label>
-                        <input type="text" name="first_name" required 
-                               style="width: 100%; padding: 10px 12px; border: 2px solid #e9ecef; border-radius: 8px; font-size: 0.95rem; transition: all 0.3s ease; outline: none;"
-                               placeholder="First name"
-                               onfocus="this.style.borderColor='#28a745'; this.style.boxShadow='0 0 0 3px rgba(40,167,69,0.1)'"
-                               onblur="this.style.borderColor='#e9ecef'; this.style.boxShadow='none'">
-                    </div>
-                    <div style="flex: 1;">
-                        <label style="display: block; margin-bottom: 6px; color: #333; font-weight: 500; font-size: 0.85rem;">
-                            Last Name
-                        </label>
-                        <input type="text" name="last_name" required 
-                               style="width: 100%; padding: 10px 12px; border: 2px solid #e9ecef; border-radius: 8px; font-size: 0.95rem; transition: all 0.3s ease; outline: none;"
-                               placeholder="Last name"
-                               onfocus="this.style.borderColor='#28a745'; this.style.boxShadow='0 0 0 3px rgba(40,167,69,0.1)'"
-                               onblur="this.style.borderColor='#e9ecef'; this.style.boxShadow='none'">
-                    </div>
+                <!-- Name Field -->
+                <div style="margin-bottom: 20px;">
+                    <label style="display: block; margin-bottom: 6px; color: #333; font-weight: 500; font-size: 0.85rem;">
+                        <i class="fas fa-user" style="margin-right: 6px; color: #28a745;"></i>
+                        Full Name
+                    </label>
+                    <input type="text" name="full_name" required 
+                           style="width: 100%; padding: 10px 12px; border: 2px solid #e9ecef; border-radius: 8px; font-size: 0.95rem; transition: all 0.3s ease; outline: none;"
+                           placeholder="Full name"
+                           onfocus="this.style.borderColor='#28a745'; this.style.boxShadow='0 0 0 3px rgba(40,167,69,0.1)'"
+                           onblur="this.style.borderColor='#e9ecef'; this.style.boxShadow='none'">
                 </div>
 
                 <!-- Email -->

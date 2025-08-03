@@ -1,209 +1,227 @@
-<a href="javascript:history.back()" class="btn btn-outline-secondary d-inline-flex align-items-center" style="gap:0.5rem;">
-    <i class="fas fa-arrow-left"></i>
-    <span>Back</span>
-</a>
+<!-- Reports & Analytics Dashboard -->
+<div class="container-fluid">
+    <!-- Error Display -->
+    <?php if (isset($error_message)): ?>
+        <div class="alert alert-danger">
+            <i class="fas fa-exclamation-triangle me-2"></i>
+            <?= esc($error_message) ?>
+        </div>
+    <?php endif; ?>
 
 <!-- Reports & Analytics Dashboard -->
-<div class="container-fluid" id="reports-container">
-    <!-- Header -->
-    <div style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white; border-radius: 1.5rem; padding: 3rem 2rem; margin-bottom: 3rem; box-shadow: 0 20px 60px rgba(102,126,234,0.2); position: relative; overflow: hidden;">
+<div class="container-fluid">
+    <!-- Error Display -->
+    <?php if (isset($error_message)): ?>
+        <div class="alert alert-danger">
+            <i class="fas fa-exclamation-triangle me-2"></i>
+            <?= esc($error_message) ?>
+        </div>
+    <?php endif; ?>
+
+    <!-- Breadcrumbs -->
+    <nav aria-label="breadcrumb" style="margin-bottom: 1.5rem;">
+        <ol style="display: flex; list-style: none; padding: 1rem 1.25rem; margin: 0; background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); border-radius: 0.75rem; box-shadow: 0 4px 15px rgba(102, 126, 234, 0.2); border: none;">
+            <li style="color: #f7fafc; font-weight: 600; font-size: 0.95rem; display: flex; align-items: center; padding: 0.25rem 0.5rem; background: rgba(255,255,255,0.1); border-radius: 0.375rem; backdrop-filter: blur(10px);">
+                <i class="fas fa-chart-bar" style="margin-right: 0.5rem; font-size: 0.9rem; opacity: 0.9;"></i>
+                Reports & Analytics
+            </li>
+        </ol>
+    </nav>
+
+    <!-- Modern Header -->
+    <div style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white; border-radius: 1.5rem; padding: 2rem; margin-bottom: 2rem; box-shadow: 0 20px 60px rgba(102,126,234,0.2); position: relative; overflow: hidden;">
+        <!-- Decorative Elements -->
         <div style="position: absolute; top: -50px; right: -50px; width: 200px; height: 200px; background: rgba(255,255,255,0.1); border-radius: 50%; opacity: 0.3;"></div>
         <div style="position: absolute; bottom: -30px; left: -30px; width: 120px; height: 120px; background: rgba(255,255,255,0.05); border-radius: 50%;"></div>
-        <div style="display: flex; justify-content: space-between; align-items: center; position: relative; z-index: 2; flex-wrap: wrap; gap: 1rem;">
+        
+        <div style="display: flex; justify-content: space-between; align-items: center; position: relative; z-index: 2;">
             <div>
-                <h1 style="color: white; font-size: clamp(2rem, 4vw, 3rem); font-weight: 800; margin-bottom: 1rem; font-family: 'Poppins', sans-serif; text-shadow: 0 2px 4px rgba(0,0,0,0.1);">
+                <h1 style="color: white; font-size: 2.5rem; font-weight: 800; margin-bottom: 0.5rem; font-family: 'Poppins', sans-serif; text-shadow: 0 2px 4px rgba(0,0,0,0.1);">
                     <i class="fas fa-chart-bar" style="margin-right: 1rem; color: rgba(255,255,255,0.9);"></i>
                     Reports & Analytics
                 </h1>
-                <p style="color: rgba(255,255,255,0.95); font-size: clamp(1rem, 2vw, 1.2rem); margin-bottom: 0; font-weight: 400;">
-                    Project and task statistics, completion rates, and recent activity.
+                <p style="color: rgba(255,255,255,0.95); font-size: 1.1rem; margin-bottom: 0; font-weight: 400;">
+                    Comprehensive insights into project performance, task completion, and team productivity
                 </p>
             </div>
         </div>
     </div>
 
-    <!-- Stat Cards Row -->
-    <div class="row" style="display: flex; gap: 1.5rem; margin-bottom: 2.5rem; flex-wrap: wrap;">
-        <div class="col-lg-3 col-md-6 col-sm-6 col-12" style="flex: 1; min-width: 250px; margin-bottom: 1rem;">
-            <div class="stat-card" style="background: #fff; border-radius: 1.25rem; box-shadow: 0 4px 24px rgba(102,126,234,0.08); padding: 2rem; text-align: center; transition: transform 0.3s ease;">
-                <i class="fas fa-folder-open" style="font-size: 2.5rem; color: #667eea; margin-bottom: 1rem;"></i>
-                <h3 style="font-family: 'Poppins', sans-serif; font-weight: 700; margin-bottom: 0.5rem;">Projects</h3>
-                <div style="font-size: 2rem; font-weight: 800; color: #4a5568; margin-bottom: 0.5rem;">
-                    <?= esc($totalProjects) ?>
+    <!-- Statistics Cards -->
+    <div class="row mb-4">
+        <!-- Total Projects -->
+        <div class="col-xl-3 col-lg-6 col-md-6 mb-4">
+            <div class="stats-card">
+                <div class="stats-icon bg-primary">
+                    <i class="fas fa-folder-open"></i>
                 </div>
-                <div style="color: #6b7280; font-size: 1rem;">Total Projects</div>
+                <div class="stats-content">
+                    <h3 class="stats-number"><?= esc($totalProjects ?? 0) ?></h3>
+                    <p class="stats-label">Total Projects</p>
+                </div>
             </div>
         </div>
-        <div class="col-lg-3 col-md-6 col-sm-6 col-12" style="flex: 1; min-width: 250px; margin-bottom: 1rem;">
-            <div class="stat-card" style="background: #fff; border-radius: 1.25rem; box-shadow: 0 4px 24px rgba(72,187,120,0.08); padding: 2rem; text-align: center; transition: transform 0.3s ease;">
-                <i class="fas fa-check-circle" style="font-size: 2.5rem; color: #48bb78; margin-bottom: 1rem;"></i>
-                <h3 style="font-family: 'Poppins', sans-serif; font-weight: 700; margin-bottom: 0.5rem;">Completed</h3>
-                <div style="font-size: 2rem; font-weight: 800; color: #4a5568; margin-bottom: 0.5rem;">
-                    <?= esc($completedProjects) ?>
+
+        <!-- Active Projects -->
+        <div class="col-xl-3 col-lg-6 col-md-6 mb-4">
+            <div class="stats-card">
+                <div class="stats-icon bg-success">
+                    <i class="fas fa-play-circle"></i>
                 </div>
-                <div style="color: #6b7280; font-size: 1rem;">Completed Projects</div>
+                <div class="stats-content">
+                    <h3 class="stats-number"><?= esc($activeProjects ?? 0) ?></h3>
+                    <p class="stats-label">Active Projects</p>
+                </div>
             </div>
         </div>
-        <div class="col-lg-3 col-md-6 col-sm-6 col-12" style="flex: 1; min-width: 250px; margin-bottom: 1rem;">
-            <div class="stat-card" style="background: #fff; border-radius: 1.25rem; box-shadow: 0 4px 24px rgba(13,202,240,0.08); padding: 2rem; text-align: center; transition: transform 0.3s ease;">
-                <i class="fas fa-play-circle" style="font-size: 2.5rem; color: #0dcaf0; margin-bottom: 1rem;"></i>
-                <h3 style="font-family: 'Poppins', sans-serif; font-weight: 700; margin-bottom: 0.5rem;">Active</h3>
-                <div style="font-size: 2rem; font-weight: 800; color: #4a5568; margin-bottom: 0.5rem;">
-                    <?= esc($activeProjects) ?>
+
+        <!-- Completed Projects -->
+        <div class="col-xl-3 col-lg-6 col-md-6 mb-4">
+            <div class="stats-card">
+                <div class="stats-icon bg-info">
+                    <i class="fas fa-check-circle"></i>
                 </div>
-                <div style="color: #6b7280; font-size: 1rem;">Active Projects</div>
+                <div class="stats-content">
+                    <h3 class="stats-number"><?= esc($completedProjects ?? 0) ?></h3>
+                    <p class="stats-label">Completed Projects</p>
+                </div>
             </div>
         </div>
-        <div class="col-lg-3 col-md-6 col-sm-6 col-12" style="flex: 1; min-width: 250px; margin-bottom: 1rem;">
-            <div class="stat-card" style="background: #fff; border-radius: 1.25rem; box-shadow: 0 4px 24px rgba(255,193,7,0.08); padding: 2rem; text-align: center; transition: transform 0.3s ease;">
-                <i class="fas fa-users" style="font-size: 2.5rem; color: #ffc107; margin-bottom: 1rem;"></i>
-                <h3 style="font-family: 'Poppins', sans-serif; font-weight: 700; margin-bottom: 0.5rem;">Users</h3>
-                <div style="font-size: 2rem; font-weight: 800; color: #4a5568; margin-bottom: 0.5rem;">
-                    <?= esc($totalUsers) ?>
+
+        <!-- Total Users -->
+        <div class="col-xl-3 col-lg-6 col-md-6 mb-4">
+            <div class="stats-card">
+                <div class="stats-icon bg-warning">
+                    <i class="fas fa-users"></i>
                 </div>
-                <div style="color: #6b7280; font-size: 1rem;">Total Users</div>
+                <div class="stats-content">
+                    <h3 class="stats-number"><?= esc($totalUsers ?? 0) ?></h3>
+                    <p class="stats-label">Total Users</p>
+                </div>
             </div>
         </div>
     </div>
 
     <!-- Charts Row -->
-    <div class="row g-4 mt-4">
-        <div class="col-md-6">
-            <div class="card chart-card" style="border-radius: 1.25rem; box-shadow: 0 4px 24px rgba(13,202,240,0.08);">
-                <div class="card-header bg-white border-0" style="border-radius: 1.25rem 1.25rem 0 0;">
-                    <span class="card-title" style="font-family: 'Poppins', sans-serif; font-weight: 600; font-size: 1.1rem;"><i class="fas fa-tasks me-2"></i>Task Status Distribution</span>
+    <div class="row mb-4">
+        <!-- Task Status Chart -->
+        <div class="col-lg-6 mb-4">
+            <div class="chart-card">
+                <div class="card-header">
+                    <h5 class="card-title">
+                        <i class="fas fa-tasks me-2"></i>
+                        Task Status Distribution
+                    </h5>
                 </div>
                 <div class="card-body">
-                    <canvas id="taskStatusChart"></canvas>
+                    <canvas id="taskStatusChart" height="300"></canvas>
                 </div>
             </div>
         </div>
-        <div class="col-md-6">
-            <div class="card chart-card" style="border-radius: 1.25rem; box-shadow: 0 4px 24px rgba(25,135,84,0.08);">
-                <div class="card-header bg-white border-0" style="border-radius: 1.25rem 1.25rem 0 0;">
-                    <span class="card-title" style="font-family: 'Poppins', sans-serif; font-weight: 600; font-size: 1.1rem;"><i class="fas fa-project-diagram me-2"></i>Project Status Distribution</span>
+
+        <!-- Project Status Chart -->
+        <div class="col-lg-6 mb-4">
+            <div class="chart-card">
+                <div class="card-header">
+                    <h5 class="card-title">
+                        <i class="fas fa-project-diagram me-2"></i>
+                        Project Status Distribution
+                    </h5>
                 </div>
                 <div class="card-body">
-                    <canvas id="projectStatusChart"></canvas>
+                    <canvas id="projectStatusChart" height="300"></canvas>
                 </div>
             </div>
         </div>
     </div>
-
-    <!-- Recent Activity Card -->
-    <div class="row g-4 mt-4">
-        <div class="col-md-12">
-            <div class="card" style="border-radius: 1.25rem; box-shadow: 0 4px 24px rgba(118,75,162,0.08);">
-                <div class="card-header bg-white border-0 d-flex align-items-center justify-content-between" style="border-radius: 1.25rem 1.25rem 0 0;">
-                    <span class="card-title" style="font-family: 'Poppins', sans-serif; font-weight: 600; font-size: 1.1rem;"><i class="fas fa-history me-2"></i>Recent Activity</span>
-                    <button class="btn btn-outline-primary btn-sm" id="refresh-activity-btn" title="Refresh Activity"><i class="fas fa-sync-alt"></i></button>
-                </div>
-                <div class="card-body" style="padding: 0;">
-                    <ul class="list-group list-group-flush" id="activity-list">
-                        <?php if (!empty($recentActivity)): ?>
-                            <?php foreach ($recentActivity as $activity): ?>
-                                <li class="list-group-item" style="display: flex; align-items: center; gap: 1rem; padding: 1.25rem 1.5rem; border: none; border-bottom: 1px solid #f1f5f9; transition: background 0.2s;">
-                                    <div style="width: 40px; height: 40px; background: #f8fafc; border-radius: 50%; display: flex; align-items: center; justify-content: center;">
-                                        <i class="fas fa-user" style="color: #764ba2;"></i>
-                                    </div>
-                                    <div style="flex: 1;">
-                                        <strong><?= esc($activity['user_name'] ?? ($activity['first_name'] ?? '')) ?></strong> <?= esc($activity['action']) ?>
-                                        <span class="text-muted">on <span class="badge bg-light text-dark"><?= esc($activity['table_name']) ?></span> <span style="font-size:0.95em;">(<?= esc($activity['date_created']) ?>)</span></span>
-                                    </div>
-                                    <div>
-                                        <span class="badge bg-info text-dark" style="font-size:0.9em;">#<?= esc($activity['id'] ?? '') ?></span>
-                                    </div>
-                                </li>
-                            <?php endforeach; ?>
-                        <?php else: ?>
-                            <li class="list-group-item text-center" style="padding: 2rem; color: #9ca3af;">
-                                <i class="fas fa-info-circle" style="font-size: 2rem; margin-bottom: 1rem; color: #cbd5e1;"></i><br>
-                                No recent activity found.
-                            </li>
-                        <?php endif; ?>
-                    </ul>
-                </div>
-            </div>
-        </div>
-    </div>
-
-<script>
-// Refresh activity list via AJAX (example, needs endpoint)
-document.getElementById('refresh-activity-btn').addEventListener('click', function() {
-    const btn = this;
-    btn.disabled = true;
-    btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i>';
-    $.ajax({
-        url: '<?= base_url('reports/recentActivityAjax') ?>',
-        method: 'GET',
-        dataType: 'json',
-        success: function(data) {
-            const list = document.getElementById('activity-list');
-            list.innerHTML = '';
-            if (data && Array.isArray(data)) {
-                data.forEach(activity => {
-                    const li = document.createElement('li');
-                    li.className = 'list-group-item';
-                    li.style = 'display: flex; align-items: center; gap: 1rem; padding: 1.25rem 1.5rem; border: none; border-bottom: 1px solid #f1f5f9; transition: background 0.2s;';
-                    li.innerHTML = `
-                        <div style="width: 40px; height: 40px; background: #f8fafc; border-radius: 50%; display: flex; align-items: center; justify-content: center;">
-                            <i class="fas fa-user" style="color: #764ba2;"></i>
-                        </div>
-                        <div style="flex: 1;">
-                            <strong>${activity.user_name ?? activity.first_name ?? ''}</strong> ${activity.action}
-                            <span class="text-muted">on <span class="badge bg-light text-dark">${activity.table_name}</span> <span style="font-size:0.95em;">(${activity.date_created})</span></span>
-                        </div>
-                        <div>
-                            <span class="badge bg-info text-dark" style="font-size:0.9em;">#${activity.id ?? ''}</span>
-                        </div>
-                    `;
-                    list.appendChild(li);
-                });
-            } else {
-                list.innerHTML = `<li class="list-group-item text-center" style="padding: 2rem; color: #9ca3af;"><i class="fas fa-info-circle" style="font-size: 2rem; margin-bottom: 1rem; color: #cbd5e1;"></i><br>No recent activity found.</li>`;
-            }
-        },
-        error: function() {
-            Swal && Swal.fire({icon:'error',title:'Failed to refresh activity',text:'Could not load recent activity.'});
-        },
-        complete: function() {
-            btn.disabled = false;
-            btn.innerHTML = '<i class="fas fa-sync-alt"></i>';
-        }
-    });
-});
-</script>
 </div>
 
+<!-- Link to external CSS file -->
+<link rel="stylesheet" href="<?= base_url('assets/css/reports.css') ?>"?>
+
+<!-- Chart.js Scripts -->
 <script>
-// Chart.js for Task Status
-const taskStatusData = <?= json_encode(array_values($taskStatusData)) ?>;
-const taskStatusLabels = <?= json_encode(array_keys($taskStatusData)) ?>;
-const ctxTask = document.getElementById('taskStatusChart').getContext('2d');
-new Chart(ctxTask, {
-    type: 'doughnut',
-    data: {
-        labels: taskStatusLabels,
-        datasets: [{
-            data: taskStatusData,
-            backgroundColor: ['#0dcaf0', '#ffc107', '#198754', '#dc3545', '#6c757d'],
-        }]
-    },
-    options: {responsive: true, plugins: {legend: {position: 'bottom'}}}
-});
-// Chart.js for Project Status
-const projectStatusData = <?= json_encode(array_values($projectStatusData)) ?>;
-const projectStatusLabels = <?= json_encode(array_keys($projectStatusData)) ?>;
-const ctxProject = document.getElementById('projectStatusChart').getContext('2d');
-new Chart(ctxProject, {
-    type: 'pie',
-    data: {
-        labels: projectStatusLabels,
-        datasets: [{
-            data: projectStatusData,
-            backgroundColor: ['#198754', '#0dcaf0', '#ffc107', '#dc3545', '#6c757d'],
-        }]
-    },
-    options: {responsive: true, plugins: {legend: {position: 'bottom'}}}
+document.addEventListener('DOMContentLoaded', function() {
+    // Task Status Chart
+    const taskStatusData = <?= json_encode(array_values($taskStatusData ?? [])) ?>;
+    const taskStatusLabels = <?= json_encode(array_keys($taskStatusData ?? [])) ?>;
+    
+    if (taskStatusLabels.length > 0) {
+        const taskCtx = document.getElementById('taskStatusChart').getContext('2d');
+        new Chart(taskCtx, {
+            type: 'doughnut',
+            data: {
+                labels: taskStatusLabels,
+                datasets: [{
+                    data: taskStatusData,
+                    backgroundColor: [
+                        '#667eea',
+                        '#f093fb',
+                        '#4facfe',
+                        '#43e97b',
+                        '#38f9d7'
+                    ],
+                    borderWidth: 0
+                }]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                plugins: {
+                    legend: {
+                        position: 'bottom',
+                        labels: {
+                            padding: 20,
+                            usePointStyle: true,
+                            font: {
+                                size: 12
+                            }
+                        }
+                    }
+                }
+            }
+        });
+    }
+
+    // Project Status Chart
+    const projectStatusData = <?= json_encode(array_values($projectStatusData ?? [])) ?>;
+    const projectStatusLabels = <?= json_encode(array_keys($projectStatusData ?? [])) ?>;
+    
+    if (projectStatusLabels.length > 0) {
+        const projectCtx = document.getElementById('projectStatusChart').getContext('2d');
+        new Chart(projectCtx, {
+            type: 'pie',
+            data: {
+                labels: projectStatusLabels,
+                datasets: [{
+                    data: projectStatusData,
+                    backgroundColor: [
+                        '#764ba2',
+                        '#667eea',
+                        '#f093fb',
+                        '#4facfe',
+                        '#43e97b'
+                    ],
+                    borderWidth: 0
+                }]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                plugins: {
+                    legend: {
+                        position: 'bottom',
+                        labels: {
+                            padding: 20,
+                            usePointStyle: true,
+                            font: {
+                                size: 12
+                            }
+                        }
+                    }
+                }
+            }
+        });
+    }
 });
 </script>

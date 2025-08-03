@@ -5,29 +5,46 @@
 <!-- Profile Page -->
 
 <div class="container-fluid">
+    <!-- Breadcrumbs -->
+    <nav aria-label="breadcrumb" style="margin-bottom: 1.5rem;">
+        <ol style="display: flex; list-style: none; padding: 1rem 1.25rem; margin: 0; background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); border-radius: 0.75rem; box-shadow: 0 4px 15px rgba(102, 126, 234, 0.2); border: none;">
+            <li style="color: #f7fafc; font-weight: 600; font-size: 0.95rem; display: flex; align-items: center; padding: 0.25rem 0.5rem; background: rgba(255,255,255,0.1); border-radius: 0.375rem; backdrop-filter: blur(10px);">
+                <i class="fas fa-user" style="margin-right: 0.5rem; font-size: 0.9rem; opacity: 0.9;"></i>
+                Profile
+            </li>
+        </ol>
+    </nav>
+
+    <!-- Back Button -->
+    <a href="javascript:history.back()" class="btn btn-outline-secondary d-inline-flex align-items-center" style="gap:0.5rem; margin-bottom: 1.5rem;">
+        <i class="fas fa-arrow-left"></i>
+        <span>Back</span>
+    </a>
+    
     <!-- Profile Header -->
-    <div style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white; border-radius: 1rem; padding: 2rem; margin-bottom: 2rem; position: relative; overflow: hidden;">
-        <div style="content: ''; position: absolute; top: 0; right: 0; width: 200px; height: 200px; background: rgba(255,255,255,0.1); border-radius: 50%; transform: translate(50px, -50px);"></div>
-        <div class="row align-items-center">
-            <div class="col-auto">
-                <div style="width: 120px; height: 120px; border-radius: 50%; border: 4px solid rgba(255,255,255,0.3); display: flex; align-items: center; justify-content: center; background: rgba(255,255,255,0.2); font-size: 3rem; color: white; margin-bottom: 1rem;">
-                    <?php if (!empty($user['avatar'])): ?>
-                        <img src="<?= base_url('uploads/avatars/' . $user['avatar']) ?>" alt="Profile" style="width: 100%; height: 100%; border-radius: 50%; object-fit: cover;">
-                    <?php else: ?>
-                        <?= strtoupper(substr($user['first_name'] ?? $user['email'] ?? 'U', 0, 1)) ?>
-                    <?php endif; ?>
-                </div>
+    <div style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white; border-radius: 1.5rem; padding: 2rem; margin-bottom: 2rem; box-shadow: 0 20px 60px rgba(102,126,234,0.2); position: relative; overflow: hidden;">
+        <!-- Decorative Elements -->
+        <div style="position: absolute; top: -50px; right: -50px; width: 200px; height: 200px; background: rgba(255,255,255,0.1); border-radius: 50%; opacity: 0.3;"></div>
+        <div style="position: absolute; bottom: -30px; left: -30px; width: 120px; height: 120px; background: rgba(255,255,255,0.05); border-radius: 50%;"></div>
+        
+        <div style="display: flex; align-items: center; gap: 2rem; position: relative; z-index: 2;">
+            <div style="width: 120px; height: 120px; border-radius: 50%; border: 4px solid rgba(255,255,255,0.3); display: flex; align-items: center; justify-content: center; background: rgba(255,255,255,0.2); font-size: 3rem; color: white; flex-shrink: 0;">
+                <?php if (!empty($user['avatar'])): ?>
+                    <img src="<?= base_url('uploads/avatars/' . $user['avatar']) ?>" alt="Profile" style="width: 100%; height: 100%; border-radius: 50%; object-fit: cover;">
+                <?php else: ?>
+                    <?= strtoupper(substr($user['full_name'] ?? $user['email'] ?? 'U', 0, 1)) ?>
+                <?php endif; ?>
             </div>
-            <div class="col">
-                <h1 class="h2 mb-2">
-                    <?= esc(trim(($user['first_name'] ?? '') . ' ' . ($user['last_name'] ?? ''))) ?: esc($user['email']) ?>
+            <div style="flex: 1;">
+                <h1 style="color: white; font-size: 2.5rem; font-weight: 800; margin-bottom: 0.75rem; font-family: 'Poppins', sans-serif; text-shadow: 0 2px 4px rgba(0,0,0,0.1);">
+                    <?= esc($user['full_name'] ?? $user['email']) ?>
                 </h1>
-                <p class="mb-2 opacity-75">
-                    <i class="fas fa-envelope me-2"></i>
+                <p style="color: rgba(255,255,255,0.95); font-size: 1.1rem; margin-bottom: 0.5rem; font-weight: 400;">
+                    <i class="fas fa-envelope" style="margin-right: 0.75rem;"></i>
                     <?= esc($user['email']) ?>
                 </p>
                 <?php if (!empty($user['phone'])): ?>
-                    <p class="mb-2 opacity-75">
+                    <p style="color: rgba(255,255,255,0.95); font-size: 1.1rem; margin-bottom: 0.5rem; font-weight: 400;">
                         <i class="fas fa-phone me-2"></i>
                         <?= esc($user['phone']) ?>
                     </p>
@@ -118,12 +135,12 @@
                             <img src="<?= base_url('uploads/avatars/' . $user['avatar']) ?>" alt="Profile" style="width: 100%; height: 100%; border-radius: 50%; object-fit: cover;">
                         <?php else: ?>
                             <span style="color: #fff; font-size: 2.5rem; font-weight: 700; letter-spacing: 1px;">
-                                <?= strtoupper(substr($user['first_name'] ?? $user['email'] ?? 'U', 0, 1)) ?>
+                                <?= strtoupper(substr($user['full_name'] ?? $user['email'] ?? 'U', 0, 1)) ?>
                             </span>
                         <?php endif; ?>
                     </div>
                     <div style="font-family: 'Poppins',sans-serif; font-weight: 700; color: #4f46e5; font-size: 1.25rem; text-align: center;">
-                        <?= esc(trim(($user['first_name'] ?? '') . ' ' . ($user['last_name'] ?? ''))) ?: esc($user['email']) ?>
+                        <?= esc($user['full_name'] ?? $user['email']) ?>
                     </div>
                     <div style="color: #6b7280; font-size: 0.95rem; font-weight: 500; text-align: center; margin-bottom: 0.5rem;">
                         <i class="fas fa-user-tag me-1"></i> <?= esc($user['role'] ?? 'User') ?>
@@ -132,9 +149,8 @@
                         <div style="height: 8px; background: #e0e7ff; border-radius: 4px; overflow: hidden;">
                             <?php 
                                 $fieldsFilled = 0;
-                                $fieldsTotal = 6;
-                                if (!empty($user['first_name'])) $fieldsFilled++;
-                                if (!empty($user['last_name'])) $fieldsFilled++;
+                                $fieldsTotal = 5;
+                                if (!empty($user['full_name'])) $fieldsFilled++;
                                 if (!empty($user['phone'])) $fieldsFilled++;
                                 if (!empty($user['avatar'])) $fieldsFilled++;
                                 if (!empty($user['email'])) $fieldsFilled++;
@@ -157,11 +173,7 @@
                     </li>
                     <li class="list-group-item d-flex align-items-center" style="background: transparent; border: none; border-bottom: 1px solid #e5e7eb; padding: 0.85rem 0; gap: 0.75rem;">
                         <span style="color: #667eea; background: #e0e7ff; border-radius: 50%; width: 36px; height: 36px; display: flex; align-items: center; justify-content: center; font-size: 1.2rem;"><i class="fas fa-user"></i></span>
-                        <span style="color: #374151; font-weight: 600; font-size: 1rem;"> <?= esc($user['first_name'] ?? 'Not set') ?> </span>
-                    </li>
-                    <li class="list-group-item d-flex align-items-center" style="background: transparent; border: none; border-bottom: 1px solid #e5e7eb; padding: 0.85rem 0; gap: 0.75rem;">
-                        <span style="color: #667eea; background: #e0e7ff; border-radius: 50%; width: 36px; height: 36px; display: flex; align-items: center; justify-content: center; font-size: 1.2rem;"><i class="fas fa-user"></i></span>
-                        <span style="color: #374151; font-weight: 600; font-size: 1rem;"> <?= esc($user['last_name'] ?? 'Not set') ?> </span>
+                        <span style="color: #374151; font-weight: 600; font-size: 1rem;"> <?= esc($user['full_name'] ?? 'Not set') ?> </span>
                     </li>
                     <li class="list-group-item d-flex align-items-center" style="background: transparent; border: none; border-bottom: 1px solid #e5e7eb; padding: 0.85rem 0; gap: 0.75rem;">
                         <span style="color: #667eea; background: #e0e7ff; border-radius: 50%; width: 36px; height: 36px; display: flex; align-items: center; justify-content: center; font-size: 1.2rem;"><i class="fas fa-phone"></i></span>

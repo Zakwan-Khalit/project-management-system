@@ -29,10 +29,8 @@ class TaskModel extends Model
             priority_lookup.name as priority_name,
             priority_lookup.color as priority_color,
             priority_lookup.level as priority_level,
-            creator_profile.first_name as creator_first_name,
-            creator_profile.last_name as creator_last_name,
-            owner_profile.first_name as owner_first_name,
-            owner_profile.last_name as owner_last_name
+            creator_profile.full_name as creator_full_name,
+            owner_profile.full_name as owner_full_name
         ');
         $builder->join('projects', 'projects.id = tasks.project_id AND projects.is_delete = 0');
         $builder->join('task_status', 'task_status.task_id = tasks.id AND task_status.is_active = 1 AND task_status.is_delete = 0', 'left');
@@ -59,8 +57,7 @@ class TaskModel extends Model
             priority_lookup.name as priority_name,
             priority_lookup.color as priority_color,
             priority_lookup.level as priority_level,
-            owner_profile.first_name as owner_first_name,
-            owner_profile.last_name as owner_last_name
+            owner_profile.full_name as owner_full_name
         ');
         $builder->join('projects', 'projects.id = tasks.project_id AND projects.is_delete = 0');
         $builder->join('task_status', 'task_status.task_id = tasks.id AND task_status.is_active = 1 AND task_status.is_delete = 0', 'left');
@@ -92,8 +89,7 @@ class TaskModel extends Model
             priority_lookup.name as priority_name,
             priority_lookup.color as priority_color,
             priority_lookup.level as priority_level,
-            owner_profile.first_name as owner_first_name,
-            owner_profile.last_name as owner_last_name
+            owner_profile.full_name as owner_full_name
         ');
         $builder->join('task_status', 'task_status.task_id = tasks.id AND task_status.is_active = 1 AND task_status.is_delete = 0', 'left');
         $builder->join('status_lookup', 'status_lookup.id = task_status.status_id AND status_lookup.type = "task" AND status_lookup.is_delete = 0', 'left');
@@ -308,10 +304,8 @@ class TaskModel extends Model
         $builder = $this->db->table('task_ownership');
         $builder->select('
             task_ownership.*,
-            owner_profile.first_name as owner_first_name,
-            owner_profile.last_name as owner_last_name,
-            creator_profile.first_name as creator_first_name,
-            creator_profile.last_name as creator_last_name
+            owner_profile.full_name as owner_full_name,
+            creator_profile.full_name as creator_full_name
         ');
         $builder->join('user_profile as owner_profile', 'owner_profile.user_id = task_ownership.owned_by AND owner_profile.is_delete = 0', 'left');
         $builder->join('user_profile as creator_profile', 'creator_profile.user_id = task_ownership.created_by AND creator_profile.is_delete = 0', 'left');
@@ -458,8 +452,7 @@ class TaskModel extends Model
             p.name as project_name,
             sl.name as status_name,
             sl.color as status_color,
-            up.first_name,
-            up.last_name,
+            up.full_name,
         ');
         $builder->join('projects p', 'p.id = t.project_id AND p.is_delete = 0', 'left');
         $builder->join('task_ownership to', 'to.task_id = t.id AND to.is_active = 1 AND to.is_delete = 0', 'left');
@@ -523,7 +516,7 @@ class TaskModel extends Model
     public function getTaskComments($taskId)
     {
         $builder = $this->db->table('task_comments tc');
-        $builder->select('tc.*, u.email, up.first_name, up.last_name');
+        $builder->select('tc.*, u.email, up.full_name');
         $builder->join('users u', 'u.id = tc.user_id', 'left');
         $builder->join('user_profile up', 'up.user_id = u.id', 'left');
         $builder->where('tc.task_id', $taskId);
@@ -738,7 +731,7 @@ class TaskModel extends Model
     public function getUserProductivityStats($limit = 10)
     {
         $builder = $this->db->table('tasks t');
-        $builder->select('user_profile.first_name, user_profile.last_name, users.email, COUNT(*) as completed_tasks');
+        $builder->select('user_profile.full_name, users.email, COUNT(*) as completed_tasks');
         $builder->join('task_assignment', 'task_assignment.task_id = t.id AND task_assignment.is_active = 1 AND task_assignment.is_delete = 0', 'inner');
         $builder->join('users', 'users.id = task_assignment.user_id AND users.is_delete = 0', 'inner');
         $builder->join('user_profile', 'user_profile.user_id = users.id AND user_profile.is_delete = 0', 'left');

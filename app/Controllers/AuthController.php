@@ -50,8 +50,7 @@ class AuthController extends BaseController
                         $sessionData = [
                             'id' => $user['id'],
                             'email' => $user['email'],
-                            'first_name' => $user['first_name'] ?? '',
-                            'last_name' => $user['last_name'] ?? '',
+                            'full_name' => $user['full_name'] ?? '',
                             'role_id' => $user['role_id'] ?? null,
                             'role_name' => $user['role_name'] ?? '',
                             'is_logged_in' => true
@@ -108,16 +107,16 @@ class AuthController extends BaseController
     public function register()
     {
         if ($this->request->getMethod() === 'POST') {
-            $data = [
+            $userData = [
                 'email' => $this->request->getPost('email'),
-                'password' => $this->request->getPost('password'),
-                'first_name' => $this->request->getPost('first_name'),
-                'last_name' => $this->request->getPost('last_name'),
-                'role' => 'developer', // Default user role
-                'is_active' => 1
+                'password' => $this->request->getPost('password')
             ];
             
-            if ($this->userModel->insert($data)) {
+            $profileData = [
+                'full_name' => $this->request->getPost('full_name')
+            ];
+            
+            if ($this->userModel->createUser($userData, $profileData)) {
                 return $this->response->setJSON([
                     'success' => true,
                     'message' => 'Registration successful. Please login.',
@@ -160,12 +159,11 @@ class AuthController extends BaseController
             return redirect()->to(base_url('login'));
         }
         
-        $user = $this->userModel->find($userId);
+        $user = $this->userModel->getUserById($userId);
         
         if ($this->request->getMethod() === 'POST') {
             $data = [
-                'first_name' => $this->request->getPost('first_name'),
-                'last_name' => $this->request->getPost('last_name'),
+                'full_name' => $this->request->getPost('full_name'),
                 'phone' => $this->request->getPost('phone')
             ];
             
@@ -177,11 +175,10 @@ class AuthController extends BaseController
             //     $data['avatar'] = $newName;
             // }
             
-            if ($this->userModel->update($userId, $data)) {
+            if ($this->userModel->updateUserProfile($userId, $data)) {
                 // Update session userdata
                 $updatedUserData = array_merge($userData, [
-                    'first_name' => $data['first_name'],
-                    'last_name' => $data['last_name']
+                    'full_name' => $data['full_name']
                 ]);
                 
                 // if (isset($data['avatar'])) {
@@ -230,7 +227,7 @@ class AuthController extends BaseController
                 ]);
             }
             
-            $user = $this->userModel->find($userId);
+            $user = $this->userModel->getUserWithPasswordById($userId);
             
             if (!password_verify($currentPassword, $user['password'])) {
                 return $this->response->setJSON([
@@ -239,7 +236,7 @@ class AuthController extends BaseController
                 ]);
             }
             
-            if ($this->userModel->update($userId, ['password' => $newPassword])) {
+            if ($this->userModel->updateUser($userId, ['password' => $newPassword])) {
                 return $this->response->setJSON([
                     'success' => true,
                     'message' => 'Password changed successfully'
@@ -282,8 +279,7 @@ class AuthController extends BaseController
                 $userData = [
                     'id' => $user['id'],
                     'email' => $user['email'],
-                    'first_name' => $user['first_name'],
-                    'last_name' => $user['last_name'],
+                    'full_name' => $user['full_name'],
                     'role' => $user['role'],
                     // 'avatar' => $user['avatar'],
                     'is_active' => $user['is_active'],

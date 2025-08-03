@@ -101,21 +101,8 @@ CREATE TABLE IF NOT EXISTS `task_images` (
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
 
--- User role lookup table
-CREATE TABLE IF NOT EXISTS `user_role_lookup` (
-    `id` int(11) NOT NULL AUTO_INCREMENT,
-    `code` varchar(32),
-    `name` varchar(128),
-    `description` text,
-    `permissions` text,
-    `level` int(11),
-    `is_active` tinyint(1) DEFAULT 1,
-    `is_delete` tinyint(1) DEFAULT 0,
-    `date_created` TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
-    `date_modified` TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
-    KEY `is_delete` (`is_delete`),
-    PRIMARY KEY (`id`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+-- User role lookup table (REMOVED - Using position_lookup + department_lookup instead)
+-- Roles are now managed through position_lookup linked to department_lookup
 
 -- Core User Tables
 CREATE TABLE IF NOT EXISTS `users` (
@@ -134,8 +121,7 @@ CREATE TABLE IF NOT EXISTS `users` (
 CREATE TABLE IF NOT EXISTS `user_profile` (
     `id` int(11) NOT NULL AUTO_INCREMENT,
     `user_id` int(11),
-    `first_name` varchar(64),
-    `last_name` varchar(64),
+    `full_name` varchar(128),
     `phone` varchar(32),
     `bio` text,
     `timezone` varchar(64),
@@ -147,18 +133,8 @@ CREATE TABLE IF NOT EXISTS `user_profile` (
     PRIMARY KEY (`id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
-CREATE TABLE IF NOT EXISTS `user_role` (
-    `id` int(11) NOT NULL AUTO_INCREMENT,
-    `user_id` int(11),
-    `role_id` int(11),
-    `assigned_by` int(11),
-    `is_active` tinyint(1) DEFAULT 1,
-    `is_delete` tinyint(1) DEFAULT 0,
-    `date_created` TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
-    `date_modified` TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
-    KEY `is_delete` (`is_delete`),
-    PRIMARY KEY (`id`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+-- User role assignment table (REMOVED - Using user_rel instead)
+-- User roles are now managed through user_rel linking to position_lookup and department_lookup
 
 CREATE TABLE IF NOT EXISTS `user_access` (
     `id` int(11) NOT NULL AUTO_INCREMENT,
@@ -192,6 +168,7 @@ CREATE TABLE IF NOT EXISTS `projects` (
     `name` varchar(128),
     `code` varchar(32),
     `description` text,
+    `client` varchar(255),
     `budget` decimal(12,2),
     `start_date` date,
     `end_date` date,
@@ -322,13 +299,17 @@ CREATE TABLE IF NOT EXISTS `task_ownership` (
 CREATE TABLE IF NOT EXISTS `activity_logs` (
     `id` int(11) NOT NULL AUTO_INCREMENT,
     `user_id` int(11),
+    `project_id` int(11),
     `action` varchar(128),
+    `description` text,
     `details` text,
     `is_active` tinyint(1) DEFAULT 1,
     `is_delete` tinyint(1) DEFAULT 0,
     `date_created` TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
     `date_modified` TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
     KEY `is_delete` (`is_delete`),
+    KEY `idx_project_activity` (`project_id`, `is_delete`, `date_created`),
+    KEY `idx_user_activity` (`user_id`, `is_delete`, `date_created`),
     PRIMARY KEY (`id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
@@ -406,12 +387,47 @@ CREATE TABLE IF NOT EXISTS `task_templates` (
     KEY `is_delete` (`is_delete`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
+-- Main events table
+CREATE TABLE IF NOT EXISTS `events` (
+    `id` int(11) NOT NULL AUTO_INCREMENT,
+    `title` varchar(255) NOT NULL,
+    `description` text,
+    `event_type` varchar(32) NOT NULL DEFAULT 'meeting',
+    `start_datetime` datetime NOT NULL,
+    `end_datetime` datetime NOT NULL,
+    `location` varchar(255),
+    `project_id` int(11),
+    `created_by` int(11) NOT NULL,
+    `is_active` tinyint(1) DEFAULT 1,
+    `is_delete` tinyint(1) DEFAULT 0,
+    `date_created` TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    `date_modified` TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+    PRIMARY KEY (`id`),
+    KEY `is_delete` (`is_delete`),
+    KEY `idx_event_project` (`project_id`, `is_delete`),
+    KEY `idx_event_datetime` (`start_datetime`, `end_datetime`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+
+-- Event attendees table
+CREATE TABLE IF NOT EXISTS `event_attendees` (
+    `id` int(11) NOT NULL AUTO_INCREMENT,
+    `event_id` int(11) NOT NULL,
+    `user_id` int(11) NOT NULL,
+    `status` varchar(32) DEFAULT 'invited',
+    `response_date` datetime,
+    `notes` text,
+    `is_active` tinyint(1) DEFAULT 1,
+    `is_delete` tinyint(1) DEFAULT 0,
+    `date_created` TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    `date_modified` TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+    PRIMARY KEY (`id`),
+    KEY `is_delete` (`is_delete`),
+    KEY `idx_event_attendee` (`event_id`, `user_id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+
 -- Foreign Key Constraints
 ALTER TABLE `position_lookup` ADD CONSTRAINT `fk_position_department` FOREIGN KEY (`department_id`) REFERENCES `department_lookup` (`id`) ON DELETE SET NULL;
 ALTER TABLE `user_profile` ADD CONSTRAINT `fk_profile_user` FOREIGN KEY (`user_id`) REFERENCES `users` (`id`) ON DELETE CASCADE;
-ALTER TABLE `user_role` ADD CONSTRAINT `fk_user_role_user` FOREIGN KEY (`user_id`) REFERENCES `users` (`id`) ON DELETE CASCADE;
-ALTER TABLE `user_role` ADD CONSTRAINT `fk_user_role_role` FOREIGN KEY (`role_id`) REFERENCES `user_role_lookup` (`id`) ON DELETE CASCADE;
-ALTER TABLE `user_role` ADD CONSTRAINT `fk_user_role_assigned_by` FOREIGN KEY (`assigned_by`) REFERENCES `users` (`id`) ON DELETE SET NULL;
 ALTER TABLE `user_access` ADD CONSTRAINT `fk_user_access_user` FOREIGN KEY (`user_id`) REFERENCES `users` (`id`) ON DELETE CASCADE;
 ALTER TABLE `user_access` ADD CONSTRAINT `fk_user_access_granted_by` FOREIGN KEY (`granted_by`) REFERENCES `users` (`id`) ON DELETE SET NULL;
 ALTER TABLE `user_rel` ADD CONSTRAINT `fk_user_rel_user` FOREIGN KEY (`user_id`) REFERENCES `users` (`id`) ON DELETE CASCADE;
@@ -445,7 +461,12 @@ ALTER TABLE `task_ownership` ADD CONSTRAINT `fk_ownership_task` FOREIGN KEY (`ta
 ALTER TABLE `task_ownership` ADD CONSTRAINT `fk_ownership_created_by` FOREIGN KEY (`created_by`) REFERENCES `users` (`id`) ON DELETE CASCADE;
 ALTER TABLE `task_ownership` ADD CONSTRAINT `fk_ownership_owned_by` FOREIGN KEY (`owned_by`) REFERENCES `users` (`id`) ON DELETE SET NULL;
 ALTER TABLE `activity_logs` ADD CONSTRAINT `fk_activity_user` FOREIGN KEY (`user_id`) REFERENCES `users` (`id`) ON DELETE SET NULL;
+ALTER TABLE `activity_logs` ADD CONSTRAINT `fk_activity_project` FOREIGN KEY (`project_id`) REFERENCES `projects` (`id`) ON DELETE SET NULL;
 ALTER TABLE `task_comments` ADD CONSTRAINT `fk_comments_task` FOREIGN KEY (`task_id`) REFERENCES `tasks` (`id`) ON DELETE CASCADE;
 ALTER TABLE `task_comments` ADD CONSTRAINT `fk_comments_user` FOREIGN KEY (`user_id`) REFERENCES `users` (`id`) ON DELETE CASCADE;
 ALTER TABLE `task_attachments` ADD CONSTRAINT `fk_attachments_task` FOREIGN KEY (`task_id`) REFERENCES `tasks` (`id`) ON DELETE CASCADE;
 ALTER TABLE `task_attachments` ADD CONSTRAINT `fk_attachments_user` FOREIGN KEY (`uploaded_by`) REFERENCES `users` (`id`) ON DELETE CASCADE;
+ALTER TABLE `events` ADD CONSTRAINT `fk_event_project` FOREIGN KEY (`project_id`) REFERENCES `projects` (`id`) ON DELETE SET NULL;
+ALTER TABLE `events` ADD CONSTRAINT `fk_event_creator` FOREIGN KEY (`created_by`) REFERENCES `users` (`id`) ON DELETE CASCADE;
+ALTER TABLE `event_attendees` ADD CONSTRAINT `fk_attendee_event` FOREIGN KEY (`event_id`) REFERENCES `events` (`id`) ON DELETE CASCADE;
+ALTER TABLE `event_attendees` ADD CONSTRAINT `fk_attendee_user` FOREIGN KEY (`user_id`) REFERENCES `users` (`id`) ON DELETE CASCADE;

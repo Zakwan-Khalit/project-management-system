@@ -200,11 +200,9 @@ if (!function_exists('user_email')) {
 if (!function_exists('user_name')) {
     function user_name($full = false) {
         if ($full) {
-            $firstName = user_data('first_name') ?? '';
-            $lastName = user_data('last_name') ?? '';
-            return trim($firstName . ' ' . $lastName);
+            return user_data('full_name') ?? '';
         }
-        return user_data('first_name') ?? 'User';
+        return user_data('full_name') ?? 'User';
     }
 }
 

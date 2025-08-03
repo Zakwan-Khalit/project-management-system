@@ -1,121 +1,144 @@
+<!-- Breadcrumbs -->
+<nav aria-label="breadcrumb" style="margin-bottom: 1rem;">
+    <ol style="display: flex; list-style: none; padding: 0.75rem 1rem; margin: 0; background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); border-radius: 0.5rem; box-shadow: 0 3px 12px rgba(102, 126, 234, 0.15); border: none;">
+        <li style="display: flex; align-items: center;">
+            <a href="<?= base_url('dashboard') ?>" style="color: #ffffff; text-decoration: none; font-weight: 600; font-size: 0.85rem; transition: all 0.3s ease; display: flex; align-items: center; padding: 0.2rem 0.4rem; border-radius: 0.3rem;" onmouseover="this.style.backgroundColor='rgba(255,255,255,0.15)'; this.style.transform='translateY(-1px)'" onmouseout="this.style.backgroundColor='transparent'; this.style.transform='translateY(0)'">
+                <i class="fas fa-tachometer-alt" style="margin-right: 0.4rem; font-size: 0.8rem;"></i>
+                Dashboard
+            </a>
+            <span style="margin: 0 0.5rem; color: #e2e8f0; font-size: 1rem; font-weight: 300;">›</span>
+        </li>
+        <li style="color: #f7fafc; font-weight: 600; font-size: 0.85rem; display: flex; align-items: center; padding: 0.2rem 0.4rem; background: rgba(255,255,255,0.1); border-radius: 0.3rem; backdrop-filter: blur(10px);">
+            <i class="fas fa-project-diagram" style="margin-right: 0.4rem; font-size: 0.75rem; opacity: 0.9;"></i>
+            Projects
+        </li>
+    </ol>
+</nav>
+
 <!-- Projects Header -->
-<div style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white; border-radius: 1.5rem; padding: 2rem; margin-bottom: 2rem; box-shadow: 0 20px 60px rgba(102,126,234,0.2); position: relative; overflow: hidden;">
-    <!-- Decorative Elements -->
-    <div style="position: absolute; top: -50px; right: -50px; width: 200px; height: 200px; background: rgba(255,255,255,0.1); border-radius: 50%; opacity: 0.3;"></div>
-    <div style="position: absolute; bottom: -30px; left: -30px; width: 120px; height: 120px; background: rgba(255,255,255,0.05); border-radius: 50%;"></div>
+<div style="background: white; border-radius: 0.75rem; box-shadow: 0 6px 20px rgba(0,0,0,0.06); border: 1px solid #f1f3f4; margin-bottom: 1.25rem; overflow: hidden;">
+    <!-- Decorative Header Section -->
+    <div style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white; padding: 1.25rem; position: relative; overflow: hidden;">
+        <!-- Decorative Elements -->
+        <div style="position: absolute; top: -30px; right: -30px; width: 120px; height: 120px; background: rgba(255,255,255,0.1); border-radius: 50%; opacity: 0.3;"></div>
+        <div style="position: absolute; bottom: -20px; left: -20px; width: 80px; height: 80px; background: rgba(255,255,255,0.05); border-radius: 50%;"></div>
+        
+        <div style="display: flex; justify-content: space-between; align-items: center; position: relative; z-index: 2;">
+            <div>
+                <h1 style="color: white; font-size: 1.5rem; font-weight: 700; margin: 0; font-family: 'Poppins', sans-serif; text-shadow: 0 2px 4px rgba(0,0,0,0.1); display: flex; align-items: center; gap: 0.5rem;">
+                    <i class="fas fa-project-diagram" style="color: rgba(255,255,255,0.9); font-size: 1.3rem;"></i>
+                    My Projects
+                </h1>
+                
+            </div>
+            <div style="display: flex; gap: 0.75rem;">
+                <?php $userData = session('userdata'); $roleId = $userData['role_id'] ?? null; if (in_array($roleId, [1,2,3,4])): ?>
+                <button onclick="createNewProject()" style="background: rgba(255,255,255,0.2); border: 2px solid rgba(255,255,255,0.3); color: white; border-radius: 0.5rem; padding: 0.5rem 1rem; font-weight: 600; font-size: 0.85rem; cursor: pointer; transition: all 0.3s ease; backdrop-filter: blur(10px);" onmouseover="this.style.background='rgba(255,255,255,0.3)'; this.style.transform='translateY(-1px)'; this.style.boxShadow='0 6px 15px rgba(0,0,0,0.15)';" onmouseout="this.style.background='rgba(255,255,255,0.2)'; this.style.transform='translateY(0)'; this.style.boxShadow='none';">
+                    <i class="fas fa-plus" style="margin-right: 0.4rem;"></i>
+                    New Project
+                </button>
+                <?php endif; ?>
+            </div>
+    </div>
     
-    <div style="display: flex; justify-content: space-between; align-items: center; position: relative; z-index: 2;">
-        <div>
-            <h1 style="color: white; font-size: 2.5rem; font-weight: 800; margin-bottom: 0.5rem; font-family: 'Poppins', sans-serif; text-shadow: 0 2px 4px rgba(0,0,0,0.1);">
-                <i class="fas fa-project-diagram" style="margin-right: 1rem; color: rgba(255,255,255,0.9);"></i>
-                My Projects
-            </h1>
-        </div>
-        <div style="display: flex; gap: 1rem;">
-            <?php $userData = session('userdata'); $roleId = $userData['role_id'] ?? null; if (in_array($roleId, [1,2,3,4])): ?>
-            <button onclick="createNewProject()" style="background: rgba(255,255,255,0.2); border: 2px solid rgba(255,255,255,0.3); color: white; border-radius: 1rem; padding: 0.75rem 1.5rem; font-weight: 600; font-size: 1rem; cursor: pointer; transition: all 0.3s ease; backdrop-filter: blur(10px);" onmouseover="this.style.background='rgba(255,255,255,0.3)'; this.style.transform='translateY(-2px)'; this.style.boxShadow='0 10px 25px rgba(0,0,0,0.2)';" onmouseout="this.style.background='rgba(255,255,255,0.2)'; this.style.transform='translateY(0)'; this.style.boxShadow='none';">
-                <i class="fas fa-plus" style="margin-right: 0.5rem;"></i>
-                New Project
-            </button>
-            <?php endif; ?>
-        </div>
-    </div>
-</div>
-
-<!-- 4 Stats Cards in a Row -->
-<div class="row" style="display: flex; gap: 1.5rem; margin-bottom: 2rem;">
-    <!-- Total Projects Card -->
-    <div class="col" style="flex: 1; min-width: 0;">
-        <div style="background: #fff; border-radius: 1.25rem; box-shadow: 0 4px 24px rgba(102,126,234,0.08); padding: 1.5rem; text-align: center;">
-            <i class="fas fa-project-diagram" style="font-size: 2rem; color: #667eea; margin-bottom: 0.75rem;"></i>
-            <h3 style="font-family: 'Poppins', sans-serif; font-weight: 700; margin-bottom: 0.25rem; font-size: 1.1rem;">Total</h3>
-            <div style="font-size: 1.75rem; font-weight: 800; color: #4a5568; margin-bottom: 0.25rem;" id="totalProjects">0</div>
-            <div style="color: #6b7280; font-size: 0.85rem;">Projects</div>
-        </div>
-    </div>
-    <!-- Active Projects Card -->
-    <div class="col" style="flex: 1; min-width: 0;">
-        <div style="background: #fff; border-radius: 1.25rem; box-shadow: 0 4px 24px rgba(245,158,11,0.08); padding: 1.5rem; text-align: center;">
-            <i class="fas fa-play" style="font-size: 2rem; color: #f59e0b; margin-bottom: 0.75rem;"></i>
-            <h3 style="font-family: 'Poppins', sans-serif; font-weight: 700; margin-bottom: 0.25rem; font-size: 1.1rem;">Active</h3>
-            <div style="font-size: 1.75rem; font-weight: 800; color: #4a5568; margin-bottom: 0.25rem;" id="inProgressProjects">0</div>
-            <div style="color: #6b7280; font-size: 0.85rem;">In Progress</div>
-        </div>
-    </div>
-    <!-- Completed Projects Card -->
-    <div class="col" style="flex: 1; min-width: 0;">
-        <div style="background: #fff; border-radius: 1.25rem; box-shadow: 0 4px 24px rgba(16,185,129,0.08); padding: 1.5rem; text-align: center;">
-            <i class="fas fa-check-circle" style="font-size: 2rem; color: #10b981; margin-bottom: 0.75rem;"></i>
-            <h3 style="font-family: 'Poppins', sans-serif; font-weight: 700; margin-bottom: 0.25rem; font-size: 1.1rem;">Completed</h3>
-            <div style="font-size: 1.75rem; font-weight: 800; color: #4a5568; margin-bottom: 0.25rem;" id="completedProjects">0</div>
-            <div style="color: #6b7280; font-size: 0.85rem;">Finished</div>
-        </div>
-    </div>
-    <!-- Delayed Projects Card -->
-    <div class="col" style="flex: 1; min-width: 0;">
-        <div style="background: #fff; border-radius: 1.25rem; box-shadow: 0 4px 24px rgba(239,68,68,0.08); padding: 1.5rem; text-align: center;">
-            <i class="fas fa-exclamation-triangle" style="font-size: 2rem; color: #ef4444; margin-bottom: 0.75rem;"></i>
-            <h3 style="font-family: 'Poppins', sans-serif; font-weight: 700; margin-bottom: 0.25rem; font-size: 1.1rem;">Delayed</h3>
-            <div style="font-size: 1.75rem; font-weight: 800; color: #4a5568; margin-bottom: 0.25rem;" id="delayedProjects">0</div>
-            <div style="color: #6b7280; font-size: 0.85rem;">Overdue</div>
+    <!-- Stats Cards Section -->
+    <div style="padding: 1.25rem;">
+        <div class="row" style="display: flex; gap: 1rem;">
+            <!-- Total Projects Card -->
+            <div class="col" style="flex: 1; min-width: 0;">
+                <div style="background: linear-gradient(135deg, #f8fafc 0%, #f1f5f9 100%); border-radius: 0.75rem; padding: 1rem; text-align: center; border: 1px solid #e2e8f0;">
+                    <i class="fas fa-project-diagram" style="font-size: 1.5rem; color: #667eea; margin-bottom: 0.5rem;"></i>
+                    <h3 style="font-family: 'Poppins', sans-serif; font-weight: 600; margin-bottom: 0.2rem; font-size: 0.95rem; color: #374151;">Total</h3>
+                    <div style="font-size: 1.4rem; font-weight: 700; color: #1f2937; margin-bottom: 0.2rem;" id="totalProjects">0</div>
+                    <div style="color: #6b7280; font-size: 0.75rem;">Projects</div>
+                </div>
+            </div>
+            <!-- Active Projects Card -->
+            <div class="col" style="flex: 1; min-width: 0;">
+                <div style="background: linear-gradient(135deg, #fff7ed 0%, #fed7aa 100%); border-radius: 0.75rem; padding: 1rem; text-align: center; border: 1px solid #fdba74;">
+                    <i class="fas fa-play" style="font-size: 1.5rem; color: #ea580c; margin-bottom: 0.5rem;"></i>
+                    <h3 style="font-family: 'Poppins', sans-serif; font-weight: 600; margin-bottom: 0.2rem; font-size: 0.95rem; color: #9a3412;">Active</h3>
+                    <div style="font-size: 1.4rem; font-weight: 700; color: #9a3412; margin-bottom: 0.2rem;" id="inProgressProjects">0</div>
+                    <div style="color: #c2410c; font-size: 0.75rem;">In Progress</div>
+                </div>
+            </div>
+            <!-- Completed Projects Card -->
+            <div class="col" style="flex: 1; min-width: 0;">
+                <div style="background: linear-gradient(135deg, #f0fdf4 0%, #bbf7d0 100%); border-radius: 0.75rem; padding: 1rem; text-align: center; border: 1px solid #86efac;">
+                    <i class="fas fa-check-circle" style="font-size: 1.5rem; color: #16a34a; margin-bottom: 0.5rem;"></i>
+                    <h3 style="font-family: 'Poppins', sans-serif; font-weight: 600; margin-bottom: 0.2rem; font-size: 0.95rem; color: #166534;">Completed</h3>
+                    <div style="font-size: 1.4rem; font-weight: 700; color: #166534; margin-bottom: 0.2rem;" id="completedProjects">0</div>
+                    <div style="color: #15803d; font-size: 0.75rem;">Finished</div>
+                </div>
+            </div>
+            <!-- Delayed Projects Card -->
+            <div class="col" style="flex: 1; min-width: 0;">
+                <div style="background: linear-gradient(135deg, #fef2f2 0%, #fecaca 100%); border-radius: 0.75rem; padding: 1rem; text-align: center; border: 1px solid #f87171;">
+                    <i class="fas fa-exclamation-triangle" style="font-size: 1.5rem; color: #dc2626; margin-bottom: 0.5rem;"></i>
+                    <h3 style="font-family: 'Poppins', sans-serif; font-weight: 600; margin-bottom: 0.2rem; font-size: 0.95rem; color: #991b1b;">Delayed</h3>
+                    <div style="font-size: 1.4rem; font-weight: 700; color: #991b1b; margin-bottom: 0.2rem;" id="delayedProjects">0</div>
+                    <div style="color: #dc2626; font-size: 0.75rem;">Overdue</div>
+                </div>
+            </div>
         </div>
     </div>
 </div>
 
-<!-- Compact Filters and Controls -->
-<div style="background: white; border-radius: 1rem; padding: 1rem; margin-bottom: 1.5rem; box-shadow: 0 4px 6px rgba(0,0,0,0.05);">
-    <!-- Filter Tabs -->
-    <div style="display: flex; flex-wrap: wrap; align-items: center; gap: 0.5rem; margin-bottom: 0.75rem;">
-        <div style="display: flex; gap: 0.3rem; flex-wrap: wrap;">
-            <button onclick="filterProjects('all')" data-filter="all" style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white; border: none; border-radius: 0.5rem; padding: 0.4rem 0.8rem; font-weight: 600; font-size: 0.8rem; cursor: pointer; transition: all 0.3s ease;">
-                <i class="fas fa-th-large" style="margin-right: 0.3rem;"></i>All
-            </button>
-            <button onclick="filterProjects('planning')" data-filter="planning" style="background: rgba(159, 122, 234, 0.1); color: #9f7aea; border: 1px solid #9f7aea; border-radius: 0.5rem; padding: 0.4rem 0.8rem; font-weight: 600; font-size: 0.8rem; cursor: pointer; transition: all 0.3s ease;" onmouseover="this.style.background='#9f7aea'; this.style.color='white';" onmouseout="this.style.background='rgba(159, 122, 234, 0.1)'; this.style.color='#9f7aea';">
-                <i class="fas fa-lightbulb" style="margin-right: 0.3rem;"></i>Planning
-            </button>
-            <button onclick="filterProjects('active')" data-filter="active" style="background: rgba(237, 137, 54, 0.1); color: #ed8936; border: 1px solid #ed8936; border-radius: 0.5rem; padding: 0.4rem 0.8rem; font-weight: 600; font-size: 0.8rem; cursor: pointer; transition: all 0.3s ease;" onmouseover="this.style.background='#ed8936'; this.style.color='white';" onmouseout="this.style.background='rgba(237, 137, 54, 0.1)'; this.style.color='#ed8936';">
-                <i class="fas fa-play" style="margin-right: 0.3rem;"></i>Active
-            </button>
-            <button onclick="filterProjects('completed')" data-filter="completed" style="background: rgba(72, 187, 120, 0.1); color: #48bb78; border: 1px solid #48bb78; border-radius: 0.5rem; padding: 0.4rem 0.8rem; font-weight: 600; font-size: 0.8rem; cursor: pointer; transition: all 0.3s ease;" onmouseover="this.style.background='#48bb78'; this.style.color='white';" onmouseout="this.style.background='rgba(72, 187, 120, 0.1)'; this.style.color='#48bb78';">
-                <i class="fas fa-check-circle" style="margin-right: 0.3rem;"></i>Completed
-            </button>
-            <button onclick="filterProjects('on_hold')" data-filter="on_hold" style="background: rgba(49, 151, 149, 0.1); color: #319795; border: 1px solid #319795; border-radius: 0.5rem; padding: 0.4rem 0.8rem; font-weight: 600; font-size: 0.8rem; cursor: pointer; transition: all 0.3s ease;" onmouseover="this.style.background='#319795'; this.style.color='white';" onmouseout="this.style.background='rgba(49, 151, 149, 0.1)'; this.style.color='#319795';">
-                <i class="fas fa-pause" style="margin-right: 0.3rem;"></i>On Hold
-            </button>
+<!-- Filters and Controls -->
+<div style="background: white; border-radius: 0.75rem; box-shadow: 0 8px 25px rgba(0,0,0,0.08); border: 1px solid #f1f3f4; margin-bottom: 1.5rem; overflow: hidden;">
+    <div style="padding: 1.25rem;">
+        <!-- Filter Tabs -->
+        <div style="display: flex; flex-wrap: wrap; align-items: center; gap: 0.5rem; margin-bottom: 1rem;">
+            <div style="display: flex; gap: 0.4rem; flex-wrap: wrap;">
+                <button onclick="filterProjects('all')" data-filter="all" style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white; border: none; border-radius: 0.4rem; padding: 0.4rem 0.75rem; font-weight: 600; font-size: 0.8rem; cursor: pointer; transition: all 0.3s ease;">
+                    <i class="fas fa-th-large" style="margin-right: 0.4rem;"></i>All
+                </button>
+                <button onclick="filterProjects('planning')" data-filter="planning" style="background: rgba(159, 122, 234, 0.1); color: #9f7aea; border: 1px solid #9f7aea; border-radius: 0.4rem; padding: 0.4rem 0.75rem; font-weight: 600; font-size: 0.8rem; cursor: pointer; transition: all 0.3s ease;" onmouseover="this.style.background='#9f7aea'; this.style.color='white';" onmouseout="this.style.background='rgba(159, 122, 234, 0.1)'; this.style.color='#9f7aea';">
+                    <i class="fas fa-lightbulb" style="margin-right: 0.4rem;"></i>Planning
+                </button>
+                <button onclick="filterProjects('active')" data-filter="active" style="background: rgba(237, 137, 54, 0.1); color: #ed8936; border: 1px solid #ed8936; border-radius: 0.4rem; padding: 0.4rem 0.75rem; font-weight: 600; font-size: 0.8rem; cursor: pointer; transition: all 0.3s ease;" onmouseover="this.style.background='#ed8936'; this.style.color='white';" onmouseout="this.style.background='rgba(237, 137, 54, 0.1)'; this.style.color='#ed8936';">
+                    <i class="fas fa-play" style="margin-right: 0.4rem;"></i>Active
+                </button>
+                <button onclick="filterProjects('completed')" data-filter="completed" style="background: rgba(72, 187, 120, 0.1); color: #48bb78; border: 1px solid #48bb78; border-radius: 0.4rem; padding: 0.4rem 0.75rem; font-weight: 600; font-size: 0.8rem; cursor: pointer; transition: all 0.3s ease;" onmouseover="this.style.background='#48bb78'; this.style.color='white';" onmouseout="this.style.background='rgba(72, 187, 120, 0.1)'; this.style.color='#48bb78';">
+                    <i class="fas fa-check-circle" style="margin-right: 0.4rem;"></i>Completed
+                </button>
+                <button onclick="filterProjects('on_hold')" data-filter="on_hold" style="background: rgba(49, 151, 149, 0.1); color: #319795; border: 1px solid #319795; border-radius: 0.4rem; padding: 0.4rem 0.75rem; font-weight: 600; font-size: 0.8rem; cursor: pointer; transition: all 0.3s ease;" onmouseover="this.style.background='#319795'; this.style.color='white';" onmouseout="this.style.background='rgba(49, 151, 149, 0.1)'; this.style.color='#319795';">
+                    <i class="fas fa-pause" style="margin-right: 0.4rem;"></i>On Hold
+                </button>
+            </div>
+
+            <!-- Search Box -->
+            <div style="margin-left: auto; position: relative;">
+                <input type="text" id="searchInput" placeholder="Search projects..." style="background: #f8fafc; border: 1px solid #e2e8f0; border-radius: 0.4rem; padding: 0.4rem 2rem 0.4rem 0.75rem; color: #4a5568; font-size: 0.8rem; outline: none; transition: all 0.3s ease; width: 200px; font-weight: 500;" onfocus="this.style.borderColor='#667eea'; this.style.background='white';" onblur="this.style.borderColor='#e2e8f0'; this.style.background='#f8fafc';">
+                <i class="fas fa-search" style="position: absolute; right: 0.75rem; top: 50%; transform: translateY(-50%); color: #9ca3af; font-size: 0.8rem;"></i>
+            </div>
         </div>
 
-        <!-- Search Box -->
-        <div style="margin-left: auto; position: relative;">
-            <input type="text" id="searchInput" placeholder="Search projects..." style="background: #f8fafc; border: 1px solid #e2e8f0; border-radius: 0.5rem; padding: 0.4rem 2.5rem 0.4rem 0.75rem; color: #4a5568; font-size: 0.85rem; outline: none; transition: all 0.3s ease; width: 200px; font-weight: 500;" onfocus="this.style.borderColor='#667eea'; this.style.background='white';" onblur="this.style.borderColor='#e2e8f0'; this.style.background='#f8fafc';">
-            <i class="fas fa-search" style="position: absolute; right: 0.75rem; top: 50%; transform: translateY(-50%); color: #9ca3af; font-size: 0.8rem;"></i>
+        <!-- Additional Filters -->
+        <div style="display: flex; gap: 0.75rem; flex-wrap: wrap; align-items: center;">
+            <select id="priorityFilter" style="background: #f8fafc; border: 1px solid #e2e8f0; border-radius: 0.4rem; padding: 0.4rem 0.75rem; color: #4a5568; font-size: 0.8rem; outline: none; font-weight: 600; cursor: pointer;" onfocus="this.style.borderColor='#667eea'; this.style.background='white';" onblur="this.style.borderColor='#e2e8f0'; this.style.background='#f8fafc';">
+                <option value="">All Priorities</option>
+                <option value="low">Low Priority</option>
+                <option value="medium">Medium Priority</option>
+                <option value="high">High Priority</option>
+                <option value="critical">Critical Priority</option>
+            </select>
+            <button onclick="clearFilters()" style="background: linear-gradient(135deg, #f56565, #e53e3e); color: white; border: none; border-radius: 0.4rem; padding: 0.4rem 0.75rem; font-weight: 600; font-size: 0.8rem; cursor: pointer; transition: all 0.3s ease;">
+                <i class="fas fa-times" style="margin-right: 0.4rem;"></i>Clear
+            </button>
         </div>
-    </div>
-
-    <!-- Additional Filters -->
-    <div style="display: flex; gap: 0.5rem; flex-wrap: wrap; align-items: center;">
-        <select id="priorityFilter" style="background: #f8fafc; border: 1px solid #e2e8f0; border-radius: 0.5rem; padding: 0.4rem 0.6rem; color: #4a5568; font-size: 0.8rem; outline: none; font-weight: 600; cursor: pointer;" onfocus="this.style.borderColor='#667eea'; this.style.background='white';" onblur="this.style.borderColor='#e2e8f0'; this.style.background='#f8fafc';">
-            <option value="">All Priorities</option>
-            <option value="low">Low Priority</option>
-            <option value="medium">Medium Priority</option>
-            <option value="high">High Priority</option>
-            <option value="critical">Critical Priority</option>
-        </select>
-        <button onclick="clearFilters()" style="background: linear-gradient(135deg, #f56565, #e53e3e); color: white; border: none; border-radius: 0.5rem; padding: 0.4rem 0.8rem; font-weight: 600; font-size: 0.8rem; cursor: pointer; transition: all 0.3s ease;">
-            <i class="fas fa-times" style="margin-right: 0.3rem;"></i>Clear
-        </button>
     </div>
 </div>
 
-    <!-- Projects Container -->
-    <div style="margin-bottom: 2rem;">
+<!-- Projects Container -->
+<div style="background: white; border-radius: 1rem; box-shadow: 0 10px 30px rgba(0,0,0,0.08); border: 1px solid #f1f3f4; overflow: hidden;">
+    <div style="padding: 2rem;">
         <!-- Loading State -->
         <div id="loadingContainer" style="text-align: center; padding: 2rem;">
             <div style="width: 40px; height: 40px; border: 3px solid #e2e8f0; border-top: 3px solid #667eea; border-radius: 50%; margin: 0 auto 1rem auto; animation: spin 1s linear infinite;"></div>
             <h4 style="color: #6b7280; font-weight: 600; font-family: 'Poppins', sans-serif; margin-bottom: 0.5rem; font-size: 1.1rem;">Loading projects...</h4>
             <p style="color: #9ca3af; margin: 0; font-size: 0.9rem;">Please wait</p>
-        </div>
-
-        <style>
+        </div>        <style>
             @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
             @keyframes pulse { 0%, 100% { opacity: 1; } 50% { opacity: 0.6; } }
             
@@ -205,21 +228,22 @@ let currentView = 'grid';
 let currentFilter = 'all';
 let projects = [];
 let filteredProjects = [];
+let isInitialized = false; // Prevent double initialization
 
 // Initialize page when DOM is loaded
 document.addEventListener('DOMContentLoaded', function() {
-    // Wait for jQuery to be available
-    function waitForJQuery() {
-        if (typeof $ !== 'undefined') {
-            console.log('jQuery is now available');
-            initializePage();
-        } else {
-            console.log('Waiting for jQuery...');
-            setTimeout(waitForJQuery, 100);
-        }
+    if (!isInitialized) {
+        initializePage();
+        isInitialized = true;
     }
-    
-    waitForJQuery();
+});
+
+// Fallback initialization
+$(document).ready(function() {
+    if (!isInitialized) {
+        initializePage();
+        isInitialized = true;
+    }
 });
 
 function initializePage() {
@@ -253,7 +277,7 @@ function initializePage() {
     }
     
     // Load data
-    console.log('Starting to load data...');
+    console.log('Loading project stats and projects...');
     loadProjectStats();
     loadProjects();
 }
@@ -261,12 +285,9 @@ function initializePage() {
 // Load project statistics
 function loadProjectStats() {
     if (typeof $ === 'undefined') {
-        console.error('jQuery is not available! Cannot make AJAX calls.');
+        updateStats({ total: 0, completed: 0, in_progress: 0, delayed: 0 });
         return;
     }
-    
-    console.log('Calling loadProjectStats()');
-    console.log('URL:', '<?= base_url('projects/getProjectStats') ?>');
     
     $.ajax({
         url: '<?= base_url('projects/getProjectStats') ?>',
@@ -276,20 +297,13 @@ function loadProjectStats() {
             'X-Requested-With': 'XMLHttpRequest'
         },
         success: function(data) {
-            console.log('Stats response:', data);
             if (data.success && data.stats) {
-                console.log('Stats data:', data.stats);
                 updateStats(data.stats);
             } else {
-                console.error('Failed to load stats:', data.message);
                 updateStats({ total: 0, completed: 0, in_progress: 0, delayed: 0 });
             }
         },
         error: function(xhr, status, error) {
-            console.error('Error loading project stats:', error);
-            console.error('Status:', status);
-            console.error('Response:', xhr.responseText);
-            console.error('XHR:', xhr);
             updateStats({ total: 0, completed: 0, in_progress: 0, delayed: 0 });
         }
     });
@@ -316,14 +330,8 @@ function loadProjects() {
         console.error('jQuery is not available! Cannot make AJAX calls.');
         return;
     }
-    console.log('Loading projects...');
-    try {
-        showLoading();
-    } catch (e) {
-        console.error('showLoading() failed:', e);
-    }
-    console.log('Calling loadProjects()');
-    console.log('URL:', '<?= base_url('projects/getProjects') ?>');
+    
+    showProjectsLoading();
     
     $.ajax({
         url: '<?= base_url('projects/getProjects') ?>',
@@ -333,45 +341,31 @@ function loadProjects() {
             'X-Requested-With': 'XMLHttpRequest'
         },
         success: function(data) {
-            console.log('Projects response:', data);
             if (data.success && data.projects) {
                 projects = data.projects;
-                console.log('Projects loaded:', projects.length);
-                console.log('Sample project:', projects[0]);
                 applyFilters();
             } else {
-                console.error('Failed to load projects:', data.message);
+                console.error('Failed to load projects:', data.message || 'Unknown error');
                 showEmptyState();
             }
         },
         error: function(xhr, status, error) {
-            console.error('Error loading projects:', error);
-            console.error('Status:', status);
-            console.error('Response:', xhr.responseText);
-            console.error('XHR:', xhr);
+            console.error('AJAX Error:', error, 'Status:', status, 'Response:', xhr.responseText);
             showEmptyState();
         },
         complete: function() {
-            hideLoading();
+            hideProjectsLoading();
         }
     });
 }
 
 // Apply current filters to projects
 function applyFilters() {
-    console.log('Applying filters...');
-    console.log('Total projects:', projects.length);
-    console.log('Current filter:', currentFilter);
-    console.log('Current view:', currentView);
-    
     const searchInput = document.getElementById('searchInput');
     const priorityFilterElement = document.getElementById('priorityFilter');
     
     const searchTerm = searchInput ? searchInput.value.toLowerCase() : '';
     const priorityFilter = priorityFilterElement ? priorityFilterElement.value : '';
-    
-    console.log('Search term:', searchTerm);
-    console.log('Priority filter:', priorityFilter);
     
     filteredProjects = projects.filter(project => {
         // Status filter
@@ -398,14 +392,10 @@ function applyFilters() {
         
         return true;
     });
-    
-    console.log('Filtered projects:', filteredProjects.length);
 
     if (currentView === 'grid') {
-        console.log('Rendering grid view');
         renderGridView();
     } else {
-        console.log('Rendering table view');
         renderTableView();
     }
 
@@ -422,8 +412,6 @@ function applyFilters() {
             tableView.style.display = 'block';
         }
     }
-    
-    console.log('View display updated');
 }
 
 // Render projects in grid view - Modern Horizontal Cards
@@ -472,17 +460,9 @@ function renderGridView() {
 
 // Render projects in table view
 function renderTableView() {
-    console.log('renderTableView called with', filteredProjects.length, 'projects');
-    
     const tableView = document.getElementById('tableView');
     const tableBody = document.getElementById('projectsTableBody');
     const emptyState = document.getElementById('emptyState');
-    
-    console.log('DOM elements found:', {
-        tableView: !!tableView,
-        tableBody: !!tableBody,
-        emptyState: !!emptyState
-    });
     
     if (!tableView || !tableBody || !emptyState) {
         console.error('Required DOM elements not found for table view');
@@ -490,23 +470,19 @@ function renderTableView() {
     }
     
     if (filteredProjects.length === 0) {
-        console.log('No projects to show, showing empty state');
         tableView.style.display = 'none';
         emptyState.style.display = 'block';
         return;
     }
     
-    console.log('Showing table with projects');
     emptyState.style.display = 'none';
     tableView.style.display = 'block';
     
     const tableRows = filteredProjects.map(project => {
-        console.log('Creating row for project:', project.name);
         return createProjectRow(project);
     });
     
     tableBody.innerHTML = tableRows.join('');
-    console.log('Table body updated with', tableRows.length, 'rows');
     
     // Re-setup select all functionality after rendering table
     const selectAllCheckbox = document.getElementById('selectAllProjects');
@@ -538,7 +514,6 @@ function createHorizontalProjectCard(project) {
                         <h4 style="margin: 0; font-size: 1.1rem; font-weight: 600; color: #1a202c; font-family: 'Poppins', sans-serif; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; max-width: 200px;">${project.name}</h4>
                         <div style="display: flex; gap: 0.5rem; align-items: center;">
                             ${statusBadge}
-                            ${priorityBadge}
                         </div>
                     </div>
                     <p style="margin: 0; color: #6b7280; font-size: 0.85rem; line-height: 1.4; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden;">${project.description || 'No description available'}</p>
@@ -567,7 +542,7 @@ function createHorizontalProjectCard(project) {
                     <!-- Team -->
                     <div style="text-align: center; min-width: 50px;">
                         <div style="font-size: 1.25rem; font-weight: 700; color: #4a5568; font-family: 'Poppins', sans-serif;">${project.member_count || 0}</div>
-                        <div style="color: #6b7280; font-size: 0.7rem;">Team</div>
+                        <div style="color: #6b7280; font-size: 0.7rem;">Members</div>
                     </div>
                     
                     <!-- Due Date -->
@@ -763,8 +738,6 @@ function clearFilters() {
 
 // Toggle between grid and table view
 function toggleView() {
-    console.log('toggleView called, current view:', currentView);
-    
     const gridView = document.getElementById('gridView');
     const tableView = document.getElementById('tableView');
     
@@ -777,17 +750,13 @@ function toggleView() {
         currentView = 'table';
         gridView.style.display = 'none';
         tableView.style.display = 'block';
-        console.log('Switched to table view');
         renderTableView();
     } else {
         currentView = 'grid';
         tableView.style.display = 'none';
         gridView.style.display = 'block';
-        console.log('Switched to grid view');
         renderGridView();
     }
-    
-    console.log('View toggled to:', currentView);
 }
 
 // Project actions
@@ -907,23 +876,29 @@ function deleteProject(projectId) {
 }
 
 // Utility functions for UI
-function showLoading() {
-    // Defensive: Only operate on known containers, never touch button.innerHTML
-    var loadingContainer = document.getElementById('loadingContainer');
-    var gridView = document.getElementById('gridView');
-    var tableView = document.getElementById('tableView');
-    var emptyState = document.getElementById('emptyState');
+function showProjectsLoading() {
+    try {
+        const loadingContainer = document.getElementById('loadingContainer');
+        const gridView = document.getElementById('gridView');
+        const tableView = document.getElementById('tableView');
+        const emptyState = document.getElementById('emptyState');
 
-    if (loadingContainer) loadingContainer.style.display = 'block';
-    if (gridView) gridView.style.display = 'none';
-    if (tableView) tableView.style.display = 'none';
-    if (emptyState) emptyState.style.display = 'none';
-    // Never reference any button or button.innerHTML here
+        if (loadingContainer) loadingContainer.style.display = 'block';
+        if (gridView) gridView.style.display = 'none';
+        if (tableView) tableView.style.display = 'none';
+        if (emptyState) emptyState.style.display = 'none';
+    } catch (error) {
+        console.error('Error in showProjectsLoading:', error);
+    }
 }
 
-function hideLoading() {
-    const loadingContainer = document.getElementById('loadingContainer');
-    if (loadingContainer) loadingContainer.style.display = 'none';
+function hideProjectsLoading() {
+    try {
+        const loadingContainer = document.getElementById('loadingContainer');
+        if (loadingContainer) loadingContainer.style.display = 'none';
+    } catch (error) {
+        console.error('Error in hideProjectsLoading:', error);
+    }
 }
 
 function showEmptyState() {

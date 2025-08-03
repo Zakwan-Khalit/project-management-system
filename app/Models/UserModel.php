@@ -11,16 +11,17 @@ class UserModel extends Model
         $builder = $this->db->table('users');
         $builder->select('
             users.*, 
-            user_profile.first_name, 
-            user_profile.last_name, 
+            user_profile.full_name, 
             user_profile.phone, 
-            user_profile.bio,
-            user_role_lookup.name as role_name, 
-            user_role.role_id
+            position_lookup.name as role_name, 
+            user_rel.position_id as role_id,
+            department_lookup.name as department_name,
+            user_rel.department_id
         ');
         $builder->join('user_profile', 'user_profile.user_id = users.id AND user_profile.is_delete = 0', 'left');
-        $builder->join('user_role', 'user_role.user_id = users.id AND user_role.is_active = 1 AND user_role.is_delete = 0', 'left');
-        $builder->join('user_role_lookup', 'user_role_lookup.id = user_role.role_id AND user_role_lookup.is_delete = 0', 'left');
+        $builder->join('user_rel', 'user_rel.user_id = users.id AND user_rel.is_active = 1 AND user_rel.is_delete = 0', 'left');
+        $builder->join('position_lookup', 'position_lookup.id = user_rel.position_id AND position_lookup.is_delete = 0', 'left');
+        $builder->join('department_lookup', 'department_lookup.id = user_rel.department_id AND department_lookup.is_delete = 0', 'left');
         $builder->where('users.email', $email);
         $builder->where('users.is_delete', 0);
         $builder->where('users.is_active', 1);
@@ -37,17 +38,44 @@ class UserModel extends Model
             users.is_delete,
             users.date_created,
             users.date_modified,
-            user_profile.first_name,
-            user_profile.last_name,
+            user_profile.full_name,
             user_profile.phone,
-            user_profile.bio,
-            user_profile.timezone,
-            user_role_lookup.name as role_name,
-            user_role.role_id
+            position_lookup.name as role_name,
+            user_rel.position_id as role_id,
+            department_lookup.name as department_name,
+            user_rel.department_id
         ');
         $builder->join('user_profile', 'user_profile.user_id = users.id AND user_profile.is_delete = 0', 'left');
-        $builder->join('user_role', 'user_role.user_id = users.id AND user_role.is_active = 1 AND user_role.is_delete = 0', 'left');
-        $builder->join('user_role_lookup', 'user_role_lookup.id = user_role.role_id AND user_role_lookup.is_delete = 0', 'left');
+        $builder->join('user_rel', 'user_rel.user_id = users.id AND user_rel.is_active = 1 AND user_rel.is_delete = 0', 'left');
+        $builder->join('position_lookup', 'position_lookup.id = user_rel.position_id AND position_lookup.is_delete = 0', 'left');
+        $builder->join('department_lookup', 'department_lookup.id = user_rel.department_id AND department_lookup.is_delete = 0', 'left');
+        $builder->where('users.id', $userId);
+        $builder->where('users.is_delete', 0);
+        return $builder->get()->getRowArray();
+    }
+    
+    public function getUserWithPasswordById($userId)
+    {
+        $builder = $this->db->table('users');
+        $builder->select('
+            users.id,
+            users.email,
+            users.password,
+            users.is_active,
+            users.is_delete,
+            users.date_created,
+            users.date_modified,
+            user_profile.full_name,
+            user_profile.phone,
+            position_lookup.name as role_name,
+            user_rel.position_id as role_id,
+            department_lookup.name as department_name,
+            user_rel.department_id
+        ');
+        $builder->join('user_profile', 'user_profile.user_id = users.id AND user_profile.is_delete = 0', 'left');
+        $builder->join('user_rel', 'user_rel.user_id = users.id AND user_rel.is_active = 1 AND user_rel.is_delete = 0', 'left');
+        $builder->join('position_lookup', 'position_lookup.id = user_rel.position_id AND position_lookup.is_delete = 0', 'left');
+        $builder->join('department_lookup', 'department_lookup.id = user_rel.department_id AND department_lookup.is_delete = 0', 'left');
         $builder->where('users.id', $userId);
         $builder->where('users.is_delete', 0);
         return $builder->get()->getRowArray();
@@ -57,23 +85,27 @@ class UserModel extends Model
     {
         $builder = $this->db->table('users');
         $builder->where('id', $userId);
-        return $builder->update(['last_login_at' => date('Y-m-d H:i:s')]);
+        return $builder->update(['date_modified' => date('Y-m-d H:i:s')]);
     }
     
     public function getAllUsers()
     {
         $builder = $this->db->table('users');
         $builder->select('
-            users.*, 
-            user_profile.first_name, 
-            user_profile.last_name, 
-            user_role_lookup.name as role_name
+            users.id,
+            users.email,
+            user_profile.full_name as name,
+            user_profile.full_name, 
+            position_lookup.name as role_name,
+            department_lookup.name as department_name
         ');
         $builder->join('user_profile', 'user_profile.user_id = users.id AND user_profile.is_delete = 0', 'left');
-        $builder->join('user_role', 'user_role.user_id = users.id AND user_role.is_active = 1 AND user_role.is_delete = 0', 'left');
-        $builder->join('user_role_lookup', 'user_role_lookup.id = user_role.role_id AND user_role_lookup.is_delete = 0', 'left');
+        $builder->join('user_rel', 'user_rel.user_id = users.id AND user_rel.is_active = 1 AND user_rel.is_delete = 0', 'left');
+        $builder->join('position_lookup', 'position_lookup.id = user_rel.position_id AND position_lookup.is_delete = 0', 'left');
+        $builder->join('department_lookup', 'department_lookup.id = user_rel.department_id AND department_lookup.is_delete = 0', 'left');
         $builder->where('users.is_delete', 0);
-        $builder->orderBy('user_profile.first_name', 'ASC');
+        $builder->where('users.is_active', 1);
+        $builder->orderBy('user_profile.full_name', 'ASC');
         return $builder->get()->getResultArray();
     }
     
@@ -82,8 +114,7 @@ class UserModel extends Model
         $builder = $this->db->table('users');
         $builder->select('
             users.*, 
-            user_profile.first_name, 
-            user_profile.last_name, 
+            user_profile.full_name, 
             project_members.role as project_role,
             project_members.joined_at
         ');
@@ -102,20 +133,20 @@ class UserModel extends Model
         $builder->select('
             users.id, 
             users.email,
-            user_profile.first_name, 
-            user_profile.last_name, 
-            user_role_lookup.name as role_name
+            user_profile.full_name, 
+            position_lookup.name as role_name,
+            department_lookup.name as department_name
         ');
         $builder->join('user_profile', 'user_profile.user_id = users.id AND user_profile.is_delete = 0', 'left');
-        $builder->join('user_role', 'user_role.user_id = users.id AND user_role.is_active = 1 AND user_role.is_delete = 0', 'left');
-        $builder->join('user_role_lookup', 'user_role_lookup.id = user_role.role_id AND user_role_lookup.is_delete = 0', 'left');
+        $builder->join('user_rel', 'user_rel.user_id = users.id AND user_rel.is_active = 1 AND user_rel.is_delete = 0', 'left');
+        $builder->join('position_lookup', 'position_lookup.id = user_rel.position_id AND position_lookup.is_delete = 0', 'left');
+        $builder->join('department_lookup', 'department_lookup.id = user_rel.department_id AND department_lookup.is_delete = 0', 'left');
         $builder->where('users.is_delete', 0);
         $builder->where('users.is_active', 1);
             
         if (!empty($search)) {
             $builder->groupStart();
-            $builder->like('user_profile.first_name', $search);
-            $builder->orLike('user_profile.last_name', $search);
+            $builder->like('user_profile.full_name', $search);
             $builder->orLike('users.email', $search);
             $builder->groupEnd();
         }
@@ -183,44 +214,55 @@ class UserModel extends Model
             $builder->where('user_id', $userId);
             return $builder->update($profileData);
         } else {
+            // Create new profile if not exists
             $profileData['user_id'] = $userId;
             $profileData['date_created'] = date('Y-m-d H:i:s');
-            $profileData['is_active'] = 1;
             $profileData['is_delete'] = 0;
-            
             $builder = $this->db->table('user_profile');
             return $builder->insert($profileData);
         }
     }
     
-    // User Role Functions
-    public function assignUserRole($userId, $roleId, $assignedBy = null)
+    // User Role Functions (updated for new structure using user_rel and position_lookup)
+    public function assignUserRole($userId, $positionId, $departmentId, $assignedBy = null)
     {
-        // Deactivate existing roles
-        $builder = $this->db->table('user_role');
+        // Deactivate existing user_rel entries
+        $builder = $this->db->table('user_rel');
         $builder->where('user_id', $userId);
-        $builder->update(['is_active' => 0]);
+        $builder->update(['is_active' => 0, 'is_delete' => 1, 'date_modified' => date('Y-m-d H:i:s')]);
         
-        // Assign new role
-        $builder = $this->db->table('user_role');
+        // Assign new position and department
+        $builder = $this->db->table('user_rel');
         return $builder->insert([
             'user_id' => $userId,
-            'role_id' => $roleId,
+            'position_id' => $positionId,
+            'department_id' => $departmentId,
             'assigned_by' => $assignedBy,
             'assigned_at' => date('Y-m-d H:i:s'),
             'is_active' => 1,
-            'is_delete' => 0
+            'is_delete' => 0,
+            'date_created' => date('Y-m-d H:i:s'),
+            'date_modified' => date('Y-m-d H:i:s')
         ]);
     }
     
     public function getUserRole($userId)
     {
-        $builder = $this->db->table('user_role');
-        $builder->select('user_role.*, user_role_lookup.code, user_role_lookup.name, user_role_lookup.description, user_role_lookup.permissions, user_role_lookup.level');
-        $builder->join('user_role_lookup', 'user_role_lookup.id = user_role.role_id');
-        $builder->where('user_role.user_id', $userId);
-        $builder->where('user_role.is_active', 1);
-        $builder->where('user_role.is_delete', 0);
+        $builder = $this->db->table('user_rel');
+        $builder->select('
+            user_rel.*, 
+            position_lookup.code, 
+            position_lookup.name, 
+            position_lookup.description, 
+            position_lookup.level,
+            department_lookup.name as department_name,
+            department_lookup.code as department_code
+        ');
+        $builder->join('position_lookup', 'position_lookup.id = user_rel.position_id');
+        $builder->join('department_lookup', 'department_lookup.id = user_rel.department_id');
+        $builder->where('user_rel.user_id', $userId);
+        $builder->where('user_rel.is_active', 1);
+        $builder->where('user_rel.is_delete', 0);
         return $builder->get()->getRowArray();
     }
     
@@ -249,10 +291,185 @@ class UserModel extends Model
     // Lookup Functions
     public function getRoles()
     {
-        $builder = $this->db->table('user_role_lookup');
+        $builder = $this->db->table('position_lookup');
         $builder->where('is_delete', 0);
         $builder->where('is_active', 1);
         $builder->orderBy('level', 'ASC');
+        $builder->orderBy('name', 'ASC');
+        return $builder->get()->getResultArray();
+    }
+    
+    public function getDepartments()
+    {
+        $builder = $this->db->table('department_lookup');
+        $builder->where('is_delete', 0);
+        $builder->where('is_active', 1);
+        $builder->orderBy('name', 'ASC');
+        return $builder->get()->getResultArray();
+    }
+
+    public function getTotalActiveUsers()
+    {
+        $builder = $this->db->table('users');
+        $builder->where('is_delete', 0);
+        $builder->where('is_active', 1);
+        return $builder->countAllResults();
+    }
+
+    public function getProjectUsers($projectId)
+    {
+        $builder = $this->db->table('project_members pm');
+        $builder->select('
+            users.id,
+            users.email,
+            user_profile.full_name as name,
+            user_profile.full_name,
+            pm.role as project_role,
+            position_lookup.name as role_name,
+            department_lookup.name as department_name
+        ');
+        $builder->join('users', 'users.id = pm.user_id');
+        $builder->join('user_profile', 'user_profile.user_id = users.id AND user_profile.is_delete = 0', 'left');
+        $builder->join('user_rel', 'user_rel.user_id = users.id AND user_rel.is_active = 1 AND user_rel.is_delete = 0', 'left');
+        $builder->join('position_lookup', 'position_lookup.id = user_rel.position_id AND position_lookup.is_delete = 0', 'left');
+        $builder->join('department_lookup', 'department_lookup.id = user_rel.department_id AND department_lookup.is_delete = 0', 'left');
+        $builder->where('pm.project_id', $projectId);
+        $builder->where('pm.is_delete', 0);
+        $builder->where('pm.is_active', 1);
+        $builder->where('users.is_delete', 0);
+        $builder->where('users.is_active', 1);
+        $builder->orderBy('user_profile.full_name', 'ASC');
+        return $builder->get()->getResultArray();
+    }
+
+    // User Management Methods for new interface
+    public function getAllUsersWithDetails()
+    {
+        $builder = $this->db->table('users');
+        $builder->select('
+            users.id,
+            users.email,
+            users.is_active,
+            users.date_created,
+            users.date_modified,
+            user_profile.full_name,
+            user_profile.phone,
+            position_lookup.name as position_name,
+            department_lookup.name as department_name,
+            user_rel.position_id,
+            user_rel.department_id
+        ');
+        $builder->join('user_profile', 'user_profile.user_id = users.id AND user_profile.is_delete = 0', 'left');
+        $builder->join('user_rel', 'user_rel.user_id = users.id AND user_rel.is_active = 1 AND user_rel.is_delete = 0', 'left');
+        $builder->join('position_lookup', 'position_lookup.id = user_rel.position_id AND position_lookup.is_delete = 0', 'left');
+        $builder->join('department_lookup', 'department_lookup.id = user_rel.department_id AND department_lookup.is_delete = 0', 'left');
+        $builder->where('users.is_delete', 0);
+        $builder->orderBy('user_profile.full_name', 'ASC');
+        return $builder->get()->getResultArray();
+    }
+
+    public function getUserWithDetails($userId)
+    {
+        $builder = $this->db->table('users');
+        $builder->select('
+            users.id,
+            users.email,
+            users.is_active,
+            users.date_created,
+            users.date_modified,
+            user_profile.full_name,
+            user_profile.phone,
+            user_rel.position_id,
+            user_rel.department_id
+        ');
+        $builder->join('user_profile', 'user_profile.user_id = users.id AND user_profile.is_delete = 0', 'left');
+        $builder->join('user_rel', 'user_rel.user_id = users.id AND user_rel.is_active = 1 AND user_rel.is_delete = 0', 'left');
+        $builder->where('users.id', $userId);
+        $builder->where('users.is_delete', 0);
+        return $builder->get()->getRowArray();
+    }
+
+    public function createUserProfile($profileData)
+    {
+        $builder = $this->db->table('user_profile');
+        $profileData['date_created'] = date('Y-m-d H:i:s');
+        $profileData['date_modified'] = date('Y-m-d H:i:s');
+        $profileData['is_delete'] = 0;
+        
+        return $builder->insert($profileData);
+    }
+
+    public function createUserRel($relData)
+    {
+        $builder = $this->db->table('user_rel');
+        $relData['date_created'] = date('Y-m-d H:i:s');
+        $relData['date_modified'] = date('Y-m-d H:i:s');
+        $relData['is_active'] = 1;
+        $relData['is_delete'] = 0;
+        
+        return $builder->insert($relData);
+    }
+
+    public function updateUserRel($userId, $relData)
+    {
+        $builder = $this->db->table('user_rel');
+        $relData['date_modified'] = date('Y-m-d H:i:s');
+        
+        return $builder->where('user_id', $userId)->where('is_delete', 0)->update($relData);
+    }
+
+    public function deleteUser($userId)
+    {
+        $this->db->transStart();
+        
+        try {
+            // Soft delete user
+            $this->db->table('users')
+                ->where('id', $userId)
+                ->update([
+                    'is_delete' => 1,
+                    'date_modified' => date('Y-m-d H:i:s')
+                ]);
+
+            // Soft delete user profile
+            $this->db->table('user_profile')
+                ->where('user_id', $userId)
+                ->update([
+                    'is_delete' => 1,
+                    'date_modified' => date('Y-m-d H:i:s')
+                ]);
+
+            // Soft delete user relationships
+            $this->db->table('user_rel')
+                ->where('user_id', $userId)
+                ->update([
+                    'is_delete' => 1,
+                    'date_modified' => date('Y-m-d H:i:s')
+                ]);
+
+            $this->db->transComplete();
+            return $this->db->transStatus();
+        } catch (\Exception $e) {
+            $this->db->transRollback();
+            return false;
+        }
+    }
+
+    public function getPositions()
+    {
+        $builder = $this->db->table('position_lookup');
+        $builder->select('id, name, department_id');
+        $builder->where('is_delete', 0);
+        $builder->orderBy('name', 'ASC');
+        return $builder->get()->getResultArray();
+    }
+
+    public function getPositionsByDepartment($departmentId)
+    {
+        $builder = $this->db->table('position_lookup');
+        $builder->select('id, name');
+        $builder->where('department_id', $departmentId);
+        $builder->where('is_delete', 0);
         $builder->orderBy('name', 'ASC');
         return $builder->get()->getResultArray();
     }

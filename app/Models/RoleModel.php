@@ -8,7 +8,7 @@ class RoleModel extends Model
 {
     public function getAllRoles()
     {
-        $builder = $this->db->table('user_role_lookup');
+        $builder = $this->db->table('position_lookup');
         return $builder->where('is_active', 1)
                        ->where('is_delete', 0)
                        ->orderBy('level', 'DESC')
@@ -17,19 +17,19 @@ class RoleModel extends Model
 
     public function getRoleByCode($code)
     {
-        $builder = $this->db->table('user_role_lookup');
+        $builder = $this->db->table('position_lookup');
         return $builder->where('code', $code)
                        ->where('is_active', 1)
                        ->where('is_delete', 0)
                        ->get()->getRowArray();
     }
 
-    public function getRolePermissions($roleId)
+    public function getRolePermissions($positionId)
     {
-        $builder = $this->db->table('user_role_lookup');
-        $role = $builder->where('id', $roleId)->get()->getRowArray();
-        if ($role && !empty($role['permissions'])) {
-            return json_decode($role['permissions'], true);
+        $builder = $this->db->table('position_lookup');
+        $position = $builder->where('id', $positionId)->get()->getRowArray();
+        if ($position && !empty($position['permissions'])) {
+            return json_decode($position['permissions'], true);
         }
         return [];
     }
@@ -41,7 +41,9 @@ class RoleModel extends Model
         }
         $data['is_active'] = 1;
         $data['is_delete'] = 0;
-        $builder = $this->db->table('user_role_lookup');
+        $data['date_created'] = date('Y-m-d H:i:s');
+        $data['date_modified'] = date('Y-m-d H:i:s');
+        $builder = $this->db->table('position_lookup');
         return $builder->insert($data);
     }
 
@@ -50,30 +52,38 @@ class RoleModel extends Model
         if (isset($data['permissions']) && is_array($data['permissions'])) {
             $data['permissions'] = json_encode($data['permissions']);
         }
-        $builder = $this->db->table('user_role_lookup');
+        $data['date_modified'] = date('Y-m-d H:i:s');
+        $builder = $this->db->table('position_lookup');
         return $builder->where('id', $id)->update($data);
     }
 
     public function softDeleteRole($id)
     {
-        $builder = $this->db->table('user_role_lookup');
-        return $builder->where('id', $id)->update(['is_delete' => 1]);
+        $builder = $this->db->table('position_lookup');
+        return $builder->where('id', $id)->update([
+            'is_delete' => 1, 
+            'date_modified' => date('Y-m-d H:i:s')
+        ]);
     }
+    
     public function hasPermission($userId, $resource, $permission = 'read')
     {
-        $builder = $this->db->table('user_role ur');
-        $builder->select('url.permissions');
-        $builder->join('user_role_lookup url', 'url.id = ur.role_id');
+        $builder = $this->db->table('user_rel ur');
+        $builder->select('pl.permissions');
+        $builder->join('position_lookup pl', 'pl.id = ur.position_id');
         $builder->where('ur.user_id', $userId);
         $builder->where('ur.is_active', 1);
         $builder->where('ur.is_delete', 0);
-        $builder->where('url.is_active', 1);
-        $builder->where('url.is_delete', 0);
-        $userRole = $builder->get()->getRowArray();
-        if (!$userRole || empty($userRole['permissions'])) {
+        $builder->where('pl.is_active', 1);
+        $builder->where('pl.is_delete', 0);
+        $userPosition = $builder->get()->getRowArray();
+        
+        if (!$userPosition || empty($userPosition['permissions'])) {
             return false;
         }
-        $permissions = json_decode($userRole['permissions'], true);
+        
+        $permissions = json_decode($userPosition['permissions'], true);
+        
         // Check for superadmin access
         if (isset($permissions['all']) && $permissions['all'] === true) {
             return true;

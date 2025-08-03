@@ -52,7 +52,7 @@ class Profile extends BaseController
         }
 
         $userId = user_id();
-        $user = $this->userModel->find($userId);
+        $user = $this->userModel->getUserById($userId);
 
         if (!$user) {
             return redirect()->to(base_url('dashboard'))->with('error', 'User not found.');
@@ -77,7 +77,7 @@ class Profile extends BaseController
         }
 
         $userId = user_id();
-        $user = $this->userModel->find($userId);
+        $user = $this->userModel->getUserById($userId);
 
         if (!$user) {
             return redirect()->to(base_url('dashboard'))->with('error', 'User not found.');
@@ -86,20 +86,20 @@ class Profile extends BaseController
         $validation = \Config\Services::validation();
         
         $rules = [
-            'email' => 'required|valid_email|max_length[100]',
-            'first_name' => 'permit_empty|max_length[50]',
-            'last_name' => 'permit_empty|max_length[50]',
-            'phone' => 'permit_empty|max_length[20]',
-            'bio' => 'permit_empty|max_length[500]'
+            'email' => 'required|valid_email|max_length[128]',
+            'full_name' => 'permit_empty|max_length[128]',
+            'phone' => 'permit_empty|max_length[32]'
         ];
 
-        // Add password validation only if password is provided
-        if (!empty($this->request->getPost('password'))) {
-            $rules['password'] = 'min_length[6]|max_length[255]';
-            $rules['password_confirm'] = 'matches[password]';
-        }
-
         if (!$this->validate($rules)) {
+            if ($this->request->isAJAX()) {
+                return $this->response->setJSON([
+                    'success' => false,
+                    'message' => 'Validation failed',
+                    'errors' => $validation->getErrors()
+                ]);
+            }
+            
             return $this->template->member('profile/edit', [
                 'title' => 'Edit Profile',
                 'user' => $user,
@@ -111,40 +111,56 @@ class Profile extends BaseController
             ]);
         }
 
-        $updateData = [
-            'email' => $this->request->getPost('email'),
-            'first_name' => $this->request->getPost('first_name'),
-            'last_name' => $this->request->getPost('last_name'),
-            'phone' => $this->request->getPost('phone'),
-            'bio' => $this->request->getPost('bio'),
-            'date_modified' => date('Y-m-d H:i:s')
-        ];
-
-        // Update password if provided
-        if (!empty($this->request->getPost('password'))) {
-            $updateData['password'] = password_hash($this->request->getPost('password'), PASSWORD_DEFAULT);
-        }
-
         try {
-            $this->userModel->update($userId, $updateData);
+            // Update users table (email only)
+            $userUpdateData = [
+                'email' => $this->request->getPost('email'),
+                'date_modified' => date('Y-m-d H:i:s')
+            ];
+
+            // Update users table
+            $this->userModel->updateUser($userId, $userUpdateData);
+
+            // Update user_profile table
+            $profileUpdateData = [
+                'full_name' => $this->request->getPost('full_name'),
+                'phone' => $this->request->getPost('phone')
+            ];
+
+            $this->userModel->updateUserProfile($userId, $profileUpdateData);
 
             // Log the activity
-            $this->activityLogModel->insert([
+            $this->activityLogModel->logActivity([
                 'user_id' => $userId,
+                'project_id' => null,
                 'action' => 'profile_updated',
-                'description' => 'Profile information updated',
-                'date_created' => date('Y-m-d H:i:s')
+                'description' => 'Profile information updated'
             ]);
 
             // Update session data
             session()->set([
-                'email' => $updateData['email'],
-                'first_name' => $updateData['first_name'],
-                'last_name' => $updateData['last_name']
+                'email' => $userUpdateData['email'],
+                'full_name' => $profileUpdateData['full_name']
             ]);
+
+            if ($this->request->isAJAX()) {
+                return $this->response->setJSON([
+                    'success' => true,
+                    'message' => 'Profile updated successfully!'
+                ]);
+            }
 
             return redirect()->to(base_url('profile'))->with('success', 'Profile updated successfully!');
         } catch (\Exception $e) {
+            log_message('error', 'Profile update failed: ' . $e->getMessage());
+            
+            if ($this->request->isAJAX()) {
+                return $this->response->setJSON([
+                    'success' => false,
+                    'message' => 'Failed to update profile. Please try again.'
+                ]);
+            }
+            
             return redirect()->back()->with('error', 'Failed to update profile. Please try again.');
         }
     }
@@ -156,7 +172,7 @@ class Profile extends BaseController
         }
 
         $userId = user_id();
-        $user = $this->userModel->find($userId);
+        $user = $this->userModel->getUserById($userId);
 
         if (!$user) {
             return redirect()->to(base_url('dashboard'))->with('error', 'User not found.');
@@ -181,7 +197,7 @@ class Profile extends BaseController
         }
 
         $userId = user_id();
-        $user = $this->userModel->find($userId);
+        $user = $this->userModel->getUserWithPasswordById($userId);
 
         if (!$user) {
             return redirect()->to(base_url('dashboard'))->with('error', 'User not found.');
@@ -196,6 +212,14 @@ class Profile extends BaseController
         ];
 
         if (!$this->validate($rules)) {
+            if ($this->request->isAJAX()) {
+                return $this->response->setJSON([
+                    'success' => false,
+                    'message' => 'Validation failed',
+                    'errors' => $validation->getErrors()
+                ]);
+            }
+            
             return $this->template->member('profile/change_password', [
                 'title' => 'Change Password',
                 'user' => $user,
@@ -209,25 +233,47 @@ class Profile extends BaseController
 
         // Verify current password
         if (!password_verify($this->request->getPost('current_password'), $user['password'])) {
+            if ($this->request->isAJAX()) {
+                return $this->response->setJSON([
+                    'success' => false,
+                    'message' => 'Current password is incorrect.'
+                ]);
+            }
             return redirect()->back()->with('error', 'Current password is incorrect.');
         }
 
         try {
-            $this->userModel->update($userId, [
-                'password' => password_hash($this->request->getPost('new_password'), PASSWORD_DEFAULT),
+            $this->userModel->updateUser($userId, [
+                'password' => $this->request->getPost('new_password'),
                 'date_modified' => date('Y-m-d H:i:s')
             ]);
 
             // Log the activity
-            $this->activityLogModel->insert([
+            $this->activityLogModel->logActivity([
                 'user_id' => $userId,
+                'project_id' => null,
                 'action' => 'password_changed',
-                'description' => 'Password changed successfully',
-                'date_created' => date('Y-m-d H:i:s')
+                'description' => 'Password changed successfully'
             ]);
+
+            if ($this->request->isAJAX()) {
+                return $this->response->setJSON([
+                    'success' => true,
+                    'message' => 'Password changed successfully!'
+                ]);
+            }
 
             return redirect()->to(base_url('profile'))->with('success', 'Password changed successfully!');
         } catch (\Exception $e) {
+            log_message('error', 'Password change failed: ' . $e->getMessage());
+            
+            if ($this->request->isAJAX()) {
+                return $this->response->setJSON([
+                    'success' => false,
+                    'message' => 'Failed to change password. Please try again.'
+                ]);
+            }
+            
             return redirect()->back()->with('error', 'Failed to change password. Please try again.');
         }
     }

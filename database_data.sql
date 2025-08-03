@@ -42,25 +42,19 @@ INSERT INTO `department_lookup` (`code`, `name`, `description`) VALUES
 ('FIN', 'Finance', 'Finance Department');
 
 -- Insert position lookup data
-INSERT INTO `position_lookup` (`code`, `name`, `description`, `level`) VALUES
-('PM', 'Project Manager', 'Project Manager', 6),
-('PE', 'Project Executive', 'Project Executive', 7),
-('SA', 'System Analyst', 'System Analyst', 5),
-('FE', 'Functional Engineer', 'Functional Engineer', 4),
-('DEV', 'Developer', 'Software Developer', 4),
-('SE', 'System Engineer', 'System Engineer', 5),
-('DBA', 'Database Administrator', 'Database Administrator', 5),
-('DA', 'Data Analyst', 'Data Analyst', 4),
-('FIN', 'Finance', 'Finance Specialist', 4);
+INSERT INTO `position_lookup` (`code`, `name`, `description`, `level`, `department_id`) VALUES
+('PM', 'Project Manager', 'Project Manager', 6, 1),     -- PMO
+('PE', 'Project Executive', 'Project Executive', 7, 1), -- PMO
+('SA', 'System Analyst', 'System Analyst', 5, 2),       -- Usability
+('FE', 'Functional Engineer', 'Functional Engineer', 4, 2), -- Usability
+('DEV', 'Developer', 'Software Developer', 4, 3),       -- Software Engineering
+('SE', 'System Engineer', 'System Engineer', 5, 4),     -- Infrastructure
+('DBA', 'Database Administrator', 'Database Administrator', 5, 5), -- Data
+('DA', 'Data Analyst', 'Data Analyst', 4, 5),           -- Data
+('FIN', 'Finance', 'Finance Specialist', 4, 6);         -- Finance
 
--- Insert user role lookup data
-INSERT INTO `user_role_lookup` (`code`, `name`, `description`, `permissions`, `level`) VALUES
-('superadmin', 'Super Administrator', 'Super Administrator with full system access', '{"all": true, "system": ["full_access"], "users": ["create", "read", "update", "delete"], "roles": ["manage"]}', 10),
-('admin', 'Administrator', 'Administrator with user and project management access', '{"users": ["create", "read", "update", "delete"], "projects": ["create", "read", "update", "delete"], "tasks": ["create", "read", "update", "delete"], "reports": ["read"]}', 8),
-('project_manager', 'Project Manager', 'Project Manager with project and task management access', '{"projects": ["create", "read", "update", "delete"], "tasks": ["create", "read", "update", "delete"], "users": ["read"], "reports": ["read"]}', 6),
-('project_executive', 'Project Executive', 'Project Executive with project oversight and reporting access', '{"projects": ["read", "update"], "tasks": ["read", "update"], "reports": ["read"], "budget": ["view"]}', 7),
-('system_analyst', 'System Analyst', 'System Analyst with requirements and analysis access', '{"projects": ["read"], "tasks": ["create", "read", "update"], "requirements": ["create", "read", "update"], "reports": ["read"]}', 5),
-('developer', 'Developer', 'Developer with task execution and code management access', '{"projects": ["read"], "tasks": ["read", "update"], "own_tasks": ["create", "update", "delete"], "code": ["commit"]}', 4);
+-- Insert user role lookup data (REMOVED - Using position_lookup instead)
+-- User roles are now managed through position_lookup and department_lookup
 
 -- Insert default superadmin user (password: admin123)
 INSERT INTO `users` (`email`, `password`, `is_active`, `email_verified_at`) VALUES
@@ -68,18 +62,21 @@ INSERT INTO `users` (`email`, `password`, `is_active`, `email_verified_at`) VALU
 ('analyst@zanko.com', '$2y$10$52N2nJ9b3o/bhozS/staJuACX6T4sKFtp8UPdLw.JqDF8E.Yb.cza', 1, NOW());
 
 -- Insert user profile for admin
-INSERT INTO `user_profile` (`user_id`, `first_name`, `last_name`, `phone`, `bio`, `timezone`) VALUES
-(1, 'Super', 'Admin', '+1234567890', 'System Administrator with full access', 'America/New_York'),
-(2, 'Natasha', 'Nazrin', '+1234567891', 'System Analyst specializing in requirements analysis', 'America/New_York');
+INSERT INTO `user_profile` (`user_id`, `full_name`, `phone`, `bio`, `timezone`) VALUES
+(1, 'Super Admin', '+1234567890', 'System Administrator with full access', 'America/New_York'),
+(2, 'Natasha Nazrin', '+1234567891', 'System Analyst specializing in requirements analysis', 'America/New_York');
 
--- Assign superadmin role to the admin user
-INSERT INTO `user_role` (`user_id`, `role_id`, `assigned_by`) VALUES
-(1, 1, 1),
-(2, 5, 1);
+-- Assign roles via position_lookup (REMOVED - Using user_rel instead)
+-- User roles are now managed through user_rel linking to position_lookup and department_lookup
+
+-- Link users to departments and positions via user_rel
+INSERT INTO `user_rel` (`user_id`, `department_id`, `position_id`, `is_active`, `is_delete`) VALUES
+(1, 1, 1, 1, 0), -- Super Admin -> PMO -> Project Manager
+(2, 2, 3, 1, 0); -- Natasha -> Usability -> System Analyst
 
 -- Insert sample project
-INSERT INTO `projects` (`name`, `code`, `description`, `budget`, `start_date`, `end_date`) VALUES
-('Project Management System', 'PMS-2025-001', 'A comprehensive project management system with task tracking, team collaboration, and progress monitoring features.', 50000.00, '2025-01-01', '2025-06-30');
+INSERT INTO `projects` (`name`, `code`, `description`, `client`, `budget`, `start_date`, `end_date`) VALUES
+('Project Management System', 'PMS-2025-001', 'A comprehensive project management system with task tracking, team collaboration, and progress monitoring features.', 'Internal Development', 50000.00, '2025-01-01', '2025-06-30');
 
 -- Set project status to active
 INSERT INTO `project_status` (`project_id`, `status_id`, `changed_by`, `notes`) VALUES
@@ -164,3 +161,58 @@ INSERT INTO `task_headers` (`column_name`, `is_active`, `is_delete`) VALUES
 UPDATE `task_templates` SET `fields` = '[1,2,3,4,5,6,7,8,9,10,11,12,13]' WHERE `id` = 1;
 UPDATE `task_templates` SET `fields` = '[1,2,3,4,5,6,7,8,9,10,11,12,13]' WHERE `id` = 2;
 UPDATE `task_templates` SET `fields` = '[1,2,3,4,5,6,7,8,9,10,11,12,13]' WHERE `id` = 3;
+
+-- Insert sample activity log data
+INSERT INTO `activity_logs` (`user_id`, `project_id`, `action`, `description`, `details`, `is_active`, `is_delete`, `date_created`, `date_modified`) VALUES
+(1, 1, 'created', 'Project created', 'New project "Project Management System" has been created', 1, 0, NOW() - INTERVAL 5 DAY, NOW() - INTERVAL 5 DAY),
+(1, 1, 'updated', 'Project updated', 'Project details have been modified', 1, 0, NOW() - INTERVAL 4 DAY, NOW() - INTERVAL 4 DAY),
+(1, 1, 'team_member_added', 'Team member added', 'Natasha Nazrin has been added to the project team', 1, 0, NOW() - INTERVAL 3 DAY, NOW() - INTERVAL 3 DAY),
+(1, 1, 'task_created', 'Task created', 'New task "User Acceptance Testing" has been created', 1, 0, NOW() - INTERVAL 2 DAY, NOW() - INTERVAL 2 DAY),
+(2, 1, 'task_updated', 'Task progress updated', 'Task progress updated to 60%', 1, 0, NOW() - INTERVAL 1 DAY, NOW() - INTERVAL 1 DAY),
+(2, 1, 'comment_added', 'Comment added', 'New comment added to task discussion', 1, 0, NOW() - INTERVAL 12 HOUR, NOW() - INTERVAL 12 HOUR),
+(1, 1, 'status_changed', 'Project status changed', 'Project status changed from Planning to Active', 1, 0, NOW() - INTERVAL 6 HOUR, NOW() - INTERVAL 6 HOUR),
+(2, 1, 'task_created', 'Task created', 'New task "Business Requirement Specification" has been created', 1, 0, NOW() - INTERVAL 3 HOUR, NOW() - INTERVAL 3 HOUR),
+(1, 1, 'task_updated', 'Task progress updated', 'Task "Dashboard" progress updated to 80%', 1, 0, NOW() - INTERVAL 1 HOUR, NOW() - INTERVAL 1 HOUR),
+(2, 1, 'file_uploaded', 'File uploaded', 'Document "sample1.png" uploaded to project', 1, 0, NOW() - INTERVAL 30 MINUTE, NOW() - INTERVAL 30 MINUTE);
+
+-- Events Module Data
+
+-- Insert event types into status_lookup
+INSERT INTO `status_lookup` (`type`, `code`, `name`, `description`, `color`, `order_index`) VALUES
+('event', 'meeting', 'Meeting', 'Team or client meeting', '#3788d8', 1),
+('event', 'deadline', 'Deadline', 'Project or task deadline', '#dc3545', 2),
+('event', 'milestone', 'Milestone', 'Project milestone', '#28a745', 3),
+('event', 'training', 'Training', 'Training session', '#fd7e14', 4),
+('event', 'review', 'Review', 'Code or project review', '#6f42c1', 5),
+('event', 'other', 'Other', 'Other type of event', '#6c757d', 6);
+
+-- Insert event attendance statuses
+INSERT INTO `status_lookup` (`type`, `code`, `name`, `description`, `color`, `order_index`) VALUES
+('event_status', 'invited', 'Invited', 'User is invited to attend', '#17a2b8', 1),
+('event_status', 'accepted', 'Accepted', 'User accepted the invitation', '#28a745', 2),
+('event_status', 'declined', 'Declined', 'User declined the invitation', '#dc3545', 3),
+('event_status', 'tentative', 'Tentative', 'User response is tentative', '#ffc107', 4),
+('event_status', 'no_response', 'No Response', 'User has not responded', '#6c757d', 5);
+
+-- Insert sample events data
+INSERT INTO `events` (`title`, `description`, `event_type`, `start_datetime`, `end_datetime`, `location`, `project_id`, `created_by`, `is_active`, `is_delete`) VALUES
+('Project Kickoff Meeting', 'Initial project kickoff meeting to discuss objectives and timeline', 'meeting', NOW() + INTERVAL 1 DAY, NOW() + INTERVAL 1 DAY + INTERVAL 2 HOUR, 'Conference Room A', 1, 1, 1, 0),
+('Sprint Planning', 'Sprint planning session for the next development cycle', 'meeting', NOW() + INTERVAL 3 DAY, NOW() + INTERVAL 3 DAY + INTERVAL 1 HOUR, 'Online - Zoom', 1, 1, 1, 0),
+('Code Review Session', 'Weekly code review and quality assurance session', 'review', NOW() + INTERVAL 5 DAY, NOW() + INTERVAL 5 DAY + INTERVAL 90 MINUTE, 'Development Lab', 1, 1, 1, 0),
+('Project Milestone Deadline', 'First milestone delivery deadline', 'deadline', NOW() + INTERVAL 14 DAY, NOW() + INTERVAL 14 DAY + INTERVAL 1 HOUR, NULL, 1, 1, 1, 0),
+('Team Training - Agile Methodology', 'Training session on Agile development practices', 'training', NOW() + INTERVAL 7 DAY, NOW() + INTERVAL 7 DAY + INTERVAL 3 HOUR, 'Training Room B', NULL, 1, 1, 0);
+
+-- Insert sample event attendees
+INSERT INTO `event_attendees` (`event_id`, `user_id`, `status`, `response_date`, `is_active`, `is_delete`) VALUES
+-- Kickoff meeting attendees
+(1, 1, 'accepted', NOW(), 1, 0),
+(1, 2, 'accepted', NOW(), 1, 0),
+-- Sprint planning attendees
+(2, 1, 'accepted', NOW(), 1, 0),
+(2, 2, 'tentative', NULL, 1, 0),
+-- Code review attendees
+(3, 1, 'accepted', NOW(), 1, 0),
+(3, 2, 'invited', NULL, 1, 0),
+-- Training attendees
+(5, 1, 'accepted', NOW(), 1, 0),
+(5, 2, 'accepted', NOW(), 1, 0);

@@ -5,29 +5,55 @@
 <!-- Modern Kanban Board Page -->
 <div class="min-vh-100 p-4" style="background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%);">
     
+    <!-- Breadcrumbs -->
+    <nav aria-label="breadcrumb" style="margin-bottom: 1.5rem;">
+        <ol style="display: flex; list-style: none; padding: 1rem 1.25rem; margin: 0; background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); border-radius: 0.75rem; box-shadow: 0 4px 15px rgba(102, 126, 234, 0.2); border: none;">
+            <li style="display: flex; align-items: center;">
+                <a href="<?= base_url('projects') ?>" style="color: #ffffff; text-decoration: none; font-weight: 600; font-size: 0.95rem; transition: all 0.3s ease; display: flex; align-items: center; padding: 0.25rem 0.5rem; border-radius: 0.375rem;" onmouseover="this.style.backgroundColor='rgba(255,255,255,0.15)'; this.style.transform='translateY(-1px)'" onmouseout="this.style.backgroundColor='transparent'; this.style.transform='translateY(0)'">
+                    <i class="fas fa-project-diagram" style="margin-right: 0.5rem; font-size: 0.9rem;"></i>
+                    Projects
+                </a>
+                <span style="margin: 0 0.75rem; color: #e2e8f0; font-size: 1.1rem; font-weight: 300;">›</span>
+            </li>
+            <li style="color: #f7fafc; font-weight: 600; font-size: 0.95rem; display: flex; align-items: center; padding: 0.25rem 0.5rem; background: rgba(255,255,255,0.1); border-radius: 0.375rem; backdrop-filter: blur(10px);">
+                <i class="fas fa-columns" style="margin-right: 0.5rem; font-size: 0.85rem; opacity: 0.9;"></i>
+                Kanban Board
+            </li>
+        </ol>
+    </nav>
+
+    <!-- Back Button -->
+    <a href="javascript:history.back()" class="btn btn-outline-secondary d-inline-flex align-items-center" style="gap:0.5rem; margin-bottom: 1.5rem;">
+        <i class="fas fa-arrow-left"></i>
+        <span>Back</span>
+    </a>
+    
     <!-- Kanban Header -->
-    <div class="card border-0 shadow-lg mb-4">
-        <div class="card-header border-0 bg-white text-dark p-4" style="border-radius: 1rem 1rem 0 0;">
-            <div class="d-flex justify-content-between align-items-center flex-wrap">
-                <div>
-                    <h1 class="h2 mb-2 fw-bold d-flex align-items-center">
-                        <i class="fas fa-columns me-3" style="color: #6366f1;"></i>
-                        <?= esc($project['name']) ?> - Kanban Board
-                    </h1>
-                    <p class="mb-0 opacity-75 text-secondary">
-                        <i class="fas fa-info-circle me-2"></i>
-                        Drag and drop tasks between columns to update their status
-                    </p>
-                </div>
-                <div class="d-flex gap-2 flex-wrap">
-                    <button onclick="openAddTaskModal()" class="btn btn-outline-primary">
-                        <i class="fas fa-plus me-2"></i>
-                        Add Task
-                    </button>
-                    <button onclick="refreshKanban()" class="btn btn-outline-secondary">
-                        <i class="fas fa-sync-alt me-2"></i>
-                        Refresh
-                    </button>
+    <div style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white; border-radius: 1.5rem; padding: 2rem; margin-bottom: 2rem; box-shadow: 0 20px 60px rgba(102,126,234,0.2); position: relative; overflow: hidden;">
+        <!-- Decorative Elements -->
+        <div style="position: absolute; top: -50px; right: -50px; width: 200px; height: 200px; background: rgba(255,255,255,0.1); border-radius: 50%; opacity: 0.3;"></div>
+        <div style="position: absolute; bottom: -30px; left: -30px; width: 120px; height: 120px; background: rgba(255,255,255,0.05); border-radius: 50%;"></div>
+        
+        <div style="display: flex; justify-content: space-between; align-items: center; position: relative; z-index: 2; flex-wrap: wrap; gap: 1rem;">
+            <div>
+                <h1 style="color: white; font-size: 2.5rem; font-weight: 800; margin-bottom: 0.5rem; font-family: 'Poppins', sans-serif; text-shadow: 0 2px 4px rgba(0,0,0,0.1);">
+                    <i class="fas fa-columns" style="margin-right: 1rem; color: rgba(255,255,255,0.9);"></i>
+                    <?= esc($project['name']) ?> - Kanban Board
+                </h1>
+                <p style="color: rgba(255,255,255,0.95); font-size: 1.1rem; margin-bottom: 0; font-weight: 400;">
+                    <i class="fas fa-info-circle" style="margin-right: 0.75rem;"></i>
+                    Drag and drop tasks between columns to update their status
+                </p>
+            </div>
+            <div style="display: flex; gap: 1rem; flex-wrap: wrap;">
+                <button onclick="openAddTaskModal()" style="background: rgba(255,255,255,0.2); border: 2px solid rgba(255,255,255,0.3); color: white; border-radius: 1rem; padding: 0.75rem 1.5rem; font-weight: 600; font-size: 1rem; cursor: pointer; transition: all 0.3s ease; backdrop-filter: blur(10px);" onmouseover="this.style.background='rgba(255,255,255,0.3)'; this.style.transform='translateY(-2px)'; this.style.boxShadow='0 10px 25px rgba(0,0,0,0.2)';" onmouseout="this.style.background='rgba(255,255,255,0.2)'; this.style.transform='translateY(0)'; this.style.boxShadow='none';">
+                    <i class="fas fa-plus" style="margin-right: 0.5rem;"></i>
+                    Add Task
+                </button>
+                <button onclick="refreshKanban()" style="background: rgba(255,255,255,0.1); border: 2px solid rgba(255,255,255,0.2); color: white; border-radius: 1rem; padding: 0.75rem 1.5rem; font-weight: 600; font-size: 1rem; cursor: pointer; transition: all 0.3s ease; backdrop-filter: blur(10px);" onmouseover="this.style.background='rgba(255,255,255,0.2)'; this.style.transform='translateY(-2px)'; this.style.boxShadow='0 10px 25px rgba(0,0,0,0.2)';" onmouseout="this.style.background='rgba(255,255,255,0.1)'; this.style.transform='translateY(0)'; this.style.boxShadow='none';">
+                    <i class="fas fa-sync-alt" style="margin-right: 0.5rem;"></i>
+                    Refresh
+                </button>
                 </div>
             </div>
         </div>
@@ -674,7 +700,7 @@
                                 <option value="">Select Team Member</option>
                                 <?php foreach ($members as $member): ?>
                                     <option value="<?= $member['id'] ?>">
-                                        <?= esc($member['first_name'] . ' ' . $member['last_name']) ?>
+                                        <?= esc($member['full_name']) ?>
                                     </option>
                                 <?php endforeach; ?>
                             </select>
