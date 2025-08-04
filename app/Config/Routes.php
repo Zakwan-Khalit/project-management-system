@@ -1,4 +1,3 @@
-
 <?php
 
 use CodeIgniter\Router\RouteCollection;
@@ -40,6 +39,9 @@ $routes->get('projects/get_tasks_by_template/(:any)/(:num)', 'Projects::get_task
 $routes->post('projects/add_project_members', 'Projects::add_project_members');
 $routes->post('projects/updateHeaders', 'Projects::updateHeaders');
 
+// Preview table (read-only)
+$routes->get('activity/preview_table', 'Activity::preview_table');
+$routes->get('activity/get_preview_table_data', 'Activity::get_preview_table_data');
 
 $routes->get('tasks', 'Tasks::index');
 $routes->get('tasks/myTasks', 'Tasks::myTasks');
@@ -68,6 +70,13 @@ $routes->post('profile/update-password', 'Profile::updatePassword');
 
 // Reports routes
 $routes->get('reports', 'Reports::index');
+$routes->get('reports/project-progress', 'Reports::projectProgress');
+$routes->post('reports/get-project-progress-data', 'Reports::getProjectProgressData');
+$routes->get('reports/project-progress/(:num)', 'Reports::projectProgress/$1');
+$routes->get('reports/completed-project', 'Reports::completedProject');
+$routes->get('reports/completion-status', 'Reports::completionStatus');
+$routes->get('reports/export-csv/(:any)', 'Reports::exportCsv/$1');
+$routes->get('reports/export-csv/(:any)/(:num)', 'Reports::exportCsv/$1/$2');
 $routes->get('reports/projects', 'Reports::projects');
 $routes->get('reports/tasks', 'Reports::tasks');
 $routes->get('reports/export/(:alpha)', 'Reports::export/$1');

@@ -1,5 +1,4 @@
 <?php
-
 namespace App\Controllers;
 
 use App\Models\ActivityModel;
@@ -855,6 +854,101 @@ class Activity extends BaseController
         return $this->response->setJSON([
             'success' => true,
             'templates' => $templates
+        ]);
+    }
+
+    // Read-only preview page for the activity table (AJAX loads data)
+    public function preview_table()
+    {
+        $userData = session('userdata');
+        $userId = $userData['id'] ?? null;
+        if (!$userId) {
+            return redirect()->to('/auth')->with('error', 'Please log in to access this page');
+        }
+
+        $template_id = $this->request->getGet('template_id');
+        $project_id = $this->request->getGet('project_id');
+        if (!$template_id || !$project_id) {
+            return redirect()->back()->with('error', 'Missing template or project ID');
+        }
+        // Only render the view, JS will load data
+        return $this->template->member('activity/preview_table', [
+            'template_id' => $template_id,
+            'project_id' => $project_id
+        ]);
+    }
+
+    // AJAX: Get preview table data (headers, tasks, images)
+    public function get_preview_table_data()
+    {
+        $userData = session('userdata');
+        $userId = $userData['id'] ?? null;
+        if (!$userId) {
+            return $this->response->setJSON(['success' => false, 'message' => 'User not authenticated']);
+        }
+
+        $template_id = $this->request->getGet('template_id');
+        $project_id = $this->request->getGet('project_id');
+        if (!$template_id || !$project_id) {
+            return $this->response->setJSON(['success' => false, 'message' => 'Missing template or project ID']);
+        }
+
+        // Get template
+        $template = $this->activityModel->getTaskTemplateById($template_id, $project_id);
+        if (!$template) {
+            return $this->response->setJSON(['success' => false, 'message' => 'Template not found']);
+        }
+
+        // Get fields and header mapping
+        $fields = [];
+        $headerMap = [];
+        if (!empty($template['fields'])) {
+            $fields = json_decode($template['fields'], true);
+            $all_headers = $this->activityModel->getHeaderLookupOptions();
+            foreach ($all_headers as $header) {
+                $headerMap[$header['id']] = $header['column_name'];
+            }
+        }
+
+        // Get tasks
+        $tasks = $this->activityModel->getTasksByTemplateIdAndProject($template_id, $project_id);
+        
+        // Process task data and add images if needed
+        foreach ($tasks as &$task) {
+            $task['data'] = is_array($task['data']) ? $task['data'] : json_decode($task['data'], true);
+            $task['images'] = []; // Initialize images array
+        }
+        unset($task);
+
+        // Check if there's an Image field and load images
+        foreach ($fields as $fieldId) {
+            if (isset($headerMap[$fieldId]) && $headerMap[$fieldId] === 'Image') {
+                $taskIds = array_column($tasks, 'id');
+                if (!empty($taskIds)) {
+                    $imageRows = $this->db->table('task_images')
+                        ->whereIn('task_id', $taskIds)
+                        ->where('is_delete', 0)
+                        ->get()
+                        ->getResultArray();
+                    
+                    foreach ($imageRows as $img) {
+                        foreach ($tasks as &$task) {
+                            if ($task['id'] == $img['task_id']) {
+                                $task['images'][] = $img;
+                            }
+                        }
+                        unset($task);
+                    }
+                }
+                break;
+            }
+        }
+
+        return $this->response->setJSON([
+            'success' => true,
+            'fields' => $fields,
+            'headerMap' => $headerMap,
+            'tasks' => $tasks
         ]);
     }
 }

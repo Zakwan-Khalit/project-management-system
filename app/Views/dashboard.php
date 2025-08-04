@@ -63,9 +63,9 @@
             <div class="modal-footer">
                 <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
                 <a href="<?= base_url('events') ?>" class="btn btn-primary">View All Events</a>
-                <?php $userData = session('userdata'); $roleId = $userData['role_id'] ?? null; if (in_array($roleId, [1, 2])): ?>
+                <!-- <?php $userData = session('userdata'); $roleId = $userData['role_id'] ?? null; if (in_array($roleId, [1, 2])): ?>
                 <a href="#" class="btn btn-primary" id="eventEditBtn">Edit Event</a>
-                <?php endif; ?>
+                <?php endif; ?> -->
             </div>
         </div>
     </div>

@@ -313,6 +313,18 @@ class ProjectModel extends Model
         return $builder->get()->getResultArray();
     }
 
+    // Get active projects for dropdown selections
+    public function getActiveProjects()
+    {
+        $builder = $this->db->table('projects');
+        $builder->select('id, name, code');
+        $builder->where('is_delete', 0);
+        $builder->where('is_active', 1);
+        $builder->orderBy('name', 'ASC');
+
+        return $builder->get()->getResultArray();
+    }
+
     // Get projects for a specific user (as a member)
     public function getUserProjects($userId)
     {

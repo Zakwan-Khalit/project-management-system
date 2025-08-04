@@ -15,142 +15,369 @@ class ReportsModel extends Model
     }
 
     /**
-     * Get project statistics
+     * Get project progress data for a specific project
      */
-    public function getProjectStats()
+    public function getProjectProgressData($projectId)
     {
-        // Total projects
-        $totalProjects = $this->db->table('projects')
-            ->where('is_delete', 0)
-            ->countAllResults();
-
-        // Projects by status
-        $projectsByStatus = $this->db->table('projects p')
-            ->select('sl.name as status_name, sl.code as status_code, COUNT(ps.project_id) as count')
-            ->join('project_status ps', 'p.id = ps.project_id AND ps.is_active = 1 AND ps.is_delete = 0', 'left')
-            ->join('status_lookup sl', 'ps.status_id = sl.id AND sl.type = "project"', 'left')
-            ->where('p.is_delete', 0)
-            ->groupBy('sl.id, sl.name, sl.code')
+        // Get project scopes with their templates
+        $scopesQuery = $this->db->table('project_scopes ps')
+            ->select('ps.id as scope_id, ps.name as scope_name, ps.scope_order')
+            ->where('ps.project_id', $projectId)
+            ->where('ps.is_delete', 0)
+            ->orderBy('ps.scope_order', 'ASC')
             ->get()
             ->getResultArray();
 
-        // Count active, completed, and other projects
-        $activeProjects = 0;
-        $completedProjects = 0;
-        $statusDistribution = [];
+        $progressData = [];
+        $scopeNum = 1; // Start with 1 and increment
 
-        foreach ($projectsByStatus as $status) {
-            $statusDistribution[$status['status_name'] ?? 'No Status'] = (int)$status['count'];
+        foreach ($scopesQuery as $scope) {
+            // Add scope header row (X.0)
+            $progressData[] = [
+                'type' => 'scope',
+                'num' => $scopeNum . '.0',
+                'activity' => $scope['scope_name'],
+                'planned_start' => '',
+                'planned_end' => '',
+                'actual_start' => '',
+                'actual_end' => '',
+                'planned_percentage' => '',
+                'actual_percentage' => '',
+                'variant' => '',
+                'status' => '',
+                'status_color' => ''
+            ];
+
+            // Get templates for this scope
+            $templates = $this->db->table('task_templates tt')
+                ->select('tt.id as template_id, tt.name as template_name, tt.weightage, tt.component_order')
+                ->where('tt.scope_id', $scope['scope_id'])
+                ->where('tt.is_delete', 0)
+                ->orderBy('tt.component_order', 'ASC')
+                ->get()
+                ->getResultArray();
+
+            if (empty($templates)) {
+                // Add a note that this scope has no components
+                $progressData[] = [
+                    'type' => 'component',
+                    'num' => $scopeNum . '.1',
+                    'activity' => 'No components defined',
+                    'planned_start' => '',
+                    'planned_end' => '',
+                    'actual_start' => '',
+                    'actual_end' => '',
+                    'planned_percentage' => '0.00',
+                    'actual_percentage' => '0.00',
+                    'variant' => '0.00',
+                    'status' => 'Pending Setup',
+                    'status_color' => '#6b7280'
+                ];
+                continue;
+            }
+
+            foreach ($templates as $template) {
+                $componentNum = $template['component_order'];
+                
+                // Get tasks for this template
+                $tasks = $this->getTasksForTemplate($template['template_id'], $projectId);
+                
+                $activityNumber = $scopeNum . '.' . $componentNum;
+                
+                if (empty($tasks)) {
+                    // Add template without tasks
+                    $progressData[] = [
+                        'type' => 'component',
+                        'num' => $activityNumber,
+                        'activity' => $template['template_name'],
+                        'planned_start' => '',
+                        'planned_end' => '',
+                        'actual_start' => '',
+                        'actual_end' => '',
+                        'planned_percentage' => number_format($template['weightage'] ?? 0, 2),
+                        'actual_percentage' => '0.00',
+                        'variant' => '0.00',
+                        'status' => 'Pending Execution',
+                        'status_color' => '#374151'
+                    ];
+                    continue;
+                }
+
+                // Calculate dates and progress from tasks
+                $plannedStart = null;
+                $plannedEnd = null;
+                $actualStart = null;
+                $actualEnd = null;
+                $totalProgress = 0;
+                $taskCount = count($tasks);
+
+                foreach ($tasks as $task) {
+                    $taskData = json_decode($task['data'], true) ?? [];
+                    
+                    // Extract dates (assuming field IDs 11=Start Date, 12=End Date)
+                    $startDate = $this->extractDateFromTask($taskData, ['11', 'start_date', 'Start Date']);
+                    $endDate = $this->extractDateFromTask($taskData, ['12', 'end_date', 'End Date']);
+                    
+                    if ($startDate) {
+                        $plannedStart = $plannedStart ? min($plannedStart, $startDate) : $startDate;
+                        $actualStart = $actualStart ? min($actualStart, $startDate) : $startDate;
+                    }
+                    
+                    if ($endDate) {
+                        $plannedEnd = $plannedEnd ? max($plannedEnd, $endDate) : $endDate;
+                        $actualEnd = $actualEnd ? max($actualEnd, $endDate) : $endDate;
+                    }
+
+                    // Extract progress (field ID 9=Progress %)
+                    $progress = $this->extractProgressFromTask($taskData, ['9', 'progress', 'Progress']);
+                    $totalProgress += $progress;
+                }
+
+                $plannedPercentage = $template['weightage'] ?? 0;
+
+                if ($taskCount > 0) {
+                    $avgProgress = $totalProgress / $taskCount;
+                    $actualPercentage = ($plannedPercentage * $avgProgress) / 100;
+                    $variant = $actualPercentage - $plannedPercentage;
+                    
+                } else {
+                    $avgProgress = 0;
+                    $actualPercentage = 0;
+                    $variant = 0 - $plannedPercentage;
+                }
+
+                // Determine status and color
+                $status = $this->determineTaskStatus($avgProgress, $actualStart, $actualEnd);
+                
+                $progressData[] = [
+                    'type' => 'component',
+                    'num' => $activityNumber,
+                    'activity' => $template['template_name'],
+                    'planned_start' => $plannedStart ? date('d/m/Y', strtotime($plannedStart)) : '',
+                    'planned_end' => $plannedEnd ? date('d/m/Y', strtotime($plannedEnd)) : '',
+                    'actual_start' => $actualStart ? date('d/m/Y', strtotime($actualStart)) : '',
+                    'actual_end' => $actualEnd ? date('d/m/Y', strtotime($actualEnd)) : '',
+                    'planned_percentage' => number_format($plannedPercentage, 2),
+                    'actual_percentage' => number_format($actualPercentage, 2),
+                    'variant' => number_format($variant, 2),
+                    'status' => $status['label'],
+                    'status_color' => $status['color']
+                ];
+            }
             
-            if ($status['status_code'] === 'active') {
-                $activeProjects = (int)$status['count'];
-            } elseif ($status['status_code'] === 'completed') {
-                $completedProjects = (int)$status['count'];
+            $scopeNum++; // Increment for next scope
+        }
+
+        return $progressData;
+    }
+
+    /**
+     * Get completed projects data
+     */
+    public function getCompletedProjectsData()
+    {
+        // Get completed projects with their scopes
+        $completedProjects = $this->db->table('projects p')
+            ->select('p.id, p.name, p.code')
+            ->join('project_status ps', 'ps.project_id = p.id AND ps.is_active = 1', 'inner')
+            ->join('status_lookup sl', 'sl.id = ps.status_id AND sl.code = "completed"', 'inner')
+            ->where('p.is_delete', 0)
+            ->get()
+            ->getResultArray();
+
+        $completedData = [];
+
+        foreach ($completedProjects as $project) {
+            // Get scopes for this project
+            $scopes = $this->db->table('project_scopes')
+                ->where('project_id', $project['id'])
+                ->where('is_delete', 0)
+                ->orderBy('scope_order', 'ASC')
+                ->get()
+                ->getResultArray();
+
+            foreach ($scopes as $scope) {
+                // Calculate completion percentages for this scope
+                $totalPercentage = 100.00;
+                $plannedPercentage = $this->calculateScopePlannedPercentage($scope['id']);
+                $actualPercentage = $this->calculateScopeActualPercentage($scope['id'], $project['id']);
+                $variant = $actualPercentage - $plannedPercentage;
+
+                $completedData[] = [
+                    'scope' => $scope['name'],
+                    'scope_details' => $scope['description'] ?? $project['name'],
+                    'total_percentage' => number_format($totalPercentage, 2),
+                    'planned_percentage' => number_format($plannedPercentage, 2),
+                    'actual_percentage' => number_format($actualPercentage, 2),
+                    'variant' => number_format($variant, 2)
+                ];
             }
         }
 
-        return [
-            'total' => $totalProjects,
-            'active' => $activeProjects,
-            'completed' => $completedProjects,
-            'distribution' => $statusDistribution
-        ];
+        return $completedData;
     }
 
     /**
-     * Get task statistics
+     * Get project completion status data
      */
-    public function getTaskStats()
+    public function getProjectCompletionStatusData()
     {
-        // Total tasks
-        $totalTasks = $this->db->table('tasks')
-            ->where('is_delete', 0)
-            ->countAllResults();
-
-        // Tasks by status
-        $tasksByStatus = $this->db->table('tasks t')
-            ->select('sl.name as status_name, sl.code as status_code, COUNT(ts.task_id) as count')
-            ->join('task_status ts', 't.id = ts.task_id AND ts.is_active = 1 AND ts.is_delete = 0', 'left')
-            ->join('status_lookup sl', 'ts.status_id = sl.id AND sl.type = "task"', 'left')
-            ->where('t.is_delete', 0)
-            ->groupBy('sl.id, sl.name, sl.code')
+        $projects = $this->db->table('projects p')
+            ->select('p.id, p.name, p.start_date, p.end_date')
+            ->where('p.is_delete', 0)
             ->get()
             ->getResultArray();
 
-        // Count completed tasks and build distribution
-        $completedTasks = 0;
-        $statusDistribution = [];
+        $statusData = [];
 
-        foreach ($tasksByStatus as $status) {
-            $statusDistribution[$status['status_name'] ?? 'No Status'] = (int)$status['count'];
+        foreach ($projects as $project) {
+            // Get current project status
+            $status = $this->db->table('project_status ps')
+                ->select('sl.name as status_name, sl.code as status_code')
+                ->join('status_lookup sl', 'sl.id = ps.status_id', 'inner')
+                ->where('ps.project_id', $project['id'])
+                ->where('ps.is_active', 1)
+                ->where('ps.is_delete', 0)
+                ->get()
+                ->getRowArray();
+
+            $statusName = $status['status_name'] ?? 'Unknown';
+            $statusCode = $status['status_code'] ?? '';
             
-            if ($status['status_code'] === 'completed') {
-                $completedTasks = (int)$status['count'];
+            // Calculate days early/late
+            $daysEarly = '';
+            $daysLate = '';
+            
+            if ($project['end_date'] && $statusCode === 'completed') {
+                $endDate = new \DateTime($project['end_date']);
+                $today = new \DateTime();
+                $diff = $today->diff($endDate);
+                
+                if ($today < $endDate) {
+                    $daysEarly = $diff->days;
+                } elseif ($today > $endDate) {
+                    $daysLate = $diff->days;
+                }
+            } elseif ($project['end_date'] && $statusCode !== 'completed') {
+                $endDate = new \DateTime($project['end_date']);
+                $today = new \DateTime();
+                if ($today > $endDate) {
+                    $daysLate = $today->diff($endDate)->days;
+                }
+            }
+
+            $statusData[] = [
+                'project_name' => $project['name'],
+                'status' => $statusName,
+                'days_early' => $daysEarly ? $daysEarly : '-',
+                'days_late' => $daysLate ? $daysLate : '-'
+            ];
+        }
+
+        return $statusData;
+    }
+
+    /**
+     * Helper methods
+     */
+    private function getTasksForTemplate($templateId, $projectId)
+    {
+        return $this->db->table('tasks')
+            ->where('template_id', $templateId)
+            ->where('project_id', $projectId)
+            ->where('is_delete', 0)
+            ->orderBy('task_order', 'ASC')
+            ->get()
+            ->getResultArray();
+    }
+
+    private function extractDateFromTask($taskData, $possibleKeys)
+    {
+        foreach ($possibleKeys as $key) {
+            if (isset($taskData[$key]) && !empty($taskData[$key])) {
+                return $taskData[$key];
+            }
+        }
+        return null;
+    }
+
+    private function extractProgressFromTask($taskData, $possibleKeys)
+    {
+        foreach ($possibleKeys as $key) {
+            if (isset($taskData[$key]) && !empty($taskData[$key])) {
+                $value = $taskData[$key];
+                
+                // Handle percentage strings like "60%" or numeric values like 60
+                if (is_numeric($value)) {
+                    return (float)$value;
+                } elseif (is_string($value) && str_ends_with($value, '%')) {
+                    // Remove the % sign and convert to float
+                    $numericValue = str_replace('%', '', $value);
+                    if (is_numeric($numericValue)) {
+                        return (float)$numericValue;
+                    }
+                }
+            }
+        }
+        return 0;
+    }
+
+    private function determineTaskStatus($progress, $actualStart, $actualEnd)
+    {
+        if ($progress >= 100) {
+            return ['label' => 'Finished Ahead of Schedule (>0%)', 'color' => 'green'];
+        } elseif ($progress >= 80) {
+            return ['label' => 'Follow Schedule', 'color' => 'yellow'];
+        } elseif ($progress >= 50) {
+            return ['label' => 'Finished Late', 'color' => 'purple'];
+        } elseif ($progress > 0) {
+            return ['label' => 'Behind Schedule (0% < -10%)', 'color' => 'red'];
+        } else {
+            return ['label' => 'Pending Execution', 'color' => 'black'];
+        }
+    }
+
+    private function calculateScopePlannedPercentage($scopeId)
+    {
+        // Get all templates for this scope and sum their weightage
+        $result = $this->db->table('task_templates')
+            ->selectSum('weightage')
+            ->where('scope_id', $scopeId)
+            ->where('is_delete', 0)
+            ->get()
+            ->getRowArray();
+
+        return $result['weightage'] ?? 0;
+    }
+
+    private function calculateScopeActualPercentage($scopeId, $projectId)
+    {
+        // Get templates for this scope
+        $templates = $this->db->table('task_templates')
+            ->where('scope_id', $scopeId)
+            ->where('is_delete', 0)
+            ->get()
+            ->getResultArray();
+
+        $totalActual = 0;
+
+        foreach ($templates as $template) {
+            $tasks = $this->getTasksForTemplate($template['id'], $projectId);
+            $templateProgress = 0;
+            $taskCount = count($tasks);
+
+            if ($taskCount > 0) {
+                foreach ($tasks as $task) {
+                    $taskData = json_decode($task['data'], true) ?? [];
+                    $progress = $this->extractProgressFromTask($taskData, ['9', 'progress', 'Progress']);
+                    $templateProgress += $progress;
+                }
+                $avgProgress = $templateProgress / $taskCount;
+                $templateActual = ($template['weightage'] * $avgProgress) / 100;
+                $totalActual += $templateActual;
             }
         }
 
-        return [
-            'total' => $totalTasks,
-            'completed' => $completedTasks,
-            'distribution' => $statusDistribution
-        ];
-    }
-
-    /**
-     * Get user statistics
-     */
-    public function getUserStats()
-    {
-        // Total active users
-        $totalUsers = $this->db->table('users')
-            ->where('is_active', 1)
-            ->where('is_delete', 0)
-            ->countAllResults();
-
-        return [
-            'total' => $totalUsers
-        ];
-    }
-
-    /**
-     * Get project completion rates
-     */
-    public function getProjectCompletionRates()
-    {
-        return $this->db->table('projects p')
-            ->select('p.id, p.name, p.code, 
-                     COUNT(t.id) as total_tasks,
-                     COUNT(CASE WHEN ts.status_id = (SELECT id FROM status_lookup WHERE type="task" AND code="completed" LIMIT 1) THEN 1 END) as completed_tasks,
-                     ROUND((COUNT(CASE WHEN ts.status_id = (SELECT id FROM status_lookup WHERE type="task" AND code="completed" LIMIT 1) THEN 1 END) / COUNT(t.id)) * 100, 2) as completion_rate')
-            ->join('tasks t', 'p.id = t.project_id AND t.is_delete = 0', 'left')
-            ->join('task_status ts', 't.id = ts.task_id AND ts.is_active = 1 AND ts.is_delete = 0', 'left')
-            ->where('p.is_delete', 0)
-            ->groupBy('p.id, p.name, p.code')
-            ->having('total_tasks >', 0)
-            ->orderBy('completion_rate', 'DESC')
-            ->get()
-            ->getResultArray();
-    }
-
-    /**
-     * Get team productivity metrics
-     */
-    public function getTeamProductivity()
-    {
-        return $this->db->table('users u')
-            ->select('u.id, u.email, up.full_name,
-                     COUNT(pm.project_id) as assigned_projects,
-                     COUNT(ta.task_id) as assigned_tasks,
-                     COUNT(CASE WHEN ts.status_id = (SELECT id FROM status_lookup WHERE type="task" AND code="completed" LIMIT 1) THEN 1 END) as completed_tasks')
-            ->join('user_profile up', 'u.id = up.user_id', 'left')
-            ->join('project_members pm', 'u.id = pm.user_id AND pm.is_delete = 0', 'left')
-            ->join('task_assignment ta', 'u.id = ta.user_id AND ta.is_delete = 0', 'left')
-            ->join('task_status ts', 'ta.task_id = ts.task_id AND ts.is_active = 1 AND ts.is_delete = 0', 'left')
-            ->where('u.is_active', 1)
-            ->where('u.is_delete', 0)
-            ->groupBy('u.id, u.email, up.full_name')
-            ->orderBy('completed_tasks', 'DESC')
-            ->get()
-            ->getResultArray();
+        return $totalActual;
     }
 }

@@ -1,0 +1,26 @@
+Debug Project Progress Data
+Project Scopes:
+Scope 1.0: System Analysis (ID: 1)
+&nbsp;&nbsp;1.1: Business Requirement Specification (Weightage: 2.00%)
+&nbsp;&nbsp;&nbsp;&nbsp;Tasks:
+&nbsp;&nbsp;&nbsp;&nbsp;- Task 3: Progress = 0% | Raw Data: {&quot;1&quot;:&quot;Requirements&quot;,&quot;2&quot;:&quot;Ali&quot;,&quot;3&quot;:&quot;System Analyst&quot;,&quot;4&quot;:&quot;adwsa&quot;,&quot;5&quot;:&quot;Initial requirements&quot;,&quot;7&quot;:&quot;&quot;,&quot;8&quot;:&quot;To Do&quot;,&quot;9&quot;:&quot;0%&quot;,&quot;10&quot;:&quot;Requirements gathering phase&quot;,&quot;11&quot;:&quot;2025-01-02&quot;,&quot;12&quot;:&quot;2025-01-02&quot;}
+&nbsp;&nbsp;&nbsp;&nbsp;Summary: 1 tasks, Total: 0%, Avg Progress: 0%, Planned: 2.00%, Actual %: 0%
+
+
+Scope 2.0: Quality Assurance (ID: 2)
+&nbsp;&nbsp;2.1: User Acceptance Testing (Weightage: 3.00%)
+&nbsp;&nbsp;&nbsp;&nbsp;Tasks:
+&nbsp;&nbsp;&nbsp;&nbsp;- Task 1: Progress = 60% | Raw Data: {&quot;1&quot;:&quot;Login&quot;,&quot;2&quot;:&quot;Ali&quot;,&quot;3&quot;:&quot;Frontend Developer&quot;,&quot;4&quot;:&quot;UI needs improvement&quot;,&quot;5&quot;:&quot;Login Button&quot;,&quot;7&quot;:&quot;Natasha Nazrin&quot;,&quot;8&quot;:&quot;In Progress&quot;,&quot;9&quot;:&quot;60%&quot;,&quot;10&quot;:&quot;UI needs improvement&quot;,&quot;11&quot;:&quot;2025-01-02&quot;,&quot;12&quot;:&quot;2025-01-05&quot;}
+&nbsp;&nbsp;&nbsp;&nbsp;- Task 2: Progress = 0% | Raw Data: {&quot;1&quot;:&quot;Register&quot;,&quot;2&quot;:&quot;Sara&quot;,&quot;3&quot;:&quot;Backend Developer&quot;,&quot;4&quot;:&quot;API pending&quot;,&quot;5&quot;:&quot;Register API&quot;,&quot;6&quot;:null,&quot;7&quot;:&quot;Sara&quot;,&quot;8&quot;:&quot;To Do&quot;,&quot;9&quot;:&quot;0%&quot;,&quot;10&quot;:&quot;API pending&quot;,&quot;11&quot;:&quot;2025-01-03&quot;,&quot;12&quot;:&quot;2025-01-10&quot;,&quot;13&quot;:null,&quot;14&quot;:&quot;&quot;}
+&nbsp;&nbsp;&nbsp;&nbsp;- Task 5: Progress = 0% | Raw Data: {&quot;1&quot;:&quot;Login&quot;,&quot;2&quot;:&quot;Siti&quot;,&quot;3&quot;:&quot;Backend Developer&quot;,&quot;4&quot;:&quot;Pending API integration&quot;,&quot;5&quot;:&quot;Authentication API&quot;,&quot;6&quot;:null,&quot;7&quot;:&quot;Siti&quot;,&quot;8&quot;:&quot;todo&quot;,&quot;9&quot;:&quot;0%&quot;,&quot;10&quot;:&quot;Pending API integration&quot;,&quot;11&quot;:&quot;2025-01-02&quot;,&quot;12&quot;:&quot;2025-01-06&quot;,&quot;13&quot;:null}
+&nbsp;&nbsp;&nbsp;&nbsp;- Task 6: Progress = 80% | Raw Data: {&quot;1&quot;:&quot;Dashboard&quot;,&quot;2&quot;:&quot;John&quot;,&quot;3&quot;:&quot;Frontend Developer&quot;,&quot;4&quot;:&quot;Awaiting feedback&quot;,&quot;5&quot;:&quot;Progress Chart&quot;,&quot;6&quot;:null,&quot;7&quot;:&quot;John&quot;,&quot;8&quot;:&quot;Review&quot;,&quot;9&quot;:&quot;80%&quot;,&quot;10&quot;:&quot;Awaiting feedback&quot;,&quot;11&quot;:&quot;2025-01-10&quot;,&quot;12&quot;:&quot;2025-01-15&quot;,&quot;13&quot;:null}
+&nbsp;&nbsp;&nbsp;&nbsp;Summary: 4 tasks, Total: 140%, Avg Progress: 35%, Planned: 3.00%, Actual %: 1.05%
+
+&nbsp;&nbsp;2.2: Factory Acceptance Testing (Weightage: 4.00%)
+&nbsp;&nbsp;&nbsp;&nbsp;Tasks:
+&nbsp;&nbsp;&nbsp;&nbsp;- Task 4: Progress = 0% | Raw Data: {&quot;1&quot;:&quot;Factory Test&quot;,&quot;2&quot;:&quot;Sara&quot;,&quot;3&quot;:&quot;QA Engineer&quot;,&quot;4&quot;:&quot;&quot;,&quot;5&quot;:&quot;Test login flow&quot;,&quot;6&quot;:null,&quot;7&quot;:&quot;Sara&quot;,&quot;8&quot;:&quot;todo&quot;,&quot;9&quot;:&quot;0%&quot;,&quot;10&quot;:&quot;Factory test case&quot;,&quot;11&quot;:&quot;2025-01-05&quot;,&quot;12&quot;:&quot;2025-01-05&quot;,&quot;13&quot;:null}
+&nbsp;&nbsp;&nbsp;&nbsp;Summary: 1 tasks, Total: 0%, Avg Progress: 0%, Planned: 4.00%, Actual %: 0%
+
+
+Scope 3.0: Development (ID: 3)
+

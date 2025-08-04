@@ -68,7 +68,7 @@
             ?>
             
             <?php if ($hasValidFields): ?>
-                <!-- Export Buttons -->
+                <!-- Export & Preview Buttons -->
                 <div class="d-flex justify-content-between align-items-center mb-4" style="padding: 1.5rem; background: linear-gradient(135deg, #f8fafc 0%, #f1f5f9 100%); border-radius: 0.75rem; border: 1px solid #e2e8f0;">
                     <div class="d-flex gap-3" id="exportBtnGroupLeft">
                         <button id="exportCsvBtn" class="btn btn-outline-primary" type="button" style="border-radius: 0.5rem; padding: 0.5rem 1rem; font-weight: 500; transition: all 0.3s ease;">
@@ -80,6 +80,9 @@
                         <button id="exportPdfBtn" class="btn btn-outline-danger" type="button" style="border-radius: 0.5rem; padding: 0.5rem 1rem; font-weight: 500; transition: all 0.3s ease;">
                             <i class="fas fa-file-pdf me-2"></i>Export PDF
                         </button>
+                        <button id="previewTableBtn" type="button" class="btn btn-outline-info" style="border-radius: 0.5rem; padding: 0.5rem 1rem; font-weight: 500; transition: all 0.3s ease;">
+                            <i class="fas fa-eye me-2"></i>Preview
+                        </button>
                     </div>
                     <div>
                         <button id="tableSettingsBtn" class="btn btn-outline-secondary" type="button" title="Table Settings" style="border-radius: 0.5rem; width: 44px; height: 44px; display: flex; align-items: center; justify-content: center; font-weight: 500; transition: all 0.3s ease;">
@@ -87,6 +90,7 @@
                         </button>
                     </div>
                 </div>
+
             <?php endif; ?>
             
             <?php if (!$hasValidFields): ?>
@@ -325,21 +329,42 @@ $('#exportCsvBtn').on('click', function() {
 const projectId = "<?= esc($project_id ?? $template['project_id'] ?? $project['id'] ?? '') ?>";
 const templateId = "<?= esc($template_id ?? $template['id'] ?? '') ?>";
 
+// --- Preview button AJAX functionality ---
+$('#previewTableBtn').on('click', function() {
+    const templateId = "<?= esc($template_id ?? $template['id'] ?? '') ?>";
+    const projectId = "<?= esc($project_id ?? $template['project_id'] ?? $project['id'] ?? '') ?>";
+    
+    // Navigate to preview page with parameters
+    window.location.href = "<?= base_url('activity/preview_table') ?>?template_id=" + encodeURIComponent(templateId) + "&project_id=" + encodeURIComponent(projectId);
+});
+
 // --- User dropdown for Tester Name and PIC ---
 let projectUsers = [];
 function fetchProjectUsers() {
     return $.ajax({
         url: '<?= base_url('activity/project_users/') ?>' + projectId,
         method: 'GET',
-        dataType: 'json',
+        dataType: 'text', // Accept any response, parse manually
         success: function(res) {
-            if (res.success) {
-                projectUsers = res.users;
+            let json;
+            try {
+                json = JSON.parse(res);
+            } catch (e) {
+                // Not JSON, likely session timeout or error page
+                console.error('Error parsing project users JSON:', e, res);
+                Swal.fire('Session Expired', 'Please log in again. (Project users)', 'error');
+                return;
+            }
+            if (json.success) {
+                projectUsers = json.users;
+            } else {
+                Swal.fire('Error', json.message || 'Failed to load project users.', 'error');
             }
         },
         error: function(xhr, status, error) {
-            console.error('Error fetching project users:', error);
-            Swal.fire('Error', 'Failed to load project users.', 'error');
+            let msg = xhr.responseText && xhr.responseText.length < 200 ? xhr.responseText : error;
+            console.error('Error fetching project users:', msg);
+            Swal.fire('Error', 'Failed to load project users.\n' + msg, 'error');
         }
     });
 }
@@ -467,35 +492,37 @@ $('#dynamicTaskTable').on('click', 'td.editable-cell', function(e) {
             }
         });
     } else if (field === 'Progress') {
-        let current = parseInt(cell.text().replace('%','').trim(), 10) || 0;
-        let selectHtml = `<select class="cell-overlay-editor form-select form-select-sm" style="position:absolute;z-index:9999;left:${cellOffset.left}px;top:${cellOffset.top}px;width:${cellWidth}px;height:${cellHeight}px;">`;
-        for (let i = 0; i <= 100; i += 10) {
-            selectHtml += `<option value="${i}"${current === i ? ' selected' : ''}>${i}%</option>`;
-        }
-        selectHtml += `</select>`;
-        overlay = $(selectHtml);
-        $('body').append(overlay);
-        overlay.focus();
-        overlay.on('blur change', function() {
-            let val = this.value + '%';
-            removeOverlay(val, val);
-        });
-        overlay.on('keydown', function(ev) {
-            if (ev.key === 'Enter' || ev.key === 'Tab') {
-                this.blur();
-            }
-        });
+        // Only allow editing if status is 'In Progress' (1-79%)
+        const statusCell = cell.closest('tr').find('td[data-field="Status"]');
+        let statusText = statusCell.text().trim().toLowerCase();
+        if (statusText === 'in progress' || statusText === 'in_progress') {
+            let current = parseInt(cell.text().replace('%','').trim(), 10) || 1;
+            overlay = $(`<input type="number" min="1" max="79" class="cell-overlay-editor form-control form-control-sm" value="${current}" style="position:absolute;z-index:9999;left:${cellOffset.left}px;top:${cellOffset.top}px;width:${cellWidth}px;height:${cellHeight}px;">`);
+            $('body').append(overlay);
+            overlay.focus();
+            overlay.on('blur', function() {
+                let val = Math.max(1, Math.min(79, parseInt(this.value, 10) || 1));
+                removeOverlay(val + '%', val + '%');
+            });
+            overlay.on('keydown', function(ev) {
+                if (ev.key === 'Enter' || ev.key === 'Tab') {
+                    this.blur();
+                }
+            });
+        } // else: not editable
     } else if (field === 'Status') {
+        // New status options and progress mapping
         const statusOptions = [
-            { code: 'pending', name: 'To Do' },
-            { code: 'in_progress', name: 'In Progress' },
-            { code: 'review', name: 'Review' },
-            { code: 'completed', name: 'Done' }
+            { code: 'new', name: 'New', progress: '0%' },
+            { code: 'in_progress', name: 'In Progress', progress: null },
+            { code: 'completed', name: 'Completed', progress: '80%' },
+            { code: 'closed', name: 'Closed', progress: '100%' },
+            { code: 'reassigned', name: 'Reassigned', progress: '50%' }
         ];
-        let current = cell.text().trim().toLowerCase().replace(' ', '_');
+        let current = cell.text().trim().toLowerCase().replace(/\s|\(|\)|%/g, '_');
         let selectHtml = `<select class="cell-overlay-editor form-select form-select-sm" style="position:absolute;z-index:9999;left:${cellOffset.left}px;top:${cellOffset.top}px;width:${cellWidth}px;height:${cellHeight}px;">`;
         statusOptions.forEach(opt => {
-            selectHtml += `<option value="${opt.code}"${current === opt.code ? ' selected' : ''}>${opt.name}</option>`;
+            selectHtml += `<option value="${opt.code}"${current.includes(opt.code) ? ' selected' : ''}>${opt.name}</option>`;
         });
         selectHtml += `</select>`;
         overlay = $(selectHtml);
@@ -505,6 +532,14 @@ $('#dynamicTaskTable').on('click', 'td.editable-cell', function(e) {
             let val = this.value;
             let display = statusOptions.find(opt => opt.code === val)?.name || val;
             removeOverlay(val, display);
+            // If not in_progress, auto-set progress cell
+            if (val !== 'in_progress') {
+                const progressVal = statusOptions.find(opt => opt.code === val)?.progress;
+                if (progressVal !== null && progressVal !== undefined) {
+                    const progressCell = cell.closest('tr').find('td[data-field="Progress"]');
+                    progressCell.text(progressVal);
+                }
+            }
         });
         overlay.on('keydown', function(ev) {
             if (ev.key === 'Enter' || ev.key === 'Tab') {
@@ -519,13 +554,13 @@ $('#dynamicTaskTable').on('blur', 'td.editable-cell', function() {
     const cell = $(this);
     const row = cell.closest('tr');
     let taskId = row.data('task-id');
-    
     // Debug: Log the task ID
     console.log('Saving task. Task ID:', taskId, 'Type:', typeof taskId);
-    
     const data = {};
     let statusValue = null;
     let progressCell = null;
+    let progressFieldId = null;
+    // First pass: collect values and references
     row.find('td.editable-cell').each(function() {
         const field = $(this).data('field');
         const fieldId = $(this).data('field-id');
@@ -535,27 +570,40 @@ $('#dynamicTaskTable').on('blur', 'td.editable-cell', function() {
         } else if (field === 'Start Date' || field === 'End Date') {
             value = $(this).find('input[type="date"]').val() || $(this).text();
         } else if (field === 'Progress') {
-            value = $(this).find('select.cell-overlay-editor').val() || $(this).text();
-            if (value !== undefined && value !== null && value !== '') {
-                value = Math.max(0, Math.min(100, parseInt(value, 10))) + '%';
-            } else {
-                value = $(this).text();
-            }
             progressCell = $(this);
+            progressFieldId = fieldId;
+            value = $(this).text().replace('%','').trim();
         } else if (field === 'Status') {
-            value = $(this).find('select').val() || $(this).text();
-            statusValue = value;
+            statusValue = $(this).text().trim().toLowerCase();
+            value = $(this).text().trim();
         } else {
-            value = $(this).text();
+            value = $(this).text().trim();
         }
-        // Use header ID as key
         data[fieldId] = value;
     });
-    // If status is completed/done, set progress to 100%
-    if (statusValue === 'completed' && progressCell) {
-        const progressFieldId = progressCell.data('field-id');
-        data[progressFieldId] = '100%';
-        progressCell.text('100%');
+    // --- Auto-update Progress based on Status ---
+    if (progressCell && progressFieldId) {
+        let newProgress = null;
+        if (statusValue === 'new') {
+            newProgress = '0%';
+        } else if (statusValue === 'in progress' || statusValue === 'in_progress') {
+            // Allow manual entry (handled in click handler)
+            let manualVal = progressCell.text().replace('%','').trim();
+            let num = parseInt(manualVal, 10);
+            if (isNaN(num) || num < 1) num = 1;
+            if (num > 79) num = 79;
+            newProgress = num + '%';
+        } else if (statusValue === 'completed') {
+            newProgress = '80%';
+        } else if (statusValue === 'closed') {
+            newProgress = '100%';
+        } else if (statusValue === 'reassigned') {
+            newProgress = '50%';
+        }
+        if (newProgress !== null) {
+            data[progressFieldId] = newProgress;
+            progressCell.text(newProgress);
+        }
     }
     // Restore cell display
     row.find('td.editable-cell').each(function() {
@@ -568,20 +616,12 @@ $('#dynamicTaskTable').on('blur', 'td.editable-cell', function() {
         } else if (field === 'Progress') {
             $(this).text(data[fieldId]);
         } else if (field === 'Status') {
-            const statusOptions = {
-                'pending': 'To Do',
-                'in_progress': 'In Progress',
-                'review': 'Review',
-                'completed': 'Done'
-            };
-            $(this).text(statusOptions[data[fieldId]] || data[fieldId]);
+            $(this).text(data[fieldId]);
         }
     });
     // Always send project_id and template_id
     data['project_id'] = projectId;
     data['template_id'] = templateId;
-    
-    // If no taskId, create new task
     if (!taskId) {
         $.ajax({
             url: '<?= base_url('activity/save_task') ?>',
@@ -589,11 +629,12 @@ $('#dynamicTaskTable').on('blur', 'td.editable-cell', function() {
             data: data,
             dataType: 'json',
             success: function(res) {
-                if (res.success && res.task_id) {
-                    row.attr('data-task-id', res.task_id);
-                } else {
+                console.log('Create response:', res);
+                if (!res.success) {
                     console.error('Failed to create task:', res.message);
                     Swal.fire('Error', 'Failed to create new task.', 'error');
+                } else {
+                    if (res.id) row.attr('data-task-id', res.id);
                 }
             },
             error: function(xhr, status, error) {
@@ -602,12 +643,8 @@ $('#dynamicTaskTable').on('blur', 'td.editable-cell', function() {
             }
         });
     } else {
-        // IMPORTANT: Include the task ID for updates
         data['id'] = taskId;
-        
-        // Debug: Log what data is being sent
         console.log('Updating existing task. Data being sent:', data);
-        
         $.ajax({
             url: '<?= base_url('activity/save_task') ?>',
             method: 'POST',
@@ -789,33 +826,41 @@ function loadTaskImages(taskId, cell) {
     $.ajax({
         url: '<?= base_url('task-images/list/') ?>' + taskId,
         method: 'GET',
-        dataType: 'json',
+        dataType: 'text', // Accept any response, parse manually
         success: function(res) {
-            if (res.success) {
+            let json;
+            try {
+                json = JSON.parse(res);
+            } catch (e) {
+                // Not JSON, likely session timeout or error page
+                console.error('Error parsing task images JSON:', e, res);
+                // Optionally show a warning for images
+                return;
+            }
+            if (json.success) {
                 const list = cell.find('.task-image-list');
                 list.empty();
-                res.images.forEach(img => {
-                    // Use controller route to serve images from writable using file_address (random filename)
-                    // file_address is like 'task_image/abc123.jpg', so we want only the filename part
+                json.images.forEach(img => {
                     let filename = img.file_address;
-                if (filename && filename.includes('/')) {
-                    filename = filename.substring(filename.lastIndexOf('/') + 1);
-                }
-                const imgPath = '<?= base_url('task-images/view/') ?>' + encodeURIComponent(filename);
-                const thumb = $('<img>').attr('src', imgPath)
-                    .addClass('img-thumbnail task-thumb me-1 mb-1')
-                    .css({width:'48px',height:'48px',objectFit:'cover',cursor:'pointer'})
-                    .attr('data-image-id', img.id)
-                    .attr('data-image-src', imgPath)
-                    .attr('title', img.file_name);
-                list.append(thumb);
-            });
+                    if (filename && filename.includes('/')) {
+                        filename = filename.substring(filename.lastIndexOf('/') + 1);
+                    }
+                    const imgPath = '<?= base_url('task-images/view/') ?>' + encodeURIComponent(filename);
+                    const thumb = $('<img>').attr('src', imgPath)
+                        .addClass('img-thumbnail task-thumb me-1 mb-1')
+                        .css({width:'48px',height:'48px',objectFit:'cover',cursor:'pointer'})
+                        .attr('data-image-id', img.id)
+                        .attr('data-image-src', imgPath)
+                        .attr('title', img.file_name);
+                    list.append(thumb);
+                });
+            }
+        },
+        error: function(xhr, status, error) {
+            let msg = xhr.responseText && xhr.responseText.length < 200 ? xhr.responseText : error;
+            console.error('Error loading task images:', msg);
+            // Don't show error to user for images, just log it
         }
-    },
-    error: function(xhr, status, error) {
-        console.error('Error loading task images:', error);
-        // Don't show error to user for images, just log it
-    }
     });
 }
 
