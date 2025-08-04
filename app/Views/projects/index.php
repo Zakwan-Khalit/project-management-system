@@ -1,44 +1,30 @@
 <!-- Breadcrumbs -->
 <nav aria-label="breadcrumb" style="margin-bottom: 1rem;">
-    <ol style="display: flex; list-style: none; padding: 0.75rem 1rem; margin: 0; background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); border-radius: 0.5rem; box-shadow: 0 3px 12px rgba(102, 126, 234, 0.15); border: none;">
+    <ol style="display: inline-flex; list-style: none; padding: 0.4rem 0.6rem; margin: 0; background: #4a5568; border-radius: 0.3rem; box-shadow: 0 2px 8px rgba(74, 85, 104, 0.15); border: none; width: fit-content;">
         <li style="display: flex; align-items: center;">
-            <a href="<?= base_url('dashboard') ?>" style="color: #ffffff; text-decoration: none; font-weight: 600; font-size: 0.85rem; transition: all 0.3s ease; display: flex; align-items: center; padding: 0.2rem 0.4rem; border-radius: 0.3rem;" onmouseover="this.style.backgroundColor='rgba(255,255,255,0.15)'; this.style.transform='translateY(-1px)'" onmouseout="this.style.backgroundColor='transparent'; this.style.transform='translateY(0)'">
-                <i class="fas fa-tachometer-alt" style="margin-right: 0.4rem; font-size: 0.8rem;"></i>
+            <a href="<?= base_url('dashboard') ?>" style="color: #e2e8f0; text-decoration: none; font-weight: 500; font-size: 0.75rem; transition: all 0.3s ease; display: flex; align-items: center; padding: 0.1rem 0.25rem; border-radius: 0.2rem;" onmouseover="this.style.backgroundColor='rgba(255,255,255,0.1)'; this.style.color='#ffffff'" onmouseout="this.style.backgroundColor='transparent'; this.style.color='#e2e8f0'">
+                <i class="fas fa-home" style="margin-right: 0.3rem; font-size: 0.7rem;"></i>
                 Dashboard
             </a>
-            <span style="margin: 0 0.5rem; color: #e2e8f0; font-size: 1rem; font-weight: 300;">›</span>
+            <span style="margin: 0 0.3rem; color: #a0aec0; font-size: 0.8rem; font-weight: 300;">›</span>
         </li>
-        <li style="color: #f7fafc; font-weight: 600; font-size: 0.85rem; display: flex; align-items: center; padding: 0.2rem 0.4rem; background: rgba(255,255,255,0.1); border-radius: 0.3rem; backdrop-filter: blur(10px);">
-            <i class="fas fa-project-diagram" style="margin-right: 0.4rem; font-size: 0.75rem; opacity: 0.9;"></i>
+        <li style="color: #ffffff; font-weight: 500; font-size: 0.75rem; display: flex; align-items: center; padding: 0.1rem 0.25rem; background: rgba(255,255,255,0.1); border-radius: 0.2rem;">
+            <i class="fas fa-project-diagram" style="margin-right: 0.3rem; font-size: 0.7rem;"></i>
             Projects
         </li>
     </ol>
 </nav>
 
 <!-- Projects Header -->
-<div style="background: white; border-radius: 0.75rem; box-shadow: 0 6px 20px rgba(0,0,0,0.06); border: 1px solid #f1f3f4; margin-bottom: 1.25rem; overflow: hidden;">
-    <!-- Decorative Header Section -->
-    <div style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white; padding: 1.25rem; position: relative; overflow: hidden;">
-        <!-- Decorative Elements -->
-        <div style="position: absolute; top: -30px; right: -30px; width: 120px; height: 120px; background: rgba(255,255,255,0.1); border-radius: 50%; opacity: 0.3;"></div>
-        <div style="position: absolute; bottom: -20px; left: -20px; width: 80px; height: 80px; background: rgba(255,255,255,0.05); border-radius: 50%;"></div>
-        
-        <div style="display: flex; justify-content: space-between; align-items: center; position: relative; z-index: 2;">
-            <div>
-                <h1 style="color: white; font-size: 1.5rem; font-weight: 700; margin: 0; font-family: 'Poppins', sans-serif; text-shadow: 0 2px 4px rgba(0,0,0,0.1); display: flex; align-items: center; gap: 0.5rem;">
-                    <i class="fas fa-project-diagram" style="color: rgba(255,255,255,0.9); font-size: 1.3rem;"></i>
-                    My Projects
-                </h1>
-                
-            </div>
-            <div style="display: flex; gap: 0.75rem;">
-                <?php $userData = session('userdata'); $roleId = $userData['role_id'] ?? null; if (in_array($roleId, [1,2,3,4])): ?>
-                <button onclick="createNewProject()" style="background: rgba(255,255,255,0.2); border: 2px solid rgba(255,255,255,0.3); color: white; border-radius: 0.5rem; padding: 0.5rem 1rem; font-weight: 600; font-size: 0.85rem; cursor: pointer; transition: all 0.3s ease; backdrop-filter: blur(10px);" onmouseover="this.style.background='rgba(255,255,255,0.3)'; this.style.transform='translateY(-1px)'; this.style.boxShadow='0 6px 15px rgba(0,0,0,0.15)';" onmouseout="this.style.background='rgba(255,255,255,0.2)'; this.style.transform='translateY(0)'; this.style.boxShadow='none';">
-                    <i class="fas fa-plus" style="margin-right: 0.4rem;"></i>
-                    New Project
-                </button>
-                <?php endif; ?>
-            </div>
+<div>
+    <!-- New Project Button -->
+    <div style="display: flex; justify-content: flex-end; margin-bottom: 1.25rem;">
+        <?php $userData = session('userdata'); $roleId = $userData['role_id'] ?? null; if (in_array($roleId, [1,2,3,4])): ?>
+            <button onclick="createNewProject()" style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white; border: none; border-radius: 0.5rem; padding: 0.75rem 1.25rem; font-weight: 600; font-size: 0.9rem; cursor: pointer; transition: all 0.3s ease; box-shadow: 0 4px 12px rgba(102, 126, 234, 0.3);" onmouseover="this.style.transform='translateY(-1px)'; this.style.boxShadow='0 6px 18px rgba(102, 126, 234, 0.4)';" onmouseout="this.style.transform='translateY(0)'; this.style.boxShadow='0 4px 12px rgba(102, 126, 234, 0.3)';">
+                <i class="fas fa-plus" style="margin-right: 0.5rem;"></i>
+                New Project
+            </button>
+        <?php endif; ?>
     </div>
     
     <!-- Stats Cards Section -->
@@ -130,32 +116,71 @@
     </div>
 </div>
 
-<!-- Projects Container -->
-<div style="background: white; border-radius: 1rem; box-shadow: 0 10px 30px rgba(0,0,0,0.08); border: 1px solid #f1f3f4; overflow: hidden;">
-    <div style="padding: 2rem;">
-        <!-- Loading State -->
-        <div id="loadingContainer" style="text-align: center; padding: 2rem;">
-            <div style="width: 40px; height: 40px; border: 3px solid #e2e8f0; border-top: 3px solid #667eea; border-radius: 50%; margin: 0 auto 1rem auto; animation: spin 1s linear infinite;"></div>
-            <h4 style="color: #6b7280; font-weight: 600; font-family: 'Poppins', sans-serif; margin-bottom: 0.5rem; font-size: 1.1rem;">Loading projects...</h4>
-            <p style="color: #9ca3af; margin: 0; font-size: 0.9rem;">Please wait</p>
-        </div>        <style>
-            @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
-            @keyframes pulse { 0%, 100% { opacity: 1; } 50% { opacity: 0.6; } }
-            
-            @media (max-width: 768px) {
-                .horizontal-project-card > div { flex-direction: column !important; }
-                .horizontal-project-card > div > div:first-child { width: 100% !important; }
-                .horizontal-project-card .stats-grid { grid-template-columns: 1fr !important; }
-                .horizontal-project-card .action-buttons { flex-direction: column !important; gap: 0.8rem !important; }
-            }
-        </style>
+<!-- Loading State -->
+<div id="loadingContainer" style="text-align: center; padding: 2rem;">
+    <div style="width: 40px; height: 40px; border: 3px solid #e2e8f0; border-top: 3px solid #667eea; border-radius: 50%; margin: 0 auto 1rem auto; animation: spin 1s linear infinite;"></div>
+    <h4 style="color: #6b7280; font-weight: 600; font-family: 'Poppins', sans-serif; margin-bottom: 0.5rem; font-size: 1.1rem;">Loading projects...</h4>
+    <p style="color: #9ca3af; margin: 0; font-size: 0.9rem;">Please wait</p>
+</div>
 
-        <!-- Modern Horizontal Cards View -->
-        <div id="gridView" style="display: block;">
-            <div id="projectsGrid" style="display: flex; flex-direction: column; gap: 1rem;">
-                <!-- Projects will be loaded here as horizontal cards -->
-            </div>
-        </div>
+<style>
+    @keyframes spin {
+        0% { transform: rotate(0deg); }
+        100% { transform: rotate(360deg); }
+    }
+    
+    @keyframes pulse {
+        0%, 100% { opacity: 1; }
+        50% { opacity: 0.6; }
+    }
+    
+    /* Dropdown menu positioning fix */
+    .horizontal-project-card .dropdown-menu {
+        position: absolute !important;
+        transform: translateY(0) !important;
+        inset: auto 0px auto auto !important;
+        margin: 0 !important;
+        top: 100% !important;
+        z-index: 9999 !important;
+    }
+    
+    .horizontal-project-card .dropdown {
+        position: relative !important;
+        overflow: visible !important;
+    }
+    
+    .horizontal-project-card {
+        overflow: visible !important;
+    }
+    
+    #gridView {
+        overflow: visible !important;
+    }
+    
+    .horizontal-project-card:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 8px 20px rgba(0,0,0,0.12);
+    }
+    
+    @media (max-width: 768px) {
+        .horizontal-project-card > div {
+            flex-direction: column !important;
+        }
+        
+        .horizontal-project-card > div > div:first-child {
+            width: 100% !important;
+        }
+        
+        .horizontal-project-card .stats-grid {
+            grid-template-columns: 1fr !important;
+        }
+        
+        .horizontal-project-card .action-buttons {
+            flex-direction: column !important;
+            gap: 0.8rem !important;
+        }
+    }
+</style>
 
         <!-- Table View -->
         <div id="tableView" style="display: none;">
@@ -197,6 +222,11 @@
             </button>
             <?php endif; ?>
         </div>
+
+<!-- Modern Horizontal Cards View - Separate Container -->
+<div style="background: white; border-radius: 1rem; box-shadow: 0 10px 30px rgba(0,0,0,0.08); border: 1px solid #f1f3f4; margin-top: 1.5rem; overflow: visible; margin-bottom: 500px;">
+    <div id="gridView" style="display: block; padding: 1.5rem; overflow: visible;">
+        <!-- Projects will be loaded here as horizontal cards -->
     </div>
 </div>
 
@@ -417,10 +447,9 @@ function applyFilters() {
 // Render projects in grid view - Modern Horizontal Cards
 function renderGridView() {
     const gridView = document.getElementById('gridView');
-    const projectsGrid = document.getElementById('projectsGrid');
     const emptyState = document.getElementById('emptyState');
     
-    if (!gridView || !projectsGrid || !emptyState) {
+    if (!gridView || !emptyState) {
         console.error('Required DOM elements not found for grid view');
         return;
     }
@@ -435,17 +464,17 @@ function renderGridView() {
     gridView.style.display = 'block';
     
     // Clear existing content
-    projectsGrid.innerHTML = '';
+    gridView.innerHTML = '';
     
     // Add projects as horizontal cards
     filteredProjects.forEach((project, index) => {
         const cardHTML = createHorizontalProjectCard(project);
-        projectsGrid.insertAdjacentHTML('beforeend', cardHTML);
+        gridView.insertAdjacentHTML('beforeend', cardHTML);
     });
     
     // Add animation to cards
     setTimeout(() => {
-        const cards = projectsGrid.querySelectorAll('.horizontal-project-card');
+        const cards = gridView.querySelectorAll('.horizontal-project-card');
         cards.forEach((card, index) => {
             card.style.opacity = '0';
             card.style.transform = 'translateX(-30px)';
@@ -505,8 +534,7 @@ function createHorizontalProjectCard(project) {
     const dueDate = project.end_date ? formatDate(project.end_date) : 'No due date';
     
     return `
-        <div class="horizontal-project-card" style="background: white; border-radius: 1rem; overflow: visible; box-shadow: 0 4px 6px rgba(0,0,0,0.05); transition: all 0.3s ease; border: 1px solid #f1f3f4;">
-            <div style="display: flex; align-items: center; padding: 1rem; gap: 1rem;">
+        <div class="horizontal-project-card" style="display: flex; align-items: center; padding: 1rem; gap: 1rem; margin-bottom: 1rem; border-bottom: 1px solid #f1f3f4; position: relative;">
                 
                 <!-- Project Info Section -->
                 <div style="flex: 1; min-width: 0;">
@@ -560,15 +588,12 @@ function createHorizontalProjectCard(project) {
                     <button onclick="viewProject(${project.id})" style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white; border: none; border-radius: 0.5rem; padding: 0.5rem; font-weight: 600; font-size: 0.8rem; cursor: pointer; transition: all 0.3s ease;" onmouseover="this.style.transform='translateY(-1px)';" onmouseout="this.style.transform='translateY(0)';" title="View Project">
                         <i class="fas fa-eye"></i>
                     </button>
-                    <button onclick="kanbanView(${project.id})" style="background: rgba(102, 126, 234, 0.1); color: #667eea; border: 1px solid #667eea; border-radius: 0.5rem; padding: 0.5rem; font-weight: 600; font-size: 0.8rem; cursor: pointer; transition: all 0.3s ease;" onmouseover="this.style.background='#667eea'; this.style.color='white';" onmouseout="this.style.background='rgba(102, 126, 234, 0.1)'; this.style.color='#667eea';" title="Kanban Board">
-                        <i class="fas fa-columns"></i>
-                    </button>
-                    <div class="dropdown" style="overflow: visible; position: relative;">
+                    <div class="dropdown" style="position: relative;">
                         <button style="background: #f8fafc; border: 1px solid #e2e8f0; border-radius: 0.5rem; padding: 0.5rem; color: #6b7280; cursor: pointer; transition: all 0.3s ease;" data-bs-toggle="dropdown" onmouseover="this.style.background='#e2e8f0';" onmouseout="this.style.background='#f8fafc';">
                             <i class="fas fa-ellipsis-v"></i>
                         </button>
                         <ul class="dropdown-menu shadow-lg"
-                            style="border-radius: 0.75rem; border: none; padding: 0.25rem; min-width: 180px; right: 0; left: auto; top: 110%; position: absolute; z-index: 9999; overflow: visible;">
+                            style="border-radius: 0.75rem; border: none; padding: 0.25rem; min-width: 180px; position: absolute; right: 0; top: 100%; z-index: 9999; background: white; box-shadow: 0 10px 25px rgba(0,0,0,0.15); margin-top: 0.25rem;">
                             <li><a class="dropdown-item" href="#" onclick="editProject(${project.id})" style="border-radius: 0.5rem; padding: 0.5rem; margin: 0.1rem; font-size: 0.85rem;">
                                 <i class="fas fa-edit me-2 text-warning"></i>Edit
                             </a></li>
@@ -582,7 +607,6 @@ function createHorizontalProjectCard(project) {
                         </ul>
                     </div>
                 </div>
-            </div>
         </div>
     `;
 }
@@ -632,9 +656,6 @@ function createProjectRow(project) {
                         </a></li>
                         <li><a class="dropdown-item" href="#" onclick="editProject(${project.id})" style="border-radius: 0.5rem; padding: 0.5rem; margin: 0.1rem; font-size: 0.85rem;">
                             <i class="fas fa-edit me-2 text-warning"></i>Edit
-                        </a></li>
-                        <li><a class="dropdown-item" href="#" onclick="kanbanView(${project.id})" style="border-radius: 0.5rem; padding: 0.5rem; margin: 0.1rem; font-size: 0.85rem;">
-                            <i class="fas fa-columns me-2 text-info"></i>Kanban
                         </a></li>
                         <li><hr class="dropdown-divider" style="margin: 0.25rem;"></li>
                         <li><a class="dropdown-item text-danger" href="#" onclick="deleteProject(${project.id})" style="border-radius: 0.5rem; padding: 0.5rem; margin: 0.1rem; font-size: 0.85rem;">

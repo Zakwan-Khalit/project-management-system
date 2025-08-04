@@ -6,91 +6,96 @@ use CodeIgniter\Model;
 
 class EventsModel extends Model
 {
-    protected $table = 'events';
-    protected $primaryKey = 'id';
-    protected $useAutoIncrement = true;
-    protected $returnType = 'array';
-    protected $useSoftDeletes = false;
-    protected $protectFields = true;
-    protected $allowedFields = [
-        'title', 'description', 'event_type', 'start_datetime', 'end_datetime',
-        'location', 'project_id', 'created_by', 'is_active', 'is_delete'
-    ];
-
-    protected $useTimestamps = true;
-    protected $dateFormat = 'datetime';
-    protected $createdField = 'date_created';
-    protected $updatedField = 'date_modified';
-
-    protected $validationRules = [];
-    protected $validationMessages = [];
-    protected $skipValidation = false;
-
     public function getEventsWithDetails()
     {
-        return $this->select('
-                events.*,
-                projects.name as project_name,
+        $db = \Config\Database::connect();
+        return $db->table('events e')
+            ->select('
+                e.*,
+                p.name as project_name,
                 up_creator.full_name as created_by_name,
                 GROUP_CONCAT(
                     up_attendee.full_name 
                     SEPARATOR ", "
                 ) as attendees_names
             ')
-            ->join('projects', 'projects.id = events.project_id', 'left')
-            ->join('user_profile up_creator', 'up_creator.user_id = events.created_by', 'left')
-            ->join('event_attendees ea', 'ea.event_id = events.id', 'left')
+            ->join('projects p', 'p.id = e.project_id', 'left')
+            ->join('user_profile up_creator', 'up_creator.user_id = e.created_by', 'left')
+            ->join('event_attendees ea', 'ea.event_id = e.id AND ea.is_delete = 0 AND ea.is_active = 1', 'left')
             ->join('user_profile up_attendee', 'up_attendee.user_id = ea.user_id', 'left')
-            ->where('events.is_delete', 0)
-            ->groupBy('events.id')
-            ->orderBy('events.start_datetime', 'ASC')
-            ->findAll();
+            ->where('e.is_delete', 0)
+            ->where('e.is_active', 1)
+            ->groupBy('e.id')
+            ->orderBy('e.start_datetime', 'ASC')
+            ->get()
+            ->getResultArray();
     }
 
     public function getEventWithDetails($id)
     {
-        return $this->select('
-                events.*,
-                projects.name as project_name,
+        $db = \Config\Database::connect();
+        return $db->table('events e')
+            ->select('
+                e.*,
+                p.name as project_name,
                 up_creator.full_name as created_by_name
             ')
-            ->join('projects', 'projects.id = events.project_id', 'left')
-            ->join('user_profile up_creator', 'up_creator.user_id = events.created_by', 'left')
-            ->where('events.id', $id)
-            ->where('events.is_delete', 0)
-            ->first();
+            ->join('projects p', 'p.id = e.project_id', 'left')
+            ->join('user_profile up_creator', 'up_creator.user_id = e.created_by', 'left')
+            ->where('e.id', $id)
+            ->where('e.is_delete', 0)
+            ->where('e.is_active', 1)
+            ->get()
+            ->getRowArray();
     }
 
     public function createEvent($data)
     {
+        $db = \Config\Database::connect();
         $data['is_active'] = 1;
         $data['is_delete'] = 0;
-        $this->insert($data);
-        return $this->getInsertID();
+        $data['date_created'] = date('Y-m-d H:i:s');
+        $data['date_modified'] = date('Y-m-d H:i:s');
+        
+        $db->table('events')->insert($data);
+        return $db->insertID();
     }
 
     public function updateEvent($id, $data)
     {
-        return $this->update($id, $data);
+        $db = \Config\Database::connect();
+        $data['date_modified'] = date('Y-m-d H:i:s');
+        
+        return $db->table('events')
+            ->where('id', $id)
+            ->update($data);
     }
 
     public function deleteEvent($id)
     {
-        return $this->update($id, ['is_delete' => 1]);
+        $db = \Config\Database::connect();
+        return $db->table('events')
+            ->where('id', $id)
+            ->update([
+                'is_delete' => 1,
+                'is_active' => 0,
+                'date_modified' => date('Y-m-d H:i:s')
+            ]);
     }
 
     public function assignAttendees($eventId, $userIds)
     {
         $db = \Config\Database::connect();
-        $builder = $db->table('event_attendees');
-
+        
         foreach ($userIds as $userId) {
-            $builder->insert([
+            $db->table('event_attendees')->insert([
                 'event_id' => $eventId,
                 'user_id' => $userId,
                 'status' => 'invited',
                 'is_active' => 1,
-                'is_delete' => 0
+                'is_delete' => 0,
+                'date_created' => date('Y-m-d H:i:s'),
+                'date_modified' => date('Y-m-d H:i:s')
             ]);
         }
         return true;
@@ -100,10 +105,14 @@ class EventsModel extends Model
     {
         $db = \Config\Database::connect();
         
-        // Remove existing attendees
+        // Soft delete existing attendees (set is_active = 0 and is_delete = 1)
         $db->table('event_attendees')
            ->where('event_id', $eventId)
-           ->update(['is_delete' => 1]);
+           ->update([
+               'is_active' => 0,
+               'is_delete' => 1,
+               'date_modified' => date('Y-m-d H:i:s')
+           ]);
 
         // Add new attendees
         if (!empty($userIds)) {
@@ -121,26 +130,30 @@ class EventsModel extends Model
                   ->join('user_profile up', 'up.user_id = ea.user_id')
                   ->where('ea.event_id', $eventId)
                   ->where('ea.is_delete', 0)
+                  ->where('ea.is_active', 1)
                   ->get()
                   ->getResultArray();
     }
 
     public function getEventsForCalendar()
     {
-        $events = $this->select('
-                events.id,
-                events.title,
-                events.description,
-                events.event_type,
-                events.start_datetime as start,
-                events.end_datetime as end,
-                events.location,
-                projects.name as project_name
+        $db = \Config\Database::connect();
+        $events = $db->table('events e')
+            ->select('
+                e.id,
+                e.title,
+                e.description,
+                e.event_type,
+                e.start_datetime as start,
+                e.end_datetime as end,
+                e.location,
+                p.name as project_name
             ')
-            ->join('projects', 'projects.id = events.project_id', 'left')
-            ->where('events.is_delete', 0)
-            ->where('events.is_active', 1)
-            ->findAll();
+            ->join('projects p', 'p.id = e.project_id', 'left')
+            ->where('e.is_delete', 0)
+            ->where('e.is_active', 1)
+            ->get()
+            ->getResultArray();
 
         // Format for FullCalendar
         $calendarEvents = [];
@@ -168,19 +181,22 @@ class EventsModel extends Model
 
     public function getUpcomingEvents($limit = 5)
     {
-        return $this->select('
-                events.*,
-                projects.name as project_name,
+        $db = \Config\Database::connect();
+        return $db->table('events e')
+            ->select('
+                e.*,
+                p.name as project_name,
                 up.full_name as created_by_name
             ')
-            ->join('projects', 'projects.id = events.project_id', 'left')
-            ->join('user_profile up', 'up.user_id = events.created_by', 'left')
-            ->where('events.is_delete', 0)
-            ->where('events.is_active', 1)
-            ->where('events.start_datetime >=', date('Y-m-d H:i:s'))
-            ->orderBy('events.start_datetime', 'ASC')
+            ->join('projects p', 'p.id = e.project_id', 'left')
+            ->join('user_profile up', 'up.user_id = e.created_by', 'left')
+            ->where('e.is_delete', 0)
+            ->where('e.is_active', 1)
+            ->where('e.start_datetime >=', date('Y-m-d H:i:s'))
+            ->orderBy('e.start_datetime', 'ASC')
             ->limit($limit)
-            ->findAll();
+            ->get()
+            ->getResultArray();
     }
 
     private function getEventTypeColor($type)
@@ -199,25 +215,30 @@ class EventsModel extends Model
 
     public function getEventStats()
     {
+        $db = \Config\Database::connect();
         $stats = [];
         
         // Total events this month
-        $stats['total_this_month'] = $this->where('is_delete', 0)
+        $stats['total_this_month'] = $db->table('events')
+            ->where('is_delete', 0)
             ->where('DATE_FORMAT(start_datetime, "%Y-%m")', date('Y-m'))
             ->countAllResults();
 
         // Upcoming events (next 7 days)
-        $stats['upcoming_week'] = $this->where('is_delete', 0)
+        $stats['upcoming_week'] = $db->table('events')
+            ->where('is_delete', 0)
             ->where('start_datetime >=', date('Y-m-d H:i:s'))
             ->where('start_datetime <=', date('Y-m-d H:i:s', strtotime('+7 days')))
             ->countAllResults();
 
         // Events by type
-        $stats['by_type'] = $this->select('event_type, COUNT(*) as count')
+        $stats['by_type'] = $db->table('events')
+            ->select('event_type, COUNT(*) as count')
             ->where('is_delete', 0)
             ->where('DATE_FORMAT(start_datetime, "%Y-%m")', date('Y-m'))
             ->groupBy('event_type')
-            ->findAll();
+            ->get()
+            ->getResultArray();
 
         return $stats;
     }

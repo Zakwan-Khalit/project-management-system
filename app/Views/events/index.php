@@ -29,10 +29,16 @@
     <div class="row mb-4">
         <div class="col-12">
             <!-- Breadcrumbs -->
-            <nav aria-label="breadcrumb" style="margin-bottom: 1.5rem;">
-                <ol style="display: flex; list-style: none; padding: 1rem 1.25rem; margin: 0; background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); border-radius: 0.75rem; box-shadow: 0 4px 15px rgba(102, 126, 234, 0.2); border: none;">
-                    <li style="color: #f7fafc; font-weight: 600; font-size: 0.95rem; display: flex; align-items: center; padding: 0.25rem 0.5rem; background: rgba(255,255,255,0.1); border-radius: 0.375rem; backdrop-filter: blur(10px);">
-                        <i class="fas fa-calendar-alt" style="margin-right: 0.5rem; font-size: 0.9rem; opacity: 0.9;"></i>
+            <nav aria-label="breadcrumb" style="margin-bottom: 1rem;">
+                <ol style="display: inline-flex; list-style: none; padding: 0.4rem 0.6rem; margin: 0; background: #4a5568; border-radius: 0.3rem; box-shadow: 0 2px 8px rgba(74, 85, 104, 0.15); border: none; width: fit-content;">
+                    <li style="display: flex; align-items: center;">
+                        <a href="<?= base_url('dashboard') ?>" style="color: #e2e8f0; text-decoration: none; font-weight: 500; font-size: 0.75rem; transition: all 0.3s ease; display: flex; align-items: center; padding: 0.1rem 0.25rem; border-radius: 0.2rem;" onmouseover="this.style.backgroundColor='rgba(255,255,255,0.1)'; this.style.color='#ffffff'" onmouseout="this.style.backgroundColor='transparent'; this.style.color='#e2e8f0'">
+                            <i class="fas fa-home" style="margin-right: 0.3rem; font-size: 0.7rem;"></i>
+                        </a>
+                        <span style="margin: 0 0.3rem; color: #a0aec0; font-size: 0.8rem; font-weight: 300;">›</span>
+                    </li>
+                    <li style="color: #f7fafc; font-weight: 600; font-size: 0.85rem; display: flex; align-items: center; padding: 0.2rem 0.4rem; background: rgba(255,255,255,0.1); border-radius: 0.3rem; backdrop-filter: blur(10px);">
+                        <i class="fas fa-calendar-alt" style="margin-right: 0.4rem; font-size: 0.75rem; opacity: 0.9;"></i>
                         Events & Schedule
                     </li>
                 </ol>
@@ -55,10 +61,12 @@
                         </p>
                     </div>
                     <div style="display: flex; gap: 1rem;">
+                        <?php $userData = session('userdata'); $roleId = $userData['role_id'] ?? null; if (in_array($roleId, [1, 2])): ?>
                         <button onclick="window.location.href='<?= base_url('events/create') ?>'" style="background: rgba(255,255,255,0.2); border: 2px solid rgba(255,255,255,0.3); color: white; border-radius: 1rem; padding: 0.75rem 1.5rem; font-weight: 600; font-size: 1rem; cursor: pointer; transition: all 0.3s ease; backdrop-filter: blur(10px);" onmouseover="this.style.background='rgba(255,255,255,0.3)'; this.style.transform='translateY(-2px)'; this.style.boxShadow='0 10px 25px rgba(0,0,0,0.2)';" onmouseout="this.style.background='rgba(255,255,255,0.2)'; this.style.transform='translateY(0)'; this.style.boxShadow='none';">
                             <i class="fas fa-plus" style="margin-right: 0.5rem;"></i>
                             Create Event
                         </button>
+                        <?php endif; ?>
                     </div>
                 </div>
             </div>
@@ -124,7 +132,11 @@
                             <div class="no-events">
                                 <i class="fas fa-calendar-times"></i>
                                 <h6>No Events Found</h6>
-                                <p>No events have been scheduled yet. <a href="<?= base_url('events/create') ?>">Create your first event</a></p>
+                                <p>No events have been scheduled yet. 
+                                    <?php $userData = session('userdata'); $roleId = $userData['role_id'] ?? null; if (in_array($roleId, [1, 2])): ?>
+                                        <a href="<?= base_url('events/create') ?>">Create your first event</a>
+                                    <?php endif; ?>
+                                </p>
                             </div>
                         <?php else: ?>
                             <?php foreach ($events as $event): ?>
@@ -172,12 +184,14 @@
                                         </div>
                                     </div>
                                     <div class="event-actions">
+                                        <?php $userData = session('userdata'); $roleId = $userData['role_id'] ?? null; if (in_array($roleId, [1, 2])): ?>
                                         <a href="<?= base_url('events/edit/' . $event['id']) ?>" class="btn btn-outline-primary btn-sm">
                                             <i class="fas fa-edit"></i>
                                         </a>
                                         <button class="btn btn-outline-danger btn-sm" onclick="deleteEvent(<?= $event['id'] ?>)">
                                             <i class="fas fa-trash"></i>
                                         </button>
+                                        <?php endif; ?>
                                     </div>
                                 </div>
                             <?php endforeach; ?>
@@ -202,7 +216,9 @@
             </div>
             <div class="modal-footer">
                 <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+                <?php $userData = session('userdata'); $roleId = $userData['role_id'] ?? null; if (in_array($roleId, [1, 2])): ?>
                 <a href="#" class="btn btn-primary" id="eventEditBtn">Edit Event</a>
+                <?php endif; ?>
             </div>
         </div>
     </div>
@@ -233,17 +249,38 @@ document.addEventListener('DOMContentLoaded', function() {
         dayMaxEvents: 3,
         moreLinkClick: 'popover',
         height: 'auto',
+        allDaySlot: true,
+        slotMinTime: '06:00:00',
+        slotMaxTime: '22:00:00',
+        slotDuration: '01:00:00',
+        expandRows: true,
         events: function(info, successCallback, failureCallback) {
             fetch('<?= base_url("events/getCalendarEvents") ?>')
                 .then(response => response.json())
                 .then(data => {
                     if (data.error) {
+                        console.error('Calendar events error:', data.error);
                         failureCallback(data.error);
                     } else {
-                        successCallback(data);
+                        console.log('Events loaded:', data); // Debug logging
+                        // Ensure events have proper date format for all views
+                        const processedEvents = data.map(event => {
+                            const processedEvent = {
+                                ...event,
+                                start: event.start,
+                                end: event.end || event.start, // Ensure end date exists
+                                allDay: event.allDay || false
+                            };
+                            console.log('Processed event:', processedEvent); // Debug logging
+                            return processedEvent;
+                        });
+                        successCallback(processedEvents);
                     }
                 })
-                .catch(error => failureCallback(error));
+                .catch(error => {
+                    console.error('Calendar fetch error:', error);
+                    failureCallback(error);
+                });
         },
         eventClick: function(info) {
             showEventDetails(info.event);
@@ -339,7 +376,12 @@ document.addEventListener('DOMContentLoaded', function() {
         }
         
         document.getElementById('eventModalBody').innerHTML = details;
-        document.getElementById('eventEditBtn').href = `<?= base_url('events/edit/') ?>${event.id}`;
+        
+        // Only set href if edit button exists (user has permission)
+        const editBtn = document.getElementById('eventEditBtn');
+        if (editBtn) {
+            editBtn.href = `<?= base_url('events/edit/') ?>${event.id}`;
+        }
         
         new bootstrap.Modal(document.getElementById('eventModal')).show();
     }

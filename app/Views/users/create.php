@@ -93,13 +93,16 @@
                             <label style="display: block; margin-bottom: 0.5rem; color: #374151; font-weight: 500;">
                                 Phone Number
                             </label>
-                            <input type="text" 
+                            <input type="tel" 
                                    name="phone" 
                                    value="<?= old('phone') ?>"
                                    placeholder="Enter phone number"
+                                   inputmode="numeric"
+                                   pattern="[0-9]*"
                                    style="width: 100%; padding: 0.75rem; border: 2px solid #e5e7eb; border-radius: 0.5rem; font-size: 0.875rem; transition: all 0.2s ease; outline: none;"
                                    onfocus="this.style.borderColor='#667eea'; this.style.boxShadow='0 0 0 3px rgba(102,126,234,0.1)'"
-                                   onblur="this.style.borderColor='#e5e7eb'; this.style.boxShadow='none'">
+                                   onblur="this.style.borderColor='#e5e7eb'; this.style.boxShadow='none'"
+                                   oninput="this.value = this.value.replace(/[^0-9]/g, '')">
                         </div>
                         <div>
                             <label style="display: block; margin-bottom: 0.5rem; color: #374151; font-weight: 500;">
@@ -160,7 +163,7 @@
                     <div style="background: linear-gradient(135deg, #dbeafe 0%, #bfdbfe 100%); border: 1px solid #93c5fd; color: #1e40af; padding: 1rem; border-radius: 0.75rem; margin-bottom: 1.5rem; display: flex; align-items: flex-start;">
                         <i class="fas fa-info-circle" style="margin-right: 0.75rem; color: #2563eb; margin-top: 0.125rem;"></i>
                         <div>
-                            <strong>Password Information:</strong> A temporary password will be generated and sent to the user's email address. The user will be required to change their password on first login.
+                            <strong>Password Information:</strong> The temporary password will be <strong>"123qwe"</strong>. The user will be required to change their password on first login.
                         </div>
                     </div>
 

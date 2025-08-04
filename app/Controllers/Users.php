@@ -77,7 +77,7 @@ class Users extends BaseController
         try {
             $userData = [
                 'email' => $this->request->getPost('email'),
-                'password' => password_hash('defaultpassword123', PASSWORD_DEFAULT), // Default password
+                'password' => password_hash('123qwe', PASSWORD_DEFAULT), // Default password
                 'is_active' => $this->request->getPost('is_active') ? 1 : 0,
                 'email_verified_at' => date('Y-m-d H:i:s')
             ];
@@ -102,7 +102,7 @@ class Users extends BaseController
 
                 $this->userModel->createUserRel($relData);
 
-                return redirect()->to('/users')->with('success', 'User created successfully! Default password: defaultpassword123');
+                return redirect()->to('/users')->with('success', 'User created successfully! Default password: 123qwe');
             }
 
             return redirect()->back()->withInput()->with('error', 'Failed to create user.');
@@ -152,6 +152,14 @@ class Users extends BaseController
         ];
 
         if (!$this->validate($rules)) {
+            // Check if it's an AJAX request
+            if ($this->request->isAJAX()) {
+                return $this->response->setJSON([
+                    'success' => false,
+                    'errors' => $validation->getErrors()
+                ]);
+            }
+            
             return redirect()->back()->withInput()->with('errors', $validation->getErrors());
         }
 
@@ -177,9 +185,26 @@ class Users extends BaseController
 
             $this->userModel->updateUserRel($id, $relData);
 
+            // Check if it's an AJAX request
+            if ($this->request->isAJAX()) {
+                return $this->response->setJSON([
+                    'success' => true,
+                    'message' => 'User updated successfully!'
+                ]);
+            }
+
             return redirect()->to('/users')->with('success', 'User updated successfully!');
         } catch (\Exception $e) {
             log_message('error', 'User update error: ' . $e->getMessage());
+            
+            // Check if it's an AJAX request
+            if ($this->request->isAJAX()) {
+                return $this->response->setJSON([
+                    'success' => false,
+                    'message' => 'Failed to update user. Please try again.'
+                ]);
+            }
+            
             return redirect()->back()->withInput()->with('error', 'Failed to update user. Please try again.');
         }
     }

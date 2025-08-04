@@ -56,15 +56,6 @@ class Home extends BaseController
                 $projects = [];
             }
             
-            // Get user's tasks with error handling
-            $myTasks = [];
-            try {
-                $myTasks = $this->taskModel->getUserTasks($userId, 5) ?? [];
-            } catch (\Exception $e) {
-                log_message('error', 'Failed to get user tasks: ' . $e->getMessage());
-                $myTasks = [];
-            }
-            
             // Get recent activities with error handling
             $recentActivities = [];
             try {
@@ -86,7 +77,6 @@ class Home extends BaseController
             $data = [
                 'stats' => $stats,
                 'projects' => $projects,
-                'myTasks' => $myTasks,
                 'recentActivities' => $recentActivities,
                 'teamCount' => $teamCount,
                 'title' => 'Dashboard - Project Management System'
@@ -114,7 +104,6 @@ class Home extends BaseController
                     ]
                 ],
                 'projects' => [],
-                'myTasks' => [],
                 'recentActivities' => [],
                 'teamCount' => 0,
                 'title' => 'Dashboard - Project Management System',

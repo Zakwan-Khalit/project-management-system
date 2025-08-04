@@ -818,11 +818,17 @@ class Projects extends BaseController
         $assignedBy = $userData['id'] ?? null;
         $projectId = $this->request->getPost('project_id');
         $departmentId = $this->request->getPost('department_id');
+        $positionId = $this->request->getPost('position_id');
         $userIds = $this->request->getPost('user_ids');
         if (!$projectId || !$userIds || !is_array($userIds)) {
             return $this->response->setJSON(['success' => false, 'message' => 'Missing data']);
         }
-        $result = $this->projectModel->addProjectMembersBulk($projectId, $userIds, $departmentId, 'member', $assignedBy);
+        
+        // Support both department_id and position_id for backwards compatibility
+        $referenceId = $positionId ?? $departmentId;
+        $referenceType = $positionId ? 'position' : 'department';
+        
+        $result = $this->projectModel->addProjectMembersBulk($projectId, $userIds, $referenceId, 'member', $assignedBy, $referenceType);
         return $this->response->setJSON($result);
     }
 
@@ -846,6 +852,26 @@ class Projects extends BaseController
         $projectId = $this->request->getGet('project_id');
         $model = new \App\Models\ProjectModel();
         $users = $model->getUsersByDepartment($departmentId, $projectId);
+        return $this->response->setJSON([
+            'success' => true,
+            'users' => $users
+        ]);
+    }
+
+    public function positions()
+    {
+        $positions = $this->projectModel->getPositions();
+        return $this->response->setJSON([
+            'success' => true,
+            'positions' => $positions
+        ]);
+    }
+
+    public function positionUsers($positionId)
+    {
+        $projectId = $this->request->getGet('project_id');
+        $model = new \App\Models\ProjectModel();
+        $users = $model->getUsersByPosition($positionId, $projectId);
         return $this->response->setJSON([
             'success' => true,
             'users' => $users

@@ -79,11 +79,11 @@
 
 .calendar-card .card-body {
     padding: 1rem;
-    max-height: 500px;
+    max-height: 700px;
 }
 
 #calendar {
-    max-height: 450px;
+    max-height: 600px;
     overflow: hidden;
 }
 
@@ -210,7 +210,7 @@
 
 /* Reduce overall calendar height */
 .fc-view-harness {
-    height: 400px !important;
+    height: 550px !important;
 }
 
 .fc-scrollgrid {

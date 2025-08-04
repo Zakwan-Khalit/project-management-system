@@ -46,7 +46,7 @@
                         User Information
                     </h5>
                 </div>
-                <form action="<?= base_url('users/edit/' . $user['id']) ?>" method="POST" id="userForm" style="padding: 2rem;">
+                <form id="userForm" style="padding: 2rem;">
                     <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1.5rem; margin-bottom: 1.5rem;">
                         <div>
                             <label style="display: block; margin-bottom: 0.5rem; color: #374151; font-weight: 500;">
@@ -83,14 +83,17 @@
                             <label style="display: block; margin-bottom: 0.5rem; color: #374151; font-weight: 500;">
                                 Phone Number
                             </label>
-                            <input type="text" 
+                            <input type="tel" 
                                    id="phone" 
                                    name="phone" 
                                    value="<?= old('phone', $user['phone'] ?? '') ?>"
                                    placeholder="Enter phone number"
+                                   inputmode="numeric"
+                                   pattern="[0-9]*"
                                    style="width: 100%; padding: 0.75rem; border: 2px solid #e5e7eb; border-radius: 0.5rem; font-size: 0.875rem; transition: all 0.2s ease; outline: none;"
                                    onfocus="this.style.borderColor='#667eea'; this.style.boxShadow='0 0 0 3px rgba(102,126,234,0.1)'"
-                                   onblur="this.style.borderColor='#e5e7eb'; this.style.boxShadow='none'">
+                                   onblur="this.style.borderColor='#e5e7eb'; this.style.boxShadow='none'"
+                                   oninput="this.value = this.value.replace(/[^0-9]/g, '')">
                         </div>
                         <div>
                             <label style="display: block; margin-bottom: 0.5rem; color: #374151; font-weight: 500;">
@@ -155,15 +158,6 @@
                         </div>
                     </div>
 
-                    <div style="background: linear-gradient(135deg, #dbeafe 0%, #bfdbfe 100%); border: 1px solid #93c5fd; color: #1e40af; padding: 1rem; border-radius: 0.75rem; margin-bottom: 1.5rem; display: flex; align-items: flex-start;">
-                        <i class="fas fa-info-circle" style="margin-right: 0.75rem; color: #2563eb; margin-top: 0.125rem;"></i>
-                        <div>
-                            <strong>User ID:</strong> <?= $user['id'] ?> |
-                            <strong>Created:</strong> <?= date('M d, Y', strtotime($user['date_created'] ?? '')) ?> |
-                            <strong>Last Modified:</strong> <?= date('M d, Y H:i', strtotime($user['date_modified'] ?? '')) ?>
-                        </div>
-                    </div>
-
                     <div style="display: flex; gap: 1rem; justify-content: flex-end; padding-top: 1.5rem; border-top: 1px solid #e5e7eb;">
                         <a href="<?= base_url('users') ?>" 
                            style="padding: 0.75rem 1.5rem; border: 2px solid #6b7280; color: #6b7280; background: white; border-radius: 0.5rem; text-decoration: none; font-weight: 500; transition: all 0.2s ease; display: inline-flex; align-items: center;"
@@ -196,6 +190,45 @@ $(document).ready(function() {
 
     // Store current position ID for reselection
     const currentPositionId = '<?= old('position_id', $user['position_id'] ?? '') ?>';
+    const userId = '<?= $user['id'] ?>';
+
+    // Function to show SweetAlert notifications
+    function showAlert(type, title, message) {
+        if (typeof Swal !== 'undefined') {
+            Swal.fire({
+                icon: type,
+                title: title,
+                text: message,
+                timer: 3000,
+                showConfirmButton: type === 'error'
+            });
+        } else {
+            alert(title + ': ' + message);
+        }
+    }
+
+    // Function to show validation errors
+    function showValidationErrors(errors) {
+        let errorList = '';
+        if (Array.isArray(errors)) {
+            errorList = errors.join('\n• ');
+        } else if (typeof errors === 'object') {
+            errorList = Object.values(errors).join('\n• ');
+        } else {
+            errorList = errors;
+        }
+        
+        if (typeof Swal !== 'undefined') {
+            Swal.fire({
+                icon: 'error',
+                title: 'Validation Errors',
+                html: '<div style="text-align: left;">• ' + errorList.replace(/\n/g, '<br>• ') + '</div>',
+                showConfirmButton: true
+            });
+        } else {
+            alert('Please fix the following errors:\n• ' + errorList);
+        }
+    }
 
     // Department change handler
     departmentSelect.on('change', function() {
@@ -239,21 +272,88 @@ $(document).ready(function() {
         }
     });
 
-    // Form validation
+    // AJAX Form submission
     userForm.on('submit', function(e) {
+        e.preventDefault(); // Prevent default form submission
+        
         const fullName = $('#full_name').val().trim();
         const email = $('#email').val().trim();
         const departmentId = departmentSelect.val();
         const positionId = positionSelect.val();
         
+        // Client-side validation
         if (!fullName || !email || !departmentId || !positionId) {
-            e.preventDefault();
-            alert('Please fill in all required fields.');
+            showAlert('error', 'Validation Error', 'Please fill in all required fields.');
             return false;
         }
         
         // Disable submit button to prevent double submission
         submitBtn.prop('disabled', true).html('<i class="fas fa-spinner fa-spin" style="margin-right: 0.5rem;"></i>Updating...');
+        
+        // Prepare form data
+        const formData = {
+            full_name: fullName,
+            email: email,
+            phone: $('#phone').val().trim(),
+            department_id: departmentId,
+            position_id: positionId,
+            is_active: $('#is_active').is(':checked') ? 1 : 0,
+            <?= csrf_token() ?>: '<?= csrf_hash() ?>'
+        };
+        
+        // Send AJAX request
+        $.ajax({
+            url: '<?= base_url('users/update/') ?>' + userId,
+            method: 'POST',
+            data: formData,
+            dataType: 'json',
+            success: function(response) {
+                console.log('Update response:', response);
+                
+                if (response.success) {
+                    showAlert('success', 'Success!', response.message || 'User updated successfully!');
+                    
+                    // Redirect to users list after a short delay
+                    setTimeout(function() {
+                        window.location.href = '<?= base_url('users') ?>';
+                    }, 1500);
+                } else {
+                    // Show validation errors
+                    if (response.errors) {
+                        showValidationErrors(response.errors);
+                    } else {
+                        showAlert('error', 'Error', response.message || 'Failed to update user.');
+                    }
+                    
+                    // Re-enable submit button
+                    submitBtn.prop('disabled', false).html('<i class="fas fa-save" style="margin-right: 0.5rem;"></i>Update User');
+                }
+            },
+            error: function(xhr, status, error) {
+                console.error('AJAX Error:', xhr.responseText);
+                
+                let errorMessage = 'An error occurred while updating the user.';
+                
+                // Try to parse error response
+                try {
+                    const errorResponse = JSON.parse(xhr.responseText);
+                    if (errorResponse.message) {
+                        errorMessage = errorResponse.message;
+                    } else if (errorResponse.errors) {
+                        showValidationErrors(errorResponse.errors);
+                        submitBtn.prop('disabled', false).html('<i class="fas fa-save" style="margin-right: 0.5rem;"></i>Update User');
+                        return;
+                    }
+                } catch (e) {
+                    // Use default error message
+                }
+                
+                showAlert('error', 'Error', errorMessage);
+                
+                // Re-enable submit button
+                submitBtn.prop('disabled', false).html('<i class="fas fa-save" style="margin-right: 0.5rem;"></i>Update User');
+            }
+        });
     });
 
     // Load positions for current department if set

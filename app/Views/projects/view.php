@@ -1,34 +1,27 @@
 <!-- Modern Project View Page -->
     
     <!-- Breadcrumbs -->
-    <nav aria-label="breadcrumb" style="margin-bottom: 1.5rem;">
-        <ol style="display: flex; list-style: none; padding: 1rem 1.25rem; margin: 0; background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); border-radius: 0.75rem; box-shadow: 0 4px 15px rgba(102, 126, 234, 0.2); border: none;">
+    <nav aria-label="breadcrumb" style="margin-bottom: 1rem;">
+        <ol style="display: inline-flex; list-style: none; padding: 0.4rem 0.6rem; margin: 0; background: #4a5568; border-radius: 0.3rem; box-shadow: 0 2px 8px rgba(74, 85, 104, 0.15); border: none; width: fit-content;">
             <li style="display: flex; align-items: center;">
-                <a href="<?= base_url('dashboard') ?>" style="color: #ffffff; text-decoration: none; font-weight: 600; font-size: 0.95rem; transition: all 0.3s ease; display: flex; align-items: center; padding: 0.25rem 0.5rem; border-radius: 0.375rem;" onmouseover="this.style.backgroundColor='rgba(255,255,255,0.15)'; this.style.transform='translateY(-1px)'" onmouseout="this.style.backgroundColor='transparent'; this.style.transform='translateY(0)'">
-                    <i class="fas fa-tachometer-alt" style="margin-right: 0.5rem; font-size: 0.9rem;"></i>
-                    Dashboard
+                <a href="<?= base_url('dashboard') ?>" style="color: #e2e8f0; text-decoration: none; font-weight: 500; font-size: 0.75rem; transition: all 0.3s ease; display: flex; align-items: center; padding: 0.1rem 0.25rem; border-radius: 0.2rem;" onmouseover="this.style.backgroundColor='rgba(255,255,255,0.1)'; this.style.color='#ffffff'" onmouseout="this.style.backgroundColor='transparent'; this.style.color='#e2e8f0'">
+                    <i class="fas fa-home" style="margin-right: 0.3rem; font-size: 0.7rem;"></i>
                 </a>
-                <span style="margin: 0 0.75rem; color: #e2e8f0; font-size: 1.1rem; font-weight: 300;">›</span>
+                <span style="margin: 0 0.3rem; color: #a0aec0; font-size: 0.8rem; font-weight: 300;">›</span>
             </li>
             <li style="display: flex; align-items: center;">
-                <a href="<?= base_url('projects') ?>" style="color: #ffffff; text-decoration: none; font-weight: 600; font-size: 0.95rem; transition: all 0.3s ease; display: flex; align-items: center; padding: 0.25rem 0.5rem; border-radius: 0.375rem;" onmouseover="this.style.backgroundColor='rgba(255,255,255,0.15)'; this.style.transform='translateY(-1px)'" onmouseout="this.style.backgroundColor='transparent'; this.style.transform='translateY(0)'">
-                    <i class="fas fa-project-diagram" style="margin-right: 0.5rem; font-size: 0.9rem;"></i>
+                <a href="<?= base_url('projects') ?>" style="color: #e2e8f0; text-decoration: none; font-weight: 500; font-size: 0.75rem; transition: all 0.3s ease; display: flex; align-items: center; padding: 0.1rem 0.25rem; border-radius: 0.2rem;" onmouseover="this.style.backgroundColor='rgba(255,255,255,0.1)'; this.style.color='#ffffff'" onmouseout="this.style.backgroundColor='transparent'; this.style.color='#e2e8f0'">
+                    <i class="fas fa-project-diagram" style="margin-right: 0.3rem; font-size: 0.7rem;"></i>
                     Projects
                 </a>
-                <span style="margin: 0 0.75rem; color: #e2e8f0; font-size: 1.1rem; font-weight: 300;">›</span>
+                <span style="margin: 0 0.3rem; color: #a0aec0; font-size: 0.8rem; font-weight: 300;">›</span>
             </li>
-            <li style="color: #f7fafc; font-weight: 600; font-size: 0.95rem; display: flex; align-items: center; padding: 0.25rem 0.5rem; background: rgba(255,255,255,0.1); border-radius: 0.375rem; backdrop-filter: blur(10px);">
-                <i class="fas fa-eye" style="margin-right: 0.5rem; font-size: 0.85rem; opacity: 0.9;"></i>
+            <li style="color: #ffffff; font-weight: 500; font-size: 0.75rem; display: flex; align-items: center; padding: 0.1rem 0.25rem; background: rgba(255,255,255,0.1); border-radius: 0.2rem;">
+                <i class="fas fa-eye" style="margin-right: 0.3rem; font-size: 0.7rem;"></i>
                 Project Details
             </li>
         </ol>
     </nav>
-    
-    <!-- Back Button -->
-    <a href="javascript:history.back()" class="btn btn-outline-secondary d-inline-flex align-items-center" style="gap:0.5rem; margin-bottom: 1.5rem;">
-        <i class="fas fa-arrow-left"></i>
-        <span>Back</span>
-    </a>
     
     <!-- Project Header -->
     <div style="background: white; border-radius: 1rem; box-shadow: 0 10px 30px rgba(0,0,0,0.08); border: 1px solid #f1f3f4; margin-bottom: 2rem; overflow: hidden;">
@@ -191,8 +184,8 @@ function addTeamMember() {
         title: 'Add Project Member',
         html: `
             <div class="mb-3 text-start">
-                <label for="departmentDropdown" class="form-label">Department</label>
-                <select id="departmentDropdown" class="form-select">
+                <label for="positionDropdown" class="form-label">Role</label>
+                <select id="positionDropdown" class="form-select">
                     <option value="">-- Please Select --</option>
                 </select>
             </div>
@@ -208,42 +201,42 @@ function addTeamMember() {
         cancelButtonText: 'Cancel',
         focusConfirm: false,
         didOpen: () => {
-            // Fetch departments
+            // Fetch positions
             $.ajax({
-                url: `${baseUrl}/projects/departments`,
+                url: `${baseUrl}/projects/positions`,
                 method: 'GET',
                 dataType: 'json',
                 success: function(resp) {
-                    if (resp.success && resp.departments) {
+                    if (resp.success && resp.positions) {
                         let opts = '<option value="">-- Please Select --</option>';
-                        resp.departments.forEach(function(dep) {
-                            opts += `<option value="${dep.id}">${dep.name}</option>`;
+                        resp.positions.forEach(function(pos) {
+                            opts += `<option value="${pos.id}">${pos.name}</option>`;
                         });
-                        $('#departmentDropdown').html(opts);
+                        $('#positionDropdown').html(opts);
                     }
                 },
                 error: function(xhr, status, error) {
-                    console.error('Error loading departments:', error);
-                    Swal.fire('Error', 'Failed to load departments.', 'error');
+                    console.error('Error loading positions:', error);
+                    Swal.fire('Error', 'Failed to load positions.', 'error');
                 }
             });
             // Init Select2 for users
             $('#userDropdown').select2({
                 dropdownParent: $('.swal2-modal'),
                 width: '100%',
-                placeholder: '-- Please Select Department First --',
+                placeholder: '-- Please Select Role First --',
                 allowClear: true
             });
-            // Department change handler
-            $('#departmentDropdown').on('change', function() {
-                let depId = $(this).val();
-                if (!depId) {
+            // Position change handler
+            $('#positionDropdown').on('change', function() {
+                let posId = $(this).val();
+                if (!posId) {
                     $('#userDropdown').prop('disabled', true).html('<option value="">-- Please Select --</option>').trigger('change');
                 } else {
                     $('#userDropdown').prop('disabled', false).html('');
-                    // Fetch users for department
+                    // Fetch users for position
                     $.ajax({
-                        url: `${baseUrl}/projects/departmentUsers/` + depId + `?project_id=${projectId}`,
+                        url: `${baseUrl}/projects/positionUsers/` + posId + `?project_id=${projectId}`,
                         method: 'GET',
                         dataType: 'json',
                         success: function(resp) {
@@ -258,7 +251,7 @@ function addTeamMember() {
                             $('#userDropdown').html(opts).trigger('change');
                         },
                         error: function(xhr, status, error) {
-                            console.error('Error loading department users:', error);
+                            console.error('Error loading position users:', error);
                             $('#userDropdown').html('<option value="">Error loading users</option>').trigger('change');
                         }
                     });
@@ -266,10 +259,10 @@ function addTeamMember() {
             });
         },
         preConfirm: () => {
-            let depId = $('#departmentDropdown').val();
+            let posId = $('#positionDropdown').val();
             let userIds = $('#userDropdown').val();
-            if (!depId || !userIds || userIds.length === 0) {
-                Swal.showValidationMessage('Please select a department and at least one user.');
+            if (!posId || !userIds || userIds.length === 0) {
+                Swal.showValidationMessage('Please select a role and at least one user.');
                 return false;
             }
             // AJAX to add members to project
@@ -278,7 +271,7 @@ function addTeamMember() {
                 method: 'POST',
                 data: {
                     project_id: projectId,
-                    department_id: depId,
+                    position_id: posId,
                     user_ids: userIds
                 },
                 dataType: 'json'
@@ -556,18 +549,6 @@ function deleteTeamMember(userId, memberName) {
         cancelButtonText: 'Cancel'
     }).then((result) => {
         if (result.isConfirmed) {
-            // Show loading state
-            Swal.fire({
-                title: 'Removing...',
-                text: 'Please wait while we remove the team member.',
-                icon: 'info',
-                allowOutsideClick: false,
-                showConfirmButton: false,
-                didOpen: () => {
-                    Swal.showLoading();
-                }
-            });
-            
             // Make AJAX call to soft delete team member
             $.ajax({
                 url: `${baseUrl}/projects/remove_project_member`,
@@ -583,8 +564,7 @@ function deleteTeamMember(userId, memberName) {
                             title: 'Removed!',
                             text: `${memberName} has been removed from the project.`,
                             icon: 'success',
-                            timer: 2000,
-                            showConfirmButton: false
+                            confirmButtonText: 'OK'
                         });
                         // Reload the team members list
                         loadTeamMembers();
@@ -692,7 +672,7 @@ function renderActivityLog(activities) {
 
 function loadProjectComponents() {
     $.ajax({
-        url: '<?= base_url('projects/get_project_scopes') ?>',
+        url: '<?= base_url('activity/get_project_scopes') ?>',
         method: 'GET',
         data: {
             project_id: projectId
@@ -728,7 +708,7 @@ function renderProjectComponents(scopes) {
             scope.templates.forEach(template => {
                 // Get progress for this template
                 $.ajax({
-                    url: '<?= base_url('projects/get_tasks_by_template/') ?>' + template.id + '/' + projectId,
+                    url: '<?= base_url('activity/get_tasks_by_template/') ?>' + template.id + '/' + projectId,
                     method: 'GET',
                     dataType: 'json',
                     success: function(taskRes) {

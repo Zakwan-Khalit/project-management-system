@@ -19,6 +19,16 @@ class Events extends BaseController
         $this->usersModel = new UserModel();
     }
 
+    /**
+     * Check if user has admin or manager role (role 1 or 2)
+     */
+    private function hasEditPermission()
+    {
+        $userData = session('userdata');
+        $roleId = $userData['role_id'] ?? null;
+        return in_array($roleId, [1, 2]);
+    }
+
     public function index()
     {
         try {
@@ -45,6 +55,11 @@ class Events extends BaseController
 
     public function create()
     {
+        // Check if user has permission to create events
+        if (!$this->hasEditPermission()) {
+            return redirect()->to('/events')->with('error', 'You do not have permission to create events.');
+        }
+
         if ($this->request->getMethod() === 'POST') {
             return $this->store();
         }
@@ -65,6 +80,11 @@ class Events extends BaseController
 
     public function store()
     {
+        // Check if user has permission to create events
+        if (!$this->hasEditPermission()) {
+            return redirect()->to('/events')->with('error', 'You do not have permission to create events.');
+        }
+
         $validation = \Config\Services::validation();
         
         $rules = [
@@ -111,6 +131,11 @@ class Events extends BaseController
 
     public function edit($id)
     {
+        // Check if user has permission to edit events
+        if (!$this->hasEditPermission()) {
+            return redirect()->to('/events')->with('error', 'You do not have permission to edit events.');
+        }
+
         if ($this->request->getMethod() === 'POST') {
             return $this->update($id);
         }
@@ -138,6 +163,11 @@ class Events extends BaseController
 
     public function update($id)
     {
+        // Check if user has permission to update events
+        if (!$this->hasEditPermission()) {
+            return redirect()->to('/events')->with('error', 'You do not have permission to update events.');
+        }
+
         $validation = \Config\Services::validation();
         
         $rules = [
@@ -171,15 +201,37 @@ class Events extends BaseController
             $attendees = $this->request->getPost('attendees');
             $this->eventsModel->updateAttendees($id, $attendees ?: []);
 
+            // Check if this is an AJAX request
+            if ($this->request->isAJAX()) {
+                return $this->response->setJSON([
+                    'success' => true,
+                    'message' => 'Event updated successfully!'
+                ]);
+            }
+
             return redirect()->to('/events')->with('success', 'Event updated successfully!');
         } catch (\Exception $e) {
             log_message('error', 'Event update error: ' . $e->getMessage());
+            
+            // Check if this is an AJAX request
+            if ($this->request->isAJAX()) {
+                return $this->response->setStatusCode(500)->setJSON([
+                    'success' => false,
+                    'message' => 'Failed to update event. Please try again.'
+                ]);
+            }
+            
             return redirect()->back()->withInput()->with('error', 'Failed to update event. Please try again.');
         }
     }
 
     public function delete($id)
     {
+        // Check if user has permission to delete events
+        if (!$this->hasEditPermission()) {
+            return redirect()->to('/events')->with('error', 'You do not have permission to delete events.');
+        }
+
         try {
             $this->eventsModel->deleteEvent($id);
             return redirect()->to('/events')->with('success', 'Event deleted successfully!');

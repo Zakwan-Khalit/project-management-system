@@ -6,28 +6,22 @@
 <div class="min-vh-100 p-4" style="background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%);">
     
     <!-- Breadcrumbs -->
-    <nav aria-label="breadcrumb" style="margin-bottom: 1.5rem;">
-        <ol style="display: flex; list-style: none; padding: 1rem 1.25rem; margin: 0; background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); border-radius: 0.75rem; box-shadow: 0 4px 15px rgba(102, 126, 234, 0.2); border: none;">
+    <nav aria-label="breadcrumb" style="margin-bottom: 1rem;">
+        <ol style="display: inline-flex; list-style: none; padding: 0.4rem 0.6rem; margin: 0; background: #4a5568; border-radius: 0.3rem; box-shadow: 0 2px 8px rgba(74, 85, 104, 0.15); border: none; width: fit-content;">
             <li style="display: flex; align-items: center;">
-                <a href="<?= base_url('projects') ?>" style="color: #ffffff; text-decoration: none; font-weight: 600; font-size: 0.95rem; transition: all 0.3s ease; display: flex; align-items: center; padding: 0.25rem 0.5rem; border-radius: 0.375rem;" onmouseover="this.style.backgroundColor='rgba(255,255,255,0.15)'; this.style.transform='translateY(-1px)'" onmouseout="this.style.backgroundColor='transparent'; this.style.transform='translateY(0)'">
-                    <i class="fas fa-project-diagram" style="margin-right: 0.5rem; font-size: 0.9rem;"></i>
+                <a href="<?= base_url('projects') ?>" style="color: #e2e8f0; text-decoration: none; font-weight: 500; font-size: 0.75rem; transition: all 0.3s ease; display: flex; align-items: center; padding: 0.1rem 0.25rem; border-radius: 0.2rem;" onmouseover="this.style.backgroundColor='rgba(255,255,255,0.1)'; this.style.color='#ffffff'" onmouseout="this.style.backgroundColor='transparent'; this.style.color='#e2e8f0'">
+                    <i class="fas fa-project-diagram" style="margin-right: 0.3rem; font-size: 0.7rem;"></i>
                     Projects
                 </a>
-                <span style="margin: 0 0.75rem; color: #e2e8f0; font-size: 1.1rem; font-weight: 300;">›</span>
+                <span style="margin: 0 0.3rem; color: #a0aec0; font-size: 0.8rem; font-weight: 300;">›</span>
             </li>
-            <li style="color: #f7fafc; font-weight: 600; font-size: 0.95rem; display: flex; align-items: center; padding: 0.25rem 0.5rem; background: rgba(255,255,255,0.1); border-radius: 0.375rem; backdrop-filter: blur(10px);">
-                <i class="fas fa-columns" style="margin-right: 0.5rem; font-size: 0.85rem; opacity: 0.9;"></i>
+            <li style="color: #ffffff; font-weight: 500; font-size: 0.75rem; display: flex; align-items: center; padding: 0.1rem 0.25rem; background: rgba(255,255,255,0.1); border-radius: 0.2rem;">
+                <i class="fas fa-columns" style="margin-right: 0.3rem; font-size: 0.7rem;"></i>
                 Kanban Board
             </li>
         </ol>
     </nav>
 
-    <!-- Back Button -->
-    <a href="javascript:history.back()" class="btn btn-outline-secondary d-inline-flex align-items-center" style="gap:0.5rem; margin-bottom: 1.5rem;">
-        <i class="fas fa-arrow-left"></i>
-        <span>Back</span>
-    </a>
-    
     <!-- Kanban Header -->
     <div style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white; border-radius: 1.5rem; padding: 2rem; margin-bottom: 2rem; box-shadow: 0 20px 60px rgba(102,126,234,0.2); position: relative; overflow: hidden;">
         <!-- Decorative Elements -->

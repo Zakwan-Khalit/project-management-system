@@ -1,64 +1,80 @@
+<!-- Breadcrumbs -->
+<nav aria-label="breadcrumb" style="margin-bottom: 1rem;">
+    <ol style="display: inline-flex; list-style: none; padding: 0.4rem 0.6rem; margin: 0; background: #4a5568; border-radius: 0.3rem; box-shadow: 0 2px 8px rgba(74, 85, 104, 0.15); border: none; width: fit-content;">
+        <li style="display: flex; align-items: center;">
+            <a href="<?= base_url('dashboard') ?>" style="color: #e2e8f0; text-decoration: none; font-weight: 500; font-size: 0.75rem; transition: all 0.3s ease; display: flex; align-items: center; padding: 0.1rem 0.25rem; border-radius: 0.2rem;" onmouseover="this.style.backgroundColor='rgba(255,255,255,0.1)'; this.style.color='#ffffff'" onmouseout="this.style.backgroundColor='transparent'; this.style.color='#e2e8f0'">
+                <i class="fas fa-home" style="margin-right: 0.3rem; font-size: 0.7rem;"></i>
+                Dashboard
+            </a>
+            <span style="margin: 0 0.3rem; color: #a0aec0; font-size: 0.8rem; font-weight: 300;">›</span>
+        </li>
+        <li style="color: #ffffff; font-weight: 500; font-size: 0.75rem; display: flex; align-items: center; padding: 0.1rem 0.25rem; background: rgba(255,255,255,0.1); border-radius: 0.2rem;">
+            <i class="fas fa-users" style="margin-right: 0.3rem; font-size: 0.7rem;"></i>
+            User Management
+        </li>
+    </ol>
+</nav>
+
 <!-- Users Header -->
-<div style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white; border-radius: 1rem; padding: 1.5rem; margin-bottom: 1.5rem; box-shadow: 0 15px 45px rgba(102,126,234,0.2); position: relative; overflow: hidden;">
-    <!-- Decorative Elements -->
-    <div style="position: absolute; top: -30px; right: -30px; width: 120px; height: 120px; background: rgba(255,255,255,0.1); border-radius: 50%; opacity: 0.3;"></div>
-    <div style="position: absolute; bottom: -20px; left: -20px; width: 80px; height: 80px; background: rgba(255,255,255,0.05); border-radius: 50%;"></div>
-    
-    <div style="display: flex; justify-content: space-between; align-items: center; position: relative; z-index: 2;">
-        <div>
-            <h1 style="color: white; font-size: 2rem; font-weight: 800; margin-bottom: 0.4rem; font-family: 'Poppins', sans-serif; text-shadow: 0 2px 4px rgba(0,0,0,0.1);">
-                <i class="fas fa-users" style="margin-right: 0.75rem; color: rgba(255,255,255,0.9);"></i>
-                User Management
-            </h1>
-            <p style="color: rgba(255,255,255,0.95); font-size: 0.95rem; margin-bottom: 0; font-weight: 400;">
-                Manage system users, roles, and permissions
-            </p>
-        </div>
-        <div style="display: flex; gap: 0.75rem;">
-            <button onclick="window.location.href='<?= base_url('users/create') ?>'" style="background: rgba(255,255,255,0.2); border: 2px solid rgba(255,255,255,0.3); color: white; border-radius: 0.75rem; padding: 0.6rem 1.25rem; font-weight: 600; font-size: 0.9rem; cursor: pointer; transition: all 0.3s ease; backdrop-filter: blur(10px);" onmouseover="this.style.background='rgba(255,255,255,0.3)'; this.style.transform='translateY(-2px)'; this.style.boxShadow='0 8px 20px rgba(0,0,0,0.2)';" onmouseout="this.style.background='rgba(255,255,255,0.2)'; this.style.transform='translateY(0)'; this.style.boxShadow='none';">
-                <i class="fas fa-plus" style="margin-right: 0.4rem;"></i>
-                Add User
-            </button>
+<div style="background: white; border-radius: 0.75rem; box-shadow: 0 6px 20px rgba(0,0,0,0.06); border: 1px solid #f1f3f4; margin-bottom: 1.25rem; overflow: hidden;">
+    <!-- Decorative Header Section -->
+    <div style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white; padding: 1.25rem; position: relative; overflow: hidden;">
+        <!-- Decorative Elements -->
+        <div style="position: absolute; top: -30px; right: -30px; width: 120px; height: 120px; background: rgba(255,255,255,0.1); border-radius: 50%; opacity: 0.3;"></div>
+        <div style="position: absolute; bottom: -20px; left: -20px; width: 80px; height: 80px; background: rgba(255,255,255,0.05); border-radius: 50%;"></div>
+        
+        <div style="display: flex; justify-content: space-between; align-items: center; position: relative; z-index: 2;">
+            <div>
+                <h1 style="color: white; font-size: 1.5rem; font-weight: 700; margin: 0; font-family: 'Poppins', sans-serif; text-shadow: 0 2px 4px rgba(0,0,0,0.1); display: flex; align-items: center; gap: 0.5rem;">
+                    <i class="fas fa-users" style="color: rgba(255,255,255,0.9); font-size: 1.3rem;"></i>
+                    User Management
+                </h1>
+                <p style="color: rgba(255,255,255,0.95); font-size: 0.95rem; margin-bottom: 0; font-weight: 400;">
+                    Manage system users, roles, and permissions
+                </p>
+            </div>
+            <div style="display: flex; gap: 0.75rem;">
+                <button onclick="window.location.href='<?= base_url('users/create') ?>'" style="background: rgba(255,255,255,0.2); border: 2px solid rgba(255,255,255,0.3); color: white; border-radius: 0.5rem; padding: 0.5rem 1rem; font-weight: 600; font-size: 0.85rem; cursor: pointer; transition: all 0.3s ease; backdrop-filter: blur(10px);" onmouseover="this.style.background='rgba(255,255,255,0.3)'; this.style.transform='translateY(-1px)'; this.style.boxShadow='0 6px 15px rgba(0,0,0,0.15)';" onmouseout="this.style.background='rgba(255,255,255,0.2)'; this.style.transform='translateY(0)'; this.style.boxShadow='none';">
+                    <i class="fas fa-plus" style="margin-right: 0.4rem;"></i>
+                    Add User
+                </button>
+            </div>
         </div>
     </div>
 </div>
 
 <!-- Alert Messages -->
 <?php if (session()->getFlashdata('success')): ?>
-    <div style="background: linear-gradient(135deg, #d1fae5 0%, #a7f3d0 100%); border: 1px solid #86efac; color: #065f46; padding: 0.75rem 1.25rem; border-radius: 0.6rem; margin-bottom: 1.25rem; display: flex; align-items: center; justify-content: space-between;">
+    <div style="background: #f0fdf4; border: 1px solid #bbf7d0; color: #166534; padding: 1rem; border-radius: 0.75rem; margin-bottom: 1.5rem;">
         <div style="display: flex; align-items: center;">
-            <i class="fas fa-check-circle" style="margin-right: 0.5rem; color: #059669;"></i>
-            <span style="font-size: 0.9rem;"><?= session()->getFlashdata('success') ?></span>
+            <i class="fas fa-check-circle" style="margin-right: 0.75rem; color: #22c55e;"></i>
+            <strong>Success:</strong>&nbsp;<?= session()->getFlashdata('success') ?>
         </div>
-        <button onclick="this.parentElement.style.display='none'" style="background: none; border: none; color: #065f46; font-size: 1rem; cursor: pointer; padding: 0; margin-left: 0.75rem;">
-            <i class="fas fa-times"></i>
-        </button>
     </div>
 <?php endif; ?>
 
 <?php if (session()->getFlashdata('error')): ?>
-    <div style="background: linear-gradient(135deg, #fee2e2 0%, #fecaca 100%); border: 1px solid #fca5a5; color: #991b1b; padding: 0.75rem 1.25rem; border-radius: 0.6rem; margin-bottom: 1.25rem; display: flex; align-items: center; justify-content: space-between;">
+    <div style="background: #fef2f2; border: 1px solid #fecaca; color: #b91c1c; padding: 1rem; border-radius: 0.75rem; margin-bottom: 1.5rem;">
         <div style="display: flex; align-items: center;">
-            <i class="fas fa-exclamation-circle" style="margin-right: 0.5rem; color: #dc2626;"></i>
-            <span style="font-size: 0.9rem;"><?= session()->getFlashdata('error') ?></span>
+            <i class="fas fa-exclamation-triangle" style="margin-right: 0.75rem; color: #ef4444;"></i>
+            <strong>Error:</strong>&nbsp;<?= session()->getFlashdata('error') ?>
         </div>
-        <button onclick="this.parentElement.style.display='none'" style="background: none; border: none; color: #991b1b; font-size: 1rem; cursor: pointer; padding: 0; margin-left: 0.75rem;">
-            <i class="fas fa-times"></i>
-        </button>
     </div>
 <?php endif; ?>
 
 <?php if (isset($error_message)): ?>
-    <div style="background: linear-gradient(135deg, #fee2e2 0%, #fecaca 100%); border: 1px solid #fca5a5; color: #991b1b; padding: 1rem 1.5rem; border-radius: 0.75rem; margin-bottom: 1.5rem; display: flex; align-items: center;">
-        <i class="fas fa-exclamation-triangle" style="margin-right: 0.75rem; color: #dc2626;"></i>
-        <span><?= $error_message ?></span>
+    <div style="background: #fef2f2; border: 1px solid #fecaca; color: #b91c1c; padding: 1rem; border-radius: 0.75rem; margin-bottom: 1.5rem;">
+        <div style="display: flex; align-items: center;">
+            <i class="fas fa-exclamation-triangle" style="margin-right: 0.75rem; color: #ef4444;"></i>
+            <strong>Error:</strong>&nbsp;<?= $error_message ?>
+        </div>
     </div>
 <?php endif; ?>
 
 <!-- Users Table -->
-<div style="background: white; border-radius: 1rem; box-shadow: 0 4px 6px rgba(0,0,0,0.05); overflow: hidden; margin-bottom: 2rem;">
-    <div style="background: linear-gradient(135deg, #f8fafc 0%, #f1f5f9 100%); border-bottom: 1px solid #e2e8f0; padding: 1.5rem;">
-        <h5 style="color: #374151; font-weight: 600; font-size: 1.1rem; margin: 0; font-family: 'Poppins', sans-serif;">
+<div style="background: #fff; border-radius: 1rem; box-shadow: 0 3px 18px rgba(102,126,234,0.08); margin-bottom: 2rem; overflow: hidden;">
+    <div style="background: linear-gradient(135deg, #f8fafc 0%, #f1f5f9 100%); border-bottom: 1px solid #e2e8f0; padding: 1.25rem;">
+        <h5 style="color: #374151; font-weight: 600; font-size: 1rem; margin: 0; font-family: 'Poppins', sans-serif;">
             <i class="fas fa-table" style="margin-right: 0.5rem; color: #667eea;"></i>
             All Users
         </h5>
@@ -69,11 +85,10 @@
                 <table style="width: 100%; border-collapse: collapse; font-size: 0.875rem;" id="usersTable">
                     <thead>
                         <tr style="background: #f8fafc; border-bottom: 2px solid #e2e8f0;">
-                            <th style="padding: 1rem; text-align: left; font-weight: 600; color: #374151; border: none;">#</th>
+                            <th style="padding: 1rem; text-align: left; font-weight: 600; color: #374151; border: none;">No</th>
                             <th style="padding: 1rem; text-align: left; font-weight: 600; color: #374151; border: none;">Full Name</th>
                             <th style="padding: 1rem; text-align: left; font-weight: 600; color: #374151; border: none;">Email</th>
                             <th style="padding: 1rem; text-align: left; font-weight: 600; color: #374151; border: none;">Phone</th>
-                            <th style="padding: 1rem; text-align: left; font-weight: 600; color: #374151; border: none;">Department</th>
                             <th style="padding: 1rem; text-align: left; font-weight: 600; color: #374151; border: none;">Position</th>
                             <th style="padding: 1rem; text-align: left; font-weight: 600; color: #374151; border: none;">Status</th>
                             <th style="padding: 1rem; text-align: left; font-weight: 600; color: #374151; border: none;">Actions</th>
@@ -94,14 +109,7 @@
                                 <td style="padding: 1rem; border: none; vertical-align: middle; color: #6b7280;"><?= esc($user['email']) ?></td>
                                 <td style="padding: 1rem; border: none; vertical-align: middle; color: #6b7280;"><?= esc($user['phone'] ?? 'N/A') ?></td>
                                 <td style="padding: 1rem; border: none; vertical-align: middle;">
-                                    <span style="background: linear-gradient(135deg, #06b6d4 0%, #0891b2 100%); color: white; padding: 0.25rem 0.75rem; border-radius: 1rem; font-size: 0.75rem; font-weight: 600; text-transform: uppercase; letter-spacing: 0.025em;">
-                                        <?= esc($user['department_name'] ?? 'N/A') ?>
-                                    </span>
-                                </td>
-                                <td style="padding: 1rem; border: none; vertical-align: middle;">
-                                    <span style="background: linear-gradient(135deg, #6b7280 0%, #4b5563 100%); color: white; padding: 0.25rem 0.75rem; border-radius: 1rem; font-size: 0.75rem; font-weight: 600; text-transform: uppercase; letter-spacing: 0.025em;">
-                                        <?= esc($user['position_name'] ?? 'N/A') ?>
-                                    </span>
+                                    <?= esc($user['position_name'] ?? 'N/A') ?>
                                 </td>
                                 <td style="padding: 1rem; border: none; vertical-align: middle;">
                                     <button class="status-toggle" data-user-id="<?= $user['id'] ?>" style="<?= $user['is_active'] ? 'background: linear-gradient(135deg, #10b981 0%, #059669 100%);' : 'background: linear-gradient(135deg, #ef4444 0%, #dc2626 100%);' ?> color: white; border: none; border-radius: 0.5rem; padding: 0.5rem 1rem; font-size: 0.75rem; font-weight: 600; cursor: pointer; transition: all 0.3s ease; min-width: 85px;" onmouseover="this.style.transform='translateY(-1px)'; this.style.boxShadow='0 4px 8px rgba(0,0,0,0.15)';" onmouseout="this.style.transform='translateY(0)'; this.style.boxShadow='none';" title="Click to toggle status">
@@ -200,16 +208,34 @@ document.addEventListener('DOMContentLoaded', function() {
         }
     });
 
-    // Delete user functionality
+    // Delete user functionality (SweetAlert2)
     document.addEventListener('click', function(e) {
         if (e.target.closest('.delete-user')) {
             const button = e.target.closest('.delete-user');
             const userId = button.getAttribute('data-user-id');
             const userName = button.getAttribute('data-user-name');
-            
-            if (confirm(`Are you sure you want to delete user "${userName}"? This action cannot be undone.`)) {
-                window.location.href = `<?= base_url('users/delete') ?>/${userId}`;
+            if (typeof Swal === 'undefined') {
+                // Fallback to confirm if SweetAlert2 is not loaded
+                if (confirm(`Are you sure you want to delete user "${userName}"?`)) {
+                    window.location.href = `<?= base_url('users/delete') ?>/${userId}`;
+                }
+                return;
             }
+            Swal.fire({
+                title: 'Are you sure?',
+                html: `Do you want to delete user <b>"${userName}"</b>?`,
+                icon: 'warning',
+                showCancelButton: true,
+                confirmButtonColor: '#d33',
+                cancelButtonColor: '#6c757d',
+                confirmButtonText: 'Yes, delete',
+                cancelButtonText: 'Cancel',
+                focusCancel: true
+            }).then((result) => {
+                if (result.isConfirmed) {
+                    window.location.href = `<?= base_url('users/delete') ?>/${userId}`;
+                }
+            });
         }
     });
 });

@@ -1,131 +1,25 @@
-<a href="javascript:history.back()" class="btn btn-outline-secondary d-inline-flex align-items-center" style="gap:0.5rem;">
-    <i class="fas fa-arrow-left"></i>
-    <span>Back</span>
-</a>
 <!-- Profile Page -->
 
 <div class="container-fluid">
     <!-- Breadcrumbs -->
-    <nav aria-label="breadcrumb" style="margin-bottom: 1.5rem;">
-        <ol style="display: flex; list-style: none; padding: 1rem 1.25rem; margin: 0; background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); border-radius: 0.75rem; box-shadow: 0 4px 15px rgba(102, 126, 234, 0.2); border: none;">
-            <li style="color: #f7fafc; font-weight: 600; font-size: 0.95rem; display: flex; align-items: center; padding: 0.25rem 0.5rem; background: rgba(255,255,255,0.1); border-radius: 0.375rem; backdrop-filter: blur(10px);">
-                <i class="fas fa-user" style="margin-right: 0.5rem; font-size: 0.9rem; opacity: 0.9;"></i>
+    <nav aria-label="breadcrumb" style="margin-bottom: 1rem;">
+        <ol style="display: inline-flex; list-style: none; padding: 0.4rem 0.6rem; margin: 0; background: #4a5568; border-radius: 0.3rem; box-shadow: 0 2px 8px rgba(74, 85, 104, 0.15); border: none; width: fit-content;">
+            <li style="display: flex; align-items: center;">
+                <a href="<?= base_url('dashboard') ?>" style="color: #e2e8f0; text-decoration: none; font-weight: 500; font-size: 0.75rem; transition: all 0.3s ease; display: flex; align-items: center; padding: 0.1rem 0.25rem; border-radius: 0.2rem;" onmouseover="this.style.backgroundColor='rgba(255,255,255,0.1)'; this.style.color='#ffffff'" onmouseout="this.style.backgroundColor='transparent'; this.style.color='#e2e8f0'">
+                    <i class="fas fa-home" style="margin-right: 0.3rem; font-size: 0.7rem;"></i>
+                </a>
+                <span style="margin: 0 0.3rem; color: #a0aec0; font-size: 0.8rem; font-weight: 300;">›</span>
+            </li>
+            <li style="color: #ffffff; font-weight: 500; font-size: 0.75rem; display: flex; align-items: center; padding: 0.1rem 0.25rem; background: rgba(255,255,255,0.1); border-radius: 0.2rem;">
+                <i class="fas fa-user" style="margin-right: 0.3rem; font-size: 0.7rem;"></i>
                 Profile
             </li>
         </ol>
     </nav>
 
-    <!-- Back Button -->
-    <a href="javascript:history.back()" class="btn btn-outline-secondary d-inline-flex align-items-center" style="gap:0.5rem; margin-bottom: 1.5rem;">
-        <i class="fas fa-arrow-left"></i>
-        <span>Back</span>
-    </a>
-    
-    <!-- Profile Header -->
-    <div style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white; border-radius: 1.5rem; padding: 2rem; margin-bottom: 2rem; box-shadow: 0 20px 60px rgba(102,126,234,0.2); position: relative; overflow: hidden;">
-        <!-- Decorative Elements -->
-        <div style="position: absolute; top: -50px; right: -50px; width: 200px; height: 200px; background: rgba(255,255,255,0.1); border-radius: 50%; opacity: 0.3;"></div>
-        <div style="position: absolute; bottom: -30px; left: -30px; width: 120px; height: 120px; background: rgba(255,255,255,0.05); border-radius: 50%;"></div>
-        
-        <div style="display: flex; align-items: center; gap: 2rem; position: relative; z-index: 2;">
-            <div style="width: 120px; height: 120px; border-radius: 50%; border: 4px solid rgba(255,255,255,0.3); display: flex; align-items: center; justify-content: center; background: rgba(255,255,255,0.2); font-size: 3rem; color: white; flex-shrink: 0;">
-                <?php if (!empty($user['avatar'])): ?>
-                    <img src="<?= base_url('uploads/avatars/' . $user['avatar']) ?>" alt="Profile" style="width: 100%; height: 100%; border-radius: 50%; object-fit: cover;">
-                <?php else: ?>
-                    <?= strtoupper(substr($user['full_name'] ?? $user['email'] ?? 'U', 0, 1)) ?>
-                <?php endif; ?>
-            </div>
-            <div style="flex: 1;">
-                <h1 style="color: white; font-size: 2.5rem; font-weight: 800; margin-bottom: 0.75rem; font-family: 'Poppins', sans-serif; text-shadow: 0 2px 4px rgba(0,0,0,0.1);">
-                    <?= esc($user['full_name'] ?? $user['email']) ?>
-                </h1>
-                <p style="color: rgba(255,255,255,0.95); font-size: 1.1rem; margin-bottom: 0.5rem; font-weight: 400;">
-                    <i class="fas fa-envelope" style="margin-right: 0.75rem;"></i>
-                    <?= esc($user['email']) ?>
-                </p>
-                <?php if (!empty($user['phone'])): ?>
-                    <p style="color: rgba(255,255,255,0.95); font-size: 1.1rem; margin-bottom: 0.5rem; font-weight: 400;">
-                        <i class="fas fa-phone me-2"></i>
-                        <?= esc($user['phone']) ?>
-                    </p>
-                <?php endif; ?>
-                <p class="mb-0 opacity-75">
-                    <i class="fas fa-calendar me-2"></i>
-                    Member since <?= !empty($user['date_created']) ? date('F Y', strtotime($user['date_created'])) : 'N/A' ?>
-                </p>
-            </div>
-            <div class="col-auto">
-                <a href="<?= base_url('profile/edit') ?>" style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white; border: none; padding: 0.75rem 1.5rem; border-radius: 0.5rem; font-weight: 500; transition: all 0.2s ease; text-decoration: none; display: inline-flex; align-items: center; gap: 0.5rem;" onmouseover="this.style.transform='translateY(-1px)'; this.style.boxShadow='0 4px 12px rgba(102, 126, 234, 0.3)'" onmouseout="this.style.transform=''; this.style.boxShadow=''">
-                    <i class="fas fa-edit"></i>
-                    Edit Profile
-                </a>
-            </div>
-        </div>
-    </div>
-
     <div class="row">
-        <!-- Profile Statistics -->
-        <div class="col-lg-8">
-            <div style="background: white; border-radius: 1rem; padding: 1.5rem; box-shadow: 0 4px 6px rgba(0,0,0,0.05); margin-bottom: 2rem;">
-                <div class="row text-center">
-                    <div style="text-align: center; padding: 1rem;" class="col-md-4">
-                        <div style="font-size: 2rem; font-weight: 700; color: #667eea; margin-bottom: 0.5rem;">
-                            <?= isset($userStats['project_count']) ? (int)$userStats['project_count'] : 0 ?>
-                        </div>
-                        <div style="color: #6b7280; font-weight: 500; font-size: 0.875rem; text-transform: uppercase; letter-spacing: 0.05em;">Projects</div>
-                    </div>
-                    <div style="text-align: center; padding: 1rem;" class="col-md-4">
-                        <div style="font-size: 2rem; font-weight: 700; color: #667eea; margin-bottom: 0.5rem;">
-                            <?= isset($userStats['task_count']) ? (int)$userStats['task_count'] : 0 ?>
-                        </div>
-                        <div style="color: #6b7280; font-weight: 500; font-size: 0.875rem; text-transform: uppercase; letter-spacing: 0.05em;">Tasks</div>
-                    </div>
-                    <div style="text-align: center; padding: 1rem;" class="col-md-4">
-                        <div style="font-size: 2rem; font-weight: 700; color: #667eea; margin-bottom: 0.5rem;">
-                            <?= (isset($userStats['project_count'], $userStats['task_count']) && ($userStats['project_count'] + $userStats['task_count']) > 0) ? round(($userStats['task_count'] / max(1, ($userStats['project_count'] + $userStats['task_count']))) * 100) : 0 ?>%
-                        </div>
-                        <div style="color: #6b7280; font-weight: 500; font-size: 0.875rem; text-transform: uppercase; letter-spacing: 0.05em;">Success Rate</div>
-                    </div>
-                </div>
-            </div>
-
-            <!-- Recent Activity -->
-            <div style="background: white; border-radius: 1rem; padding: 1.5rem; box-shadow: 0 4px 6px rgba(0,0,0,0.05);">
-                <h5 class="mb-4">
-                    <i class="fas fa-clock me-2"></i>
-                    Recent Activity
-                </h5>
-                
-                <div style="position: relative; padding-left: 2rem;">
-                    <div style="content: ''; position: absolute; left: 0.75rem; top: 0; bottom: 0; width: 2px; background: #e5e7eb;"></div>
-                    
-                    <?php if (!empty($recentActivity)): ?>
-                        <?php foreach ($recentActivity as $activity): ?>
-                            <div style="position: relative; margin-bottom: 2rem; background: white; border-radius: 0.75rem; padding: 1.5rem; box-shadow: 0 2px 4px rgba(0,0,0,0.05); margin-left: 1rem;">
-                                <div style="content: ''; position: absolute; left: -2.5rem; top: 1.5rem; width: 12px; height: 12px; background: #667eea; border-radius: 50%; border: 3px solid white; box-shadow: 0 0 0 3px #e5e7eb;"></div>
-                                <div style="color: #9ca3af; font-size: 0.875rem; font-weight: 500; margin-bottom: 0.5rem;">
-                                    <?= date('M j, Y - H:i', strtotime($activity['date_created'])) ?>
-                                </div>
-                                <div>
-                                    <h6 style="color: #374151; font-weight: 600; margin-bottom: 0.25rem;"><?= esc($activity['action']) ?></h6>
-                                    <p style="color: #6b7280; margin: 0; font-size: 0.875rem;">
-                                        <?= esc($activity['description'] ?? 'Activity performed') ?>
-                                    </p>
-                                </div>
-                            </div>
-                        <?php endforeach; ?>
-                    <?php else: ?>
-                        <div class="text-center py-4">
-                            <i class="fas fa-clock text-muted mb-3" style="font-size: 3rem;"></i>
-                            <p class="text-muted mb-0">No recent activity to display</p>
-                        </div>
-                    <?php endif; ?>
-                </div>
-            </div>
-        </div>
-
         <!-- Profile Information -->
-        <div class="col-lg-4">
+        <div class="col-lg-8">
             <div style="backdrop-filter: blur(12px); background: rgba(255,255,255,0.55); border-radius: 1.5rem; box-shadow: 0 8px 32px rgba(102,126,234,0.18); padding: 2.5rem 1.5rem 2rem 1.5rem; height: 100%; position: relative; overflow: hidden; border: 1.5px solid rgba(102,126,234,0.10);">
                 <div style="position: absolute; top: -40px; right: -40px; width: 120px; height: 120px; background: rgba(102,126,234,0.10); border-radius: 50%; z-index: 0;"></div>
                 <div style="position: absolute; bottom: -30px; left: -30px; width: 80px; height: 80px; background: rgba(102,126,234,0.06); border-radius: 50%; z-index: 0;"></div>
@@ -196,6 +90,42 @@
                         <i class="fas fa-lock me-2"></i>
                         Change Password
                     </a>
+                </div>
+            </div>
+        </div>
+
+        <!-- Recent Activity -->
+        <div class="col-lg-4">
+            <div style="background: white; border-radius: 1rem; padding: 1.5rem; box-shadow: 0 4px 6px rgba(0,0,0,0.05);">
+                <h5 class="mb-4">
+                    <i class="fas fa-clock me-2"></i>
+                    Recent Activity
+                </h5>
+                
+                <div style="position: relative; padding-left: 2rem;">
+                    <div style="content: ''; position: absolute; left: 0.75rem; top: 0; bottom: 0; width: 2px; background: #e5e7eb;"></div>
+                    
+                    <?php if (!empty($recentActivity)): ?>
+                        <?php foreach ($recentActivity as $activity): ?>
+                            <div style="position: relative; margin-bottom: 2rem; background: white; border-radius: 0.75rem; padding: 1.5rem; box-shadow: 0 2px 4px rgba(0,0,0,0.05); margin-left: 1rem;">
+                                <div style="content: ''; position: absolute; left: -2.5rem; top: 1.5rem; width: 12px; height: 12px; background: #667eea; border-radius: 50%; border: 3px solid white; box-shadow: 0 0 0 3px #e5e7eb;"></div>
+                                <div style="color: #9ca3af; font-size: 0.875rem; font-weight: 500; margin-bottom: 0.5rem;">
+                                    <?= date('M j, Y - H:i', strtotime($activity['date_created'])) ?>
+                                </div>
+                                <div>
+                                    <h6 style="color: #374151; font-weight: 600; margin-bottom: 0.25rem;"><?= esc($activity['action']) ?></h6>
+                                    <p style="color: #6b7280; margin: 0; font-size: 0.875rem;">
+                                        <?= esc($activity['description'] ?? 'Activity performed') ?>
+                                    </p>
+                                </div>
+                            </div>
+                        <?php endforeach; ?>
+                    <?php else: ?>
+                        <div class="text-center py-4">
+                            <i class="fas fa-clock text-muted mb-3" style="font-size: 3rem;"></i>
+                            <p class="text-muted mb-0">No recent activity to display</p>
+                        </div>
+                    <?php endif; ?>
                 </div>
             </div>
         </div>

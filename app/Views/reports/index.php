@@ -19,10 +19,16 @@
     <?php endif; ?>
 
     <!-- Breadcrumbs -->
-    <nav aria-label="breadcrumb" style="margin-bottom: 1.5rem;">
-        <ol style="display: flex; list-style: none; padding: 1rem 1.25rem; margin: 0; background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); border-radius: 0.75rem; box-shadow: 0 4px 15px rgba(102, 126, 234, 0.2); border: none;">
-            <li style="color: #f7fafc; font-weight: 600; font-size: 0.95rem; display: flex; align-items: center; padding: 0.25rem 0.5rem; background: rgba(255,255,255,0.1); border-radius: 0.375rem; backdrop-filter: blur(10px);">
-                <i class="fas fa-chart-bar" style="margin-right: 0.5rem; font-size: 0.9rem; opacity: 0.9;"></i>
+    <nav aria-label="breadcrumb" style="margin-bottom: 1rem;">
+        <ol style="display: inline-flex; list-style: none; padding: 0.4rem 0.6rem; margin: 0; background: #4a5568; border-radius: 0.3rem; box-shadow: 0 2px 8px rgba(74, 85, 104, 0.15); border: none; width: fit-content;">
+            <li style="display: flex; align-items: center;">
+                <a href="<?= base_url('dashboard') ?>" style="color: #e2e8f0; text-decoration: none; font-weight: 500; font-size: 0.75rem; transition: all 0.3s ease; display: flex; align-items: center; padding: 0.1rem 0.25rem; border-radius: 0.2rem;" onmouseover="this.style.backgroundColor='rgba(255,255,255,0.1)'; this.style.color='#ffffff'" onmouseout="this.style.backgroundColor='transparent'; this.style.color='#e2e8f0'">
+                    <i class="fas fa-home" style="margin-right: 0.3rem; font-size: 0.7rem;"></i>
+                </a>
+                <span style="margin: 0 0.3rem; color: #a0aec0; font-size: 0.8rem; font-weight: 300;">›</span>
+            </li>
+            <li style="color: #f7fafc; font-weight: 600; font-size: 0.85rem; display: flex; align-items: center; padding: 0.2rem 0.4rem; background: rgba(255,255,255,0.1); border-radius: 0.3rem; backdrop-filter: blur(10px);">
+                <i class="fas fa-chart-bar" style="margin-right: 0.4rem; font-size: 0.75rem; opacity: 0.9;"></i>
                 Reports & Analytics
             </li>
         </ol>

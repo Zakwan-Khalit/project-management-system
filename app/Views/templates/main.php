@@ -143,7 +143,7 @@
         }
 
         .sidebar-header {
-            padding: 0.5rem 0.75rem !important;
+            padding: 0 !important;
             border-bottom: 1px solid #e9ecef !important;
             background: linear-gradient(135deg, #667eea 0%, #764ba2 100%) !important;
             color: white !important;
@@ -152,6 +152,26 @@
             display: flex !important;
             align-items: center !important;
             justify-content: center !important;
+            position: relative !important;
+            overflow: hidden !important;
+        }
+
+        .sidebar-logo {
+            width: 100% !important;
+            height: 60px !important;
+            object-fit: cover !important;
+            object-position: center !important;
+            transition: all 0.3s ease !important;
+        }
+
+        .sidebar.collapsed .sidebar-logo {
+            width: 70px !important;
+            height: 60px !important;
+            object-fit: cover !important;
+        }
+
+        .sidebar.collapsed.hover-expanded .sidebar-logo {
+            width: 100% !important;
         }
 
         .sidebar-header h4 {
@@ -1132,10 +1152,7 @@
     <!-- Sidebar -->
     <nav class="sidebar" id="sidebar">
         <div class="sidebar-header">
-            <h4>
-                <i class="fas fa-project-diagram"></i>
-                <span>KerTask</span>
-            </h4>
+            <img src="<?= base_url('assets/images/kertask_logo.jpeg') ?>" alt="KerTask Logo" class="sidebar-logo">
         </div>
         <div class="sidebar-menu">
             <?php $url = current_url(); ?>
@@ -1151,10 +1168,10 @@
                 <i class="fas fa-list"></i>
                 <span>Activities</span>
             </a>
-            <a href="<?= base_url('tasks/kanban_select') ?>" class="nav-link<?= strpos($url, 'kanban') !== false ? ' active' : '' ?>" data-tooltip="Kanban">
+            <!-- <a href="<?= base_url('tasks/kanban_select') ?>" class="nav-link<?= strpos($url, 'kanban') !== false ? ' active' : '' ?>" data-tooltip="Kanban">
                 <i class="fas fa-columns"></i>
                 <span>Kanban</span>
-            </a>
+            </a> -->
             <a href="<?= base_url('reports') ?>" class="nav-link<?= strpos($url, 'reports') !== false ? ' active' : '' ?>" data-tooltip="Reports">
                 <i class="fas fa-chart-bar"></i>
                 <span>Reports</span>

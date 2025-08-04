@@ -1,25 +1,30 @@
 <!-- Change Password Page -->
 
 <div class="container-fluid">
-    <!-- Header -->
-    <div style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white; border-radius: 1rem; padding: 2rem; margin-bottom: 2rem;">
-        <div class="row align-items-center">
-            <div class="col">
-                <h1 class="h2 mb-2">
-                    <i class="fas fa-lock me-2"></i>
-                    Change Password
-                </h1>
-                <p class="mb-0 opacity-75">Update your account password for better security</p>
-            </div>
-            <div class="col-auto">
-                <a href="<?= base_url('profile') ?>" class="btn btn-light">
-                    <i class="fas fa-arrow-left me-2"></i>
-                    Back to Profile
+    <!-- Breadcrumbs -->
+    <nav aria-label="breadcrumb" style="margin-bottom: 1rem;">
+        <ol style="display: inline-flex; list-style: none; padding: 0.4rem 0.6rem; margin: 0; background: #4a5568; border-radius: 0.3rem; box-shadow: 0 2px 8px rgba(74, 85, 104, 0.15); border: none; width: fit-content;">
+            <li style="display: flex; align-items: center;">
+                <a href="<?= base_url('dashboard') ?>" style="color: #e2e8f0; text-decoration: none; font-weight: 500; font-size: 0.75rem; transition: all 0.3s ease; display: flex; align-items: center; padding: 0.1rem 0.25rem; border-radius: 0.2rem;" onmouseover="this.style.backgroundColor='rgba(255,255,255,0.1)'; this.style.color='#ffffff'" onmouseout="this.style.backgroundColor='transparent'; this.style.color='#e2e8f0'">
+                    <i class="fas fa-home" style="margin-right: 0.3rem; font-size: 0.7rem;"></i>
                 </a>
-            </div>
-        </div>
-    </div>
+                <span style="margin: 0 0.3rem; color: #a0aec0; font-size: 0.8rem; font-weight: 300;">›</span>
+            </li>
+            <li style="display: flex; align-items: center;">
+                <a href="<?= base_url('profile') ?>" style="color: #e2e8f0; text-decoration: none; font-weight: 500; font-size: 0.75rem; transition: all 0.3s ease; display: flex; align-items: center; padding: 0.1rem 0.25rem; border-radius: 0.2rem;" onmouseover="this.style.backgroundColor='rgba(255,255,255,0.1)'; this.style.color='#ffffff'" onmouseout="this.style.backgroundColor='transparent'; this.style.color='#e2e8f0'">
+                    <i class="fas fa-user" style="margin-right: 0.3rem; font-size: 0.7rem;"></i>
+                    Profile
+                </a>
+                <span style="margin: 0 0.3rem; color: #a0aec0; font-size: 0.8rem; font-weight: 300;">›</span>
+            </li>
+            <li style="color: #ffffff; font-weight: 500; font-size: 0.75rem; display: flex; align-items: center; padding: 0.1rem 0.25rem; background: rgba(255,255,255,0.1); border-radius: 0.2rem;">
+                <i class="fas fa-lock" style="margin-right: 0.3rem; font-size: 0.7rem;"></i>
+                Change Password
+            </li>
+        </ol>
+    </nav>
 
+    <!-- Header -->
     <div class="row justify-content-center">
         <div class="col-lg-6">
             <!-- Password Change Form -->
@@ -98,7 +103,7 @@
                         <small id="passwordStrengthText" class="text-muted">Enter a password to see strength</small>
                     </div>
                     
-                    <div class="d-flex gap-2">
+                    <div class="d-flex gap-2 justify-content-end">
                         <button type="submit" class="btn btn-primary">
                             <i class="fas fa-save me-2"></i>
                             Update Password
@@ -108,53 +113,6 @@
                         </a>
                     </div>
                 </form>
-            </div>
-        </div>
-        
-        <div class="col-lg-4">
-            <!-- Security Tips -->
-            <div style="background: white; border-radius: 1rem; padding: 1.5rem; box-shadow: 0 4px 6px rgba(0,0,0,0.05);">
-                <h6 class="mb-3">
-                    <i class="fas fa-shield-alt me-2 text-success"></i>
-                    Security Tips
-                </h6>
-                
-                <div style="padding: 1rem; background: #f8f9fa; border-radius: 0.5rem; margin-bottom: 1rem;">
-                    <h6 style="color: #374151; font-size: 0.9rem; margin-bottom: 0.5rem;">
-                        <i class="fas fa-check-circle me-2 text-success"></i>
-                        Strong Password Guidelines
-                    </h6>
-                    <ul style="margin: 0; padding-left: 1rem; color: #6b7280; font-size: 0.8rem;">
-                        <li>At least 8 characters long</li>
-                        <li>Mix of uppercase and lowercase letters</li>
-                        <li>Include numbers and special characters</li>
-                        <li>Avoid common words or personal information</li>
-                    </ul>
-                </div>
-                
-                <div style="padding: 1rem; background: #fef3c7; border-radius: 0.5rem; margin-bottom: 1rem;">
-                    <h6 style="color: #92400e; font-size: 0.9rem; margin-bottom: 0.5rem;">
-                        <i class="fas fa-exclamation-triangle me-2"></i>
-                        Important Reminders
-                    </h6>
-                    <ul style="margin: 0; padding-left: 1rem; color: #92400e; font-size: 0.8rem;">
-                        <li>Don't share your password with anyone</li>
-                        <li>Use unique passwords for different accounts</li>
-                        <li>Consider using a password manager</li>
-                        <li>Change passwords regularly</li>
-                    </ul>
-                </div>
-                
-                <div style="padding: 1rem; background: #e0f2fe; border-radius: 0.5rem;">
-                    <h6 style="color: #0277bd; font-size: 0.9rem; margin-bottom: 0.5rem;">
-                        <i class="fas fa-info-circle me-2"></i>
-                        Need Help?
-                    </h6>
-                    <p style="margin: 0; color: #0277bd; font-size: 0.8rem;">
-                        If you're having trouble changing your password or have security concerns, 
-                        contact your system administrator for assistance.
-                    </p>
-                </div>
             </div>
         </div>
     </div>

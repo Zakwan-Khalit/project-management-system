@@ -4,17 +4,22 @@
     <div class="row mb-4">
         <div class="col-12">
             <div class="page-header">
-                <nav aria-label="breadcrumb" style="margin-bottom: 1.5rem;">
-                    <ol style="display: flex; list-style: none; padding: 1rem 1.25rem; margin: 0; background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); border-radius: 0.75rem; box-shadow: 0 4px 15px rgba(102, 126, 234, 0.2); border: none;">
+                <nav aria-label="breadcrumb" style="margin-bottom: 1rem;">
+                    <ol style="display: inline-flex; list-style: none; padding: 0.4rem 0.6rem; margin: 0; background: #4a5568; border-radius: 0.3rem; box-shadow: 0 2px 8px rgba(74, 85, 104, 0.15); border: none; width: fit-content;">
                         <li style="display: flex; align-items: center;">
-                            <a href="<?= base_url('events') ?>" style="color: #ffffff; text-decoration: none; font-weight: 600; font-size: 0.95rem; transition: all 0.3s ease; display: flex; align-items: center; padding: 0.25rem 0.5rem; border-radius: 0.375rem;" onmouseover="this.style.backgroundColor='rgba(255,255,255,0.15)'; this.style.transform='translateY(-1px)'" onmouseout="this.style.backgroundColor='transparent'; this.style.transform='translateY(0)'">
-                                <i class="fas fa-calendar-alt" style="margin-right: 0.5rem; font-size: 0.9rem;"></i>
+                            <a href="<?= base_url('events') ?>" style="color: #e2e8f0; text-decoration: none; font-weight: 500; font-size: 0.75rem; transition: all 0.3s ease; display: flex; align-items: center; padding: 0.1rem 0.25rem; border-radius: 0.2rem;" onmouseover="this.style.backgroundColor='rgba(255,255,255,0.1)'; this.style.color='#ffffff'" onmouseout="this.style.backgroundColor='transparent'; this.style.color='#e2e8f0'">
+                                <i class="fas fa-calendar-alt" style="margin-right: 0.3rem; font-size: 0.7rem;"></i>
                                 Events
                             </a>
-                            <span style="margin: 0 0.75rem; color: #e2e8f0; font-size: 1.1rem; font-weight: 300;">›</span>
+                            <span style="margin: 0 0.3rem; color: #a0aec0; font-size: 0.8rem; font-weight: 300;">›</span>
                         </li>
-                        <li style="color: #f7fafc; font-weight: 600; font-size: 0.95rem; display: flex; align-items: center; padding: 0.25rem 0.5rem; background: rgba(255,255,255,0.1); border-radius: 0.375rem; backdrop-filter: blur(10px);">
-                            <i class="fas fa-edit" style="margin-right: 0.5rem; font-size: 0.85rem; opacity: 0.9;"></i>
+                        <li style="color: #ffffff; font-weight: 500; font-size: 0.75rem; display: flex; align-items: center; padding: 0.1rem 0.25rem; background: rgba(255,255,255,0.1); border-radius: 0.2rem;">
+                            <i class="fas fa-edit" style="margin-right: 0.3rem; font-size: 0.7rem;"></i>
+                            Edit Event
+                        </li>
+                    </ol>
+                        <li style="color: #f7fafc; font-weight: 600; font-size: 0.85rem; display: flex; align-items: center; padding: 0.2rem 0.4rem; background: rgba(255,255,255,0.1); border-radius: 0.3rem; backdrop-filter: blur(10px);">
+                            <i class="fas fa-edit" style="margin-right: 0.4rem; font-size: 0.75rem; opacity: 0.9;"></i>
                             Edit Event
                         </li>
                     </ol>
@@ -30,21 +35,21 @@
     <!-- Edit Form -->
     <div class="row">
         <div class="col-lg-8 col-xl-9">
-            <div class="form-card">
-                <div class="card-header">
-                    <h5 class="card-title">Event Details</h5>
+            <div style="background: white; border-radius: 1rem; box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08); border: 1px solid #f1f3f4;">
+                <div style="background: white; border-bottom: 1px solid #e2e8f0; padding: 1.5rem; border-radius: 1rem 1rem 0 0;">
+                    <h5 style="margin: 0; font-size: 1.1rem; font-weight: 600; color: #2d3748;">Event Details</h5>
                 </div>
-                <div class="card-body">
-                    <?= form_open('events/edit/' . $event['id'], ['class' => 'event-form']) ?>
+                <div style="padding: 1.5rem;">
+                    <?= form_open(base_url('events/edit/' . $event['id']), ['class' => 'event-form']) ?>
                         
                         <!-- Basic Information -->
-                        <div class="form-section">
-                            <h6 class="section-title">Basic Information</h6>
+                        <div style="margin-bottom: 2rem; padding-bottom: 1.5rem; border-bottom: 1px solid #f7fafc;">
+                            <h6 style="font-size: 1.1rem; font-weight: 600; color: #2d3748; margin-bottom: 1rem; padding-bottom: 0.5rem; border-bottom: 2px solid #e2e8f0;">Basic Information</h6>
                             
                             <div class="row">
                                 <div class="col-md-8">
                                     <div class="mb-3">
-                                        <label for="title" class="form-label required">Event Title</label>
+                                        <label for="title" class="form-label" style="font-weight: 600;">Event Title <span style="color: #e53e3e;">*</span></label>
                                         <input type="text" class="form-control" id="title" name="title" 
                                                value="<?= old('title', $event['title']) ?>" required>
                                         <?php if (isset($errors['title'])): ?>
@@ -54,7 +59,7 @@
                                 </div>
                                 <div class="col-md-4">
                                     <div class="mb-3">
-                                        <label for="event_type" class="form-label required">Event Type</label>
+                                        <label for="event_type" class="form-label" style="font-weight: 600;">Event Type <span style="color: #e53e3e;">*</span></label>
                                         <select class="form-select" id="event_type" name="event_type" required>
                                             <option value="">Select Type</option>
                                             <option value="meeting" <?= old('event_type', $event['event_type']) === 'meeting' ? 'selected' : '' ?>>Meeting</option>
@@ -81,13 +86,13 @@
                         </div>
 
                         <!-- Date & Time -->
-                        <div class="form-section">
-                            <h6 class="section-title">Date & Time</h6>
+                        <div style="margin-bottom: 2rem; padding-bottom: 1.5rem; border-bottom: 1px solid #f7fafc;">
+                            <h6 style="font-size: 1.1rem; font-weight: 600; color: #2d3748; margin-bottom: 1rem; padding-bottom: 0.5rem; border-bottom: 2px solid #e2e8f0;">Date & Time</h6>
                             
                             <div class="row">
                                 <div class="col-md-6">
                                     <div class="mb-3">
-                                        <label for="start_datetime" class="form-label required">Start Date & Time</label>
+                                        <label for="start_datetime" class="form-label" style="font-weight: 600;">Start Date & Time <span style="color: #e53e3e;">*</span></label>
                                         <input type="datetime-local" class="form-control" id="start_datetime" name="start_datetime" 
                                                value="<?= old('start_datetime', date('Y-m-d\TH:i', strtotime($event['start_datetime']))) ?>" required>
                                         <?php if (isset($errors['start_datetime'])): ?>
@@ -97,7 +102,7 @@
                                 </div>
                                 <div class="col-md-6">
                                     <div class="mb-3">
-                                        <label for="end_datetime" class="form-label required">End Date & Time</label>
+                                        <label for="end_datetime" class="form-label" style="font-weight: 600;">End Date & Time <span style="color: #e53e3e;">*</span></label>
                                         <input type="datetime-local" class="form-control" id="end_datetime" name="end_datetime" 
                                                value="<?= old('end_datetime', date('Y-m-d\TH:i', strtotime($event['end_datetime']))) ?>" required>
                                         <?php if (isset($errors['end_datetime'])): ?>
@@ -118,8 +123,8 @@
                         </div>
 
                         <!-- Project & Attendees -->
-                        <div class="form-section">
-                            <h6 class="section-title">Project & Attendees</h6>
+                        <div style="margin-bottom: 2rem; padding-bottom: 1.5rem;">
+                            <h6 style="font-size: 1.1rem; font-weight: 600; color: #2d3748; margin-bottom: 1rem; padding-bottom: 0.5rem; border-bottom: 2px solid #e2e8f0;">Project & Attendees</h6>
                             
                             <div class="mb-3">
                                 <label for="project_id" class="form-label">Related Project</label>
@@ -150,8 +155,8 @@
                         </div>
 
                         <!-- Form Actions -->
-                        <div class="form-actions">
-                            <button type="submit" class="btn btn-primary btn-lg">
+                        <div style="display: flex; gap: 1rem; justify-content: flex-start; margin-top: 2rem;">
+                            <button type="submit" class="btn btn-primary btn-lg" id="updateEventBtn">
                                 <i class="fas fa-save me-2"></i>
                                 Update Event
                             </button>
@@ -168,27 +173,27 @@
 
         <!-- Event Preview -->
         <div class="col-lg-4 col-xl-3">
-            <div class="preview-card">
-                <div class="card-header">
-                    <h6 class="card-title">Event Preview</h6>
+            <div style="background: white; border-radius: 1rem; box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08); border: 1px solid #f1f3f4;">
+                <div style="background: white; border-bottom: 1px solid #e2e8f0; padding: 1.5rem; border-radius: 1rem 1rem 0 0;">
+                    <h6 style="margin: 0; font-size: 1rem; font-weight: 600; color: #2d3748;">Event Preview</h6>
                 </div>
-                <div class="card-body">
-                    <div class="event-preview">
-                        <div class="preview-title" id="previewTitle"><?= esc($event['title']) ?></div>
-                        <div class="preview-type" id="previewType"><?= ucfirst($event['event_type']) ?></div>
-                        <div class="preview-datetime" id="previewDatetime">
+                <div style="padding: 1.5rem;">
+                    <div style="padding: 1rem; background: #f8fafc; border-radius: 0.5rem; border: 1px solid #e2e8f0;">
+                        <div style="font-size: 1.1rem; font-weight: 600; color: #2d3748; margin-bottom: 0.5rem;" id="previewTitle"><?= esc($event['title']) ?></div>
+                        <div style="font-size: 0.85rem; color: #4a5568; text-transform: uppercase; font-weight: 500; margin-bottom: 1rem;" id="previewType"><?= ucfirst($event['event_type']) ?></div>
+                        <div style="font-size: 0.9rem; color: #4a5568; margin-bottom: 0.5rem; display: flex; align-items: center;" id="previewDatetime">
                             <i class="fas fa-clock me-2"></i>
                             <?= date('M d, Y g:i A', strtotime($event['start_datetime'])) ?>
                         </div>
-                        <div class="preview-location" id="previewLocation" style="<?= $event['location'] ? '' : 'display: none;' ?>">
+                        <div style="font-size: 0.9rem; color: #4a5568; margin-bottom: 0.5rem; display: flex; align-items: center; <?= $event['location'] ? '' : 'display: none;' ?>" id="previewLocation">
                             <i class="fas fa-map-marker-alt me-2"></i>
                             <span><?= esc($event['location']) ?></span>
                         </div>
-                        <div class="preview-project" id="previewProject" style="<?= $event['project_name'] ? '' : 'display: none;' ?>">
+                        <div style="font-size: 0.9rem; color: #4a5568; margin-bottom: 0.5rem; display: flex; align-items: center; <?= $event['project_name'] ? '' : 'display: none;' ?>" id="previewProject">
                             <i class="fas fa-folder me-2"></i>
                             <span><?= esc($event['project_name'] ?? '') ?></span>
                         </div>
-                        <div class="preview-description" id="previewDescription" style="<?= $event['description'] ? '' : 'display: none;' ?>">
+                        <div style="font-size: 0.9rem; color: #718096; margin-top: 1rem; padding-top: 1rem; border-top: 1px solid #e2e8f0; line-height: 1.5; <?= $event['description'] ? '' : 'display: none;' ?>" id="previewDescription">
                             <span><?= esc($event['description']) ?></span>
                         </div>
                     </div>
@@ -226,6 +231,64 @@ document.addEventListener('DOMContentLoaded', function() {
     document.getElementById('end_datetime').addEventListener('change', updatePreview);
     document.getElementById('location').addEventListener('input', updatePreview);
     document.getElementById('description').addEventListener('input', updatePreview);
+
+    // Handle form submission with AJAX
+    document.querySelector('.event-form').addEventListener('submit', function(e) {
+        e.preventDefault();
+        
+        const submitBtn = document.getElementById('updateEventBtn');
+        const originalText = submitBtn.innerHTML;
+        
+        // Show loading state
+        submitBtn.disabled = true;
+        submitBtn.innerHTML = '<i class="fas fa-spinner fa-spin me-2"></i>Updating...';
+        
+        // Prepare form data
+        const formData = new FormData(this);
+        
+        // Submit via AJAX
+        fetch(this.action, {
+            method: 'POST',
+            body: formData,
+            headers: {
+                'X-Requested-With': 'XMLHttpRequest'
+            }
+        })
+        .then(response => {
+            if (response.ok) {
+                // Success - show SweetAlert and redirect
+                Swal.fire({
+                    icon: 'success',
+                    title: 'Success!',
+                    text: 'Event updated successfully!',
+                    showConfirmButton: true,
+                    confirmButtonText: 'OK'
+                }).then((result) => {
+                    if (result.isConfirmed) {
+                        window.location.href = '<?= base_url('events') ?>';
+                    }
+                });
+            } else {
+                // Handle HTTP errors
+                throw new Error('Network response was not ok');
+            }
+        })
+        .catch(error => {
+            console.error('Error:', error);
+            Swal.fire({
+                icon: 'error',
+                title: 'Error!',
+                text: 'Failed to update event. Please try again.',
+                showConfirmButton: true,
+                confirmButtonText: 'OK'
+            });
+        })
+        .finally(() => {
+            // Reset button state
+            submitBtn.disabled = false;
+            submitBtn.innerHTML = originalText;
+        });
+    });
 
     function loadUsers(projectId = null) {
         const attendeesSelect = document.getElementById('attendees');
@@ -325,99 +388,3 @@ document.addEventListener('DOMContentLoaded', function() {
 
 <!-- Include events CSS -->
 <link rel="stylesheet" href="<?= base_url('assets/css/events.css') ?>">
-
-<!-- Additional form styles -->
-<style>
-.form-card {
-    background: white;
-    border-radius: 1rem;
-    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
-    border: 1px solid #f1f3f4;
-}
-
-.form-card .card-header {
-    background: white;
-    border-bottom: 1px solid #e2e8f0;
-    padding: 1.5rem;
-    border-radius: 1rem 1rem 0 0;
-}
-
-.form-section {
-    margin-bottom: 2rem;
-    padding-bottom: 1.5rem;
-    border-bottom: 1px solid #f7fafc;
-}
-
-.form-section:last-of-type {
-    border-bottom: none;
-}
-
-.section-title {
-    font-size: 1.1rem;
-    font-weight: 600;
-    color: #2d3748;
-    margin-bottom: 1rem;
-    padding-bottom: 0.5rem;
-    border-bottom: 2px solid #e2e8f0;
-}
-
-.required::after {
-    content: ' *';
-    color: #e53e3e;
-}
-
-.form-actions {
-    display: flex;
-    gap: 1rem;
-    justify-content: flex-start;
-    margin-top: 2rem;
-}
-
-.preview-card {
-    background: white;
-    border-radius: 1rem;
-    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
-    border: 1px solid #f1f3f4;
-}
-
-.event-preview {
-    padding: 1rem;
-    background: #f8fafc;
-    border-radius: 0.5rem;
-    border: 1px solid #e2e8f0;
-}
-
-.preview-title {
-    font-size: 1.1rem;
-    font-weight: 600;
-    color: #2d3748;
-    margin-bottom: 0.5rem;
-}
-
-.preview-type {
-    font-size: 0.85rem;
-    color: #4a5568;
-    text-transform: uppercase;
-    font-weight: 500;
-    margin-bottom: 1rem;
-}
-
-.preview-datetime,
-.preview-location,
-.preview-project {
-    font-size: 0.9rem;
-    color: #4a5568;
-    margin-bottom: 0.5rem;
-    display: flex;
-    align-items: center;
-}
-
-.preview-description {
-    font-size: 0.9rem;
-    color: #718096;
-    margin-top: 1rem;
-    padding-top: 1rem;
-    border-top: 1px solid #e2e8f0;
-    line-height: 1.5;
-}
-</style>

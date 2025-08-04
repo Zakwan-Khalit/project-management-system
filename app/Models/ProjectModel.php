@@ -74,6 +74,41 @@ class ProjectModel extends Model
         $builder->orderBy('up.full_name', 'ASC');
         return $builder->get()->getResultArray();
     }
+
+    /**
+     * Get all positions from position_lookup
+     */
+    public function getPositions()
+    {
+        return $this->db->table('position_lookup')
+            ->select('id, code, name')
+            ->orderBy('name', 'ASC')
+            ->get()->getResultArray();
+    }
+
+    /**
+     * Get all users in a position (by position_lookup.id), excluding users already in the project
+     * Joins user_rel, users, user_profile
+     * @param int $positionId
+     * @param int|null $projectId
+     * @return array
+     */
+    public function getUsersByPosition($positionId, $projectId = null)
+    {
+        $builder = $this->db->table('users u');
+        $builder->select('u.id, up.full_name, u.email');
+        $builder->join('user_rel ur', 'ur.user_id = u.id AND ur.is_active = 1 AND ur.is_delete = 0', 'inner');
+        $builder->join('user_profile up', 'up.user_id = u.id AND up.is_delete = 0', 'left');
+        $builder->where('u.is_active', 1);
+        $builder->where('u.is_delete', 0);
+        $builder->where('ur.position_id', $positionId);
+        if ($projectId !== null) {
+            $builder->where('u.id NOT IN (SELECT user_id FROM project_members WHERE project_id = ' . (int)$projectId . ' AND is_active = 1 AND is_delete = 0)');
+        }
+        $builder->groupBy('u.id');
+        $builder->orderBy('up.full_name', 'ASC');
+        return $builder->get()->getResultArray();
+    }
     /**
      * Create a new project and return its ID
      * @param array $data
@@ -903,13 +938,13 @@ class ProjectModel extends Model
         return $headers;
     }
 
-    public function addProjectMembersBulk($projectId, $userIds, $departmentId = null, $role = 'member', $assignedBy = null)
+    public function addProjectMembersBulk($projectId, $userIds, $referenceId = null, $role = 'member', $assignedBy = null, $referenceType = 'department')
     {
         $added = [];
         $failed = [];
         if (!is_array($userIds) || empty($userIds)) return ['success' => false, 'added' => [], 'failed' => []];
         foreach ($userIds as $userId) {
-            // Optionally, check department match here if needed
+            // Optionally, check department/position match here if needed
             $result = $this->addProjectMember($projectId, $userId, $role, $assignedBy);
             if ($result) {
                 $added[] = $userId;
