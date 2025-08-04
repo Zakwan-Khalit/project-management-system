@@ -34,25 +34,6 @@
         </ol>
     </nav>
 
-    <!-- Modern Header -->
-    <div style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white; border-radius: 1.5rem; padding: 2rem; margin-bottom: 2rem; box-shadow: 0 20px 60px rgba(102,126,234,0.2); position: relative; overflow: hidden;">
-        <!-- Decorative Elements -->
-        <div style="position: absolute; top: -50px; right: -50px; width: 200px; height: 200px; background: rgba(255,255,255,0.1); border-radius: 50%; opacity: 0.3;"></div>
-        <div style="position: absolute; bottom: -30px; left: -30px; width: 120px; height: 120px; background: rgba(255,255,255,0.05); border-radius: 50%;"></div>
-        
-        <div style="display: flex; justify-content: space-between; align-items: center; position: relative; z-index: 2;">
-            <div>
-                <h1 style="color: white; font-size: 2.5rem; font-weight: 800; margin-bottom: 0.5rem; font-family: 'Poppins', sans-serif; text-shadow: 0 2px 4px rgba(0,0,0,0.1);">
-                    <i class="fas fa-chart-bar" style="margin-right: 1rem; color: rgba(255,255,255,0.9);"></i>
-                    Reports & Analytics
-                </h1>
-                <p style="color: rgba(255,255,255,0.95); font-size: 1.1rem; margin-bottom: 0; font-weight: 400;">
-                    Comprehensive insights into project performance, task completion, and team productivity
-                </p>
-            </div>
-        </div>
-    </div>
-
     <!-- Statistics Cards -->
     <div class="row mb-4">
         <!-- Total Projects -->

@@ -681,6 +681,7 @@ class Activity extends BaseController
             foreach ($components as $component) {
                 $templateName = $component['name'] ?? '';
                 $templateType = $component['type'] ?? 'custom';
+                $weightage = $component['weightage'] ?? 0;
 
                 if (empty($templateName)) {
                     continue;
@@ -695,6 +696,7 @@ class Activity extends BaseController
                     'name' => $templateName,
                     'fields' => json_encode($fields),
                     'component_order' => $nextOrder++,
+                    'weightage' => $weightage,
                     'is_active' => 1,
                     'is_delete' => 0,
                     'date_created' => date('Y-m-d H:i:s'),
@@ -757,5 +759,102 @@ class Activity extends BaseController
         ];
 
         return $defaultFields;
+    }
+
+    // Create component/template
+    public function create_component()
+    {
+        $userData = session('userdata');
+        $userId = $userData['id'] ?? null;
+        if (!$userId) {
+            return $this->response->setJSON(['success' => false, 'message' => 'Unauthorized']);
+        }
+
+        $projectId = $this->request->getPost('project_id');
+        $scopeId = $this->request->getPost('scope_id');
+        $name = $this->request->getPost('component_name');
+        $description = $this->request->getPost('component_description');
+        $weightage = $this->request->getPost('weightage') ?? 0.00;
+
+        // Validate weightage format (decimal with up to 2 decimal places)
+        if (!is_numeric($weightage) || $weightage < 0) {
+            return $this->response->setJSON(['success' => false, 'message' => 'Invalid weightage value']);
+        }
+        
+        $weightage = round(floatval($weightage), 2);
+
+        if (!$projectId || !$scopeId || !$name) {
+            return $this->response->setJSON(['success' => false, 'message' => 'Project ID, Scope ID, and component name are required']);
+        }
+
+        $templateId = $this->activityModel->createTemplate($projectId, $scopeId, $name, $description, $weightage);
+        
+        if ($templateId) {
+            return $this->response->setJSON([
+                'success' => true,
+                'message' => 'Component created successfully',
+                'template_id' => $templateId
+            ]);
+        } else {
+            return $this->response->setJSON(['success' => false, 'message' => 'Failed to create component']);
+        }
+    }
+
+    // Update component weightage
+    public function update_component_weightage()
+    {
+        $userData = session('userdata');
+        $userId = $userData['id'] ?? null;
+        if (!$userId) {
+            return $this->response->setJSON(['success' => false, 'message' => 'Unauthorized']);
+        }
+
+        $templateId = $this->request->getPost('template_id');
+        $weightage = $this->request->getPost('weightage') ?? 0.00;
+
+        // Validate weightage format
+        if (!is_numeric($weightage) || $weightage < 0) {
+            return $this->response->setJSON(['success' => false, 'message' => 'Invalid weightage value']);
+        }
+        
+        $weightage = round(floatval($weightage), 2);
+
+        if (!$templateId) {
+            return $this->response->setJSON(['success' => false, 'message' => 'Template ID is required']);
+        }
+
+        $success = $this->activityModel->updateTemplateWeightage($templateId, $weightage);
+        
+        if ($success) {
+            return $this->response->setJSON([
+                'success' => true,
+                'message' => 'Component weightage updated successfully'
+            ]);
+        } else {
+            return $this->response->setJSON(['success' => false, 'message' => 'Failed to update component weightage']);
+        }
+    }
+
+    // Get project templates for table display
+    public function get_project_templates()
+    {
+        $userData = session('userdata');
+        $userId = $userData['id'] ?? null;
+        if (!$userId) {
+            return $this->response->setJSON(['success' => false, 'message' => 'Unauthorized']);
+        }
+
+        $projectId = $this->request->getGet('project_id');
+        
+        if (!$projectId) {
+            return $this->response->setJSON(['success' => false, 'message' => 'Project ID is required']);
+        }
+
+        $templates = $this->activityModel->getProjectTemplates($projectId);
+        
+        return $this->response->setJSON([
+            'success' => true,
+            'templates' => $templates
+        ]);
     }
 }

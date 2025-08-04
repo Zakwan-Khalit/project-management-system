@@ -9,21 +9,6 @@
             </div>
         </div>
     <?php endif; ?>
-    
-    <!-- Modern Dashboard Header -->
-    <div style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white; border-radius: 1rem; padding: 2rem 1.5rem; margin-bottom: 2rem; box-shadow: 0 15px 45px rgba(102,126,234,0.2); position: relative; overflow: hidden;">
-        <!-- Decorative Elements -->
-        <div style="position: absolute; top: -30px; right: -30px; width: 120px; height: 120px; background: rgba(255,255,255,0.1); border-radius: 50%; opacity: 0.3;"></div>
-        <div style="position: absolute; bottom: -20px; left: -20px; width: 80px; height: 80px; background: rgba(255,255,255,0.05); border-radius: 50%;"></div>
-        <div style="display: flex; justify-content: space-between; align-items: center; position: relative; z-index: 2; flex-wrap: wrap; gap: 0.75rem;">
-            <div>
-                <h1 style="color: white; font-size: clamp(1.5rem, 3vw, 2.25rem); font-weight: 800; margin-bottom: 0.75rem; font-family: 'Poppins', sans-serif; text-shadow: 0 2px 4px rgba(0,0,0,0.1);">
-                    <i class="fas fa-tachometer-alt" style="margin-right: 0.75rem; color: rgba(255,255,255,0.9);"></i>
-                    Dashboard
-                </h1>
-            </div>
-        </div>
-    </div>
 
     <!-- Calendar View Widget -->
     <div class="row" style="margin-bottom: 2rem;">

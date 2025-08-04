@@ -389,4 +389,68 @@ class ActivityModel extends Model
         }
         return true;
     }
+
+    /**
+     * Create a new template
+     */
+    public function createTemplate($projectId, $scopeId, $name, $description, $weightage = 0.00)
+    {
+        // Get the next component order number
+        $builder = $this->db->table('task_templates');
+        $builder->selectMax('component_order');
+        $builder->where('scope_id', $scopeId);
+        $builder->where('is_delete', 0);
+        $result = $builder->get()->getRowArray();
+        $nextOrder = ($result['component_order'] ?? 0) + 1;
+
+        $data = [
+            'project_id' => $projectId,
+            'scope_id' => $scopeId,
+            'name' => $name,
+            'description' => $description,
+            'weightage' => $weightage,
+            'component_order' => $nextOrder,
+            'fields' => json_encode([1,2,3,4,5,6,7,8,9,10,11,12,13]), // Default fields
+            'is_active' => 1,
+            'is_delete' => 0,
+            'date_created' => date('Y-m-d H:i:s'),
+            'date_modified' => date('Y-m-d H:i:s')
+        ];
+
+        if ($this->db->table('task_templates')->insert($data)) {
+            return $this->db->insertID();
+        }
+        return false;
+    }
+
+    /**
+     * Update template weightage
+     */
+    public function updateTemplateWeightage($templateId, $weightage)
+    {
+        return $this->db->table('task_templates')
+            ->where('id', $templateId)
+            ->where('is_delete', 0)
+            ->update([
+                'weightage' => $weightage,
+                'date_modified' => date('Y-m-d H:i:s')
+            ]);
+    }
+
+    /**
+     * Get all templates for a project (for the table display)
+     */
+    public function getProjectTemplates($projectId)
+    {
+        return $this->db->table('task_templates tt')
+            ->select('tt.*, ps.name as scope_name')
+            ->join('project_scopes ps', 'ps.id = tt.scope_id', 'left')
+            ->where('tt.project_id', $projectId)
+            ->where('tt.is_active', 1)
+            ->where('tt.is_delete', 0)
+            ->orderBy('ps.scope_order', 'ASC')
+            ->orderBy('tt.component_order', 'ASC')
+            ->get()
+            ->getResultArray();
+    }
 }

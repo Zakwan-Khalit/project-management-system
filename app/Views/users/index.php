@@ -15,32 +15,12 @@
     </ol>
 </nav>
 
-<!-- Users Header -->
-<div style="background: white; border-radius: 0.75rem; box-shadow: 0 6px 20px rgba(0,0,0,0.06); border: 1px solid #f1f3f4; margin-bottom: 1.25rem; overflow: hidden;">
-    <!-- Decorative Header Section -->
-    <div style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white; padding: 1.25rem; position: relative; overflow: hidden;">
-        <!-- Decorative Elements -->
-        <div style="position: absolute; top: -30px; right: -30px; width: 120px; height: 120px; background: rgba(255,255,255,0.1); border-radius: 50%; opacity: 0.3;"></div>
-        <div style="position: absolute; bottom: -20px; left: -20px; width: 80px; height: 80px; background: rgba(255,255,255,0.05); border-radius: 50%;"></div>
-        
-        <div style="display: flex; justify-content: space-between; align-items: center; position: relative; z-index: 2;">
-            <div>
-                <h1 style="color: white; font-size: 1.5rem; font-weight: 700; margin: 0; font-family: 'Poppins', sans-serif; text-shadow: 0 2px 4px rgba(0,0,0,0.1); display: flex; align-items: center; gap: 0.5rem;">
-                    <i class="fas fa-users" style="color: rgba(255,255,255,0.9); font-size: 1.3rem;"></i>
-                    User Management
-                </h1>
-                <p style="color: rgba(255,255,255,0.95); font-size: 0.95rem; margin-bottom: 0; font-weight: 400;">
-                    Manage system users, roles, and permissions
-                </p>
-            </div>
-            <div style="display: flex; gap: 0.75rem;">
-                <button onclick="window.location.href='<?= base_url('users/create') ?>'" style="background: rgba(255,255,255,0.2); border: 2px solid rgba(255,255,255,0.3); color: white; border-radius: 0.5rem; padding: 0.5rem 1rem; font-weight: 600; font-size: 0.85rem; cursor: pointer; transition: all 0.3s ease; backdrop-filter: blur(10px);" onmouseover="this.style.background='rgba(255,255,255,0.3)'; this.style.transform='translateY(-1px)'; this.style.boxShadow='0 6px 15px rgba(0,0,0,0.15)';" onmouseout="this.style.background='rgba(255,255,255,0.2)'; this.style.transform='translateY(0)'; this.style.boxShadow='none';">
-                    <i class="fas fa-plus" style="margin-right: 0.4rem;"></i>
-                    Add User
-                </button>
-            </div>
-        </div>
-    </div>
+<!-- Add User Button -->
+<div style="margin-bottom: 1.25rem; display: flex; justify-content: flex-end;">
+    <button onclick="window.location.href='<?= base_url('users/create') ?>'" style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white; border: none; border-radius: 0.5rem; padding: 0.75rem 1.5rem; font-weight: 600; font-size: 0.9rem; cursor: pointer; transition: all 0.3s ease; box-shadow: 0 4px 12px rgba(102, 126, 234, 0.3);" onmouseover="this.style.transform='translateY(-1px)'; this.style.boxShadow='0 6px 18px rgba(102, 126, 234, 0.4)';" onmouseout="this.style.transform='translateY(0)'; this.style.boxShadow='0 4px 12px rgba(102, 126, 234, 0.3)';">
+        <i class="fas fa-plus" style="margin-right: 0.5rem;"></i>
+        Add User
+    </button>
 </div>
 
 <!-- Alert Messages -->

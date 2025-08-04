@@ -115,4 +115,7 @@ $routes->post('activity/delete_scope', 'Activity::delete_scope');
 $routes->post('activity/update_component_name', 'Activity::update_component_name');
 $routes->post('activity/soft_delete_component', 'Activity::soft_delete_component');
 $routes->post('activity/add_custom_template_to_scope', 'Activity::add_custom_template_to_scope');
+$routes->post('activity/create_component', 'Activity::create_component');
+$routes->post('activity/update_component_weightage', 'Activity::update_component_weightage');
+$routes->get('activity/get_project_templates', 'Activity::get_project_templates');
 $routes->get('activity/task_page/(:any)', 'Activity::activity_dynamic/$1');

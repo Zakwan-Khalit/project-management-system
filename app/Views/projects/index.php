@@ -26,8 +26,10 @@
             </button>
         <?php endif; ?>
     </div>
-    
-    <!-- Stats Cards Section -->
+</div>
+
+<!-- Stats Cards Section -->
+<div style="background: white; border-radius: 0.75rem; box-shadow: 0 8px 25px rgba(0,0,0,0.08); border: 1px solid #f1f3f4; margin-bottom: 1.5rem; overflow: hidden;">
     <div style="padding: 1.25rem;">
         <div class="row" style="display: flex; gap: 1rem;">
             <!-- Total Projects Card -->
@@ -68,53 +70,47 @@
             </div>
         </div>
     </div>
-</div>
 
-<!-- Filters and Controls -->
-<div style="background: white; border-radius: 0.75rem; box-shadow: 0 8px 25px rgba(0,0,0,0.08); border: 1px solid #f1f3f4; margin-bottom: 1.5rem; overflow: hidden;">
-    <div style="padding: 1.25rem;">
-        <!-- Filter Tabs -->
-        <div style="display: flex; flex-wrap: wrap; align-items: center; gap: 0.5rem; margin-bottom: 1rem;">
-            <div style="display: flex; gap: 0.4rem; flex-wrap: wrap;">
-                <button onclick="filterProjects('all')" data-filter="all" style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white; border: none; border-radius: 0.4rem; padding: 0.4rem 0.75rem; font-weight: 600; font-size: 0.8rem; cursor: pointer; transition: all 0.3s ease;">
-                    <i class="fas fa-th-large" style="margin-right: 0.4rem;"></i>All
-                </button>
-                <button onclick="filterProjects('planning')" data-filter="planning" style="background: rgba(159, 122, 234, 0.1); color: #9f7aea; border: 1px solid #9f7aea; border-radius: 0.4rem; padding: 0.4rem 0.75rem; font-weight: 600; font-size: 0.8rem; cursor: pointer; transition: all 0.3s ease;" onmouseover="this.style.background='#9f7aea'; this.style.color='white';" onmouseout="this.style.background='rgba(159, 122, 234, 0.1)'; this.style.color='#9f7aea';">
-                    <i class="fas fa-lightbulb" style="margin-right: 0.4rem;"></i>Planning
-                </button>
-                <button onclick="filterProjects('active')" data-filter="active" style="background: rgba(237, 137, 54, 0.1); color: #ed8936; border: 1px solid #ed8936; border-radius: 0.4rem; padding: 0.4rem 0.75rem; font-weight: 600; font-size: 0.8rem; cursor: pointer; transition: all 0.3s ease;" onmouseover="this.style.background='#ed8936'; this.style.color='white';" onmouseout="this.style.background='rgba(237, 137, 54, 0.1)'; this.style.color='#ed8936';">
-                    <i class="fas fa-play" style="margin-right: 0.4rem;"></i>Active
-                </button>
-                <button onclick="filterProjects('completed')" data-filter="completed" style="background: rgba(72, 187, 120, 0.1); color: #48bb78; border: 1px solid #48bb78; border-radius: 0.4rem; padding: 0.4rem 0.75rem; font-weight: 600; font-size: 0.8rem; cursor: pointer; transition: all 0.3s ease;" onmouseover="this.style.background='#48bb78'; this.style.color='white';" onmouseout="this.style.background='rgba(72, 187, 120, 0.1)'; this.style.color='#48bb78';">
-                    <i class="fas fa-check-circle" style="margin-right: 0.4rem;"></i>Completed
-                </button>
-                <button onclick="filterProjects('on_hold')" data-filter="on_hold" style="background: rgba(49, 151, 149, 0.1); color: #319795; border: 1px solid #319795; border-radius: 0.4rem; padding: 0.4rem 0.75rem; font-weight: 600; font-size: 0.8rem; cursor: pointer; transition: all 0.3s ease;" onmouseover="this.style.background='#319795'; this.style.color='white';" onmouseout="this.style.background='rgba(49, 151, 149, 0.1)'; this.style.color='#319795';">
-                    <i class="fas fa-pause" style="margin-right: 0.4rem;"></i>On Hold
-                </button>
+    <!-- Filters and Controls -->
+    <div style="background: white; border-radius: 0.75rem; border: 1px solid #f1f3f4; margin-bottom: 1.5rem; overflow: hidden;">
+        <div style="padding: 1.25rem;">
+            <!-- Filter Tabs -->
+            <div style="display: flex; flex-wrap: wrap; align-items: center; gap: 0.5rem; margin-bottom: 1rem;">
+                <div style="display: flex; gap: 0.4rem; flex-wrap: wrap;">
+                    <button onclick="filterProjects('all')" data-filter="all" style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white; border: none; border-radius: 0.4rem; padding: 0.4rem 0.75rem; font-weight: 600; font-size: 0.8rem; cursor: pointer; transition: all 0.3s ease;">
+                        <i class="fas fa-th-large" style="margin-right: 0.4rem;"></i>All
+                    </button>
+                    <button onclick="filterProjects('planning')" data-filter="planning" style="background: rgba(159, 122, 234, 0.1); color: #9f7aea; border: 1px solid #9f7aea; border-radius: 0.4rem; padding: 0.4rem 0.75rem; font-weight: 600; font-size: 0.8rem; cursor: pointer; transition: all 0.3s ease;" onmouseover="this.style.background='#9f7aea'; this.style.color='white';" onmouseout="this.style.background='rgba(159, 122, 234, 0.1)'; this.style.color='#9f7aea';">
+                        <i class="fas fa-lightbulb" style="margin-right: 0.4rem;"></i>Planning
+                    </button>
+                    <button onclick="filterProjects('active')" data-filter="active" style="background: rgba(237, 137, 54, 0.1); color: #ed8936; border: 1px solid #ed8936; border-radius: 0.4rem; padding: 0.4rem 0.75rem; font-weight: 600; font-size: 0.8rem; cursor: pointer; transition: all 0.3s ease;" onmouseover="this.style.background='#ed8936'; this.style.color='white';" onmouseout="this.style.background='rgba(237, 137, 54, 0.1)'; this.style.color='#ed8936';">
+                        <i class="fas fa-play" style="margin-right: 0.4rem;"></i>Active
+                    </button>
+                    <button onclick="filterProjects('completed')" data-filter="completed" style="background: rgba(72, 187, 120, 0.1); color: #48bb78; border: 1px solid #48bb78; border-radius: 0.4rem; padding: 0.4rem 0.75rem; font-weight: 600; font-size: 0.8rem; cursor: pointer; transition: all 0.3s ease;" onmouseover="this.style.background='#48bb78'; this.style.color='white';" onmouseout="this.style.background='rgba(72, 187, 120, 0.1)'; this.style.color='#48bb78';">
+                        <i class="fas fa-check-circle" style="margin-right: 0.4rem;"></i>Completed
+                    </button>
+                    <button onclick="filterProjects('on_hold')" data-filter="on_hold" style="background: rgba(49, 151, 149, 0.1); color: #319795; border: 1px solid #319795; border-radius: 0.4rem; padding: 0.4rem 0.75rem; font-weight: 600; font-size: 0.8rem; cursor: pointer; transition: all 0.3s ease;" onmouseover="this.style.background='#319795'; this.style.color='white';" onmouseout="this.style.background='rgba(49, 151, 149, 0.1)'; this.style.color='#319795';">
+                        <i class="fas fa-pause" style="margin-right: 0.4rem;"></i>On Hold
+                    </button>
+                </div>
+
+                <!-- Search Box -->
+                <div style="margin-left: auto; position: relative;">
+                    <input type="text" id="searchInput" placeholder="Search projects..." style="background: #f8fafc; border: 1px solid #e2e8f0; border-radius: 0.4rem; padding: 0.4rem 2rem 0.4rem 0.75rem; color: #4a5568; font-size: 0.8rem; outline: none; transition: all 0.3s ease; width: 200px; font-weight: 500;" onfocus="this.style.borderColor='#667eea'; this.style.background='white';" onblur="this.style.borderColor='#e2e8f0'; this.style.background='#f8fafc';">
+                    <i class="fas fa-search" style="position: absolute; right: 0.75rem; top: 50%; transform: translateY(-50%); color: #9ca3af; font-size: 0.8rem;"></i>
+                </div>
             </div>
 
-            <!-- Search Box -->
-            <div style="margin-left: auto; position: relative;">
-                <input type="text" id="searchInput" placeholder="Search projects..." style="background: #f8fafc; border: 1px solid #e2e8f0; border-radius: 0.4rem; padding: 0.4rem 2rem 0.4rem 0.75rem; color: #4a5568; font-size: 0.8rem; outline: none; transition: all 0.3s ease; width: 200px; font-weight: 500;" onfocus="this.style.borderColor='#667eea'; this.style.background='white';" onblur="this.style.borderColor='#e2e8f0'; this.style.background='#f8fafc';">
-                <i class="fas fa-search" style="position: absolute; right: 0.75rem; top: 50%; transform: translateY(-50%); color: #9ca3af; font-size: 0.8rem;"></i>
+            <!-- Additional Filters -->
+            <div style="display: flex; gap: 0.75rem; flex-wrap: wrap; align-items: center;">
+                <button onclick="clearFilters()" style="background: linear-gradient(135deg, #f56565, #e53e3e); color: white; border: none; border-radius: 0.4rem; padding: 0.4rem 0.75rem; font-weight: 600; font-size: 0.8rem; cursor: pointer; transition: all 0.3s ease;">
+                    <i class="fas fa-times" style="margin-right: 0.4rem;"></i>Clear
+                </button>
             </div>
-        </div>
-
-        <!-- Additional Filters -->
-        <div style="display: flex; gap: 0.75rem; flex-wrap: wrap; align-items: center;">
-            <select id="priorityFilter" style="background: #f8fafc; border: 1px solid #e2e8f0; border-radius: 0.4rem; padding: 0.4rem 0.75rem; color: #4a5568; font-size: 0.8rem; outline: none; font-weight: 600; cursor: pointer;" onfocus="this.style.borderColor='#667eea'; this.style.background='white';" onblur="this.style.borderColor='#e2e8f0'; this.style.background='#f8fafc';">
-                <option value="">All Priorities</option>
-                <option value="low">Low Priority</option>
-                <option value="medium">Medium Priority</option>
-                <option value="high">High Priority</option>
-                <option value="critical">Critical Priority</option>
-            </select>
-            <button onclick="clearFilters()" style="background: linear-gradient(135deg, #f56565, #e53e3e); color: white; border: none; border-radius: 0.4rem; padding: 0.4rem 0.75rem; font-weight: 600; font-size: 0.8rem; cursor: pointer; transition: all 0.3s ease;">
-                <i class="fas fa-times" style="margin-right: 0.4rem;"></i>Clear
-            </button>
         </div>
     </div>
 </div>
+
 
 <!-- Loading State -->
 <div id="loadingContainer" style="text-align: center; padding: 2rem;">
@@ -194,7 +190,6 @@
                                 </th>
                                 <th style="padding: 1.5rem; font-weight: 700; color: #4a5568; border: none;">Project</th>
                                 <th style="padding: 1.5rem; font-weight: 700; color: #4a5568; border: none;">Status</th>
-                                <th style="padding: 1.5rem; font-weight: 700; color: #4a5568; border: none;">Priority</th>
                                 <th style="padding: 1.5rem; font-weight: 700; color: #4a5568; border: none;">Progress</th>
                                 <th style="padding: 1.5rem; font-weight: 700; color: #4a5568; border: none;">Due Date</th>
                                 <th style="padding: 1.5rem; font-weight: 700; color: #4a5568; border: none;">Actions</th>
@@ -281,18 +276,11 @@ function initializePage() {
     
     // Setup search functionality
     const searchInput = document.getElementById('searchInput');
-    const priorityFilter = document.getElementById('priorityFilter');
     
     if (searchInput) {
         searchInput.addEventListener('input', debounce(function() {
             applyFilters();
         }, 300));
-    }
-    
-    if (priorityFilter) {
-        priorityFilter.addEventListener('change', function() {
-            applyFilters();
-        });
     }
     
     // Setup select all checkbox functionality
@@ -392,19 +380,12 @@ function loadProjects() {
 // Apply current filters to projects
 function applyFilters() {
     const searchInput = document.getElementById('searchInput');
-    const priorityFilterElement = document.getElementById('priorityFilter');
     
     const searchTerm = searchInput ? searchInput.value.toLowerCase() : '';
-    const priorityFilter = priorityFilterElement ? priorityFilterElement.value : '';
     
     filteredProjects = projects.filter(project => {
         // Status filter
         if (currentFilter !== 'all' && project.status !== currentFilter) {
-            return false;
-        }
-        
-        // Priority filter
-        if (priorityFilter && project.priority !== priorityFilter) {
             return false;
         }
         
@@ -530,7 +511,6 @@ function renderTableView() {
 function createHorizontalProjectCard(project) {
     const progressPercentage = project.total_tasks > 0 ? Math.round((project.completed_tasks / project.total_tasks) * 100) : 0;
     const statusBadge = getStatusBadge(project.status);
-    const priorityBadge = getPriorityBadge(project.priority);
     const dueDate = project.end_date ? formatDate(project.end_date) : 'No due date';
     
     return `
@@ -539,7 +519,7 @@ function createHorizontalProjectCard(project) {
                 <!-- Project Info Section -->
                 <div style="flex: 1; min-width: 0;">
                     <div style="display: flex; align-items: start; justify-content: space-between; margin-bottom: 0.5rem;">
-                        <h4 style="margin: 0; font-size: 1.1rem; font-weight: 600; color: #1a202c; font-family: 'Poppins', sans-serif; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; max-width: 200px;">${project.name}</h4>
+                        <h4 style="margin: 0; font-size: 1.1rem; font-weight: 600; color: #1a202c; font-family: 'Poppins', sans-serif; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; max-width: 400px;">${project.name}</h4>
                         <div style="display: flex; gap: 0.5rem; align-items: center;">
                             ${statusBadge}
                         </div>
@@ -615,7 +595,6 @@ function createHorizontalProjectCard(project) {
 function createProjectRow(project) {
     const progressPercentage = project.total_tasks > 0 ? Math.round((project.completed_tasks / project.total_tasks) * 100) : 0;
     const statusBadge = getStatusBadge(project.status);
-    const priorityBadge = getPriorityBadge(project.priority);
     const dueDate = project.end_date ? formatDate(project.end_date) : 'No due date';
     
     return `
@@ -630,7 +609,6 @@ function createProjectRow(project) {
                 </div>
             </td>
             <td style="padding: 1rem;">${statusBadge}</td>
-            <td style="padding: 1rem;">${priorityBadge}</td>
             <td style="padding: 1rem;">
                 <div style="display: flex; align-items: center;">
                     <div style="background: #f1f5f9; border-radius: 1rem; overflow: hidden; width: 100px; height: 8px; margin-right: 0.5rem;">
@@ -749,10 +727,8 @@ function filterProjects(status) {
 // Clear all filters
 function clearFilters() {
     const searchInput = document.getElementById('searchInput');
-    const priorityFilter = document.getElementById('priorityFilter');
     
     if (searchInput) searchInput.value = '';
-    if (priorityFilter) priorityFilter.value = '';
     
     filterProjects('all');
 }

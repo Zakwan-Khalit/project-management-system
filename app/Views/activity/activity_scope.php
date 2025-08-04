@@ -103,7 +103,7 @@ $(document).ready(function() {
     
     function renderScope(scope) {
         const scopeCard = `
-            <div class="scope-card mb-4" data-scope-id="${scope.id}" style="background: white; border-radius: 1rem; border: 1px solid #e2e8f0; padding: 2rem; box-shadow: 0 4px 6px rgba(0,0,0,0.05); transition: all 0.3s ease;" onmouseover="this.style.boxShadow='0 8px 15px rgba(0,0,0,0.1)'" onmouseout="this.style.boxShadow='0 4px 6px rgba(0,0,0,0.05)'">
+            <div class="scope-card mb-4" data-scope-id="${scope.id}" data-scope-name="${scope.name}" style="background: white; border-radius: 1rem; border: 1px solid #e2e8f0; padding: 2rem; box-shadow: 0 4px 6px rgba(0,0,0,0.05); transition: all 0.3s ease;" onmouseover="this.style.boxShadow='0 8px 15px rgba(0,0,0,0.1)'" onmouseout="this.style.boxShadow='0 4px 6px rgba(0,0,0,0.05)'">
                 <div class="scope-header d-flex justify-content-between align-items-center mb-4">
                     <div class="scope-info">
                         <h3 style="font-family: 'Poppins', sans-serif; font-weight: 600; color: #1f2937; margin: 0; font-size: 1.5rem; display: flex; align-items: center; gap: 0.5rem;">
@@ -169,9 +169,24 @@ $(document).ready(function() {
                                     <div class="drag-handle" style="cursor: grab; color: #9ca3af;">
                                         <i class="fas fa-grip-vertical"></i>
                                     </div>
-                                    <div class="component-name" style="font-weight: 600; color: #374151;">${template.name}</div>
+                                    <div class="component-details d-flex flex-column">
+                                        <div class="component-name" style="font-weight: 600; color: #374151;">${template.name}</div>
+                                        <div class="component-weightage" style="font-size: 0.875rem; color: #6b7280;">
+                                            <span class="badge bg-info">${parseFloat(template.weightage || 0).toFixed(2)}%</span>
+                                        </div>
+                                    </div>
                                 </div>
                                 <div class="component-actions d-flex align-items-center gap-2">
+                                    <button type="button" class="btn btn-sm btn-outline-secondary edit-weightage-btn" 
+                                        data-template-id="${template.id}" 
+                                        data-weightage="${template.weightage || 0}"
+                                        data-component-name="${template.name}"
+                                        title="Edit Weightage" 
+                                        style="opacity: 0.7; transition: opacity 0.3s;"
+                                        onmouseover="this.style.opacity='1'"
+                                        onmouseout="this.style.opacity='0.7'">
+                                        <i class="fas fa-edit"></i>
+                                    </button>
                                     <div class="progress-indicator d-flex flex-column align-items-center">
                                         <div style="width:36px; height:36px; position:relative;">
                                             <svg width="36" height="36" viewBox="0 0 36 36">
@@ -195,9 +210,24 @@ $(document).ready(function() {
                                     <div class="drag-handle" style="cursor: grab; color: #9ca3af;">
                                         <i class="fas fa-grip-vertical"></i>
                                     </div>
-                                    <div class="component-name" style="font-weight: 600; color: #374151;">${template.name}</div>
+                                    <div class="component-details d-flex flex-column">
+                                        <div class="component-name" style="font-weight: 600; color: #374151;">${template.name}</div>
+                                        <div class="component-weightage" style="font-size: 0.875rem; color: #6b7280;">
+                                            <span class="badge bg-info">${parseFloat(template.weightage || 0).toFixed(2)}%</span>
+                                        </div>
+                                    </div>
                                 </div>
                                 <div class="component-actions d-flex align-items-center gap-2">
+                                    <button type="button" class="btn btn-sm btn-outline-secondary edit-weightage-btn" 
+                                        data-template-id="${template.id}" 
+                                        data-weightage="${template.weightage || 0}"
+                                        data-component-name="${template.name}"
+                                        title="Edit Weightage" 
+                                        style="opacity: 0.7; transition: opacity 0.3s;"
+                                        onmouseover="this.style.opacity='1'"
+                                        onmouseout="this.style.opacity='0.7'">
+                                        <i class="fas fa-edit"></i>
+                                    </button>
                                     <div class="progress-indicator d-flex flex-column align-items-center">
                                         <div style="width:36px; height:36px; position:relative; display:flex; align-items:center; justify-content:center;">
                                             <span style="font-size:0.75rem; font-weight:700; color:#6b7280;">N/A</span>
@@ -318,30 +348,48 @@ $(document).ready(function() {
     $('#scopeList').on('click', '.edit-scope-btn', function() {
         const scopeId = $(this).data('scope-id');
         const scopeCard = $(this).closest('.scope-card');
-        const currentName = scopeCard.find('.scope-info h4').text();
+        const currentName = scopeCard.data('scope-name');
         
         // Get current scope components
         const currentComponents = [];
         scopeCard.find('.component-item').each(function() {
             const templateId = $(this).data('template-id');
             const templateName = $(this).find('.component-name').text();
-            currentComponents.push({ id: templateId, name: templateName });
+            const weightage = $(this).find('.edit-weightage-btn').data('weightage') || 0;
+            currentComponents.push({ id: templateId, name: templateName, weightage: weightage });
         });
         
         // Build components list HTML
         const componentsListHtml = currentComponents.length > 0 
             ? currentComponents.map(comp => 
-                `<div class="d-flex justify-content-between align-items-center p-2 border rounded mb-2" data-template-id="${comp.id}">
-                    <div class="component-edit-container flex-grow-1">
-                        <input type="text" class="form-control form-control-sm component-name-input" value="${comp.name}" data-template-id="${comp.id}" data-original-name="${comp.name}" style="border: none; background: transparent; font-weight: 500;">
-                    </div>
-                    <div class="d-flex gap-1">
-                        <button type="button" class="btn btn-sm btn-outline-success save-component-name" data-template-id="${comp.id}" title="Save changes" style="display: none;">
-                            <i class="fas fa-check"></i>
-                        </button>
-                        <button type="button" class="btn btn-sm btn-outline-danger remove-component-from-edit" data-template-id="${comp.id}" title="Remove component">
-                            <i class="fas fa-times"></i>
-                        </button>
+                `<div class="component-edit-row" data-template-id="${comp.id}" style="background: #f8fafc; border: 1px solid #e2e8f0; border-radius: 0.5rem; padding: 1rem; margin-bottom: 0.75rem; transition: all 0.3s ease;">
+                    <div class="d-flex align-items-center gap-3">
+                        <div class="flex-grow-1">
+                            <label style="font-size: 0.75rem; font-weight: 600; color: #6b7280; margin-bottom: 0.25rem; display: block;">Component Name</label>
+                            <input type="text" class="form-control component-name-input" 
+                                value="${comp.name}" 
+                                data-template-id="${comp.id}" 
+                                data-original-name="${comp.name}" 
+                                style="border: 1px solid #d1d5db; border-radius: 0.375rem; font-weight: 500;">
+                        </div>
+                        <div style="min-width: 120px;">
+                            <label style="font-size: 0.75rem; font-weight: 600; color: #6b7280; margin-bottom: 0.25rem; display: block;">Weightage (%)</label>
+                            <input type="number" class="form-control component-weightage-input" 
+                                value="${comp.weightage}" 
+                                data-template-id="${comp.id}" 
+                                data-original-weightage="${comp.weightage}"
+                                step="0.01" min="0" max="100" 
+                                placeholder="0.00"
+                                style="border: 1px solid #d1d5db; border-radius: 0.375rem; text-align: center;">
+                        </div>
+                        <div class="d-flex flex-column gap-1" style="min-width: 40px;">
+                            <button type="button" class="btn btn-sm btn-outline-danger remove-component-from-edit" 
+                                data-template-id="${comp.id}" 
+                                title="Remove component"
+                                style="opacity: 0.7;">
+                                <i class="fas fa-times"></i>
+                            </button>
+                        </div>
                     </div>
                 </div>`
             ).join('')
@@ -350,126 +398,46 @@ $(document).ready(function() {
         Swal.fire({
             title: 'Edit Scope',
             html: `
-                <div style="text-align: left;">
-                    <label for="editScopeName" style="display: block; margin-bottom: 0.5rem; font-weight: 600;">Scope Name</label>
-                    <input type="text" id="editScopeName" class="swal2-input" value="${currentName}" style="margin-bottom: 1rem;">
-                    
-                    <label style="display: block; margin-bottom: 0.5rem; font-weight: 600;">Components in this Scope</label>
-                    <div id="editComponentsList" style="max-height: 200px; overflow-y: auto; border: 1px solid #e2e8f0; border-radius: 0.5rem; padding: 0.5rem; margin-bottom: 1rem;">
-                        ${componentsListHtml}
+                <div style="text-align: left; padding: 1rem;">
+                    <div class="mb-4">
+                        <label for="editScopeName" style="display: block; margin-bottom: 0.75rem; font-weight: 600; color: #374151; font-size: 1rem;">Scope Name</label>
+                        <input type="text" id="editScopeName" class="swal2-input" value="${currentName}" 
+                            style="margin: 0; border: 2px solid #e5e7eb; border-radius: 0.5rem; padding: 0.75rem; font-size: 1rem; width: 100%;">
                     </div>
                     
-                    <div class="d-flex gap-2">
-                        <button type="button" id="deleteScopeFromEdit" class="btn btn-sm btn-outline-danger flex-fill">
-                            <i class="fas fa-trash"></i> Delete Scope
+                    <div class="mb-4">
+                        <label style="display: block; margin-bottom: 0.75rem; font-weight: 600; color: #374151; font-size: 1rem;">Components in this Scope</label>
+                        <div id="editComponentsList" style="max-height: 300px; overflow-y: auto; border: 2px solid #e5e7eb; border-radius: 0.75rem; padding: 1rem; background: #fafafa;">
+                            ${componentsListHtml}
+                        </div>
+                        <div class="mt-2">
+                            <small style="color: #6b7280; font-size: 0.875rem;">
+                                <i class="fas fa-info-circle me-1"></i>
+                                Changes will be saved when you click "Update Scope"
+                            </small>
+                        </div>
+                    </div>
+                    
+                    <div class="d-flex gap-2 mt-4">
+                        <button type="button" id="deleteScopeFromEdit" class="btn btn-outline-danger flex-fill" style="border-radius: 0.5rem; padding: 0.75rem;">
+                            <i class="fas fa-trash me-2"></i>Delete Scope
                         </button>
                     </div>
                 </div>
             `,
             showCancelButton: true,
             confirmButtonText: 'Update Scope',
-            width: '600px',
+            cancelButtonText: 'Cancel',
+            width: '700px',
+            customClass: {
+                confirmButton: 'btn btn-primary',
+                cancelButton: 'btn btn-secondary'
+            },
             didOpen: () => {
-                // Track original component names for change detection
-                const originalNames = {};
-                $('#editComponentsList .component-name-input').each(function() {
-                    const templateId = $(this).data('template-id');
-                    const originalName = $(this).data('original-name');
-                    originalNames[templateId] = originalName;
-                });
-                
-                // Handle component name input changes
-                $('#editComponentsList').on('input', '.component-name-input', function() {
-                    const templateId = $(this).data('template-id');
-                    const currentValue = $(this).val().trim();
-                    const originalValue = originalNames[templateId];
-                    const saveBtn = $(this).closest('.d-flex').find('.save-component-name');
-                    
-                    // Show/hide save button based on changes
-                    if (currentValue !== originalValue && currentValue !== '') {
-                        saveBtn.show();
-                    } else {
-                        saveBtn.hide();
-                    }
-                });
-                
-                // Handle component name changes on Enter key
-                $('#editComponentsList').on('keypress', '.component-name-input', function(e) {
-                    if (e.which === 13) { // Enter key
-                        const saveBtn = $(this).closest('.d-flex').find('.save-component-name');
-                        if (saveBtn.is(':visible')) {
-                            saveBtn.click();
-                        }
-                    }
-                });
-
-                // Handle save component name
-                $('#editComponentsList').on('click', '.save-component-name', function() {
-                    const templateId = $(this).data('template-id');
-                    const nameInput = $(this).closest('.d-flex').find('.component-name-input');
-                    const newName = nameInput.val().trim();
-                    const saveBtn = $(this);
-                    
-                    if (!newName) {
-                        Swal.showValidationMessage('Component name cannot be empty');
-                        return;
-                    }
-
-                    // Show loading state
-                    const originalHtml = saveBtn.html();
-                    saveBtn.html('<i class="fas fa-spinner fa-spin"></i>').prop('disabled', true);
-                    
-                    $.ajax({
-                        url: '<?= base_url('activity/update_component_name') ?>',
-                        method: 'POST',
-                        data: {
-                            template_id: templateId,
-                            name: newName,
-                            project_id: projectId
-                        },
-                        dataType: 'json',
-                        success: function(res) {
-                            if (res.success) {
-                                // Update the original name and hide save button
-                                nameInput.data('original-name', newName);
-                                originalNames[templateId] = newName;
-                                saveBtn.hide().html(originalHtml).prop('disabled', false);
-                                
-                                // Show success feedback
-                                nameInput.css('background-color', '#d4edda');
-                                setTimeout(() => {
-                                    nameInput.css('background-color', 'transparent');
-                                }, 1000);
-                                
-                                // Show success toast
-                                const Toast = Swal.mixin({
-                                    toast: true,
-                                    position: 'top-end',
-                                    showConfirmButton: false,
-                                    timer: 2000,
-                                    timerProgressBar: true
-                                });
-                                Toast.fire({
-                                    icon: 'success',
-                                    title: 'Component name updated successfully'
-                                });
-                            } else {
-                                saveBtn.html(originalHtml).prop('disabled', false);
-                                Swal.fire('Error', res.message || 'Failed to update component name.', 'error');
-                            }
-                        },
-                        error: function(xhr, status, error) {
-                            console.error('Error updating component name:', error);
-                            saveBtn.html(originalHtml).prop('disabled', false);
-                            Swal.fire('Error', 'Failed to update component name.', 'error');
-                        }
-                    });
-                });
-
                 // Handle component removal from edit modal
                 $('#editComponentsList').on('click', '.remove-component-from-edit', function() {
                     const templateId = $(this).data('template-id');
-                    const componentDiv = $(this).closest('div');
+                    const componentDiv = $(this).closest('.component-edit-row');
                     
                     Swal.fire({
                         title: 'Delete Component?',
@@ -490,8 +458,12 @@ $(document).ready(function() {
                                 dataType: 'json',
                                 success: function(res) {
                                     if (res.success) {
-                                        // Just reload the page directly
-                                        loadScopes();
+                                        componentDiv.fadeOut(300, function() {
+                                            $(this).remove();
+                                            if ($('#editComponentsList .component-edit-row').length === 0) {
+                                                $('#editComponentsList').html('<div class="text-muted text-center p-3">No components in this scope</div>');
+                                            }
+                                        });
                                     } else {
                                         Swal.fire('Error', res.message || 'Failed to delete component.', 'error');
                                     }
@@ -549,41 +521,125 @@ $(document).ready(function() {
                     Swal.showValidationMessage('Scope name is required');
                     return false;
                 }
-                return { name };
+                
+                // Collect all component weightage changes
+                const componentChanges = [];
+                $('#editComponentsList .component-weightage-input').each(function() {
+                    const templateId = $(this).data('template-id');
+                    const currentWeightage = $(this).val();
+                    const originalWeightage = $(this).data('original-weightage');
+                    
+                    if (currentWeightage !== originalWeightage) {
+                        // Validate weightage
+                        if (currentWeightage && (isNaN(currentWeightage) || parseFloat(currentWeightage) < 0 || parseFloat(currentWeightage) > 100)) {
+                            Swal.showValidationMessage('Please enter valid weightage values (0-100)');
+                            return false;
+                        }
+                        componentChanges.push({
+                            template_id: templateId,
+                            weightage: currentWeightage || 0
+                        });
+                    }
+                });
+                
+                // Collect all component name changes
+                const nameChanges = [];
+                $('#editComponentsList .component-name-input').each(function() {
+                    const templateId = $(this).data('template-id');
+                    const currentName = $(this).val().trim();
+                    const originalName = $(this).data('original-name');
+                    
+                    if (currentName !== originalName) {
+                        if (!currentName) {
+                            Swal.showValidationMessage('Component names cannot be empty');
+                            return false;
+                        }
+                        nameChanges.push({
+                            template_id: templateId,
+                            name: currentName
+                        });
+                    }
+                });
+                
+                return { 
+                    name: name,
+                    componentChanges: componentChanges,
+                    nameChanges: nameChanges
+                };
             }
         }).then((result) => {
             if (result.isConfirmed) {
-                $.ajax({
-                    url: '<?= base_url('activity/update_scope') ?>',
-                    method: 'POST',
-                    data: {
-                        scope_id: scopeId,
-                        name: result.value.name,
-                        project_id: projectId
-                    },
-                    dataType: 'json',
-                    beforeSend: function() {
-                        Swal.fire({
-                            title: 'Updating Scope...',
-                            allowOutsideClick: false,
-                            didOpen: () => {
-                                Swal.showLoading();
-                            }
-                        });
-                    },
-                    success: function(res) {
-                        if (res.success) {
-                            Swal.fire('Updated!', 'Scope updated successfully.', 'success').then(() => {
-                                loadScopes();
-                            });
-                        } else {
-                            Swal.fire('Error', res.message || 'Failed to update scope.', 'error');
-                        }
-                    },
-                    error: function(xhr, status, error) {
-                        console.error('Error updating scope:', error);
-                        Swal.fire('Error', 'Failed to update scope.', 'error');
+                // Create array of all update promises
+                const updatePromises = [];
+                
+                // Update scope name
+                updatePromises.push(
+                    $.ajax({
+                        url: '<?= base_url('activity/update_scope') ?>',
+                        method: 'POST',
+                        data: {
+                            scope_id: scopeId,
+                            name: result.value.name,
+                            project_id: projectId
+                        },
+                        dataType: 'json'
+                    })
+                );
+                
+                // Update component weightages
+                result.value.componentChanges.forEach(function(change) {
+                    updatePromises.push(
+                        $.ajax({
+                            url: '<?= base_url('activity/update_component_weightage') ?>',
+                            method: 'POST',
+                            data: {
+                                template_id: change.template_id,
+                                weightage: change.weightage
+                            },
+                            dataType: 'json'
+                        })
+                    );
+                });
+                
+                // Update component names
+                result.value.nameChanges.forEach(function(change) {
+                    updatePromises.push(
+                        $.ajax({
+                            url: '<?= base_url('activity/update_component_name') ?>',
+                            method: 'POST',
+                            data: {
+                                template_id: change.template_id,
+                                name: change.name,
+                                project_id: projectId
+                            },
+                            dataType: 'json'
+                        })
+                    );
+                });
+                
+                // Show loading
+                Swal.fire({
+                    title: 'Updating Scope...',
+                    allowOutsideClick: false,
+                    didOpen: () => {
+                        Swal.showLoading();
                     }
+                });
+                
+                // Execute all updates
+                Promise.all(updatePromises).then(function(responses) {
+                    const allSuccess = responses.every(res => res.success);
+                    
+                    if (allSuccess) {
+                        Swal.fire('Updated!', 'Scope and components updated successfully.', 'success').then(() => {
+                            loadScopes();
+                        });
+                    } else {
+                        Swal.fire('Error', 'Some updates failed. Please try again.', 'error');
+                    }
+                }).catch(function(error) {
+                    console.error('Error updating scope:', error);
+                    Swal.fire('Error', 'Failed to update scope. Please try again.', 'error');
                 });
             }
         });
@@ -592,7 +648,7 @@ $(document).ready(function() {
     // Delete Scope
     $('#scopeList').on('click', '.delete-scope-btn', function() {
         const scopeId = $(this).data('scope-id');
-        const scopeName = $(this).closest('.scope-card').find('.scope-info h4').text();
+        const scopeName = $(this).closest('.scope-card').data('scope-name');
         
         Swal.fire({
             title: 'Delete Scope',
@@ -669,88 +725,242 @@ $(document).ready(function() {
             `<option value="${name}">${name}</option>`
         ).join('');
         
+        // Load existing project templates for table display
+        loadProjectTemplatesTable(function(templatesTableHtml) {
+            Swal.fire({
+                title: 'Add Components',
+                html: `
+                    <div style="text-align: left;">
+                        <div class="mb-3">
+                            <label style="display: block; margin-bottom: 0.5rem; font-weight: 600;">Select Components</label>
+                            <select id="componentSelect" class="form-select" multiple style="width: 100%;">
+                                ${predefinedOptions}
+                            </select>
+                            <small class="text-muted mt-2 d-block">You can select multiple components.</small>
+                        </div>
+                        
+                        <div class="mb-3">
+                            <label style="display: block; margin-bottom: 0.5rem; font-weight: 600;">Weightage (%)</label>
+                            <input type="number" id="componentWeightage" class="form-control" step="0.01" min="0" max="100" placeholder="0.00" style="width: 100%;">
+                            <small class="text-muted mt-1 d-block">Enter weightage as a percentage (e.g., 25.50)</small>
+                        </div>
+                        
+                        <div class="mb-3">
+                            <label style="display: block; margin-bottom: 0.5rem; font-weight: 600;">Existing Project Components</label>
+                            <div style="max-height: 300px; overflow-y: auto; border: 1px solid #e2e8f0; border-radius: 0.5rem;">
+                                ${templatesTableHtml}
+                            </div>
+                        </div>
+                    </div>
+                `,
+                showCancelButton: true,
+                confirmButtonText: 'Add Components',
+                width: '700px',
+                didOpen: () => {
+                    // Initialize Select2 with tags for custom entries
+                    $('#componentSelect').select2({
+                        width: '100%',
+                        placeholder: 'Select or type custom component names',
+                        allowClear: true,
+                        tags: true,
+                        tokenSeparators: [',', '\n'],
+                        dropdownParent: $('.swal2-popup'), // Keep dropdown inside the modal
+                        createTag: function (params) {
+                            const term = $.trim(params.term);
+                            if (term === '') {
+                                return null;
+                            }
+                            return {
+                                id: term,
+                                text: term,
+                                newTag: true
+                            };
+                        }
+                    });
+                },
+                preConfirm: () => {
+                    const selectedComponents = $('#componentSelect').val();
+                    const componentWeightage = document.getElementById('componentWeightage').value;
+                    
+                    if (!selectedComponents || selectedComponents.length === 0) {
+                        Swal.showValidationMessage('Please select at least one component');
+                        return false;
+                    }
+                    
+                    // Validate weightage
+                    if (componentWeightage && (isNaN(componentWeightage) || parseFloat(componentWeightage) < 0)) {
+                        Swal.showValidationMessage('Please enter a valid weightage value');
+                        return false;
+                    }
+                    
+                    return {
+                        components: selectedComponents,
+                        weightage: componentWeightage || 0
+                    };
+                }
+            }).then((result) => {
+                if (result.isConfirmed && result.value.components.length > 0) {
+                    // Process all selected components
+                    const componentsToAdd = result.value.components.map(name => ({
+                        name: name.trim(),
+                        weightage: result.value.weightage
+                    }));
+                    
+                    addMultipleComponentsToScope(scopeId, componentsToAdd);
+                }
+            });
+        });
+    });
+    
+    function loadProjectTemplatesTable(callback) {
+        $.ajax({
+            url: '<?= base_url('activity/get_project_templates') ?>',
+            method: 'GET',
+            data: { project_id: projectId },
+            dataType: 'json',
+            success: function(res) {
+                let tableHtml = '';
+                if (res.success && res.templates && res.templates.length > 0) {
+                    tableHtml = `
+                        <table class="table table-sm table-hover mb-0">
+                            <thead style="background: #f8fafc;">
+                                <tr>
+                                    <th style="padding: 0.75rem; font-size: 0.875rem; font-weight: 600;">Component</th>
+                                    <th style="padding: 0.75rem; font-size: 0.875rem; font-weight: 600;">Scope</th>
+                                    <th style="padding: 0.75rem; font-size: 0.875rem; font-weight: 600; text-align: right;">Weightage</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                    `;
+                    
+                    res.templates.forEach(function(template) {
+                        tableHtml += `
+                            <tr>
+                                <td style="padding: 0.75rem; font-size: 0.875rem;">${template.name}</td>
+                                <td style="padding: 0.75rem; font-size: 0.875rem;">${template.scope_name || 'No Scope'}</td>
+                                <td style="padding: 0.75rem; font-size: 0.875rem; text-align: right;">
+                                    <span class="badge bg-info">${parseFloat(template.weightage || 0).toFixed(2)}%</span>
+                                </td>
+                            </tr>
+                        `;
+                    });
+                    
+                    tableHtml += `
+                            </tbody>
+                        </table>
+                    `;
+                } else {
+                    tableHtml = '<div class="text-center text-muted p-3">No components found in this project yet.</div>';
+                }
+                callback(tableHtml);
+            },
+            error: function() {
+                callback('<div class="text-center text-danger p-3">Error loading components.</div>');
+            }
+        });
+    }
+    
+    function addMultipleComponentsToScope(scopeId, componentsToAdd) {
+        $.ajax({
+            url: '<?= base_url('activity/add_custom_template_to_scope') ?>',
+            method: 'POST',
+            data: {
+                scope_id: scopeId,
+                project_id: projectId,
+                components: JSON.stringify(componentsToAdd.map(comp => ({
+                    name: comp.name,
+                    type: 'custom',
+                    weightage: comp.weightage
+                })))
+            },
+            dataType: 'json',
+            success: function(res) {
+                if (res.success) {
+                    Swal.fire('Added!', 'Components added successfully.', 'success').then(() => {
+                        loadScopes();
+                    });
+                } else {
+                    Swal.fire('Error', res.message || 'Failed to add components.', 'error');
+                }
+            },
+            error: function(xhr, status, error) {
+                console.error('Error adding components:', error);
+                Swal.fire('Error', 'Failed to add components. Please try again.', 'error');
+            }
+        });
+    }
+    
+    // Edit Component Weightage
+    $('#scopeList').on('click', '.edit-weightage-btn', function() {
+        const templateId = $(this).data('template-id');
+        const currentWeightage = $(this).data('weightage') || 0;
+        const componentName = $(this).data('component-name');
+        
         Swal.fire({
-            title: 'Add Components',
+            title: 'Edit Component Weightage',
             html: `
                 <div style="text-align: left;">
-                    <label style="display: block; margin-bottom: 0.5rem; font-weight: 600;">Select Components</label>
-                    <select id="componentSelect" class="form-select" multiple style="width: 100%;">
-                        ${predefinedOptions}
-                    </select>
-                    <small class="text-muted mt-2 d-block">You can select multiple components.</small>
+                    <div class="mb-3">
+                        <label style="display: block; margin-bottom: 0.5rem; font-weight: 600;">Component</label>
+                        <input type="text" class="form-control" value="${componentName}" readonly style="width: 100%; background-color: #f8f9fa;">
+                    </div>
+                    
+                    <div class="mb-3">
+                        <label style="display: block; margin-bottom: 0.5rem; font-weight: 600;">Weightage (%)</label>
+                        <input type="number" id="editWeightage" class="form-control" step="0.01" min="0" max="100" value="${currentWeightage}" style="width: 100%;">
+                        <small class="text-muted mt-1 d-block">Enter weightage as a percentage (e.g., 25.50)</small>
+                    </div>
                 </div>
             `,
             showCancelButton: true,
-            confirmButtonText: 'Add Components',
+            confirmButtonText: 'Update Weightage',
             width: '500px',
-            didOpen: () => {
-                // Initialize Select2 with tags for custom entries
-                $('#componentSelect').select2({
-                    width: '100%',
-                    placeholder: 'Select or type custom component names',
-                    allowClear: true,
-                    tags: true,
-                    tokenSeparators: [',', '\n'],
-                    dropdownParent: $('.swal2-popup'), // Keep dropdown inside the modal
-                    createTag: function (params) {
-                        const term = $.trim(params.term);
-                        if (term === '') {
-                            return null;
-                        }
-                        return {
-                            id: term,
-                            text: term,
-                            newTag: true
-                        };
-                    }
-                });
-            },
             preConfirm: () => {
-                const selectedComponents = $('#componentSelect').val();
-                if (!selectedComponents || selectedComponents.length === 0) {
-                    Swal.showValidationMessage('Please select at least one component');
+                const weightage = document.getElementById('editWeightage').value;
+                
+                if (weightage && (isNaN(weightage) || parseFloat(weightage) < 0)) {
+                    Swal.showValidationMessage('Please enter a valid weightage value');
                     return false;
                 }
-                return selectedComponents;
+                
+                return weightage || 0;
             }
         }).then((result) => {
-            if (result.isConfirmed && result.value.length > 0) {
-                // Process all selected components
-                const componentsToAdd = result.value.map(name => ({
-                    name: name.trim(),
-                    type: predefinedTemplates.includes(name.trim()) ? 'predefined' : 'custom'
-                }));
-                
-                $.ajax({
-                    url: '<?= base_url('activity/add_custom_template_to_scope') ?>',
-                    method: 'POST',
-                    data: {
-                        scope_id: scopeId,
-                        project_id: projectId,
-                        components: JSON.stringify(componentsToAdd)
-                    },
-                    dataType: 'json',
-                    success: function(res) {
-                        if (res.success) {
-                            Swal.fire('Added!', 'Components added successfully.', 'success').then(() => {
-                                loadScopes();
-                            });
-                        } else {
-                            Swal.fire('Error', res.message || 'Failed to add components.', 'error');
-                        }
-                    },
-                    error: function(xhr, status, error) {
-                        console.error('Error adding components:', error);
-                        Swal.fire('Error', 'Failed to add components.', 'error');
-                    }
-                });
+            if (result.isConfirmed) {
+                updateComponentWeightage(templateId, result.value);
             }
         });
     });
     
+    function updateComponentWeightage(templateId, weightage) {
+        $.ajax({
+            url: '<?= base_url('activity/update_component_weightage') ?>',
+            method: 'POST',
+            data: {
+                template_id: templateId,
+                weightage: weightage
+            },
+            dataType: 'json',
+            success: function(res) {
+                if (res.success) {
+                    Swal.fire('Updated!', 'Component weightage updated successfully.', 'success').then(() => {
+                        loadScopes();
+                    });
+                } else {
+                    Swal.fire('Error', res.message || 'Failed to update weightage.', 'error');
+                }
+            },
+            error: function(xhr, status, error) {
+                console.error('Error updating weightage:', error);
+                Swal.fire('Error', 'Failed to update weightage. Please try again.', 'error');
+            }
+        });
+    }
+    
     // Click on component to navigate to task page
     $('#scopeList').on('click', '.component-item', function(e) {
         if ($(e.target).closest('.drag-handle').length) return;
+        if ($(e.target).closest('.edit-weightage-btn').length) return;
         
         const templateId = $(this).data('template-id');
         window.location.href = '<?= base_url('activity/activity_dynamic/') ?>' + templateId + '?project_id=' + projectId;

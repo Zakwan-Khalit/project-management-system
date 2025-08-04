@@ -44,32 +44,15 @@
                 </ol>
             </nav>
             
-            <!-- Modern Header -->
-            <div style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white; border-radius: 1.5rem; padding: 2rem; margin-bottom: 2rem; box-shadow: 0 20px 60px rgba(102,126,234,0.2); position: relative; overflow: hidden;">
-                <!-- Decorative Elements -->
-                <div style="position: absolute; top: -50px; right: -50px; width: 200px; height: 200px; background: rgba(255,255,255,0.1); border-radius: 50%; opacity: 0.3;"></div>
-                <div style="position: absolute; bottom: -30px; left: -30px; width: 120px; height: 120px; background: rgba(255,255,255,0.05); border-radius: 50%;"></div>
-                
-                <div style="display: flex; justify-content: space-between; align-items: center; position: relative; z-index: 2;">
-                    <div>
-                        <h1 style="color: white; font-size: 2.5rem; font-weight: 800; margin-bottom: 0.5rem; font-family: 'Poppins', sans-serif; text-shadow: 0 2px 4px rgba(0,0,0,0.1);">
-                            <i class="fas fa-calendar-alt" style="margin-right: 1rem; color: rgba(255,255,255,0.9);"></i>
-                            Events & Schedule
-                        </h1>
-                        <p style="color: rgba(255,255,255,0.95); font-size: 1.1rem; margin-bottom: 0; font-weight: 400;">
-                            Manage meetings, deadlines, milestones, and team activities
-                        </p>
-                    </div>
-                    <div style="display: flex; gap: 1rem;">
-                        <?php $userData = session('userdata'); $roleId = $userData['role_id'] ?? null; if (in_array($roleId, [1, 2])): ?>
-                        <button onclick="window.location.href='<?= base_url('events/create') ?>'" style="background: rgba(255,255,255,0.2); border: 2px solid rgba(255,255,255,0.3); color: white; border-radius: 1rem; padding: 0.75rem 1.5rem; font-weight: 600; font-size: 1rem; cursor: pointer; transition: all 0.3s ease; backdrop-filter: blur(10px);" onmouseover="this.style.background='rgba(255,255,255,0.3)'; this.style.transform='translateY(-2px)'; this.style.boxShadow='0 10px 25px rgba(0,0,0,0.2)';" onmouseout="this.style.background='rgba(255,255,255,0.2)'; this.style.transform='translateY(0)'; this.style.boxShadow='none';">
-                            <i class="fas fa-plus" style="margin-right: 0.5rem;"></i>
-                            Create Event
-                        </button>
-                        <?php endif; ?>
-                    </div>
-                </div>
+            <!-- Create Event Button -->
+            <?php $userData = session('userdata'); $roleId = $userData['role_id'] ?? null; if (in_array($roleId, [1, 2])): ?>
+            <div style="margin-bottom: 2rem; display: flex; justify-content: flex-end;">
+                <button onclick="window.location.href='<?= base_url('events/create') ?>'" style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white; border: none; border-radius: 0.75rem; padding: 0.75rem 1.5rem; font-weight: 600; font-size: 0.9rem; cursor: pointer; transition: all 0.3s ease; box-shadow: 0 4px 12px rgba(102, 126, 234, 0.3);" onmouseover="this.style.transform='translateY(-1px)'; this.style.boxShadow='0 6px 18px rgba(102, 126, 234, 0.4)';" onmouseout="this.style.transform='translateY(0)'; this.style.boxShadow='0 4px 12px rgba(102, 126, 234, 0.3)';">
+                    <i class="fas fa-plus" style="margin-right: 0.5rem;"></i>
+                    Create Event
+                </button>
             </div>
+            <?php endif; ?>
         </div>
     </div>
 

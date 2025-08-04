@@ -379,6 +379,7 @@ CREATE TABLE IF NOT EXISTS `task_templates` (
     `description` text,
     `fields` text,
     `component_order` int(11) DEFAULT 0,
+    `weightage` decimal(5,2) DEFAULT 0.00,
     `is_active` tinyint(1) DEFAULT 1,
     `is_delete` tinyint(1) DEFAULT 0,
     `date_created` TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,

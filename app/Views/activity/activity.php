@@ -16,21 +16,28 @@
         </ol>
     </nav>
 
-    <!-- Header -->
-    <div style="background: white; border-radius: 1rem; box-shadow: 0 10px 30px rgba(0,0,0,0.08); border: 1px solid #f1f3f4; margin-bottom: 2rem; overflow: hidden;">
-        <div style="padding: 2rem; display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 1.5rem;">
-            <h1 style="font-family: 'Poppins', sans-serif; font-weight: 700; color: #1f2937; margin: 0; font-size: 2rem; display: flex; align-items: center; gap: 0.75rem;">
-                <i class="fas fa-tasks" style="color: #667eea; font-size: 1.8rem;"></i>
-                Activity Management
-            </h1>
-            <div style="display: flex; gap: 1rem; flex-wrap: wrap;">
-                <input type="text" id="projectSearch" class="form-control" placeholder="Search projects..." style="min-width: 220px; border-radius: 0.5rem; border: 1px solid #e2e8f0;">
-                <select id="statusFilter" class="form-select" style="min-width: 160px; border-radius: 0.5rem; border: 1px solid #e2e8f0;">
+    <!-- Enhanced Filters -->
+    <div style="background: white; border-radius: 1rem; box-shadow: 0 4px 12px rgba(0,0,0,0.05); border: 1px solid #f1f5f9; margin-bottom: 2rem; padding: 1.5rem;">
+        <div style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 1rem;">
+            <h6 style="color: #374151; font-weight: 600; margin: 0; font-family: 'Poppins', sans-serif; display: flex; align-items: center; gap: 0.5rem;">
+                <i class="fas fa-filter" style="color: #667eea; font-size: 1rem;"></i>
+                Filter Projects
+            </h6>
+            <div style="display: flex; gap: 1rem; flex-wrap: wrap; align-items: center;">
+                <div style="position: relative;">
+                    <input type="text" id="projectSearch" placeholder="Search projects..." style="min-width: 280px; padding: 0.75rem 1rem 0.75rem 2.5rem; border-radius: 0.75rem; border: 2px solid #e2e8f0; background: #f8fafc; font-size: 0.9rem; transition: all 0.3s ease;" onfocus="this.style.borderColor='#667eea'; this.style.background='white'; this.style.boxShadow='0 0 0 3px rgba(102, 126, 234, 0.1)'" onblur="this.style.borderColor='#e2e8f0'; this.style.background='#f8fafc'; this.style.boxShadow='none'">
+                    <i class="fas fa-search" style="position: absolute; left: 0.9rem; top: 50%; transform: translateY(-50%); color: #9ca3af; font-size: 0.9rem;"></i>
+                </div>
+                <select id="statusFilter" style="min-width: 180px; padding: 0.75rem 1rem; border-radius: 0.75rem; border: 2px solid #e2e8f0; background: #f8fafc; font-size: 0.9rem; transition: all 0.3s ease; cursor: pointer;" onfocus="this.style.borderColor='#667eea'; this.style.background='white'; this.style.boxShadow='0 0 0 3px rgba(102, 126, 234, 0.1)'" onblur="this.style.borderColor='#e2e8f0'; this.style.background='#f8fafc'; this.style.boxShadow='none'">
                     <option value="">All Status</option>
                     <?php foreach ($status_options as $status): ?>
                         <option value="<?= esc($status['code']) ?>"><?= esc($status['name']) ?></option>
                     <?php endforeach; ?>
                 </select>
+                <button onclick="clearFilters()" style="padding: 0.75rem 1rem; background: #f3f4f6; border: 2px solid #e5e7eb; color: #6b7280; border-radius: 0.75rem; font-size: 0.9rem; font-weight: 500; cursor: pointer; transition: all 0.3s ease; display: flex; align-items: center; gap: 0.5rem;" onmouseover="this.style.background='#e5e7eb'; this.style.color='#374151'" onmouseout="this.style.background='#f3f4f6'; this.style.color='#6b7280'">
+                    <i class="fas fa-times" style="font-size: 0.8rem;"></i>
+                    Clear
+                </button>
             </div>
         </div>
     </div>
@@ -97,4 +104,13 @@ document.addEventListener('DOMContentLoaded', function() {
     statusFilter.addEventListener('change', filterProjects);
     projectSearch.addEventListener('input', filterProjects);
 });
+
+function clearFilters() {
+    document.getElementById('statusFilter').value = '';
+    document.getElementById('projectSearch').value = '';
+    const projectCards = Array.from(document.querySelectorAll('[data-status-code]'));
+    projectCards.forEach(card => {
+        card.style.display = '';
+    });
+}
 </script>

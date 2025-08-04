@@ -102,10 +102,10 @@ INSERT INTO `project_scopes` (`id`, `project_id`, `name`, `description`, `scope_
 (3, 1, 'Development', 'Software development and implementation', 3);
 
 -- Insert task templates with scopes
-INSERT INTO `task_templates` (`id`, `project_id`, `scope_id`, `name`, `description`, `fields`, `component_order`) VALUES
-(1, 1, 1, 'Business Requirement Specification', 'BRS Template', '[1,2,3,4,5,6,7,8,9,10,11,12,13]', 1),
-(2, 1, 2, 'User Acceptance Testing', 'UAT Template', '[1,2,3,4,5,6,7,8,9,10,11,12,13]', 1),
-(3, 1, 2, 'Factory Acceptance Testing', 'FAT Template', '[1,2,3,4,5,6,7,8,9,10,11,12,13]', 2);
+INSERT INTO `task_templates` (`id`, `project_id`, `scope_id`, `name`, `description`, `fields`, `component_order`, `weightage`) VALUES
+(1, 1, 1, 'Business Requirement Specification', 'BRS Template', '[1,2,3,4,5,6,7,8,9,10,11,12,13]', 1, 25.50),
+(2, 1, 2, 'User Acceptance Testing', 'UAT Template', '[1,2,3,4,5,6,7,8,9,10,11,12,13]', 1, 35.75),
+(3, 1, 2, 'Factory Acceptance Testing', 'FAT Template', '[1,2,3,4,5,6,7,8,9,10,11,12,13]', 2, 38.75);
 
 INSERT INTO `tasks` (`project_id`, `template_id`, `data`, `is_active`, `is_delete`, `task_order`, `date_created`, `date_modified`) VALUES
  (1, 2, '{"1":"Login","2":"Ali","3":"Frontend Developer","4":"UI needs improvement","5":"Login Button","6":"","7":"Ali","8":"in_progress","9":60,"10":"UI needs improvement","11":"2025-01-02","12":"2025-01-05","13":"2025-01-05"}', 1, 0, 1, NOW(), NOW()),
