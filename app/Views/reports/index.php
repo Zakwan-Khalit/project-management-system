@@ -16,28 +16,9 @@
         </ol>
     </nav>
 
-    <!-- Reports Header -->
-    <div style="background: white; border-radius: 1rem; box-shadow: 0 10px 30px rgba(0,0,0,0.08); border: 1px solid #f1f3f4; margin-bottom: 2rem; overflow: hidden;">
-        <div style="padding: 2rem;">
-            <div style="display: flex; justify-content: space-between; align-items: flex-start; flex-wrap: wrap; gap: 1.5rem;">
-                <div style="flex: 1; min-width: 300px;">
-                    <div style="display: flex; align-items: center; gap: 1rem; margin-bottom: 1rem;">
-                        <h1 style="margin: 0; font-size: 2rem; font-weight: 700; color: #1f2937; font-family: 'Poppins', sans-serif; display: flex; align-items: center; gap: 0.75rem;">
-                            <i class="fas fa-chart-bar" style="color: #667eea; font-size: 1.8rem;"></i>
-                            Reports Dashboard
-                        </h1>
-                    </div>
-                    <p style="margin: 0; color: #6b7280; font-size: 1rem; line-height: 1.5;">
-                        Generate comprehensive reports for project progress and completion analysis
-                    </p>
-                </div>
-            </div>
-        </div>
-    </div>
-
     <!-- Report Selection Card -->
     <div class="row justify-content-center">
-        <div class="col-lg-8">
+        <div class="col-lg-12">
             <div style="background: white; border-radius: 1rem; box-shadow: 0 10px 30px rgba(0,0,0,0.08); border: 1px solid #f1f3f4; overflow: hidden;">
                 <div style="padding: 2rem;">
                     <h5 style="margin: 0 0 1.5rem 0; font-size: 1.25rem; font-weight: 600; color: #1f2937; font-family: 'Poppins', sans-serif;">
@@ -70,58 +51,6 @@
             </div>
         </div>
     </div>
-
-    <!-- Report Types Info Cards -->
-    <div class="row mt-4">
-        <div class="col-lg-4 mb-3">
-            <div class="card h-100" style="border-radius: 0.75rem; border: 1px solid #e5e7eb; transition: all 0.3s ease;" 
-                 onmouseover="this.style.transform='translateY(-4px)'; this.style.boxShadow='0 8px 25px rgba(0,0,0,0.1)';"
-                 onmouseout="this.style.transform='translateY(0)'; this.style.boxShadow='none';">
-                <div class="card-body text-center" style="padding: 1.5rem;">
-                    <div class="mb-3">
-                        <i class="fas fa-tasks" style="font-size: 2.5rem; color: #667eea;"></i>
-                    </div>
-                    <h5 class="card-title fw-bold" style="color: #374151;">Project Progress Report</h5>
-                    <p class="card-text text-muted" style="font-size: 0.9rem;">
-                        Track individual project progress with planned vs actual timelines, percentage completion, and status indicators.
-                    </p>
-                </div>
-            </div>
-        </div>
-        
-        <div class="col-lg-4 mb-3">
-            <div class="card h-100" style="border-radius: 0.75rem; border: 1px solid #e5e7eb; transition: all 0.3s ease;" 
-                 onmouseover="this.style.transform='translateY(-4px)'; this.style.boxShadow='0 8px 25px rgba(0,0,0,0.1)';"
-                 onmouseout="this.style.transform='translateY(0)'; this.style.boxShadow='none';">
-                <div class="card-body text-center" style="padding: 1.5rem;">
-                    <div class="mb-3">
-                        <i class="fas fa-check-circle" style="font-size: 2.5rem; color: #10b981;"></i>
-                    </div>
-                    <h5 class="card-title fw-bold" style="color: #374151;">Completed Project Report</h5>
-                    <p class="card-text text-muted" style="font-size: 0.9rem;">
-                        Summary of all completed projects showing scope completion percentages and performance variants.
-                    </p>
-                </div>
-            </div>
-        </div>
-        
-        <div class="col-lg-4 mb-3">
-            <div class="card h-100" style="border-radius: 0.75rem; border: 1px solid #e5e7eb; transition: all 0.3s ease;" 
-                 onmouseover="this.style.transform='translateY(-4px)'; this.style.boxShadow='0 8px 25px rgba(0,0,0,0.1)';"
-                 onmouseout="this.style.transform='translateY(0)'; this.style.boxShadow='none';">
-                <div class="card-body text-center" style="padding: 1.5rem;">
-                    <div class="mb-3">
-                        <i class="fas fa-chart-line" style="font-size: 2.5rem; color: #f59e0b;"></i>
-                    </div>
-                    <h5 class="card-title fw-bold" style="color: #374151;">Completion Status Report</h5>
-                    <p class="card-text text-muted" style="font-size: 0.9rem;">
-                        Overview of all projects with current status and timeline performance (early/late completion).
-                    </p>
-                </div>
-            </div>
-        </div>
-    </div>
-
 </div>
 
 <script>

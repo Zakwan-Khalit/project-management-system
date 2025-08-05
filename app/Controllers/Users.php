@@ -71,13 +71,19 @@ class Users extends BaseController
         ];
 
         if (!$this->validate($rules)) {
-            return redirect()->back()->withInput()->with('errors', $validation->getErrors());
+            return $this->response->setJSON([
+                'success' => false,
+                'errors' => $validation->getErrors()
+            ]);
         }
 
         try {
+            $hashedPassword = password_hash('123qwe', PASSWORD_DEFAULT); // Default password
+            log_message('info', 'Generated password hash: ' . $hashedPassword);
+
             $userData = [
                 'email' => $this->request->getPost('email'),
-                'password' => password_hash('123qwe', PASSWORD_DEFAULT), // Default password
+                'password' => $hashedPassword,
                 'is_active' => $this->request->getPost('is_active') ? 1 : 0,
                 'email_verified_at' => date('Y-m-d H:i:s')
             ];
@@ -102,13 +108,22 @@ class Users extends BaseController
 
                 $this->userModel->createUserRel($relData);
 
-                return redirect()->to('/users')->with('success', 'User created successfully! Default password: 123qwe');
+                return $this->response->setJSON([
+                    'success' => true,
+                    'message' => 'User created successfully! Default password: 123qwe'
+                ]);
             }
 
-            return redirect()->back()->withInput()->with('error', 'Failed to create user.');
+            return $this->response->setJSON([
+                'success' => false,
+                'message' => 'Failed to create user.'
+            ]);
         } catch (\Exception $e) {
             log_message('error', 'User creation error: ' . $e->getMessage());
-            return redirect()->back()->withInput()->with('error', 'Failed to create user. Please try again.');
+            return $this->response->setJSON([
+                'success' => false,
+                'message' => 'Failed to create user. Please try again.'
+            ]);
         }
     }
 

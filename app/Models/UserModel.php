@@ -159,7 +159,7 @@ class UserModel extends Model
     public function createUser($userData, $profileData = [])
     {
         // Hash password
-        if (isset($userData['password'])) {
+        if (isset($userData['password']) && !password_get_info($userData['password'])['algo']) {
             $userData['password'] = password_hash($userData['password'], PASSWORD_DEFAULT);
         }
         
@@ -188,7 +188,7 @@ class UserModel extends Model
     
     public function updateUser($userId, $userData)
     {
-        if (isset($userData['password'])) {
+        if (isset($userData['password']) && !password_get_info($userData['password'])['algo']) {
             $userData['password'] = password_hash($userData['password'], PASSWORD_DEFAULT);
         }
         

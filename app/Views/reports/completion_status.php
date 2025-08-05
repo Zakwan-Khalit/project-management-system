@@ -23,25 +23,6 @@
         </ol>
     </nav>
 
-    <!-- Report Header -->
-    <div style="background: white; border-radius: 1rem; box-shadow: 0 10px 30px rgba(0,0,0,0.08); border: 1px solid #f1f3f4; margin-bottom: 2rem; overflow: hidden;">
-        <div style="padding: 2rem;">
-            <div style="display: flex; justify-content: space-between; align-items: flex-start; flex-wrap: wrap; gap: 1.5rem;">
-                <div style="flex: 1; min-width: 300px;">
-                    <div style="display: flex; align-items: center; gap: 1rem; margin-bottom: 1rem;">
-                        <h1 style="margin: 0; font-size: 2rem; font-weight: 700; color: #1f2937; font-family: 'Poppins', sans-serif; display: flex; align-items: center; gap: 0.75rem;">
-                            <i class="fas fa-chart-pie" style="color: #f59e0b; font-size: 1.8rem;"></i>
-                            Project Completion Status Report
-                        </h1>
-                    </div>
-                    <p style="margin: 0; color: #6b7280; font-size: 1rem; line-height: 1.5;">
-                        Overview of all projects with current status and timeline performance
-                    </p>
-                </div>
-            </div>
-        </div>
-    </div>
-
     <!-- Export Buttons -->
     <div style="background: white; border-radius: 1rem; box-shadow: 0 10px 30px rgba(0,0,0,0.08); border: 1px solid #f1f3f4; margin-bottom: 2rem; overflow: hidden;">
         <div style="padding: 1.5rem; background: linear-gradient(135deg, #f8fafc 0%, #f1f5f9 100%); border-bottom: 1px solid #e2e8f0;">

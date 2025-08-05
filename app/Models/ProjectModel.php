@@ -118,12 +118,10 @@ class ProjectModel extends Model
     {
         $insert = [
             'name'         => $data['name'] ?? null,
-            'code'         => $data['code'] ?? null,
-            'description'  => $data['description'] ?? null,
+            'cost'         => $data['cost'] ?? null,
             'client'       => $data['client'] ?? null,
             'start_date'   => $data['start_date'] ?? null,
             'end_date'     => $data['end_date'] ?? null,
-            'budget'       => $data['budget'] ?? null,
             'is_active'    => $data['is_active'] ?? 1,
             'is_delete'    => $data['is_delete'] ?? 0,
             'date_created' => date('Y-m-d H:i:s'),
@@ -151,12 +149,11 @@ class ProjectModel extends Model
         
         // Only update fields that are provided
         if (isset($data['name'])) $update['name'] = $data['name'];
-        if (isset($data['code'])) $update['code'] = $data['code'];
-        if (isset($data['description'])) $update['description'] = $data['description'];
         if (isset($data['start_date'])) $update['start_date'] = $data['start_date'];
         if (isset($data['end_date'])) $update['end_date'] = $data['end_date'];
         if (isset($data['budget'])) $update['budget'] = $data['budget'];
         if (isset($data['client'])) $update['client'] = $data['client'];
+        if (isset($data['cost'])) $update['cost'] = $data['cost'];
         
         return $this->db->table('projects')
             ->where('id', $projectId)

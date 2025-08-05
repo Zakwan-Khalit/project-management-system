@@ -22,38 +22,18 @@
             </li>
         </ol>
     </nav>
-    
-    <!-- Project Header -->
-    <div style="background: white; border-radius: 1rem; box-shadow: 0 10px 30px rgba(0,0,0,0.08); border: 1px solid #f1f3f4; margin-bottom: 2rem; overflow: hidden;">
-        
-        <!-- Project Title Section -->
-        <div style="padding: 2rem;">
-            <div style="display: flex; justify-content: space-between; align-items: flex-start; flex-wrap: wrap; gap: 1.5rem;">
-                <div style="flex: 1; min-width: 300px;">
-                    <div style="display: flex; align-items: center; gap: 1rem; margin-bottom: 1rem;">
-                        <h1 style="margin: 0; font-size: 2rem; font-weight: 700; color: #1f2937; font-family: 'Poppins', sans-serif; display: flex; align-items: center; gap: 0.75rem;" id="projectTitle">
-                            <i class="fas fa-project-diagram" style="color: #667eea; font-size: 1.8rem;"></i>
-                            Loading...
-                        </h1>
-                        <span class="badge" id="projectStatus">Loading</span>
-                    </div>
-                    <p style="color: #6b7280; line-height: 1.6; margin: 0; font-size: 1rem;" id="projectDescription">Loading project description...</p>
-                    <!-- script moved to bottom for global scope -->
-                </div>
-                <div style="display: flex; gap: 1rem; flex-wrap: wrap;">
-                    <button onclick="editProject()" style="background: rgba(102,126,234,0.1); color: #667eea; border: 2px solid #667eea; padding: 0.75rem 1.5rem; border-radius: 0.75rem; font-weight: 600; cursor: pointer; transition: all 0.3s ease; display: flex; align-items: center; gap: 0.5rem;"
-                            onmouseover="this.style.background='#667eea'; this.style.color='white'"
-                            onmouseout="this.style.background='rgba(102,126,234,0.1)'; this.style.color='#667eea'">
-                        <i class="fas fa-edit"></i>
-                        Edit Project
-                    </button>
-                </div>
-            </div>
-        </div>
-    </div>
 
-    <!-- Project Overview Cards: Only Team Members and Days Left remain -->
-    <!-- Removed Team Members and Days Left cards -->
+    <div>
+    <!-- New Project Button -->
+    <div style="display: flex; justify-content: flex-end; margin-bottom: 1.25rem;">
+        <?php $userData = session('userdata'); $roleId = $userData['role_id'] ?? null; if (in_array($roleId, [1,2,3,4])): ?>
+            <button onclick="editProject()" style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white; border: none; border-radius: 0.5rem; padding: 0.75rem 1.25rem; font-weight: 600; font-size: 0.9rem; cursor: pointer; transition: all 0.3s ease; box-shadow: 0 4px 12px rgba(102, 126, 234, 0.3);" onmouseover="this.style.transform='translateY(-1px)'; this.style.boxShadow='0 6px 18px rgba(102, 126, 234, 0.4)';" onmouseout="this.style.transform='translateY(0)'; this.style.boxShadow='0 4px 12px rgba(102, 126, 234, 0.3)';">
+                <i class="fas fa-plus" style="margin-right: 0.5rem;"></i>
+                Edit Project
+            </button>
+        <?php endif; ?>
+    </div>
+</div>
 
     <!-- Main Content Tabs -->
     <div style="background: white; border-radius: 1rem; box-shadow: 0 10px 30px rgba(0,0,0,0.08); border: 1px solid #f1f3f4; overflow: hidden;">

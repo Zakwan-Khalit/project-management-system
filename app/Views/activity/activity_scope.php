@@ -1,4 +1,4 @@
-    <!-- Breadcrumbs -->
+<!-- Breadcrumbs -->
     <nav aria-label="breadcrumb" style="margin-bottom: 1rem;">
         <ol style="display: inline-flex; list-style: none; padding: 0.4rem 0.6rem; margin: 0; background: #4a5568; border-radius: 0.3rem; box-shadow: 0 2px 8px rgba(74, 85, 104, 0.15); border: none; width: fit-content;">
             <li style="display: flex; align-items: center;">
@@ -21,29 +21,19 @@
         </ol>
     </nav>
 
-    
 
-    <!-- Header -->
-    <div style="background: white; border-radius: 1rem; box-shadow: 0 10px 30px rgba(0,0,0,0.08); border: 1px solid #f1f3f4; margin-bottom: 2rem; overflow: hidden;">
-        <div style="padding: 2rem;">
-            <div style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 1.5rem;">
-                <div>
-                    <h1 style="margin: 0; font-size: 2rem; font-weight: 700; color: #1f2937; font-family: 'Poppins', sans-serif; display: flex; align-items: center; gap: 0.75rem;">
-                        <i class="fas fa-sitemap" style="color: #667eea; font-size: 1.8rem;"></i>
-                        Project Scope
-                    </h1>
-                    <p style="color: #6b7280; line-height: 1.6; margin: 0.5rem 0 0 0; font-size: 1rem;">
-                        Manage project scopes and their associated activities.
-                    </p>
-                </div>
-                <div>
-                    <button class="btn btn-primary" id="addScopeBtn" style="border-radius: 0.5rem; padding: 0.75rem 1.5rem; font-weight: 600; box-shadow: 0 4px 12px rgba(102,126,234,0.3);">
-                        <i class="fas fa-plus me-2"></i>Add Project Scope
-                    </button>
-                </div>
-            </div>
+    <?php $userData = session('userdata'); $roleId = $userData['role_id'] ?? null; if (in_array($roleId, [1, 2])): ?>
+        <!-- Header Button (matching projects/index.php style) -->
+        <div style="display: flex; justify-content: flex-end; margin-bottom: 1.25rem;">
+            <button id="addScopeBtn"
+                style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white; border: none; border-radius: 0.5rem; padding: 0.75rem 1.25rem; font-weight: 600; font-size: 0.9rem; cursor: pointer; transition: all 0.3s ease; box-shadow: 0 4px 12px rgba(102, 126, 234, 0.3);"
+                onmouseover="this.style.transform='translateY(-1px)'; this.style.boxShadow='0 6px 18px rgba(102, 126, 234, 0.4)';"
+                onmouseout="this.style.transform='translateY(0)'; this.style.boxShadow='0 4px 12px rgba(102, 126, 234, 0.3)';">
+                <i class="fas fa-plus" style="margin-right: 0.5rem;"></i>
+                Add Project Scope
+            </button>
         </div>
-    </div>
+    <?php endif; ?>
 
     <!-- Main Content -->
     <div style="background: white; border-radius: 1rem; box-shadow: 0 10px 30px rgba(0,0,0,0.08); border: 1px solid #f1f3f4; overflow: hidden;">
@@ -52,7 +42,9 @@
                 <!-- Dynamic scope items will be loaded here -->
             </div>
         </div>
-    </div><script>
+    </div>
+    
+<script>
 // Load scopes dynamically via AJAX
 $(document).ready(function() {
     var projectId = <?= isset($project['id']) ? json_encode($project['id']) : 'null' ?>;
@@ -726,7 +718,7 @@ $(document).ready(function() {
         ).join('');
         
         // Load existing project templates for table display
-        loadProjectTemplatesTable(function(templatesTableHtml) {
+        loadProjectTemplatesTable(scopeId, function(templatesTableHtml) {
             Swal.fire({
                 title: 'Add Components',
                 html: `
@@ -742,7 +734,7 @@ $(document).ready(function() {
                         <div class="mb-3">
                             <label style="display: block; margin-bottom: 0.5rem; font-weight: 600;">Weightage (%)</label>
                             <input type="number" id="componentWeightage" class="form-control" step="0.01" min="0" max="100" placeholder="0.00" style="width: 100%;">
-                            <small class="text-muted mt-1 d-block">Enter weightage as a percentage (e.g., 25.50)</small>
+                            <small class="text-muted mt-1 d-block">Enter weightage as a percentage (e.g. 25.50)</small>
                         </div>
                         
                         <div class="mb-3">
@@ -812,11 +804,11 @@ $(document).ready(function() {
         });
     });
     
-    function loadProjectTemplatesTable(callback) {
+    function loadProjectTemplatesTable(scopeId, callback) {
         $.ajax({
             url: '<?= base_url('activity/get_project_templates') ?>',
             method: 'GET',
-            data: { project_id: projectId },
+            data: { project_id: projectId, scope_id: scopeId },
             dataType: 'json',
             success: function(res) {
                 let tableHtml = '';
@@ -825,32 +817,30 @@ $(document).ready(function() {
                         <table class="table table-sm table-hover mb-0">
                             <thead style="background: #f8fafc;">
                                 <tr>
-                                    <th style="padding: 0.75rem; font-size: 0.875rem; font-weight: 600;">Component</th>
-                                    <th style="padding: 0.75rem; font-size: 0.875rem; font-weight: 600;">Scope</th>
-                                    <th style="padding: 0.75rem; font-size: 0.875rem; font-weight: 600; text-align: right;">Weightage</th>
+                                    <th style="text-align: left; padding: 0.75rem; font-weight: 600;">Component</th>
+                                    <th style="text-align: right; padding: 0.75rem; font-weight: 600;">Weightage</th>
                                 </tr>
                             </thead>
                             <tbody>
                     `;
-                    
+
                     res.templates.forEach(function(template) {
                         tableHtml += `
                             <tr>
-                                <td style="padding: 0.75rem; font-size: 0.875rem;">${template.name}</td>
-                                <td style="padding: 0.75rem; font-size: 0.875rem;">${template.scope_name || 'No Scope'}</td>
-                                <td style="padding: 0.75rem; font-size: 0.875rem; text-align: right;">
-                                    <span class="badge bg-info">${parseFloat(template.weightage || 0).toFixed(2)}%</span>
+                                <td style="text-align: left; padding: 0.75rem;">${template.name}</td>
+                                <td style="text-align: right; padding: 0.75rem;">
+                                    <span class="badge bg-primary">${template.weightage}%</span>
                                 </td>
                             </tr>
                         `;
                     });
-                    
+
                     tableHtml += `
                             </tbody>
                         </table>
                     `;
                 } else {
-                    tableHtml = '<div class="text-center text-muted p-3">No components found in this project yet.</div>';
+                    tableHtml = '<div class="text-center text-muted p-3">No components found in this scope.</div>';
                 }
                 callback(tableHtml);
             },

@@ -494,8 +494,8 @@ $('#dynamicTaskTable').on('click', 'td.editable-cell', function(e) {
     } else if (field === 'Progress') {
         // Only allow editing if status is 'In Progress' (1-79%)
         const statusCell = cell.closest('tr').find('td[data-field="Status"]');
-        let statusText = statusCell.text().trim().toLowerCase();
-        if (statusText === 'in progress' || statusText === 'in_progress') {
+        let statusText = statusCell.text().trim();
+        if (statusText === 'In Progress (1-79%)' || statusText.toLowerCase().includes('in progress')) {
             let current = parseInt(cell.text().replace('%','').trim(), 10) || 1;
             overlay = $(`<input type="number" min="1" max="79" class="cell-overlay-editor form-control form-control-sm" value="${current}" style="position:absolute;z-index:9999;left:${cellOffset.left}px;top:${cellOffset.top}px;width:${cellWidth}px;height:${cellHeight}px;">`);
             $('body').append(overlay);
@@ -513,11 +513,11 @@ $('#dynamicTaskTable').on('click', 'td.editable-cell', function(e) {
     } else if (field === 'Status') {
         // New status options and progress mapping
         const statusOptions = [
-            { code: 'new', name: 'New', progress: '0%' },
-            { code: 'in_progress', name: 'In Progress', progress: null },
-            { code: 'completed', name: 'Completed', progress: '80%' },
-            { code: 'closed', name: 'Closed', progress: '100%' },
-            { code: 'reassigned', name: 'Reassigned', progress: '50%' }
+            { code: 'new', name: 'New (0%)', progress: '0%' },
+            { code: 'in_progress', name: 'In Progress (1-79%)', progress: null },
+            { code: 'completed', name: 'Completed (80%)', progress: '80%' },
+            { code: 'closed', name: 'Closed (100%)', progress: '100%' },
+            { code: 'reassigned', name: 'Reassigned (50%)', progress: '50%' }
         ];
         let current = cell.text().trim().toLowerCase().replace(/\s|\(|\)|%/g, '_');
         let selectHtml = `<select class="cell-overlay-editor form-select form-select-sm" style="position:absolute;z-index:9999;left:${cellOffset.left}px;top:${cellOffset.top}px;width:${cellWidth}px;height:${cellHeight}px;">`;
@@ -531,15 +531,45 @@ $('#dynamicTaskTable').on('click', 'td.editable-cell', function(e) {
         overlay.on('blur change', function() {
             let val = this.value;
             let display = statusOptions.find(opt => opt.code === val)?.name || val;
-            removeOverlay(val, display);
-            // If not in_progress, auto-set progress cell
-            if (val !== 'in_progress') {
-                const progressVal = statusOptions.find(opt => opt.code === val)?.progress;
+
+            const progressCell = cell.closest('tr').find('td[data-field="Progress"]');
+            let progressVal = null;
+
+            // If status is 'in_progress', auto-set progress to 1% and make it editable
+            if (val === 'in_progress') {
+                // Check if progress cell already has a value between 1-79%
+                let currentProgress = progressCell.text().replace('%', '').trim();
+                let currentNum = parseInt(currentProgress, 10);
+                if (isNaN(currentNum) || currentNum < 1 || currentNum > 79) {
+                    progressVal = '1%';
+                } else {
+                    progressVal = currentNum + '%';
+                }
+                progressCell.text(progressVal);
+                progressCell.addClass('editable-cell');
+            } else {
+                // If not 'in_progress', auto-set progress based on status mapping
+                progressVal = statusOptions.find(opt => opt.code === val)?.progress;
                 if (progressVal !== null && progressVal !== undefined) {
-                    const progressCell = cell.closest('tr').find('td[data-field="Progress"]');
                     progressCell.text(progressVal);
+                    progressCell.removeClass('editable-cell');
                 }
             }
+
+            // Always store the progress value for immediate saving
+            if (progressVal !== null) {
+                const progressFieldId = progressCell.data('field-id');
+                if (progressFieldId) {
+                    const row = cell.closest('tr');
+                    // Trigger a blur event on the progress cell to ensure it gets saved
+                    setTimeout(function() {
+                        progressCell.trigger('blur');
+                    }, 50);
+                }
+            }
+
+            // Trigger blur only after updating progress
+            removeOverlay(val, display);
         });
         overlay.on('keydown', function(ev) {
             if (ev.key === 'Enter' || ev.key === 'Tab') {
@@ -572,7 +602,11 @@ $('#dynamicTaskTable').on('blur', 'td.editable-cell', function() {
         } else if (field === 'Progress') {
             progressCell = $(this);
             progressFieldId = fieldId;
-            value = $(this).text().replace('%','').trim();
+            let progressValue = $(this).text().trim();
+            if (!progressValue.endsWith('%')) {
+                progressValue += '%';
+            }
+            value = progressValue;
         } else if (field === 'Status') {
             statusValue = $(this).text().trim().toLowerCase();
             value = $(this).text().trim();
@@ -581,28 +615,68 @@ $('#dynamicTaskTable').on('blur', 'td.editable-cell', function() {
         }
         data[fieldId] = value;
     });
+    
+    // Always ensure progress field is included, even if not directly edited
+    if (!progressCell) {
+        // Find progress cell if it wasn't in the editable cells loop
+        const foundProgressCell = row.find('td[data-field="Progress"]');
+        if (foundProgressCell.length > 0) {
+            progressCell = foundProgressCell;
+            progressFieldId = foundProgressCell.data('field-id');
+            let progressValue = foundProgressCell.text().trim();
+            if (!progressValue.endsWith('%')) {
+                progressValue += '%';
+            }
+            if (progressFieldId) {
+                data[progressFieldId] = progressValue;
+            }
+        }
+    }
     // --- Auto-update Progress based on Status ---
     if (progressCell && progressFieldId) {
         let newProgress = null;
-        if (statusValue === 'new') {
+        if (statusValue === 'new' || statusValue === 'new_(0%)' || statusValue === 'new (0%)') {
             newProgress = '0%';
-        } else if (statusValue === 'in progress' || statusValue === 'in_progress') {
+        } else if (statusValue === 'in progress' || statusValue === 'in_progress' || statusValue === 'in progress (1-79%)') {
             // Allow manual entry (handled in click handler)
-            let manualVal = progressCell.text().replace('%','').trim();
+            let manualVal = progressCell.text().replace('%', '').trim();
             let num = parseInt(manualVal, 10);
             if (isNaN(num) || num < 1) num = 1;
             if (num > 79) num = 79;
             newProgress = num + '%';
-        } else if (statusValue === 'completed') {
+        } else if (statusValue === 'completed (80%)' || statusValue === 'completed') {
             newProgress = '80%';
-        } else if (statusValue === 'closed') {
+        } else if (statusValue === 'closed (100%)' || statusValue === 'closed') {
             newProgress = '100%';
-        } else if (statusValue === 'reassigned') {
+        } else if (statusValue === 'reassigned (50%)' || statusValue === 'reassigned') {
             newProgress = '50%';
         }
+        
+        // Always ensure progress has a value and percentage sign
         if (newProgress !== null) {
             data[progressFieldId] = newProgress;
             progressCell.text(newProgress);
+        } else {
+            // Fallback: ensure current progress value is saved with %
+            let currentProgress = progressCell.text().trim();
+            if (currentProgress && !currentProgress.endsWith('%')) {
+                currentProgress += '%';
+            }
+            if (currentProgress) {
+                data[progressFieldId] = currentProgress;
+                progressCell.text(currentProgress);
+            }
+        }
+    }
+    
+    // Final check: ensure progress field is always in data object
+    if (progressFieldId && !data.hasOwnProperty(progressFieldId)) {
+        let fallbackProgress = progressCell ? progressCell.text().trim() : '';
+        if (fallbackProgress && !fallbackProgress.endsWith('%')) {
+            fallbackProgress += '%';
+        }
+        if (fallbackProgress) {
+            data[progressFieldId] = fallbackProgress;
         }
     }
     // Restore cell display
@@ -1066,7 +1140,7 @@ function createTableModal() {
             }
         });
         if (headersToInsert.length === 0) {
-            // All are IDs, just save
+            // All are IDs, do just save
             $.ajax({
                 url: '<?= base_url('activity/updateHeaders') ?>',
                 method: 'POST',

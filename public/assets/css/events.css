@@ -151,11 +151,15 @@
     text-overflow: clip !important;
     word-wrap: break-word;
     hyphens: auto;
+    display: block;
 }
 
 .fc-event-time {
     font-weight: 600;
     white-space: nowrap;
+    display: block;
+    font-size: 0.65rem;
+    margin-bottom: 1px;
 }
 
 .fc-event:hover {

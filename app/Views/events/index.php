@@ -237,6 +237,26 @@ document.addEventListener('DOMContentLoaded', function() {
         slotMaxTime: '22:00:00',
         slotDuration: '01:00:00',
         expandRows: true,
+        eventContent: function(arg) {
+            // Custom event content to display time above title
+            let timeText = '';
+            if (arg.event.start) {
+                timeText = arg.event.start.toLocaleTimeString([], {
+                    hour: 'numeric',
+                    minute: '2-digit',
+                    hour12: true
+                });
+            }
+            
+            return {
+                html: `
+                    <div style="padding: 2px 4px; line-height: 1.2; font-size: 0.7rem;">
+                        ${timeText ? `<div style="font-weight: 600; font-size: 0.65rem; margin-bottom: 1px; color: inherit;">${timeText}</div>` : ''}
+                        <div style="font-weight: bold; word-wrap: break-word; hyphens: auto;">${arg.event.title}</div>
+                    </div>
+                `
+            };
+        },
         events: function(info, successCallback, failureCallback) {
             fetch('<?= base_url("events/getCalendarEvents") ?>')
                 .then(response => response.json())

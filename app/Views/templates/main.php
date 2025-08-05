@@ -6,7 +6,7 @@
     <title><?= isset($title) ? esc($title) : 'Project Management System' ?></title>
     
     <!-- Favicon -->
-    <link rel="icon" type="image/x-icon" href="<?= base_url('favicon.ico') ?>">
+    <link rel="icon" type="image/png" href="<?= base_url('assets/images/k_logo.jpeg') ?>">
     
     <!-- Bootstrap CSS -->
     <link href="<?= base_url('assets/css/bootstrap/bootstrap.min.css') ?>" rel="stylesheet">

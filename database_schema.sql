@@ -166,8 +166,7 @@ CREATE TABLE IF NOT EXISTS `user_rel` (
 CREATE TABLE IF NOT EXISTS `projects` (
     `id` int(11) NOT NULL AUTO_INCREMENT,
     `name` varchar(128),
-    `code` varchar(32),
-    `description` text,
+    `cost` decimal(12,2),
     `client` varchar(255),
     `budget` decimal(12,2),
     `start_date` date,

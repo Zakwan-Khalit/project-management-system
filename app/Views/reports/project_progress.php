@@ -23,25 +23,6 @@
         </ol>
     </nav>
 
-    <!-- Report Header -->
-    <div style="background: white; border-radius: 1rem; box-shadow: 0 10px 30px rgba(0,0,0,0.08); border: 1px solid #f1f3f4; margin-bottom: 2rem; overflow: hidden;">
-        <div style="padding: 2rem;">
-            <div style="display: flex; justify-content: space-between; align-items: flex-start; flex-wrap: wrap; gap: 1.5rem;">
-                <div style="flex: 1; min-width: 300px;">
-                    <div style="display: flex; align-items: center; gap: 1rem; margin-bottom: 1rem;">
-                        <h1 style="margin: 0; font-size: 2rem; font-weight: 700; color: #1f2937; font-family: 'Poppins', sans-serif; display: flex; align-items: center; gap: 0.75rem;">
-                            <i class="fas fa-tasks" style="color: #667eea; font-size: 1.8rem;"></i>
-                            Project Progress Report
-                        </h1>
-                    </div>
-                    <p style="margin: 0; color: #6b7280; font-size: 1rem; line-height: 1.5;">
-                        <span id="projectInfo">Select a project to view its progress report</span>
-                    </p>
-                </div>
-            </div>
-        </div>
-    </div>
-
     <!-- Project Selection -->
     <div style="background: white; border-radius: 1rem; box-shadow: 0 10px 30px rgba(0,0,0,0.08); border: 1px solid #f1f3f4; margin-bottom: 2rem; overflow: hidden;">
         <div style="padding: 2rem;">
@@ -101,8 +82,7 @@
             <!-- Project Name Header -->
             <div id="projectNameHeader" style="margin-bottom: 1.5rem; display: none;">
                 <h4 style="margin: 0; font-size: 1.5rem; font-weight: 600; color: #1f2937; font-family: 'Poppins', sans-serif; text-align: center; padding: 1rem; background: linear-gradient(135deg, #f8fafc 0%, #f1f5f9 100%); border-radius: 0.75rem; border: 1px solid #e2e8f0;">
-                    <i class="fas fa-project-diagram me-2" style="color: #667eea;"></i>
-                    <span id="projectNameDisplay"></span>
+                    <span id="projectNameDisplay"></span> Progress Report
                 </h4>
             </div>
             
@@ -172,7 +152,22 @@
         </div>
     </div>
 
+    <div id="projectInfo" style="margin-bottom: 1rem; font-size: 1rem; color: #374151;"></div>
 </div>
+
+<style>
+/* Ensure no crossing lines in the header */
+#progressTable thead th {
+    border-bottom: 2px solid #d1d5db; /* Adjust border thickness */
+    border-right: 1px solid #d1d5db; /* Ensure no overlapping */
+}
+#progressTable thead tr {
+    border-collapse: separate; /* Prevent overlapping borders */
+}
+#progressTable {
+    border: 2px solid #d1d5db; /* Enhance outer table border visibility */
+}
+</style>
 
 <script>
 let currentProject = null;
@@ -328,9 +323,7 @@ function populateTable(progressData) {
                     <td style="padding: 1rem; text-align: center; font-weight: 600; color: #374151; border: 1px solid #d1d5db;">${escapeHtml(row.planned_percentage)}</td>
                     <td style="padding: 1rem; text-align: center; font-weight: 600; color: #374151; border: 1px solid #d1d5db;">${escapeHtml(row.actual_percentage)}</td>
                     <td style="padding: 1rem; text-align: center; font-weight: 600; color: ${variantColor}; border: 1px solid #d1d5db;">${escapeHtml(row.variant)}</td>
-                    <td style="padding: 1rem; text-align: center; border: 1px solid #d1d5db;">
-                        ${row.status ? `<span style="padding: 0.5rem 1rem; border-radius: 0.5rem; font-size: 0.8rem; font-weight: 600; color: white; background-color: ${escapeHtml(row.status_color)};">${escapeHtml(row.status)}</span>` : ''}
-                    </td>
+                    <td style="padding: 1rem; text-align: center; border: 1px solid #d1d5db; background-color: ${escapeHtml(row.status_color)};"></td>
                 </tr>
             `;
         }
@@ -410,16 +403,15 @@ function exportPDF() {
         alert('Please select a project first');
         return;
     }
-    
+
     const element = document.getElementById('progressTable');
-    const projectNameHeader = document.getElementById('projectNameHeader');
     const projectName = currentProject.name;
-    
+
     // Create a container with report information and table
     const container = document.createElement('div');
     container.style.padding = '20px';
     container.style.backgroundColor = 'white';
-    
+
     // Add report type
     const reportType = document.createElement('h1');
     reportType.textContent = 'Project Progress Report';
@@ -428,7 +420,7 @@ function exportPDF() {
     reportType.style.color = '#1f2937';
     reportType.style.fontSize = '24px';
     container.appendChild(reportType);
-    
+
     // Add project title
     const title = document.createElement('h2');
     title.textContent = `Project: ${projectName}`;
@@ -437,23 +429,14 @@ function exportPDF() {
     title.style.color = '#1f2937';
     title.style.fontSize = '18px';
     container.appendChild(title);
-    
-    // Add generation date
-    const dateHeader = document.createElement('p');
-    dateHeader.textContent = `Generated: ${new Date().toLocaleString()}`;
-    dateHeader.style.textAlign = 'center';
-    dateHeader.style.marginBottom = '20px';
-    dateHeader.style.color = '#6b7280';
-    dateHeader.style.fontSize = '12px';
-    container.appendChild(dateHeader);
-    
+
     // Clone the table
     const tableClone = element.cloneNode(true);
     container.appendChild(tableClone);
-    
+
     // Temporarily add to document for rendering
     document.body.appendChild(container);
-    
+
     html2canvas(container, {
         scale: 1,
         useCORS: true,
@@ -465,20 +448,26 @@ function exportPDF() {
         const pageHeight = 210;
         const imgHeight = (canvas.height * imgWidth) / canvas.width;
         let heightLeft = imgHeight;
-        
+
         let position = 0;
         pdf.addImage(imgData, 'PNG', 10, position, imgWidth, imgHeight);
         heightLeft -= pageHeight;
-        
+
         while (heightLeft >= 0) {
             position = heightLeft - imgHeight;
             pdf.addPage();
             pdf.addImage(imgData, 'PNG', 10, position, imgWidth, imgHeight);
             heightLeft -= pageHeight;
         }
-        
+
+        // Add generation date at the bottom right of the last page
+        const dateText = `Generated: ${new Date().toLocaleString()}`;
+        pdf.setFontSize(10);
+        pdf.setTextColor(107, 114, 128); // Tailwind Gray-500
+        pdf.text(dateText, pdf.internal.pageSize.width - 10, pdf.internal.pageSize.height - 10, { align: 'right' });
+
         pdf.save(`${projectName.replace(/\s+/g, '_')}_progress_report.pdf`);
-        
+
         // Remove temporary container
         document.body.removeChild(container);
     }).catch(error => {

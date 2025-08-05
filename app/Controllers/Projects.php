@@ -87,12 +87,10 @@ class Projects extends BaseController
             $statusLookup = $this->projectModel->getProjectStatusByCode($statusCode);
             $projectData = [
                 'name' => $this->request->getPost('name'),
-                'code' => $this->request->getPost('code'),
-                'description' => $this->request->getPost('description'),
+                'cost' => $this->request->getPost('cost'),
                 'client' => $this->request->getPost('client'),
                 'start_date' => $this->request->getPost('start_date'),
                 'end_date' => $this->request->getPost('end_date'),
-                'budget' => $this->request->getPost('budget'),
             ];
             // pr($projectData);
             if ($projectId = $this->projectModel->createProject($projectData)) {
@@ -175,11 +173,10 @@ class Projects extends BaseController
             $oldData = $project;
             $projectData = [
                 'name' => $this->request->getPost('name'),
-                'code' => $this->request->getPost('code'),
-                'description' => $this->request->getPost('description'),
+                'cost' => $this->request->getPost('cost'),
+                'client' => $this->request->getPost('client'),
                 'start_date' => $this->request->getPost('start_date'),
                 'end_date' => $this->request->getPost('end_date'),
-                'client' => $this->request->getPost('client')
             ];
             if ($this->projectModel->updateProject($id, $projectData)) {
                 // Update status if provided using model
@@ -490,7 +487,6 @@ class Projects extends BaseController
 
         // Ensure all fields are set and never null/empty for frontend
         $project['name'] = $project['name'] ?? 'Untitled';
-        $project['description'] = $project['description'] ?? '';
         $project['start_date'] = $project['start_date'] ?? 'N/A';
         $project['end_date'] = $project['end_date'] ?? 'N/A';
         $project['budget'] = $project['budget'] ?? 'N/A';

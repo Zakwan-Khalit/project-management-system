@@ -1,17 +1,27 @@
 <div style="padding: 1.5rem; min-height: 100vh;">
     <div style="max-width: 1200px; margin: 0 auto;">
-        <!-- Header Section -->
-        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 2rem; background: #f8fafc; padding: 1.5rem; border-radius: 1rem; border: 1px solid #e2e8f0;">
-            <div style="display: flex; align-items: center;">
-                <div style="width: 3rem; height: 3rem; background: #667eea; border-radius: 0.75rem; display: flex; align-items: center; justify-content: center; margin-right: 1rem;">
-                    <i class="fas fa-user-edit" style="color: white; font-size: 1.25rem;"></i>
-                </div>
-                <div>
-                    <h1 style="color: #1e293b; margin: 0; font-size: 1.875rem; font-weight: 700;">Edit User</h1>
-                    <p style="color: #64748b; margin: 0; font-size: 0.875rem;">Update user information and details</p>
-                </div>
-            </div>
-        </div>
+        <!-- Breadcrumbs -->
+        <nav aria-label="breadcrumb" style="margin-bottom: 1rem;">
+            <ol style="display: inline-flex; list-style: none; padding: 0.4rem 0.6rem; margin: 0; background: #4a5568; border-radius: 0.3rem; box-shadow: 0 2px 8px rgba(74, 85, 104, 0.15); border: none; width: fit-content;">
+                <li style="display: flex; align-items: center;">
+                            <a href="<?= base_url('dashboard') ?>" style="color: #e2e8f0; text-decoration: none; font-weight: 500; font-size: 0.75rem; transition: all 0.3s ease; display: flex; align-items: center; padding: 0.1rem 0.25rem; border-radius: 0.2rem;" onmouseover="this.style.backgroundColor='rgba(255,255,255,0.1)'; this.style.color='#ffffff'" onmouseout="this.style.backgroundColor='transparent'; this.style.color='#e2e8f0'">
+                                <i class="fas fa-home" style="margin-right: 0.3rem; font-size: 0.7rem;"></i>
+                            </a>
+                            <span style="margin: 0 0.3rem; color: #a0aec0; font-size: 0.8rem; font-weight: 300;">›</span>
+                        </li>       
+                <li style="display: flex; align-items: center;">
+                    <a href="<?= base_url('users') ?>" style="color: #e2e8f0; text-decoration: none; font-weight: 500; font-size: 0.75rem; transition: all 0.3s ease; display: flex; align-items: center; padding: 0.1rem 0.25rem; border-radius: 0.2rem;" onmouseover="this.style.backgroundColor='rgba(255,255,255,0.1)'; this.style.color='#ffffff'" onmouseout="this.style.backgroundColor='transparent'; this.style.color='#e2e8f0'">
+                        <i class="fas fa-users" style="margin-right: 0.3rem; font-size: 0.7rem;"></i>
+                        User Management
+                    </a>
+                    <span style="margin: 0 0.3rem; color: #a0aec0; font-size: 0.8rem; font-weight: 300;">›</span>
+                </li>
+                <li style="color: #ffffff; font-weight: 500; font-size: 0.75rem; display: flex; align-items: center; padding: 0.1rem 0.25rem; background: rgba(255,255,255,0.1); border-radius: 0.2rem;">
+                    <i class="fas fa-plus" style="margin-right: 0.3rem; font-size: 0.7rem;"></i>
+                    Edit User
+                </li>
+            </ol>
+        </nav>
 
         <!-- Error Messages -->
         <?php if (session()->getFlashdata('errors')): ?>
@@ -159,13 +169,6 @@
                     </div>
 
                     <div style="display: flex; gap: 1rem; justify-content: flex-end; padding-top: 1.5rem; border-top: 1px solid #e5e7eb;">
-                        <a href="<?= base_url('users') ?>" 
-                           style="padding: 0.75rem 1.5rem; border: 2px solid #6b7280; color: #6b7280; background: white; border-radius: 0.5rem; text-decoration: none; font-weight: 500; transition: all 0.2s ease; display: inline-flex; align-items: center;"
-                           onmouseover="this.style.background='#f9fafb'; this.style.borderColor='#374151'; this.style.color='#374151'"
-                           onmouseout="this.style.background='white'; this.style.borderColor='#6b7280'; this.style.color='#6b7280'">
-                            <i class="fas fa-times" style="margin-right: 0.5rem;"></i>
-                            Cancel
-                        </a>
                         <button type="submit" 
                                 id="submitBtn"
                                 style="padding: 0.75rem 1.5rem; background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white; border: none; border-radius: 0.5rem; font-weight: 500; cursor: pointer; transition: all 0.2s ease; display: inline-flex; align-items: center;"
@@ -174,6 +177,13 @@
                             <i class="fas fa-save" style="margin-right: 0.5rem;"></i>
                             Update User
                         </button>
+                        <a href="<?= base_url('users') ?>" 
+                           style="padding: 0.75rem 1.5rem; border: 2px solid #6b7280; color: #6b7280; background: white; border-radius: 0.5rem; text-decoration: none; font-weight: 500; transition: all 0.2s ease; display: inline-flex; align-items: center;"
+                           onmouseover="this.style.background='#f9fafb'; this.style.borderColor='#374151'; this.style.color='#374151'"
+                           onmouseout="this.style.background='white'; this.style.borderColor='#6b7280'; this.style.color='#6b7280'">
+                            <i class="fas fa-times" style="margin-right: 0.5rem;"></i>
+                            Cancel
+                        </a>
                     </div>
                 </form>
             </div>

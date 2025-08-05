@@ -75,8 +75,8 @@ INSERT INTO `user_rel` (`user_id`, `department_id`, `position_id`, `is_active`, 
 (2, 2, 3, 1, 0); -- Natasha -> Usability -> System Analyst
 
 -- Insert sample project
-INSERT INTO `projects` (`name`, `code`, `description`, `client`, `budget`, `start_date`, `end_date`) VALUES
-('Project Management System', 'PMS-2025-001', 'A comprehensive project management system with task tracking, team collaboration, and progress monitoring features.', 'Internal Development', 50000.00, '2025-01-01', '2025-06-30');
+INSERT INTO `projects` (`name`, `cost`, `client`, `budget`, `start_date`, `end_date`) VALUES
+('Project Management System', 50000.00, 'Internal Development', 50000.00, '2025-01-01', '2025-06-30');
 
 -- Set project status to active
 INSERT INTO `project_status` (`project_id`, `status_id`, `changed_by`, `notes`) VALUES

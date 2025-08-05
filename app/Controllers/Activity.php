@@ -69,10 +69,10 @@ class Activity extends BaseController
             throw \CodeIgniter\Exceptions\PageNotFoundException::forPageNotFound();
         }
 
-        $templates = $this->activityModel->getTaskTemplatesByProject($id);
+        $scopes = $this->activityModel->getProjectScopes($id);
         $data = [
             'project' => $project,
-            'templates' => $templates
+            'scopes' => $scopes
         ];
         return $this->template->member('activity/activity_scope', $data);
     }
@@ -844,12 +844,15 @@ class Activity extends BaseController
         }
 
         $projectId = $this->request->getGet('project_id');
+        $scopeId = $this->request->getGet('scope_id');
         
         if (!$projectId) {
             return $this->response->setJSON(['success' => false, 'message' => 'Project ID is required']);
         }
 
-        $templates = $this->activityModel->getProjectTemplates($projectId);
+        $templates = $scopeId
+            ? $this->activityModel->getScopeTemplates($scopeId)
+            : $this->activityModel->getTaskTemplatesByProject($projectId);
         
         return $this->response->setJSON([
             'success' => true,
