@@ -26,7 +26,7 @@
     <div>
     <!-- New Project Button -->
     <div style="display: flex; justify-content: flex-end; margin-bottom: 1.25rem;">
-        <?php $userData = session('userdata'); $roleId = $userData['role_id'] ?? null; if (in_array($roleId, [1,2,3,4])): ?>
+        <?php $userData = session('userdata'); $roleId = $userData['role_id'] ?? null; if (in_array($roleId, [1,2])): ?>
             <button onclick="editProject()" style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white; border: none; border-radius: 0.5rem; padding: 0.75rem 1.25rem; font-weight: 600; font-size: 0.9rem; cursor: pointer; transition: all 0.3s ease; box-shadow: 0 4px 12px rgba(102, 126, 234, 0.3);" onmouseover="this.style.transform='translateY(-1px)'; this.style.boxShadow='0 6px 18px rgba(102, 126, 234, 0.4)';" onmouseout="this.style.transform='translateY(0)'; this.style.boxShadow='0 4px 12px rgba(102, 126, 234, 0.3)';">
                 <i class="fas fa-plus" style="margin-right: 0.5rem;"></i>
                 Edit Project
@@ -65,12 +65,24 @@
             
             <!-- Overview Tab (Task-related charts removed) -->
             <div id="overview" style="display: block;">
+                <div style="margin-bottom: 2rem;">
+                    <h2 id="projectTitle" style="font-family: 'Poppins', sans-serif; font-size: 1.5rem; font-weight: 600; color: #374151; margin-bottom: 2rem; display: flex; align-items: center;">Loading...</h2>
+                </div>
                 <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 2rem;">
                     <div>
                         <!-- Project Details (left column only) -->
                         <div style="margin-bottom: 2rem;">
                             <h3 style="margin: 0 0 1rem 0; font-size: 1.25rem; font-weight: 600; color: #374151; font-family: 'Poppins', sans-serif;">Project Details</h3>
                             <div style="background: white; border: 1px solid #e2e8f0; border-radius: 0.75rem; padding: 1.5rem;">
+                                <div style="margin-bottom: 1.25rem;">
+                                    <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 0.5rem;">
+                                        <strong>Progress:</strong>
+                                        <small class="text-muted" id="projectProgressText">0%</small>
+                                    </div>
+                                    <div class="progress">
+                                        <div class="progress-bar" id="projectProgressBar" style="width: 0%"></div>
+                                    </div>
+                                </div>
                                 <div style="display: flex; justify-content: space-between; align-items: center; padding: 1rem 0; border-bottom: 1px solid #f1f5f9;">
                                     <span style="font-weight: 600; color: #374151;">Start Date:</span>
                                     <span style="color: #6b7280;" id="projectStartDate">Loading...</span>
@@ -91,18 +103,7 @@
                         </div>
                     </div>
                     <div>
-                        <!-- Recent Activity and Progress (right column) -->
-                        <div class="row mb-3" style="padding-top: 2.5rem;">
-                            <div class="col-sm-6">
-                                <strong>Progress:</strong>
-                            </div>
-                            <div class="col-sm-6">
-                                <div class="progress">
-                                    <div class="progress-bar" id="projectProgressBar" style="width: 0%"></div>
-                                </div>
-                                <small class="text-muted" id="projectProgressText">0%</small>
-                            </div>
-                        </div>
+                        <!-- Recent Activity (right column) -->
                         <div class="mb-4">
                             <h5>Project Activities</h5>
                             <div class="card">
@@ -124,10 +125,12 @@
             <div id="team" style="display: none;">
                 <div class="d-flex justify-content-between align-items-center mb-3">
                     <h5>Team Members</h5>
-                    <button class="btn btn-primary" onclick="addTeamMember()">
-                        <i class="fas fa-user-plus me-1"></i>
-                        Add Member
-                    </button>
+                    <?php $userData = session('userdata'); $roleId = $userData['role_id'] ?? null; if (in_array($roleId, [1,2])): ?>
+                        <button class="btn btn-primary" onclick="addTeamMember()">
+                            <i class="fas fa-user-plus me-1"></i>
+                            Add Member
+                        </button>
+                    <?php endif; ?>
                 </div>
                 <div id="teamMembersList">
                     <div class="text-center text-muted py-4">
@@ -158,6 +161,112 @@
     <!-- Removed Create Task Modal -->
 
 <script>
+var baseUrl = '<?= base_url() ?>';
+// --- GLOBAL UTILITY FUNCTIONS (fix ReferenceError) ---
+function showTab(tabName) {
+    console.log('Switching to tab:', tabName); // Debug: log tab switches
+    const tabs = ['overview', 'team', 'activity'];
+    tabs.forEach(tab => {
+        const tabContent = document.getElementById(tab);
+        const tabButton = document.getElementById(tab + '-tab');
+        if (tabContent) tabContent.style.display = 'none';
+        if (tabButton) {
+            tabButton.style.background = 'transparent';
+            tabButton.style.color = '#6b7280';
+            tabButton.style.borderBottomColor = 'transparent';
+            tabButton.classList.remove('active');
+        }
+    });
+    const selectedTab = document.getElementById(tabName);
+    const selectedButton = document.getElementById(tabName + '-tab');
+    if (selectedTab) selectedTab.style.display = 'block';
+    if (selectedButton) {
+        selectedButton.style.background = 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)';
+        selectedButton.style.color = 'white';
+        selectedButton.style.borderBottomColor = '#667eea';
+        selectedButton.classList.add('active');
+    }
+    switch(tabName) {
+        case 'team':
+            console.log('Loading team members because team tab was selected');
+            loadTeamMembers();
+            break;
+        case 'activity':
+            console.log('Loading activity log because activity tab was selected');
+            loadActivityLog();
+            break;
+    }
+}
+
+function editTeamMember(userId, fullName, fte, endDateInvolvement) {
+
+    // Fetch latest member data from backend for modal
+    // Fetch latest member data from backend for modal
+    $.ajax({
+        url: baseUrl + '/projects/get_project_member/' + userId,
+        method: 'GET',
+        dataType: 'json',
+        success: function(data) {
+            let fteVal = (data.fte === undefined || data.fte === null || data.fte === 'null' || data.fte === '') ? '1.00' : data.fte;
+            let endDateVal = (data.end_date_involvement === undefined || data.end_date_involvement === null || data.end_date_involvement === 'null' || data.end_date_involvement === '') ? '' : data.end_date_involvement;
+            Swal.fire({
+                title: `Edit Member: ${fullName}`,
+                html: `
+                    <div class="mb-3 text-start">
+                        <label for="fteEditInput" class="form-label">FTE</label>
+                        <input id="fteEditInput" type="number" class="form-control" min="0" max="1" step="0.01" value="${fteVal}" placeholder="e.g. 1.00">
+                    </div>
+                    <div class="mb-3 text-start">
+                        <label for="endDateEditInput" class="form-label">End Date Involvement</label>
+                        <input id="endDateEditInput" type="date" class="form-control" value="${endDateVal}">
+                    </div>
+                `,
+                showCancelButton: true,
+                confirmButtonText: 'Save',
+                cancelButtonText: 'Cancel',
+                focusConfirm: false,
+                customClass: {
+                    cancelButton: '',
+                },
+                preConfirm: () => {
+                    let newFte = parseFloat(document.getElementById('fteEditInput').value);
+                    let newEndDate = document.getElementById('endDateEditInput').value;
+                    if (isNaN(newFte) || newFte < 0 || newFte > 1) {
+                        Swal.showValidationMessage('FTE must be a number between 0.00 and 1.00');
+                        return false;
+                    }
+                    return $.ajax({
+                        url: `${baseUrl}/projects/update_project_member`,
+                        method: 'POST',
+                        data: {
+                            project_id: projectId,
+                            user_id: userId,
+                            fte: newFte.toFixed(2),
+                            end_date_involvement: newEndDate
+                        },
+                        dataType: 'json'
+                    }).then(function(resp) {
+                        if (resp.success) {
+                            loadTeamMembers();
+                            return true;
+                        } else {
+                            Swal.showValidationMessage(resp.message || 'Unknown error');
+                            return false;
+                        }
+                    }).catch(function(xhr, status, error) {
+                        console.error('Error updating project member:', error);
+                        Swal.showValidationMessage('Server error');
+                        return false;
+                    });
+                }
+            });
+        },
+        error: function() {
+            Swal.fire('Error', 'Could not fetch member data.', 'error');
+        }
+    });
+}
+
 // Add Team Member button handler
 function addTeamMember() {
     Swal.fire({
@@ -175,11 +284,22 @@ function addTeamMember() {
                     <option value="">-- Please Select --</option>
                 </select>
             </div>
+            <div class="mb-3 text-start">
+                <label for="fteInput" class="form-label">FTE</label>
+                <input id="fteInput" type="number" class="form-control" min="0" max="1" step="0.01" placeholder="e.g. 1.00" value="1.00">
+            </div>
+            <div class="mb-3 text-start">
+                <label for="endDateInvolvementInput" class="form-label">End Date Involvement</label>
+                <input id="endDateInvolvementInput" type="date" class="form-control">
+            </div>
         `,
         showCancelButton: true,
         confirmButtonText: 'Add',
         cancelButtonText: 'Cancel',
         focusConfirm: false,
+        customClass: {
+            cancelButton: '',
+        },
         didOpen: () => {
             // Fetch positions
             $.ajax({
@@ -241,8 +361,14 @@ function addTeamMember() {
         preConfirm: () => {
             let posId = $('#positionDropdown').val();
             let userIds = $('#userDropdown').val();
+            let fte = parseFloat($('#fteInput').val());
+            let endDateInvolvement = $('#endDateInvolvementInput').val();
             if (!posId || !userIds || userIds.length === 0) {
                 Swal.showValidationMessage('Please select a role and at least one user.');
+                return false;
+            }
+            if (isNaN(fte) || fte < 0 || fte > 1) {
+                Swal.showValidationMessage('FTE must be a number between 0.00 and 1.00');
                 return false;
             }
             // AJAX to add members to project
@@ -252,7 +378,9 @@ function addTeamMember() {
                 data: {
                     project_id: projectId,
                     position_id: posId,
-                    user_ids: userIds
+                    user_ids: userIds,
+                    fte: fte.toFixed(2),
+                    end_date_involvement: endDateInvolvement
                 },
                 dataType: 'json'
             }).then(function(resp) {
@@ -359,41 +487,8 @@ function timeAgo(date) {
 function editProject() {
     window.location.href = `<?= base_url('projects') ?>/${projectId}/edit`;
 }
-function showTab(tabName) {
-    console.log('Switching to tab:', tabName); // Debug: log tab switches
-    
-    const tabs = ['overview', 'team', 'activity'];
-    tabs.forEach(tab => {
-        const tabContent = document.getElementById(tab);
-        const tabButton = document.getElementById(tab + '-tab');
-        if (tabContent) tabContent.style.display = 'none';
-        if (tabButton) {
-            tabButton.style.background = 'transparent';
-            tabButton.style.color = '#6b7280';
-            tabButton.style.borderBottomColor = 'transparent';
-            tabButton.classList.remove('active');
-        }
-    });
-    const selectedTab = document.getElementById(tabName);
-    const selectedButton = document.getElementById(tabName + '-tab');
-    if (selectedTab) selectedTab.style.display = 'block';
-    if (selectedButton) {
-        selectedButton.style.background = 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)';
-        selectedButton.style.color = 'white';
-        selectedButton.style.borderBottomColor = '#667eea';
-        selectedButton.classList.add('active');
-    }
-    switch(tabName) {
-        case 'team':
-            console.log('Loading team members because team tab was selected');
-            loadTeamMembers();
-            break;
-        case 'activity':
-            console.log('Loading activity log because activity tab was selected');
-            loadActivityLog();
-            break;
-    }
-}
+// --- END OF GLOBAL UTILITY FUNCTIONS ---
+
 function loadProjectDetails() {
     fetch(`${baseUrl}/projects/getProject/${projectId}`)
         .then(res => res.json())
@@ -412,10 +507,14 @@ function loadProjectDetails() {
             const client = project.client || 'N/A';
             const totalTasks = typeof project.total_tasks !== 'undefined' ? project.total_tasks : 0;
             const completedTasks = typeof project.completed_tasks !== 'undefined' ? project.completed_tasks : 0;
-            const progress = totalTasks > 0 ? Math.round((completedTasks / totalTasks) * 100) : 0;
+            // Use avg_progress from backend if available, fallback to classic progress
+            let avgProgress = typeof project.avg_progress !== 'undefined' ? Math.round(project.avg_progress) : null;
+            if (avgProgress === null || isNaN(avgProgress)) {
+                avgProgress = totalTasks > 0 ? Math.round((completedTasks / totalTasks) * 100) : 0;
+            }
 
             const elTitle = document.getElementById('projectTitle');
-            if (elTitle) elTitle.innerHTML = `<i class='fas fa-project-diagram' style='color: #667eea; font-size: 1.8rem;'></i> ${name}`;
+            if (elTitle) elTitle.textContent = name;
             const elStatus = document.getElementById('projectStatus');
             if (elStatus) {
                 elStatus.textContent = status;
@@ -435,14 +534,14 @@ function loadProjectDetails() {
             const elClient = document.getElementById('projectClient');
             if (elClient) elClient.textContent = client;
             const elBar = document.getElementById('projectProgressBar');
-            if (elBar) elBar.style.width = progress + '%';
+            if (elBar) elBar.style.width = avgProgress + '%';
             const elText = document.getElementById('projectProgressText');
-            if (elText) elText.textContent = `${progress}% (${completedTasks}/${totalTasks})`;
+            if (elText) elText.textContent = `${avgProgress}%`;
         })
         .catch(error => {
             console.error('Error loading project details:', error);
             const elTitle = document.getElementById('projectTitle');
-            if (elTitle) elTitle.innerHTML = `<i class='fas fa-project-diagram' style='color: #667eea; font-size: 1.8rem;'></i> Error Loading Project`;
+            if (elTitle) elTitle.textContent = 'Error Loading Project';
         });
 }
 function loadProjectStats() {
@@ -505,13 +604,21 @@ function renderTeamMembers(members) {
                     <i class="fas fa-user-circle me-2 text-secondary"></i> 
                     <span>${m.full_name} (${m.role})</span>
                 </div>
-                <button class="btn btn-sm btn-outline-danger" onclick="deleteTeamMember(${m.user_id || m.id}, '${m.full_name}')" title="Remove from project">
-                    <i class="fas fa-trash"></i>
-                </button>
+                <div class="d-flex align-items-center gap-2">
+                    <?php $userData = session('userdata'); $roleId = $userData['role_id'] ?? null; if (in_array($roleId, [1,2])): ?>
+                    <button class="btn btn-sm btn-outline-secondary me-1" onclick="editTeamMember(${m.user_id || m.id}, '${m.full_name}')" title="Edit FTE & End Date">
+                        <i class="fas fa-cog"></i>
+                    </button>
+                    <button class="btn btn-sm btn-outline-danger" onclick="deleteTeamMember(${m.user_id || m.id}, '${m.full_name}')" title="Remove from project">
+                        <i class="fas fa-trash"></i>
+                    </button>
+                    <?php endif; ?>
+                </div>
             </li>
         `;
     });
     html += '</ul>';
+// (Removed duplicate non-AJAX editTeamMember function)
     
     console.log('Generated HTML length:', html.length); // Debug: check HTML output
     document.getElementById('teamMembersList').innerHTML = html;
@@ -524,9 +631,12 @@ function deleteTeamMember(userId, memberName) {
         icon: 'warning',
         showCancelButton: true,
         confirmButtonColor: '#dc3545',
-        cancelButtonColor: '#6c757d',
+        cancelButtonColor: '#6b7280',
         confirmButtonText: 'Yes, remove them!',
-        cancelButtonText: 'Cancel'
+        cancelButtonText: 'Cancel',
+        customClass: {
+            cancelButton: '',
+        }
     }).then((result) => {
         if (result.isConfirmed) {
             // Make AJAX call to soft delete team member
@@ -544,16 +654,20 @@ function deleteTeamMember(userId, memberName) {
                             title: 'Removed!',
                             text: `${memberName} has been removed from the project.`,
                             icon: 'success',
-                            confirmButtonText: 'OK'
+                            confirmButtonText: 'OK',
+                            allowOutsideClick: false,
+                            allowEscapeKey: false
+                        }).then(() => {
+                            loadTeamMembers();
                         });
-                        // Reload the team members list
-                        loadTeamMembers();
                     } else {
                         Swal.fire({
                             title: 'Error!',
                             text: response.message || 'Failed to remove team member.',
                             icon: 'error',
-                            confirmButtonText: 'OK'
+                            confirmButtonText: 'OK',
+                            allowOutsideClick: false,
+                            allowEscapeKey: false
                         });
                     }
                 },
@@ -563,7 +677,9 @@ function deleteTeamMember(userId, memberName) {
                         title: 'Error!',
                         text: 'An error occurred while removing the team member. Please try again.',
                         icon: 'error',
-                        confirmButtonText: 'OK'
+                        confirmButtonText: 'OK',
+                        allowOutsideClick: false,
+                        allowEscapeKey: false
                     });
                 }
             });
@@ -718,7 +834,7 @@ function renderProjectComponents(scopes) {
                                  style="border-radius: 0.5rem; border: 1px solid #e2e8f0; cursor: pointer; transition: background-color 0.2s;"
                                  onmouseover="this.style.backgroundColor='#f8fafc'" 
                                  onmouseout="this.style.backgroundColor='white'"
-                                 onclick="window.location.href='<?= base_url('activity/activity_dynamic/') ?>${template.id}?project_id=${projectId}'">>
+                                 onclick="window.location.href='<?= base_url('activity/activity_dynamic/') ?>${template.id}?project_id=${projectId}'">
                                 <div class="component-info d-flex align-items-center">
                                     <span class="component-name" style="font-weight: 500; color: #374151;">${template.name}</span>
                                 </div>

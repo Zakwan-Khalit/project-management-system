@@ -11,7 +11,7 @@
             </li>
             <li style="color: #f7fafc; font-weight: 500; font-size: 0.75rem; display: flex; align-items: center; padding: 0.1rem 0.25rem;">
                 <i class="fas fa-chart-bar" style="margin-right: 0.3rem; font-size: 0.7rem;"></i>
-                Reports Dashboard
+                Reports
             </li>
         </ol>
     </nav>
@@ -34,6 +34,7 @@
                             <option value="project_progress">Project Progress Report</option>
                             <option value="completed_project">Completed Project Progress Report</option>
                             <option value="completion_status">Project Completion Status Report</option>
+                            <option value="fte_report">Full-Time Equivalent (FTE) Report</option>
                         </select>
                     </div>
 

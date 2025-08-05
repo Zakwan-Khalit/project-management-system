@@ -68,7 +68,7 @@
                         </div>
                     </div>
                     
-                    <div class="d-flex gap-3 mt-4 pt-3" style="border-top: 1px solid #f3f4f6;">
+                    <div class="d-flex gap-3 mt-4 pt-3" style="border-top: 1px solid #f3f4f6; justify-content: flex-end;">
                         <button type="submit" class="btn btn-primary px-4 py-2" style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); border: none; border-radius: 0.5rem; font-weight: 500;">
                             <i class="fas fa-save me-2"></i>
                             Save Changes

@@ -18,16 +18,7 @@
                             Edit Event
                         </li>
                     </ol>
-                        <li style="color: #f7fafc; font-weight: 600; font-size: 0.85rem; display: flex; align-items: center; padding: 0.2rem 0.4rem; background: rgba(255,255,255,0.1); border-radius: 0.3rem; backdrop-filter: blur(10px);">
-                            <i class="fas fa-edit" style="margin-right: 0.4rem; font-size: 0.75rem; opacity: 0.9;"></i>
-                            Edit Event
-                        </li>
-                    </ol>
                 </nav>
-                <h1 class="page-title">
-                    <i class="fas fa-edit me-3"></i>
-                    Edit Event
-                </h1>
             </div>
         </div>
     </div>
@@ -37,7 +28,7 @@
         <div class="col-lg-8 col-xl-9">
             <div style="background: white; border-radius: 1rem; box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08); border: 1px solid #f1f3f4;">
                 <div style="background: white; border-bottom: 1px solid #e2e8f0; padding: 1.5rem; border-radius: 1rem 1rem 0 0;">
-                    <h5 style="margin: 0; font-size: 1.1rem; font-weight: 600; color: #2d3748;">Event Details</h5>
+                    <h5 style="margin: 0; font-size: 1.1rem; font-weight: 600; color: #2d3748;">Edit Event</h5>
                 </div>
                 <div style="padding: 1.5rem;">
                     <?= form_open(base_url('events/edit/' . $event['id']), ['class' => 'event-form']) ?>
@@ -77,7 +68,7 @@
                             </div>
 
                             <div class="mb-3">
-                                <label for="description" class="form-label">Description</label>
+                                <label for="description" class="form-label" style="font-weight: 600;">Description</label>
                                 <textarea class="form-control" id="description" name="description" rows="3"><?= old('description', $event['description']) ?></textarea>
                                 <?php if (isset($errors['description'])): ?>
                                     <div class="invalid-feedback d-block"><?= $errors['description'] ?></div>
@@ -113,7 +104,7 @@
                             </div>
 
                             <div class="mb-3">
-                                <label for="location" class="form-label">Location</label>
+                                <label for="location" class="form-label" style="font-weight: 600;">Location</label>
                                 <input type="text" class="form-control" id="location" name="location" 
                                        value="<?= old('location', $event['location']) ?>" placeholder="Meeting room, address, or online link">
                                 <?php if (isset($errors['location'])): ?>
@@ -127,7 +118,7 @@
                             <h6 style="font-size: 1.1rem; font-weight: 600; color: #2d3748; margin-bottom: 1rem; padding-bottom: 0.5rem; border-bottom: 2px solid #e2e8f0;">Project & Attendees</h6>
                             
                             <div class="mb-3">
-                                <label for="project_id" class="form-label">Related Project</label>
+                                <label for="project_id" class="form-label" style="font-weight: 600;">Related Project</label>
                                 <select class="form-select" id="project_id" name="project_id">
                                     <option value="">No specific project</option>
                                     <?php foreach ($projects as $project): ?>
@@ -143,7 +134,7 @@
                             </div>
 
                             <div class="mb-3">
-                                <label for="attendees" class="form-label">Attendees</label>
+                                <label for="attendees" class="form-label" style="font-weight: 600;">Attendees</label>
                                 <select class="form-select" id="attendees" name="attendees[]" multiple>
                                     <!-- Options will be populated by JavaScript based on project selection -->
                                 </select>
@@ -155,13 +146,13 @@
                         </div>
 
                         <!-- Form Actions -->
-                        <div style="display: flex; gap: 1rem; justify-content: flex-start; margin-top: 2rem;">
-                            <button type="submit" class="btn btn-primary btn-lg" id="updateEventBtn">
+                        <div style="display: flex; gap: 1rem; justify-content: flex-end; margin-top: 2rem;">
+                            <button type="submit" id="updateEventBtn" style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white; border: none; border-radius: 0.5rem; padding: 0.75rem 1.25rem; font-weight: 600; font-size: 0.9rem; cursor: pointer; transition: all 0.3s ease; box-shadow: 0 4px 12px rgba(102, 126, 234, 0.3);" onmouseover="this.style.transform='translateY(-1px)'; this.style.boxShadow='0 6px 18px rgba(102, 126, 234, 0.4)';" onmouseout="this.style.transform='translateY(0)'; this.style.boxShadow='0 4px 12px rgba(102, 126, 234, 0.3)';">
                                 <i class="fas fa-save me-2"></i>
                                 Update Event
                             </button>
                             <a href="<?= base_url('events') ?>" class="btn btn-outline-secondary btn-lg">
-                                <i class="fas fa-times me-2"></i>
+                                <i class="fas fa-times" style="margin-right: 0.5rem;"></i>
                                 Cancel
                             </a>
                         </div>

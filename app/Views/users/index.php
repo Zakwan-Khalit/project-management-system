@@ -9,14 +9,14 @@
         </li>
         <li style="color: #ffffff; font-weight: 500; font-size: 0.75rem; display: flex; align-items: center; padding: 0.1rem 0.25rem; background: rgba(255,255,255,0.1); border-radius: 0.2rem;">
             <i class="fas fa-users" style="margin-right: 0.3rem; font-size: 0.7rem;"></i>
-            User Management
+            User
         </li>
     </ol>
 </nav>
 
 <!-- Add User Button -->
 <div style="margin-bottom: 1.25rem; display: flex; justify-content: flex-end;">
-    <button onclick="window.location.href='<?= base_url('users/create') ?>'" style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white; border: none; border-radius: 0.5rem; padding: 0.75rem 1.5rem; font-weight: 600; font-size: 0.9rem; cursor: pointer; transition: all 0.3s ease; box-shadow: 0 4px 12px rgba(102, 126, 234, 0.3);" onmouseover="this.style.transform='translateY(-1px)'; this.style.boxShadow='0 6px 18px rgba(102, 126, 234, 0.4)';" onmouseout="this.style.transform='translateY(0)'; this.style.boxShadow='0 4px 12px rgba(102, 126, 234, 0.3)';">
+    <button onclick="window.location.href='<?= base_url('users/create') ?>'" style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white; border: none; border-radius: 0.5rem; padding: 0.75rem 1.25rem; font-weight: 600; font-size: 0.9rem; cursor: pointer; transition: all 0.3s ease; box-shadow: 0 4px 12px rgba(102, 126, 234, 0.3);" onmouseover="this.style.transform='translateY(-1px)'; this.style.boxShadow='0 6px 18px rgba(102, 126, 234, 0.4)';" onmouseout="this.style.transform='translateY(0)'; this.style.boxShadow='0 4px 12px rgba(102, 126, 234, 0.3)';">
         <i class="fas fa-plus" style="margin-right: 0.5rem;"></i>
         Add User
     </button>
@@ -116,7 +116,7 @@
                 <i class="fas fa-users" style="font-size: 3rem; color: #d1d5db; margin-bottom: 1rem;"></i>
                 <h5 style="color: #6b7280; font-weight: 600; margin-bottom: 0.5rem; font-family: 'Poppins', sans-serif;">No users found</h5>
                 <p style="color: #9ca3af; margin-bottom: 1.5rem;">Start by adding your first user to the system.</p>
-                <button onclick="window.location.href='<?= base_url('users/create') ?>'" style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white; border: none; border-radius: 0.75rem; padding: 0.75rem 1.5rem; font-weight: 600; cursor: pointer; transition: all 0.2s ease;" onmouseover="this.style.transform='translateY(-2px)'; this.style.boxShadow='0 8px 25px rgba(102,126,234,0.3)';" onmouseout="this.style.transform='translateY(0)'; this.style.boxShadow='none';">
+                <button onclick="window.location.href='<?= base_url('users/create') ?>'" style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white; border: none; border-radius: 0.5rem; padding: 0.75rem 1.25rem; font-weight: 600; font-size: 0.9rem; cursor: pointer; transition: all 0.3s ease; box-shadow: 0 4px 12px rgba(102, 126, 234, 0.3);" onmouseover="this.style.transform='translateY(-1px)'; this.style.boxShadow='0 6px 18px rgba(102, 126, 234, 0.4)';" onmouseout="this.style.transform='translateY(0)'; this.style.boxShadow='0 4px 12px rgba(102, 126, 234, 0.3)';">
                     <i class="fas fa-plus" style="margin-right: 0.5rem;"></i>
                     Add User
                 </button>
@@ -206,10 +206,13 @@ document.addEventListener('DOMContentLoaded', function() {
                 icon: 'warning',
                 showCancelButton: true,
                 confirmButtonColor: '#d33',
-                cancelButtonColor: '#6c757d',
+                cancelButtonColor: '#6b7280',
                 confirmButtonText: 'Yes, delete',
                 cancelButtonText: 'Cancel',
-                focusCancel: true
+                focusCancel: true,
+                customClass: {
+                    cancelButton: '',
+                }
             }).then((result) => {
                 if (result.isConfirmed) {
                     window.location.href = `<?= base_url('users/delete') ?>/${userId}`;

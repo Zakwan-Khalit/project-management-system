@@ -1,28 +1,28 @@
-<div style="padding: 1.5rem; min-height: 100vh;">
-    <div style="max-width: 1200px; margin: 0 auto;">
-        <!-- Breadcrumbs -->
-        <nav aria-label="breadcrumb" style="margin-bottom: 1rem;">
-            <ol style="display: inline-flex; list-style: none; padding: 0.4rem 0.6rem; margin: 0; background: #4a5568; border-radius: 0.3rem; box-shadow: 0 2px 8px rgba(74, 85, 104, 0.15); border: none; width: fit-content;">
-                <li style="display: flex; align-items: center;">
-                            <a href="<?= base_url('dashboard') ?>" style="color: #e2e8f0; text-decoration: none; font-weight: 500; font-size: 0.75rem; transition: all 0.3s ease; display: flex; align-items: center; padding: 0.1rem 0.25rem; border-radius: 0.2rem;" onmouseover="this.style.backgroundColor='rgba(255,255,255,0.1)'; this.style.color='#ffffff'" onmouseout="this.style.backgroundColor='transparent'; this.style.color='#e2e8f0'">
-                                <i class="fas fa-home" style="margin-right: 0.3rem; font-size: 0.7rem;"></i>
-                            </a>
-                            <span style="margin: 0 0.3rem; color: #a0aec0; font-size: 0.8rem; font-weight: 300;">›</span>
-                        </li>       
-                <li style="display: flex; align-items: center;">
-                    <a href="<?= base_url('users') ?>" style="color: #e2e8f0; text-decoration: none; font-weight: 500; font-size: 0.75rem; transition: all 0.3s ease; display: flex; align-items: center; padding: 0.1rem 0.25rem; border-radius: 0.2rem;" onmouseover="this.style.backgroundColor='rgba(255,255,255,0.1)'; this.style.color='#ffffff'" onmouseout="this.style.backgroundColor='transparent'; this.style.color='#e2e8f0'">
-                        <i class="fas fa-users" style="margin-right: 0.3rem; font-size: 0.7rem;"></i>
-                        User Management
+<!-- Breadcrumbs -->
+<nav aria-label="breadcrumb" style="margin-bottom: 1rem;">
+    <ol style="display: inline-flex; list-style: none; padding: 0.4rem 0.6rem; margin: 0; background: #4a5568; border-radius: 0.3rem; box-shadow: 0 2px 8px rgba(74, 85, 104, 0.15); border: none; width: fit-content;">
+        <li style="display: flex; align-items: center;">
+                    <a href="<?= base_url('dashboard') ?>" style="color: #e2e8f0; text-decoration: none; font-weight: 500; font-size: 0.75rem; transition: all 0.3s ease; display: flex; align-items: center; padding: 0.1rem 0.25rem; border-radius: 0.2rem;" onmouseover="this.style.backgroundColor='rgba(255,255,255,0.1)'; this.style.color='#ffffff'" onmouseout="this.style.backgroundColor='transparent'; this.style.color='#e2e8f0'">
+                        <i class="fas fa-home" style="margin-right: 0.3rem; font-size: 0.7rem;"></i>
                     </a>
                     <span style="margin: 0 0.3rem; color: #a0aec0; font-size: 0.8rem; font-weight: 300;">›</span>
-                </li>
-                <li style="color: #ffffff; font-weight: 500; font-size: 0.75rem; display: flex; align-items: center; padding: 0.1rem 0.25rem; background: rgba(255,255,255,0.1); border-radius: 0.2rem;">
-                    <i class="fas fa-plus" style="margin-right: 0.3rem; font-size: 0.7rem;"></i>
-                    Edit User
-                </li>
-            </ol>
-        </nav>
+                </li>       
+        <li style="display: flex; align-items: center;">
+            <a href="<?= base_url('users') ?>" style="color: #e2e8f0; text-decoration: none; font-weight: 500; font-size: 0.75rem; transition: all 0.3s ease; display: flex; align-items: center; padding: 0.1rem 0.25rem; border-radius: 0.2rem;" onmouseover="this.style.backgroundColor='rgba(255,255,255,0.1)'; this.style.color='#ffffff'" onmouseout="this.style.backgroundColor='transparent'; this.style.color='#e2e8f0'">
+                <i class="fas fa-users" style="margin-right: 0.3rem; font-size: 0.7rem;"></i>
+                User Management
+            </a>
+            <span style="margin: 0 0.3rem; color: #a0aec0; font-size: 0.8rem; font-weight: 300;">›</span>
+        </li>
+        <li style="color: #ffffff; font-weight: 500; font-size: 0.75rem; display: flex; align-items: center; padding: 0.1rem 0.25rem; background: rgba(255,255,255,0.1); border-radius: 0.2rem;">
+            <i class="fas fa-plus" style="margin-right: 0.3rem; font-size: 0.7rem;"></i>
+            Edit User
+        </li>
+    </ol>
+</nav>
 
+<div style="padding: 1.5rem; min-height: 100vh;">
+    <div style="max-width: 1200px; margin: 0 auto;">
         <!-- Error Messages -->
         <?php if (session()->getFlashdata('errors')): ?>
             <div style="background: linear-gradient(135deg, #fee2e2 0%, #fecaca 100%); border: 1px solid #f87171; color: #dc2626; padding: 1rem; border-radius: 0.75rem; margin-bottom: 1.5rem;">
@@ -209,8 +209,9 @@ $(document).ready(function() {
                 icon: type,
                 title: title,
                 text: message,
-                timer: 3000,
-                showConfirmButton: type === 'error'
+                showConfirmButton: true,
+                allowOutsideClick: false,
+                allowEscapeKey: false
             });
         } else {
             alert(title + ': ' + message);
@@ -232,8 +233,10 @@ $(document).ready(function() {
             Swal.fire({
                 icon: 'error',
                 title: 'Validation Errors',
-                html: '<div style="text-align: left;">• ' + errorList.replace(/\n/g, '<br>• ') + '</div>',
-                showConfirmButton: true
+                html: '<div style="text-align: left;"> ' + errorList.replace(/\n/g, '<br> ') + '</div>',
+                showConfirmButton: true,
+                allowOutsideClick: false,
+                allowEscapeKey: false
             });
         } else {
             alert('Please fix the following errors:\n• ' + errorList);

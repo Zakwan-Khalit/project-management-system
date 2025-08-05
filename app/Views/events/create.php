@@ -1,9 +1,9 @@
 <!-- Create Event Form -->
-<div class="container-fluid">
+<div class="container-fluid" style="width: 100%; padding: 0 1.5rem;">
     <!-- Page Header -->
-    <div class="row mb-4">
-        <div class="col-12">
-            <div class="page-header">
+    <div class="row mb-4" style="margin-bottom: 2rem !important;">
+        <div class="col-12" style="width: 100%;">
+            <div class="page-header" style="margin-bottom: 2rem;">
                 <nav aria-label="breadcrumb" style="margin-bottom: 1rem;">
                     <ol style="display: inline-flex; list-style: none; padding: 0.4rem 0.6rem; margin: 0; background: #4a5568; border-radius: 0.3rem; box-shadow: 0 2px 8px rgba(74, 85, 104, 0.15); border: none; width: fit-content;">
                         <li style="display: flex; align-items: center;">
@@ -19,33 +19,28 @@
                         </li>
                     </ol>
                 </nav>
-                </nav>
-                <h1 class="page-title">
-                    <i class="fas fa-plus-circle me-3"></i>
-                    Create New Event
-                </h1>
             </div>
         </div>
     </div>
 
     <!-- Create Form -->
-    <div class="row">
-        <div class="col-lg-8 col-xl-9">
-            <div class="form-card">
-                <div class="card-header">
-                    <h5 class="card-title">Event Details</h5>
+    <div class="row" style="display: flex; flex-wrap: wrap; margin-right: -0.75rem; margin-left: -0.75rem;">
+        <div class="col-lg-8 col-xl-9" style="flex: 0 0 auto; width: 75%; max-width: 75%; padding-right: 0.75rem; padding-left: 0.75rem;">
+            <div class="form-card" style="background: white; border-radius: 1rem; box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08); border: 1px solid #f1f3f4;">
+                <div class="card-header" style="background: white; border-bottom: 1px solid #e2e8f0; padding: 1.5rem; border-radius: 1rem 1rem 0 0;">
+                    <h5 class="card-title">Create New Event</h5>
                 </div>
-                <div class="card-body">
+                <div class="card-body" style="padding: 2rem;">
                     <?= form_open('events/create', ['class' => 'event-form']) ?>
                         
                         <!-- Basic Information -->
-                        <div class="form-section">
-                            <h6 class="section-title">Basic Information</h6>
+                        <div class="form-section" style="margin-bottom: 2rem; padding-bottom: 1.5rem; border-bottom: 1px solid #f7fafc;">
+                            <h6 class="section-title" style="font-size: 1.1rem; font-weight: 600; color: #2d3748; margin-bottom: 1rem; padding-bottom: 0.5rem; border-bottom: 2px solid #e2e8f0;">Basic Information</h6>
                             
                             <div class="row">
                                 <div class="col-md-8">
                                     <div class="mb-3">
-                                        <label for="title" class="form-label required">Event Title</label>
+                                        <label for="title" class="form-label required" style="font-weight: 600;">Event Title</label>
                                         <input type="text" class="form-control" id="title" name="title" 
                                                value="<?= old('title') ?>" required>
                                         <?php if (isset($errors['title'])): ?>
@@ -55,7 +50,7 @@
                                 </div>
                                 <div class="col-md-4">
                                     <div class="mb-3">
-                                        <label for="event_type" class="form-label required">Event Type</label>
+                                        <label for="event_type" class="form-label required" style="font-weight: 600;">Event Type</label>
                                         <select class="form-select" id="event_type" name="event_type" required>
                                             <option value="">Select Type</option>
                                             <option value="meeting" <?= old('event_type') === 'meeting' ? 'selected' : '' ?>>Meeting</option>
@@ -73,7 +68,7 @@
                             </div>
 
                             <div class="mb-3">
-                                <label for="description" class="form-label">Description</label>
+                                <label for="description" class="form-label" style="font-weight: 600;">Description</label>
                                 <textarea class="form-control" id="description" name="description" rows="3"><?= old('description') ?></textarea>
                                 <?php if (isset($errors['description'])): ?>
                                     <div class="invalid-feedback d-block"><?= $errors['description'] ?></div>
@@ -82,13 +77,13 @@
                         </div>
 
                         <!-- Date & Time -->
-                        <div class="form-section">
-                            <h6 class="section-title">Date & Time</h6>
+                        <div class="form-section" style="margin-bottom: 2rem; padding-bottom: 1.5rem; border-bottom: 1px solid #f7fafc;">
+                            <h6 class="section-title" style="font-size: 1.1rem; font-weight: 600; color: #2d3748; margin-bottom: 1rem; padding-bottom: 0.5rem; border-bottom: 2px solid #e2e8f0;">Date & Time</h6>
                             
                             <div class="row">
                                 <div class="col-md-6">
                                     <div class="mb-3">
-                                        <label for="start_datetime" class="form-label required">Start Date & Time</label>
+                                        <label for="start_datetime" class="form-label required" style="font-weight: 600;">Start Date & Time</label>
                                         <input type="datetime-local" class="form-control" id="start_datetime" name="start_datetime" 
                                                value="<?= old('start_datetime') ?>" required>
                                         <?php if (isset($errors['start_datetime'])): ?>
@@ -98,7 +93,7 @@
                                 </div>
                                 <div class="col-md-6">
                                     <div class="mb-3">
-                                        <label for="end_datetime" class="form-label required">End Date & Time</label>
+                                        <label for="end_datetime" class="form-label required" style="font-weight: 600;">End Date & Time</label>
                                         <input type="datetime-local" class="form-control" id="end_datetime" name="end_datetime" 
                                                value="<?= old('end_datetime') ?>" required>
                                         <?php if (isset($errors['end_datetime'])): ?>
@@ -109,7 +104,7 @@
                             </div>
 
                             <div class="mb-3">
-                                <label for="location" class="form-label">Location</label>
+                                <label for="location" class="form-label" style="font-weight: 600;">Location</label>
                                 <input type="text" class="form-control" id="location" name="location" 
                                        value="<?= old('location') ?>" placeholder="Meeting room, address, or online link">
                                 <?php if (isset($errors['location'])): ?>
@@ -119,11 +114,11 @@
                         </div>
 
                         <!-- Project & Attendees -->
-                        <div class="form-section">
-                            <h6 class="section-title">Project & Attendees</h6>
+                        <div class="form-section" style="margin-bottom: 2rem; padding-bottom: 1.5rem; border-bottom: 1px solid #f7fafc;">
+                            <h6 class="section-title" style="font-size: 1.1rem; font-weight: 600; color: #2d3748; margin-bottom: 1rem; padding-bottom: 0.5rem; border-bottom: 2px solid #e2e8f0;">Project & Attendees</h6>
                             
                             <div class="mb-3">
-                                <label for="project_id" class="form-label">Related Project</label>
+                                <label for="project_id" class="form-label" style="font-weight: 600;">Related Project</label>
                                 <select class="form-select" id="project_id" name="project_id">
                                     <option value="">No specific project</option>
                                     <?php foreach ($projects as $project): ?>
@@ -139,7 +134,7 @@
                             </div>
 
                             <div class="mb-3">
-                                <label for="attendees" class="form-label">Attendees</label>
+                                <label for="attendees" class="form-label" style="font-weight: 600;">Attendees</label>
                                 <select class="form-select" id="attendees" name="attendees[]" multiple>
                                     <!-- Options will be populated by JavaScript based on project selection -->
                                 </select>
@@ -151,13 +146,13 @@
                         </div>
 
                         <!-- Form Actions -->
-                        <div class="form-actions">
-                            <button type="submit" class="btn btn-primary btn-lg">
+                        <div class="form-actions" style="display: flex; gap: 1rem; justify-content: flex-end; margin-top: 2rem;">
+                            <button type="submit" class="btn btn-primary btn-lg" style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white; border: none; border-radius: 0.5rem; padding: 0.75rem 1.25rem; font-weight: 600; font-size: 0.9rem; cursor: pointer; transition: all 0.3s ease; box-shadow: 0 4px 12px rgba(102, 126, 234, 0.3);" onmouseover="this.style.transform='translateY(-1px)'; this.style.boxShadow='0 6px 18px rgba(102, 126, 234, 0.4)';" onmouseout="this.style.transform='translateY(0)'; this.style.boxShadow='0 4px 12px rgba(102, 126, 234, 0.3)';">
                                 <i class="fas fa-save me-2"></i>
                                 Create Event
                             </button>
                             <a href="<?= base_url('events') ?>" class="btn btn-outline-secondary btn-lg">
-                                <i class="fas fa-times me-2"></i>
+                                <i class="fas fa-times" style="margin-right: 0.5rem;"></i>
                                 Cancel
                             </a>
                         </div>
@@ -168,28 +163,28 @@
         </div>
 
         <!-- Event Preview -->
-        <div class="col-lg-4 col-xl-3">
-            <div class="preview-card">
-                <div class="card-header">
+        <div class="col-lg-4 col-xl-3" style="flex: 0 0 auto; width: 25%; max-width: 25%; padding-right: 0.75rem; padding-left: 0.75rem;">
+            <div class="preview-card" style="background: white; border-radius: 1rem; box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08); border: 1px solid #f1f3f4;">
+                <div class="card-header" style="background: white; border-bottom: 1px solid #e2e8f0; padding: 1.5rem; border-radius: 1rem 1rem 0 0;">
                     <h6 class="card-title">Event Preview</h6>
                 </div>
-                <div class="card-body">
-                    <div class="event-preview">
-                        <div class="preview-title" id="previewTitle">Event Title</div>
-                        <div class="preview-type" id="previewType">Event Type</div>
-                        <div class="preview-datetime" id="previewDatetime">
+                <div class="card-body" style="padding: 1.5rem;">
+                    <div class="event-preview" style="padding: 1rem; background: #f8fafc; border-radius: 0.5rem; border: 1px solid #e2e8f0;">
+                        <div class="preview-title" id="previewTitle" style="font-size: 1.1rem; font-weight: 600; color: #2d3748; margin-bottom: 0.5rem;">Event Title</div>
+                        <div class="preview-type" id="previewType" style="font-size: 0.85rem; color: #4a5568; text-transform: uppercase; font-weight: 500; margin-bottom: 1rem;">Event Type</div>
+                        <div class="preview-datetime" id="previewDatetime" style="font-size: 0.9rem; color: #4a5568; margin-bottom: 0.5rem; display: flex; align-items: center;">
                             <i class="fas fa-clock me-2"></i>
                             Select date & time
                         </div>
-                        <div class="preview-location" id="previewLocation" style="display: none;">
+                        <div class="preview-location" id="previewLocation" style="font-size: 0.9rem; color: #4a5568; margin-bottom: 0.5rem; display: flex; align-items: center; display: none;">
                             <i class="fas fa-map-marker-alt me-2"></i>
                             <span></span>
                         </div>
-                        <div class="preview-project" id="previewProject" style="display: none;">
+                        <div class="preview-project" id="previewProject" style="font-size: 0.9rem; color: #4a5568; margin-bottom: 0.5rem; display: flex; align-items: center; display: none;">
                             <i class="fas fa-folder me-2"></i>
                             <span></span>
                         </div>
-                        <div class="preview-description" id="previewDescription" style="display: none;">
+                        <div class="preview-description" id="previewDescription" style="font-size: 0.9rem; color: #718096; margin-top: 1rem; padding-top: 1rem; border-top: 1px solid #e2e8f0; line-height: 1.5; display: none;">
                             <span></span>
                         </div>
                     </div>
@@ -197,20 +192,20 @@
             </div>
 
             <!-- Quick Tips -->
-            <div class="tips-card mt-3">
-                <div class="card-header">
+            <div class="tips-card mt-3" style="background: white; border-radius: 1rem; box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08); border: 1px solid #f1f3f4; margin-top: 1rem !important;">
+                <div class="card-header" style="background: white; border-bottom: 1px solid #e2e8f0; padding: 1.5rem; border-radius: 1rem 1rem 0 0;">
                     <h6 class="card-title">
                         <i class="fas fa-lightbulb me-2"></i>
                         Tips
                     </h6>
                 </div>
-                <div class="card-body">
-                    <ul class="tips-list">
-                        <li>Use clear, descriptive titles for your events</li>
-                        <li>Add a location for in-person meetings</li>
-                        <li>Link events to projects for better organization</li>
-                        <li>Invite relevant team members to collaborate</li>
-                        <li>Set reminders for important deadlines</li>
+                <div class="card-body" style="padding: 1.5rem;">
+                    <ul class="tips-list" style="list-style: none; padding: 0; margin: 0;">
+                        <li style="padding: 0.5rem 0; border-bottom: 1px solid #f7fafc; color: #4a5568; font-size: 0.9rem;">💡 Use clear, descriptive titles for your events</li>
+                        <li style="padding: 0.5rem 0; border-bottom: 1px solid #f7fafc; color: #4a5568; font-size: 0.9rem;">💡 Add a location for in-person meetings</li>
+                        <li style="padding: 0.5rem 0; border-bottom: 1px solid #f7fafc; color: #4a5568; font-size: 0.9rem;">💡 Link events to projects for better organization</li>
+                        <li style="padding: 0.5rem 0; border-bottom: 1px solid #f7fafc; color: #4a5568; font-size: 0.9rem;">💡 Invite relevant team members to collaborate</li>
+                        <li style="padding: 0.5rem 0; color: #4a5568; font-size: 0.9rem;">💡 Set reminders for important deadlines</li>
                     </ul>
                 </div>
             </div>
@@ -343,123 +338,4 @@ document.addEventListener('DOMContentLoaded', function() {
 });
 </script>
 
-<!-- Include events CSS -->
-<link rel="stylesheet" href="<?= base_url('assets/css/events.css') ?>">
 
-<!-- Additional form styles -->
-<style>
-.form-card {
-    background: white;
-    border-radius: 1rem;
-    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
-    border: 1px solid #f1f3f4;
-}
-
-.form-card .card-header {
-    background: white;
-    border-bottom: 1px solid #e2e8f0;
-    padding: 1.5rem;
-    border-radius: 1rem 1rem 0 0;
-}
-
-.form-section {
-    margin-bottom: 2rem;
-    padding-bottom: 1.5rem;
-    border-bottom: 1px solid #f7fafc;
-}
-
-.form-section:last-of-type {
-    border-bottom: none;
-}
-
-.section-title {
-    font-size: 1.1rem;
-    font-weight: 600;
-    color: #2d3748;
-    margin-bottom: 1rem;
-    padding-bottom: 0.5rem;
-    border-bottom: 2px solid #e2e8f0;
-}
-
-.required::after {
-    content: ' *';
-    color: #e53e3e;
-}
-
-.form-actions {
-    display: flex;
-    gap: 1rem;
-    justify-content: flex-start;
-    margin-top: 2rem;
-}
-
-.preview-card, .tips-card {
-    background: white;
-    border-radius: 1rem;
-    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
-    border: 1px solid #f1f3f4;
-}
-
-.event-preview {
-    padding: 1rem;
-    background: #f8fafc;
-    border-radius: 0.5rem;
-    border: 1px solid #e2e8f0;
-}
-
-.preview-title {
-    font-size: 1.1rem;
-    font-weight: 600;
-    color: #2d3748;
-    margin-bottom: 0.5rem;
-}
-
-.preview-type {
-    font-size: 0.85rem;
-    color: #4a5568;
-    text-transform: uppercase;
-    font-weight: 500;
-    margin-bottom: 1rem;
-}
-
-.preview-datetime,
-.preview-location,
-.preview-project {
-    font-size: 0.9rem;
-    color: #4a5568;
-    margin-bottom: 0.5rem;
-    display: flex;
-    align-items: center;
-}
-
-.preview-description {
-    font-size: 0.9rem;
-    color: #718096;
-    margin-top: 1rem;
-    padding-top: 1rem;
-    border-top: 1px solid #e2e8f0;
-    line-height: 1.5;
-}
-
-.tips-list {
-    list-style: none;
-    padding: 0;
-    margin: 0;
-}
-
-.tips-list li {
-    padding: 0.5rem 0;
-    border-bottom: 1px solid #f7fafc;
-    color: #4a5568;
-    font-size: 0.9rem;
-}
-
-.tips-list li:last-child {
-    border-bottom: none;
-}
-
-.tips-list li::before {
-    content: '💡';
-    margin-right: 0.5rem;
-}
-</style>

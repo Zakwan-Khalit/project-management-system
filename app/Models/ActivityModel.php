@@ -307,7 +307,7 @@ class ActivityModel extends Model
     /**
      * Create a new scope
      */
-    public function createScope($projectId, $name, $description = null)
+    public function createScope($projectId, $scopeLookupId, $description = null)
     {
         // Get the next order number
         $builder = $this->db->table('project_scopes');
@@ -317,10 +317,14 @@ class ActivityModel extends Model
         $result = $builder->get()->getRowArray();
         $nextOrder = ($result['scope_order'] ?? 0) + 1;
 
+        // Get the name from scope_lookup
+        $lookup = $this->db->table('scope_lookup')->where('id', $scopeLookupId)->get()->getRowArray();
+        $name = $lookup ? $lookup['name'] : '';
+
         $data = [
             'project_id' => $projectId,
+            'scope_lookup_id' => $scopeLookupId,
             'name' => $name,
-            'description' => $description,
             'scope_order' => $nextOrder,
             'is_active' => 1,
             'is_delete' => 0,
@@ -452,5 +456,34 @@ class ActivityModel extends Model
             ->orderBy('tt.component_order', 'ASC')
             ->get()
             ->getResultArray();
+    }
+
+    // Get all components for a given scope (for Add Component dropdown)
+    public function getComponentsByScope($scopeId)
+    {
+        return $this->db->table('component_lookup')
+            ->select('id, name')
+            ->where('scope_id', $scopeId)
+            ->orderBy('name', 'ASC')
+            ->get()
+            ->getResultArray();
+    }
+
+    /**
+     * Get available scopes from scope_lookup not already in project_scopes for this project
+     * Returns: [id, name, description]
+     */
+    public function getAvailableScopesForProject($projectId)
+    {
+        // Get all scope_lookup.id not in project_scopes.scope_lookup_id for this project
+        $builder = $this->db->table('scope_lookup');
+        $builder->select('scope_lookup.id, scope_lookup.name');
+        $builder->whereNotIn('scope_lookup.id', function($sub) use ($projectId) {
+            $sub->select('scope_lookup_id')
+                ->from('project_scopes')
+                ->where('project_id', $projectId)
+                ->where('is_delete', 0);
+        });
+        return $builder->get()->getResultArray();
     }
 }

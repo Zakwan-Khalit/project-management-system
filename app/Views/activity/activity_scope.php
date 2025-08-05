@@ -22,7 +22,7 @@
     </nav>
 
 
-    <?php $userData = session('userdata'); $roleId = $userData['role_id'] ?? null; if (in_array($roleId, [1, 2])): ?>
+    <?php $userData = session('userdata'); $roleId = $userData['role_id'] ?? null; if (in_array($roleId, [1,2])): ?>
         <!-- Header Button (matching projects/index.php style) -->
         <div style="display: flex; justify-content: flex-end; margin-bottom: 1.25rem;">
             <button id="addScopeBtn"
@@ -79,7 +79,7 @@ $(document).ready(function() {
                             <p style="color: #64748b; font-size: 1.1rem; margin-bottom: 2rem; max-width: 500px; margin-left: auto; margin-right: auto;">
                                 Create project scopes to organize your activities and manage different aspects of your project.
                             </p>
-                            <button class="btn btn-primary btn-lg" id="createScopeBtn" style="padding: 0.75rem 2rem; font-size: 1.1rem; border-radius: 0.75rem; box-shadow: 0 4px 12px rgba(102,126,234,0.3);">
+                            <button id="createScopeBtn" style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white; border: none; border-radius: 0.5rem; padding: 0.75rem 1.25rem; font-weight: 600; font-size: 0.9rem; cursor: pointer; transition: all 0.3s ease; box-shadow: 0 4px 12px rgba(102, 126, 234, 0.3);" onmouseover="this.style.transform='translateY(-1px)'; this.style.boxShadow='0 6px 18px rgba(102, 126, 234, 0.4)';" onmouseout="this.style.transform='translateY(0)'; this.style.boxShadow='0 4px 12px rgba(102, 126, 234, 0.3)';">
                                 <i class="fas fa-plus me-2"></i>Create Scope
                             </button>
                         </div>
@@ -103,6 +103,7 @@ $(document).ready(function() {
                             ${scope.name}
                         </h3>
                     </div>
+                    <?php $userData = session('userdata'); $roleId = $userData['role_id'] ?? null; if (in_array($roleId, [1,2])): ?>
                     <div class="scope-actions d-flex gap-2">
                         <button class="btn btn-sm btn-outline-primary add-components-btn" data-scope-id="${scope.id}" style="border-radius: 0.5rem; padding: 0.5rem 1rem; font-weight: 500;">
                             <i class="fas fa-plus me-1"></i>Add Components
@@ -111,6 +112,7 @@ $(document).ready(function() {
                             <i class="fas fa-cog me-1"></i>Edit
                         </button>
                     </div>
+                    <?php endif; ?>
                 </div>
                 <div class="components-container" id="components-${scope.id}" style="border-top: 1px solid #f1f5f9; padding-top: 1.5rem;">
                     <!-- Components will be loaded here -->
@@ -136,9 +138,11 @@ $(document).ready(function() {
                     dataType: 'json',
                     success: function(taskRes) {
                         let percent = 0;
+                        let taskCount = 0;
                         if (taskRes.success && Array.isArray(taskRes.tasks) && taskRes.tasks.length > 0) {
                             let sum = 0;
                             let count = 0;
+                            taskCount = taskRes.tasks.length;
                             taskRes.tasks.forEach(t => {
                                 Object.values(t).forEach(val => {
                                     if (typeof val === 'string' && val.trim().endsWith('%')) {
@@ -154,7 +158,6 @@ $(document).ready(function() {
                                 percent = Math.round(sum / count);
                             }
                         }
-                        
                         const componentHtml = `
                             <div class="component-item" data-template-id="${template.id}" data-component-order="${template.component_order}" style="background: #f8fafc; border: 1px solid #e2e8f0; border-radius: 0.5rem; padding: 1rem; margin-bottom: 0.75rem; display: flex; justify-content: space-between; align-items: center; cursor: pointer; transition: all 0.3s ease;" onmouseover="this.style.background='#e0f2fe'; this.style.borderColor='#0ea5e9'; this.style.transform='translateY(-2px)'; this.style.boxShadow='0 4px 12px rgba(14, 165, 233, 0.15)'" onmouseout="this.style.background='#f8fafc'; this.style.borderColor='#e2e8f0'; this.style.transform='translateY(0)'; this.style.boxShadow='none'">
                                 <div class="component-content d-flex align-items-center gap-3">
@@ -169,6 +172,7 @@ $(document).ready(function() {
                                     </div>
                                 </div>
                                 <div class="component-actions d-flex align-items-center gap-2">
+                                    <?php $userData = session('userdata'); $roleId = $userData['role_id'] ?? null; if (in_array($roleId, [1,2])): ?>
                                     <button type="button" class="btn btn-sm btn-outline-secondary edit-weightage-btn" 
                                         data-template-id="${template.id}" 
                                         data-weightage="${template.weightage || 0}"
@@ -179,7 +183,12 @@ $(document).ready(function() {
                                         onmouseout="this.style.opacity='0.7'">
                                         <i class="fas fa-edit"></i>
                                     </button>
-                                    <div class="progress-indicator d-flex flex-column align-items-center">
+                                    <?php endif; ?>
+                                    <div class="progress-indicator d-flex flex-row align-items-center" style="gap: 0.5rem;">
+                                        <div style="min-width: 32px; text-align: center; font-size: 0.8rem; color: #64748b; font-weight: 600; display: flex; flex-direction: column; align-items: center;">
+                                            <span>${taskCount}</span>
+                                            <span style="font-size: 1em; color: #636b75ff; font-weight: 400;"><strong>logs</strong></span>
+                                        </div>
                                         <div style="width:36px; height:36px; position:relative;">
                                             <svg width="36" height="36" viewBox="0 0 36 36">
                                                 <circle cx="18" cy="18" r="14" stroke="#e2e8f0" stroke-width="4" fill="none" />
@@ -220,7 +229,10 @@ $(document).ready(function() {
                                         onmouseout="this.style.opacity='0.7'">
                                         <i class="fas fa-edit"></i>
                                     </button>
-                                    <div class="progress-indicator d-flex flex-column align-items-center">
+                                    <div class="progress-indicator d-flex flex-row align-items-center" style="gap: 0.5rem;">
+                                        <div style="min-width: 32px; text-align: right; font-size: 0.8rem; color: #64748b; font-weight: 600;">
+                                            <i class="fas fa-tasks me-1"></i>0
+                                        </div>
                                         <div style="width:36px; height:36px; position:relative; display:flex; align-items:center; justify-content:center;">
                                             <span style="font-size:0.75rem; font-weight:700; color:#6b7280;">N/A</span>
                                         </div>
@@ -279,59 +291,83 @@ $(document).ready(function() {
         });
     }
     
+
     // Add Scope button (both main button and fallback button)
     $(document).on('click', '#addScopeBtn, #createScopeBtn', function() {
-        Swal.fire({
-            title: 'Add Project Scope',
-            html: `
-                <div style="text-align: left;">
-                    <label for="scopeName" style="display: block; margin-bottom: 0.5rem; font-weight: 600;">Scope Name</label>
-                    <input type="text" id="scopeName" class="swal2-input" placeholder="Enter scope name">
-                </div>
-            `,
+        // Fetch available scopes from backend
+        $.ajax({
+            url: '<?= base_url('activity/get_available_scopes') ?>',
+            method: 'GET',
+            data: { project_id: projectId },
+            dataType: 'json',
+            success: function(res) {
+                if (res.success && res.scopes && res.scopes.length > 0) {
+                    const options = res.scopes.map(s => `<option value="${s.id}">${s.name}</option>`).join('');
+                    Swal.fire({
+                        title: 'Add Project Scope',
+                        html: `
+                            <div style="text-align: left;">
+                                <label for="scopeLookupId" style="display: block; margin-bottom: 0.5rem; font-weight: 600;">Scope Name</label>
+                                <select id="scopeLookupId" class="form-select">
+                                    <option value="">Select a scope</option>
+                                    ${options}
+                                </select>
+                            </div>
+                        `,
             showCancelButton: true,
             confirmButtonText: 'Create Scope',
-            preConfirm: () => {
-                const name = document.getElementById('scopeName').value;
-                if (!name) {
-                    Swal.showValidationMessage('Scope name is required');
-                    return false;
-                }
-                return { name };
-            }
-        }).then((result) => {
-            if (result.isConfirmed) {
-                $.ajax({
-                    url: '<?= base_url('activity/create_scope') ?>',
-                    method: 'POST',
-                    data: {
-                        project_id: projectId,
-                        name: result.value.name
-                    },
-                    dataType: 'json',
-                    beforeSend: function() {
-                        Swal.fire({
-                            title: 'Creating Scope...',
-                            allowOutsideClick: false,
-                            didOpen: () => {
-                                Swal.showLoading();
+            cancelButtonText: 'Cancel',
+            customClass: {
+                cancelButton: '',
+            },
+                        preConfirm: () => {
+                            const scope_lookup_id = document.getElementById('scopeLookupId').value;
+                            if (!scope_lookup_id) {
+                                Swal.showValidationMessage('Please select a scope');
+                                return false;
                             }
-                        });
-                    },
-                    success: function(res) {
-                        if (res.success) {
-                            Swal.fire('Created!', 'Scope created successfully.', 'success').then(() => {
-                                loadScopes();
-                            });
-                        } else {
-                            Swal.fire('Error', res.message || 'Failed to create scope.', 'error');
+                            return { scope_lookup_id };
                         }
-                    },
-                    error: function(xhr, status, error) {
-                        console.error('Error creating scope:', error);
-                        Swal.fire('Error', 'Failed to create scope.', 'error');
-                    }
-                });
+                    }).then((result) => {
+                        if (result.isConfirmed) {
+                            $.ajax({
+                                url: '<?= base_url('activity/create_scope') ?>',
+                                method: 'POST',
+                                data: {
+                                    project_id: projectId,
+                                    scope_lookup_id: result.value.scope_lookup_id
+                                },
+                                dataType: 'json',
+                                success: function(res) {
+                                    if (res.success) {
+                                        Swal.fire({
+                                            title: 'Created!',
+                                            text: 'Scope created successfully.',
+                                            icon: 'success',
+                                            allowOutsideClick: false,
+                                            allowEscapeKey: false,
+                                            confirmButtonText: 'OK'
+                                        }).then(() => {
+                                            loadScopes();
+                                        });
+                                    } else {
+                                        Swal.fire('Error', res.message || 'Failed to create scope.', 'error');
+                                    }
+                                },
+                                error: function(xhr, status, error) {
+                                    console.error('Error creating scope:', error);
+                                    Swal.fire('Error', 'Failed to create scope.', 'error');
+                                }
+                            });
+                        }
+                    });
+                } else {
+                    Swal.fire('No Available Scopes', 'All scopes have already been added to this project.', 'info');
+                }
+            },
+            error: function(xhr, status, error) {
+                console.error('Error loading available scopes:', error);
+                Swal.fire('Error', 'Failed to load available scopes.', 'error');
             }
         });
     });
@@ -422,8 +458,7 @@ $(document).ready(function() {
             cancelButtonText: 'Cancel',
             width: '700px',
             customClass: {
-                confirmButton: 'btn btn-primary',
-                cancelButton: 'btn btn-secondary'
+                cancelButton: '',
             },
             didOpen: () => {
                 // Handle component removal from edit modal
@@ -437,7 +472,10 @@ $(document).ready(function() {
                         icon: 'warning',
                         showCancelButton: true,
                         confirmButtonText: 'Delete',
-                        cancelButtonText: 'Cancel'
+                        cancelButtonText: 'Cancel',
+                        customClass: {
+                            cancelButton: '',
+                        }
                     }).then((result) => {
                         if (result.isConfirmed) {
                             $.ajax({
@@ -475,10 +513,13 @@ $(document).ready(function() {
                         title: 'Delete Scope',
                         text: `Are you sure you want to delete "${currentName}"? This will remove all components from this scope.`,
                         icon: 'warning',
-                        showCancelButton: true,
-                        confirmButtonColor: '#dc3545',
-                        confirmButtonText: 'Yes, delete it!',
-                        cancelButtonText: 'Cancel'
+                    showCancelButton: true,
+                    confirmButtonColor: '#dc3545',
+                    confirmButtonText: 'Yes, delete it!',
+                    cancelButtonText: 'Cancel',
+                    customClass: {
+                        cancelButton: '',
+                    }
                     }).then((deleteResult) => {
                         if (deleteResult.isConfirmed) {
                             $.ajax({
@@ -641,7 +682,7 @@ $(document).ready(function() {
     $('#scopeList').on('click', '.delete-scope-btn', function() {
         const scopeId = $(this).data('scope-id');
         const scopeName = $(this).closest('.scope-card').data('scope-name');
-        
+
         Swal.fire({
             title: 'Delete Scope',
             text: `Are you sure you want to delete "${scopeName}"? This will remove all components from this scope.`,
@@ -659,19 +700,18 @@ $(document).ready(function() {
                         project_id: projectId
                     },
                     dataType: 'json',
-                    beforeSend: function() {
-                        Swal.fire({
-                            title: 'Deleting Scope...',
-                            allowOutsideClick: false,
-                            didOpen: () => {
-                                Swal.showLoading();
-                            }
-                        });
-                    },
                     success: function(res) {
                         if (res.success) {
-                            Swal.fire('Deleted!', 'Scope deleted successfully.', 'success');
-                            loadScopes();
+                            Swal.fire({
+                                title: 'Deleted!',
+                                text: 'Scope deleted successfully.',
+                                icon: 'success',
+                                allowOutsideClick: false,
+                                allowEscapeKey: false,
+                                confirmButtonText: 'OK'
+                            }).then(() => {
+                                loadScopes();
+                            });
                         } else {
                             Swal.fire('Error', res.message || 'Failed to delete scope.', 'error');
                         }
@@ -688,119 +728,103 @@ $(document).ready(function() {
     // Add Components to Scope
     $('#scopeList').on('click', '.add-components-btn', function() {
         const scopeId = $(this).data('scope-id');
-        
-        // Predefined template options
-        const predefinedTemplates = [
-            'Business Requirement Specification',
-            'Final Acceptance Testing',
-            'User Acceptance Testing',
-            'System Design Document',
-            'Technical Specification',
-            'Database Design',
-            'API Documentation',
-            'Frontend Development',
-            'Backend Development',
-            'Testing & QA',
-            'Code Review',
-            'Deployment',
-            'User Training',
-            'Documentation',
-            'Security Testing',
-            'Performance Testing',
-            'Bug Fixes',
-            'Feature Enhancement',
-            'System Integration',
-            'Data Migration'
-        ];
-        
-        const predefinedOptions = predefinedTemplates.map(name => 
-            `<option value="${name}">${name}</option>`
-        ).join('');
-        
-        // Load existing project templates for table display
-        loadProjectTemplatesTable(scopeId, function(templatesTableHtml) {
-            Swal.fire({
-                title: 'Add Components',
-                html: `
-                    <div style="text-align: left;">
-                        <div class="mb-3">
-                            <label style="display: block; margin-bottom: 0.5rem; font-weight: 600;">Select Components</label>
-                            <select id="componentSelect" class="form-select" multiple style="width: 100%;">
-                                ${predefinedOptions}
-                            </select>
-                            <small class="text-muted mt-2 d-block">You can select multiple components.</small>
-                        </div>
-                        
-                        <div class="mb-3">
-                            <label style="display: block; margin-bottom: 0.5rem; font-weight: 600;">Weightage (%)</label>
-                            <input type="number" id="componentWeightage" class="form-control" step="0.01" min="0" max="100" placeholder="0.00" style="width: 100%;">
-                            <small class="text-muted mt-1 d-block">Enter weightage as a percentage (e.g. 25.50)</small>
-                        </div>
-                        
-                        <div class="mb-3">
-                            <label style="display: block; margin-bottom: 0.5rem; font-weight: 600;">Existing Project Components</label>
-                            <div style="max-height: 300px; overflow-y: auto; border: 1px solid #e2e8f0; border-radius: 0.5rem;">
-                                ${templatesTableHtml}
+        // Load components for this scope from backend (component_lookup, not templates)
+        $.ajax({
+            url: '<?= base_url('activity/get_components_by_scope') ?>',
+            method: 'GET',
+            data: { scope_id: scopeId },
+            dataType: 'json',
+            success: function(res) {
+                let componentOptions = '';
+                if (res.success && res.components && res.components.length > 0) {
+                    componentOptions = res.components.map(c => `<option value="${c.name}">${c.name}</option>`).join('');
+                }
+                // Load existing project templates for table display (unchanged)
+                loadProjectTemplatesTable(scopeId, function(templatesTableHtml) {
+                    Swal.fire({
+                        title: 'Add Components',
+                        html: `
+                            <div style="text-align: left;">
+                                <div class="mb-3">
+                                    <label style="display: block; margin-bottom: 0.5rem; font-weight: 600;">Select Components</label>
+                                    <select id="componentSelect" class="form-select" multiple style="width: 100%;">
+                                        ${componentOptions}
+                                    </select>
+                                    <small class="text-muted mt-2 d-block">You can select multiple components or type to add new.</small>
+                                </div>
+                                <div class="mb-3">
+                                    <label style="display: block; margin-bottom: 0.5rem; font-weight: 600;">Weightage (%)</label>
+                                    <input type="number" id="componentWeightage" class="form-control" step="0.01" min="0" max="100" placeholder="0.00" style="width: 100%;">
+                                    <small class="text-muted mt-1 d-block">Enter weightage as a percentage (e.g. 25.50)</small>
+                                </div>
+                                <div class="mb-3">
+                                    <label style="display: block; margin-bottom: 0.5rem; font-weight: 600;">Existing Project Components</label>
+                                    <div style="max-height: 300px; overflow-y: auto; border: 1px solid #e2e8f0; border-radius: 0.5rem;">
+                                        ${templatesTableHtml}
+                                    </div>
+                                </div>
                             </div>
-                        </div>
-                    </div>
-                `,
-                showCancelButton: true,
-                confirmButtonText: 'Add Components',
-                width: '700px',
-                didOpen: () => {
-                    // Initialize Select2 with tags for custom entries
-                    $('#componentSelect').select2({
-                        width: '100%',
-                        placeholder: 'Select or type custom component names',
-                        allowClear: true,
-                        tags: true,
-                        tokenSeparators: [',', '\n'],
-                        dropdownParent: $('.swal2-popup'), // Keep dropdown inside the modal
-                        createTag: function (params) {
-                            const term = $.trim(params.term);
-                            if (term === '') {
-                                return null;
+                        `,
+            showCancelButton: true,
+            confirmButtonText: 'Add Components',
+            cancelButtonText: 'Cancel',
+            customClass: {
+                cancelButton: '',
+            },
+                        width: '700px',
+                        didOpen: () => {
+                            // Initialize Select2 with tags for custom entries
+                            $('#componentSelect').select2({
+                                width: '100%',
+                                placeholder: 'Select or type custom component names',
+                                allowClear: true,
+                                tags: true,
+                                tokenSeparators: [',', '\n'],
+                                dropdownParent: $('.swal2-popup'),
+                                createTag: function (params) {
+                                    const term = $.trim(params.term);
+                                    if (term === '') {
+                                        return null;
+                                    }
+                                    return {
+                                        id: term,
+                                        text: term,
+                                        newTag: true
+                                    };
+                                }
+                            });
+                        },
+                        preConfirm: () => {
+                            const selectedComponents = $('#componentSelect').val();
+                            const componentWeightage = document.getElementById('componentWeightage').value;
+                            if (!selectedComponents || selectedComponents.length === 0) {
+                                Swal.showValidationMessage('Please select at least one component');
+                                return false;
+                            }
+                            if (componentWeightage && (isNaN(componentWeightage) || parseFloat(componentWeightage) < 0)) {
+                                Swal.showValidationMessage('Please enter a valid weightage value');
+                                return false;
                             }
                             return {
-                                id: term,
-                                text: term,
-                                newTag: true
+                                components: selectedComponents,
+                                weightage: componentWeightage || 0
                             };
                         }
+                    }).then((result) => {
+                        if (result.isConfirmed && result.value.components.length > 0) {
+                            // Process all selected components
+                            const componentsToAdd = result.value.components.map(name => ({
+                                name: name.trim(),
+                                weightage: result.value.weightage
+                            }));
+                            addMultipleComponentsToScope(scopeId, componentsToAdd);
+                        }
                     });
-                },
-                preConfirm: () => {
-                    const selectedComponents = $('#componentSelect').val();
-                    const componentWeightage = document.getElementById('componentWeightage').value;
-                    
-                    if (!selectedComponents || selectedComponents.length === 0) {
-                        Swal.showValidationMessage('Please select at least one component');
-                        return false;
-                    }
-                    
-                    // Validate weightage
-                    if (componentWeightage && (isNaN(componentWeightage) || parseFloat(componentWeightage) < 0)) {
-                        Swal.showValidationMessage('Please enter a valid weightage value');
-                        return false;
-                    }
-                    
-                    return {
-                        components: selectedComponents,
-                        weightage: componentWeightage || 0
-                    };
-                }
-            }).then((result) => {
-                if (result.isConfirmed && result.value.components.length > 0) {
-                    // Process all selected components
-                    const componentsToAdd = result.value.components.map(name => ({
-                        name: name.trim(),
-                        weightage: result.value.weightage
-                    }));
-                    
-                    addMultipleComponentsToScope(scopeId, componentsToAdd);
-                }
-            });
+                });
+            },
+            error: function() {
+                Swal.fire('Error', 'Failed to load components for this scope.', 'error');
+            }
         });
     });
     
@@ -866,7 +890,14 @@ $(document).ready(function() {
             dataType: 'json',
             success: function(res) {
                 if (res.success) {
-                    Swal.fire('Added!', 'Components added successfully.', 'success').then(() => {
+                    Swal.fire({
+                        title: 'Added!',
+                        text: 'Components added successfully.',
+                        icon: 'success',
+                        allowOutsideClick: false,
+                        allowEscapeKey: false,
+                        confirmButtonText: 'OK'
+                    }).then(() => {
                         loadScopes();
                     });
                 } else {
@@ -904,6 +935,10 @@ $(document).ready(function() {
             `,
             showCancelButton: true,
             confirmButtonText: 'Update Weightage',
+            cancelButtonText: 'Cancel',
+            customClass: {
+                cancelButton: '',
+            },
             width: '500px',
             preConfirm: () => {
                 const weightage = document.getElementById('editWeightage').value;

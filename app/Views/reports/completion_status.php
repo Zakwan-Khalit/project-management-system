@@ -49,6 +49,11 @@
     <!-- Completion Status Table -->
     <div style="background: white; border-radius: 1rem; box-shadow: 0 10px 30px rgba(0,0,0,0.08); border: 1px solid #f1f3f4; overflow: hidden;">
         <div style="padding: 2rem;">
+            <div id="projectNameHeader" style="margin-bottom: 1.5rem;">
+                <h4 style="margin: 0; font-size: 1.5rem; font-weight: 600; color: #1f2937; font-family: 'Poppins', sans-serif; text-align: center; padding: 1rem; background: linear-gradient(135deg, #f8fafc 0%, #f1f5f9 100%); border-radius: 0.75rem; border: 1px solid #e2e8f0;">
+                    <span id="projectNameDisplay"></span> Completion Status Report
+                </h4>
+            </div>
             <div style="overflow-x: auto;">
                 <table class="table table-bordered mb-0" id="statusTable" style="min-width: 700px;">
                     <thead style="background: linear-gradient(135deg, #f59e0b 0%, #d97706 100%); color: white;">
@@ -105,72 +110,6 @@
             </div>
         </div>
     </div>
-
-    <!-- Summary Statistics -->
-    <?php if (!empty($statusData)): ?>
-    <div class="row mt-4">
-        <?php 
-        $statusCounts = array_count_values(array_column($statusData, 'status'));
-        $totalProjects = count($statusData);
-        $onTimeProjects = 0;
-        $lateProjects = 0;
-        $earlyProjects = 0;
-        
-        foreach ($statusData as $project) {
-            if ($project['days_early'] !== '-') $earlyProjects++;
-            if ($project['days_late'] !== '-') $lateProjects++;
-            if ($project['days_early'] === '-' && $project['days_late'] === '-') $onTimeProjects++;
-        }
-        ?>
-        
-        <div class="col-md-3">
-            <div class="card" style="border-radius: 1rem; border: none; box-shadow: 0 4px 6px rgba(0,0,0,0.05);">
-                <div class="card-body text-center">
-                    <h5 class="fw-bold" style="color: #3b82f6;">Total Projects</h5>
-                    <h2 class="fw-bold" style="color: #374151;"><?= $totalProjects ?></h2>
-                </div>
-            </div>
-        </div>
-        
-        <div class="col-md-3">
-            <div class="card" style="border-radius: 1rem; border: none; box-shadow: 0 4px 6px rgba(0,0,0,0.05);">
-                <div class="card-body text-center">
-                    <h5 class="fw-bold" style="color: #10b981;">Completed</h5>
-                    <h2 class="fw-bold" style="color: #374151;"><?= $statusCounts['Completed'] ?? 0 ?></h2>
-                </div>
-            </div>
-        </div>
-        
-        <div class="col-md-3">
-            <div class="card" style="border-radius: 1rem; border: none; box-shadow: 0 4px 6px rgba(0,0,0,0.05);">
-                <div class="card-body text-center">
-                    <h5 class="fw-bold" style="color: #10b981;">Early/On Time</h5>
-                    <h2 class="fw-bold" style="color: #374151;"><?= $earlyProjects + $onTimeProjects ?></h2>
-                </div>
-            </div>
-        </div>
-        
-        <div class="col-md-3">
-            <div class="card" style="border-radius: 1rem; border: none; box-shadow: 0 4px 6px rgba(0,0,0,0.05);">
-                <div class="card-body text-center">
-                    <h5 class="fw-bold" style="color: #ef4444;">Behind Schedule</h5>
-                    <h2 class="fw-bold" style="color: #374151;"><?= $lateProjects ?></h2>
-                </div>
-            </div>
-        </div>
-    </div>
-    
-    <!-- Status Distribution Chart -->
-    <div class="card mt-4" style="border-radius: 1rem; border: none; box-shadow: 0 4px 6px rgba(0,0,0,0.05);">
-        <div class="card-body">
-            <h5 class="fw-bold mb-3" style="color: #374151;">Project Status Distribution</h5>
-            <div style="height: 300px;">
-                <canvas id="statusChart"></canvas>
-            </div>
-        </div>
-    </div>
-    <?php endif; ?>
-
 </div>
 
 <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
@@ -271,47 +210,4 @@ function exportPDF() {
         pdf.save(`completion_status_report_${new Date().toISOString().split('T')[0]}.pdf`);
     });
 }
-
-// Status Chart
-<?php if (!empty($statusData)): ?>
-document.addEventListener('DOMContentLoaded', function() {
-    const ctx = document.getElementById('statusChart').getContext('2d');
-    const statusCounts = <?= json_encode($statusCounts) ?>;
-    
-    new Chart(ctx, {
-        type: 'doughnut',
-        data: {
-            labels: Object.keys(statusCounts),
-            datasets: [{
-                data: Object.values(statusCounts),
-                backgroundColor: [
-                    '#10b981', // Completed
-                    '#3b82f6', // Active
-                    '#6b7280', // Planning
-                    '#f59e0b', // On Hold
-                    '#ef4444'  // Cancelled
-                ],
-                borderWidth: 2,
-                borderColor: '#ffffff'
-            }]
-        },
-        options: {
-            responsive: true,
-            maintainAspectRatio: false,
-            plugins: {
-                legend: {
-                    position: 'bottom',
-                    labels: {
-                        padding: 20,
-                        usePointStyle: true,
-                        font: {
-                            size: 12
-                        }
-                    }
-                }
-            }
-        }
-    });
-});
-<?php endif; ?>
 </script>

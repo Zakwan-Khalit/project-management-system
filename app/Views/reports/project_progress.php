@@ -151,8 +151,6 @@
             </div>
         </div>
     </div>
-
-    <div id="projectInfo" style="margin-bottom: 1rem; font-size: 1rem; color: #374151;"></div>
 </div>
 
 <style>
@@ -191,9 +189,6 @@ document.addEventListener('DOMContentLoaded', function() {
             hideProjectName();
             hideExportSection();
             currentProject = null;
-            const projectInfo = document.getElementById('projectInfo');
-            projectInfo.innerHTML = 'Select a project to view its progress report';
-            
             // Reset table to initial state
             const tbody = document.getElementById('progressTableBody');
             tbody.innerHTML = `
@@ -274,11 +269,8 @@ async function loadProjectData() {
 }
 
 function updateProjectInfo(projectName) {
-    const projectInfo = document.getElementById('projectInfo');
     const projectNameHeader = document.getElementById('projectNameHeader');
     const projectNameDisplay = document.getElementById('projectNameDisplay');
-    
-    projectInfo.innerHTML = `<strong>Project:</strong> ${projectName}`;
     projectNameDisplay.textContent = projectName;
     projectNameHeader.style.display = 'block';
 }
@@ -412,18 +404,9 @@ function exportPDF() {
     container.style.padding = '20px';
     container.style.backgroundColor = 'white';
 
-    // Add report type
-    const reportType = document.createElement('h1');
-    reportType.textContent = 'Project Progress Report';
-    reportType.style.textAlign = 'center';
-    reportType.style.marginBottom = '10px';
-    reportType.style.color = '#1f2937';
-    reportType.style.fontSize = '24px';
-    container.appendChild(reportType);
-
-    // Add project title
+    // Add project name with 'Progress Report' (no 'Project: ' prefix)
     const title = document.createElement('h2');
-    title.textContent = `Project: ${projectName}`;
+    title.textContent = `${projectName} Progress Report`;
     title.style.textAlign = 'center';
     title.style.marginBottom = '10px';
     title.style.color = '#1f2937';

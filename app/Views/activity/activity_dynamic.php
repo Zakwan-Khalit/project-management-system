@@ -25,7 +25,7 @@
             </li>
             <li style="color: #f7fafc; font-weight: 500; font-size: 0.75rem; display: flex; align-items: center; padding: 0.1rem 0.25rem;">
                 <i class="fas fa-cogs" style="margin-right: 0.3rem; font-size: 0.7rem;"></i>
-                Activity Management
+                Component
             </li>
         </ol>
     </nav>
@@ -36,18 +36,18 @@
     <div style="background: white; border-radius: 1rem; box-shadow: 0 10px 30px rgba(0,0,0,0.08); border: 1px solid #f1f3f4; margin-bottom: 2rem; overflow: hidden;">
         
         <!-- Activity Title Section -->
-        <div style="padding: 2rem;">
-            <div style="display: flex; justify-content: space-between; align-items: flex-start; flex-wrap: wrap; gap: 1.5rem;">
-                <div style="flex: 1; min-width: 300px;">
-                    <div style="display: flex; align-items: center; gap: 1rem; margin-bottom: 1rem;">
-                        <h1 style="margin: 0; font-size: 2rem; font-weight: 700; color: #1f2937; font-family: 'Poppins', sans-serif; display: flex; align-items: center; gap: 0.75rem;" id="taskTableTitle">
-                            <i class="fas fa-tasks" style="color: #667eea; font-size: 1.8rem;"></i>
-                            <?= esc($template['name'] ?? 'Activity') ?>
-                        </h1>
-                    </div>
+        <div style="padding: 1rem;">
+        <div style="display: flex; justify-content: space-between; align-items: flex-start; flex-wrap: wrap; gap: 1rem;">
+            <div style="flex: 1; min-width: 200px;">
+                <div style="display: flex; align-items: center; gap: 0.5rem; margin-bottom: 0.5rem;">
+                    <h1 style="margin: 0; font-size: 1.2rem; font-weight: 600; color: #1f2937; font-family: 'Poppins', sans-serif; display: flex; align-items: center; gap: 0.5rem;" id="taskTableTitle">
+                        <i class="fas fa-tasks" style="color: #667eea; font-size: 1rem;"></i>
+                        <?= esc($template['name'] ?? 'Activity') ?>
+                    </h1>
                 </div>
             </div>
         </div>
+    </div>
     </div>
 
     <!-- Main Content -->
@@ -1109,11 +1109,23 @@ function createTableModal() {
                 <label class="form-label">Add Header:</label>
                 <select id="headerSelect2" class="form-select" style="width:100%;min-width:120px;max-width:220px;"></select>
               </div>
-              <button id="addHeaderBtn" class="btn btn-primary" type="button" style="height:38px;">Add</button>
+                <button id="addHeaderBtn" type="button"
+                    style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white; border: none; border-radius: 0.4rem; padding: 0.35rem 0.9rem; font-weight: 600; font-size: 0.82rem; cursor: pointer; transition: all 0.2s ease; display: inline-flex; align-items: center; box-shadow: 0 2px 7px rgba(102, 126, 234, 0.22); height: 30px; min-width: 60px;"
+                    onmouseover="this.style.transform='translateY(-1px)'; this.style.boxShadow='0 4px 12px rgba(102, 126, 234, 0.3)';"
+                    onmouseout="this.style.transform='translateY(0)'; this.style.boxShadow='0 2px 7px rgba(102, 126, 234, 0.22)';">
+                    <i class="fas fa-plus" style="margin-right: 0.35rem; font-size: 0.95em;"></i>
+                    Add
+                </button>
             </div>
           </div>
-          <div class="modal-footer">
-            <button id="saveHeadersBtn" class="btn btn-success" type="button">Save</button>
+          <div class="modal-footer" style="justify-content: center; display: flex;">
+            <button id="saveHeadersBtn" type="button"
+                    style="padding: 0.45rem 1.5rem; background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white; border: none; border-radius: 0.5rem; font-weight: 500; cursor: pointer; transition: all 0.2s ease; display: inline-flex; align-items: center;"
+                                onmouseover="this.style.transform='translateY(-1px)'; this.style.boxShadow='0 4px 12px rgba(102,126,234,0.4)'"
+                                onmouseout="this.style.transform='translateY(0)'; this.style.boxShadow='none'">
+                <i class="fas fa-save" style="margin-right: 0.5rem;"></i>
+                Save
+            </button>
             <button class="btn btn-secondary" data-bs-dismiss="modal" type="button">Cancel</button>
           </div>
         </div>

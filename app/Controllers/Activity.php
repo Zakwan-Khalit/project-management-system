@@ -454,15 +454,15 @@ class Activity extends BaseController
         }
 
         $projectId = $this->request->getPost('project_id');
-        $name = $this->request->getPost('name');
+        $scopeLookupId = $this->request->getPost('scope_lookup_id');
         $description = $this->request->getPost('description');
 
-        if (!$projectId || !$name) {
-            return $this->response->setJSON(['success' => false, 'message' => 'Project ID and scope name are required']);
+        if (!$projectId || !$scopeLookupId) {
+            return $this->response->setJSON(['success' => false, 'message' => 'Project ID and scope_lookup_id are required']);
         }
 
-        $scopeId = $this->activityModel->createScope($projectId, $name, $description);
-        
+        $scopeId = $this->activityModel->createScope($projectId, $scopeLookupId, $description);
+
         if ($scopeId) {
             return $this->response->setJSON([
                 'success' => true,
@@ -853,7 +853,19 @@ class Activity extends BaseController
         $templates = $scopeId
             ? $this->activityModel->getScopeTemplates($scopeId)
             : $this->activityModel->getTaskTemplatesByProject($projectId);
-        
+
+        // Map output for frontend compatibility (use component_name if available, fallback to name)
+        $templates = array_map(function($tpl) {
+            return [
+                'id' => $tpl['id'],
+                'name' => isset($tpl['component_name']) && $tpl['component_name'] ? $tpl['component_name'] : $tpl['name'],
+                'weightage' => $tpl['weightage'],
+                'component_order' => $tpl['component_order'],
+                'scope_id' => $tpl['scope_id'],
+                'component_id' => $tpl['component_id'] ?? null
+            ];
+        }, $templates);
+
         return $this->response->setJSON([
             'success' => true,
             'templates' => $templates
@@ -952,6 +964,48 @@ class Activity extends BaseController
             'fields' => $fields,
             'headerMap' => $headerMap,
             'tasks' => $tasks
+        ]);
+    }
+
+    // AJAX: Get all components for a given scope (for Add Component dropdown)
+    public function get_components_by_scope()
+    {
+        $userData = session('userdata');
+        $userId = $userData['id'] ?? null;
+        if (!$userId) {
+            return $this->response->setJSON(['success' => false, 'message' => 'Unauthorized']);
+        }
+
+        $scopeId = $this->request->getGet('scope_id');
+        if (!$scopeId) {
+            return $this->response->setJSON(['success' => false, 'message' => 'Scope ID is required']);
+        }
+
+        $components = $this->activityModel->getComponentsByScope($scopeId);
+        return $this->response->setJSON([
+            'success' => true,
+            'components' => $components
+        ]);
+    }
+
+    // AJAX: Get available scopes from scope_lookup not already in project_scopes for this project
+    public function get_available_scopes()
+    {
+        $userData = session('userdata');
+        $userId = $userData['id'] ?? null;
+        if (!$userId) {
+            return $this->response->setJSON(['success' => false, 'message' => 'Unauthorized']);
+        }
+
+        $projectId = $this->request->getGet('project_id');
+        if (!$projectId) {
+            return $this->response->setJSON(['success' => false, 'message' => 'Project ID is required']);
+        }
+
+        $scopes = $this->activityModel->getAvailableScopesForProject($projectId);
+        return $this->response->setJSON([
+            'success' => true,
+            'scopes' => $scopes
         ]);
     }
 }

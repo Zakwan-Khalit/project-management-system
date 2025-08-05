@@ -68,18 +68,6 @@
                     <i class="fas fa-sign-in-alt" style="margin-right: 8px;"></i>
                     Sign In
                 </button>
-
-                <!-- Register Link -->
-                <div style="text-align: center;">
-                    <p style="color: #6c757d; margin: 0; font-size: 0.9rem;">
-                        Don't have an account? 
-                        <a href="<?= base_url('register') ?>" style="color: #667eea; text-decoration: none; font-weight: 600;"
-                           onmouseover="this.style.textDecoration='underline'"
-                           onmouseout="this.style.textDecoration='none'">
-                            Sign up here
-                        </a>
-                    </p>
-                </div>
             </form>
         </div>
     </div>

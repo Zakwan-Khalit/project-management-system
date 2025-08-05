@@ -145,8 +145,8 @@
         .sidebar-header {
             padding: 0 !important;
             border-bottom: 1px solid #e9ecef !important;
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%) !important;
-            color: white !important;
+            background: white !important;
+            color: #495057 !important;
             text-align: center !important;
             min-height: 60px !important;
             display: flex !important;
@@ -168,10 +168,18 @@
             width: 70px !important;
             height: 60px !important;
             object-fit: cover !important;
+            content: url('<?= base_url('assets/images/k_logo_small.png') ?>') !important;
+            transition: content 0.3s ease !important;
+        }
+
+        /* Remove hover on .sidebar-logo itself to avoid conflict */
+        .sidebar.collapsed .sidebar-logo:hover {
+            content: url('<?= base_url('assets/images/k_logo_small.png') ?>') !important;
         }
 
         .sidebar.collapsed.hover-expanded .sidebar-logo {
             width: 100% !important;
+            content: url('<?= base_url('assets/images/kertask_logo.jpeg') ?>') !important;
         }
 
         .sidebar-header h4 {
@@ -828,15 +836,32 @@
             transform: translateY(-1px) !important;
         }
 
+
         .btn-primary {
-            background: linear-gradient(135deg, #0d6efd, #0056b3) !important;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%) !important;
             color: white !important;
+            border: none !important;
+            border-radius: 0.5rem !important;
+            padding: 0.75rem 1.25rem !important;
+            font-weight: 600 !important;
+            font-size: 0.9rem !important;
+            cursor: pointer !important;
+            transition: all 0.3s ease !important;
+            box-shadow: 0 4px 12px rgba(102, 126, 234, 0.3) !important;
         }
 
         .btn-primary:hover {
-            background: linear-gradient(135deg, #0056b3, #004085) !important;
-            box-shadow: 0 4px 12px rgba(13,110,253,0.3) !important;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%) !important;
             color: white !important;
+            transform: translateY(-1px) !important;
+            box-shadow: 0 6px 18px rgba(102, 126, 234, 0.4) !important;
+        }
+
+        .btn-primary:active, .btn-primary:focus {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%) !important;
+            color: white !important;
+            box-shadow: 0 4px 12px rgba(102, 126, 234, 0.3) !important;
+            outline: none !important;
         }
 
         .btn-outline-primary {
@@ -1180,10 +1205,12 @@
                 <i class="fas fa-calendar-alt"></i>
                 <span>Events</span>
             </a>
-            <a href="<?= base_url('users') ?>" class="nav-link<?= strpos($url, 'users') !== false ? ' active' : '' ?>" data-tooltip="Users">
-                <i class="fas fa-users"></i>
-                <span>Users</span>
-            </a>
+            <?php $userData = session('userdata'); $name = $userData['full_name'] ?? null; if (in_array($name, ['Super Admin'])): ?>
+                <a href="<?= base_url('users') ?>" class="nav-link<?= strpos($url, 'users') !== false ? ' active' : '' ?>" data-tooltip="Users">
+                    <i class="fas fa-users"></i>
+                    <span>Users</span>
+                </a>
+            <?php endif; ?>
             <a href="<?= base_url('profile') ?>" class="nav-link<?= strpos($url, 'profile') !== false ? ' active' : '' ?>" data-tooltip="Profile">
                 <i class="fas fa-user"></i>
                 <span>Profile</span>

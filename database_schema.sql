@@ -212,6 +212,8 @@ CREATE TABLE IF NOT EXISTS `project_members` (
     `project_id` int(11),
     `user_id` int(11),
     `role` varchar(32),
+    `fte` float,
+    `end_date_involvement` date,
     `assigned_by` int(11),
     `joined_at` datetime,
     `is_active` tinyint(1) DEFAULT 1,
@@ -354,12 +356,10 @@ CREATE TABLE IF NOT EXISTS `task_headers` (
     `date_modified` TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
--- Project Scopes Table
 CREATE TABLE IF NOT EXISTS `project_scopes` (
     `id` int(11) NOT NULL AUTO_INCREMENT,
     `project_id` int(11) NOT NULL,
     `name` varchar(128) NOT NULL,
-    `description` text,
     `scope_order` int(11) DEFAULT 0,
     `is_active` tinyint(1) DEFAULT 1,
     `is_delete` tinyint(1) DEFAULT 0,
@@ -369,6 +369,25 @@ CREATE TABLE IF NOT EXISTS `project_scopes` (
     KEY `is_delete` (`is_delete`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
+  `scope_lookup_id` INT DEFAULT NULL,
+-- Table: scope_lookup
+CREATE TABLE IF NOT EXISTS `scope_lookup` (
+  `id` INT AUTO_INCREMENT PRIMARY KEY,
+  `name` VARCHAR(255) NOT NULL,
+  `description` TEXT
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+
+-- Table: component_lookup
+CREATE TABLE IF NOT EXISTS `component_lookup` (
+  `id` INT AUTO_INCREMENT PRIMARY KEY,
+  `scope_id` INT NOT NULL,
+  `name` VARCHAR(255) NOT NULL,
+  `description` TEXT,
+  FOREIGN KEY (`scope_id`) REFERENCES `scope_lookup`(`id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+
+-- Add foreign key to project_scopes for scope_lookup_id
+ALTER TABLE `project_scopes` ADD CONSTRAINT `fk_project_scopes_scope_lookup` FOREIGN KEY (`scope_lookup_id`) REFERENCES `scope_lookup`(`id`);
 -- Task Template Table
 CREATE TABLE IF NOT EXISTS `task_templates` (
     `id` int(11) NOT NULL AUTO_INCREMENT,

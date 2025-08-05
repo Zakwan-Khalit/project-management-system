@@ -6,6 +6,7 @@ use App\Models\ProjectModel;
 use App\Models\TaskModel;
 use App\Models\UserModel;
 use App\Models\ActivityLogModel;
+use App\Models\ReportsModel;
 
 class Home extends BaseController
 {
@@ -13,13 +14,15 @@ class Home extends BaseController
     protected $taskModel;
     protected $userModel;
     protected $activityLog;
-    
+    protected $reportsModel;
+
     public function __construct()
     {
         $this->projectModel = new ProjectModel();
         $this->taskModel = new TaskModel();
         $this->userModel = new UserModel();
         $this->activityLog = new ActivityLogModel();
+        $this->reportsModel = new ReportsModel();
     }
     
     public function index()
@@ -38,6 +41,7 @@ class Home extends BaseController
         $userData = session('userdata');
         $userId = $userData['id'] ?? null;
         
+        $statusData = $this->reportsModel->getProjectCompletionStatusData();
         if (!$userId) {
             log_message('warning', 'Dashboard access attempted without valid user session');
             return redirect()->to(base_url('login'));
@@ -79,7 +83,8 @@ class Home extends BaseController
                 'projects' => $projects,
                 'recentActivities' => $recentActivities,
                 'teamCount' => $teamCount,
-                'title' => 'Dashboard - Project Management System'
+                'title' => 'Dashboard - Project Management System',
+                'statusData' => $statusData
             ];
             
             return $this->template->member('dashboard', $data);
@@ -109,6 +114,8 @@ class Home extends BaseController
                 'title' => 'Dashboard - Project Management System',
                 'error_message' => 'Unable to load dashboard data. Please try again later.'
             ];
+
+            
             
             return $this->template->member('dashboard', $data);
         }

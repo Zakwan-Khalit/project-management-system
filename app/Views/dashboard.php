@@ -10,6 +10,72 @@
         </div>
     <?php endif; ?>
 
+    <!-- Project Completion Statistics (moved from reports/completion_status.php) -->
+    <?php
+    // You may want to load $statusData from the same source as in the report, or inject it from the controller
+    if (!isset($statusData)) {
+        // Example: $statusData = model('ProjectModel')->getCompletionStatusData();
+        $statusData = [];
+    }
+    // Always show statistics, even if $statusData is empty
+    $statusCounts = array_count_values(array_column($statusData, 'status'));
+    $totalProjects = count($statusData);
+    $onTimeProjects = 0;
+    $lateProjects = 0;
+    $earlyProjects = 0;
+    foreach ($statusData as $project) {
+        if ($project['days_early'] !== '-') $earlyProjects++;
+        if ($project['days_late'] !== '-') $lateProjects++;
+        if ($project['days_early'] === '-' && $project['days_late'] === '-') $onTimeProjects++;
+    }
+    ?>
+    <div class="row mt-4 mb-4">
+        <div class="col-md-3">
+            <div class="card" style="border-radius: 1rem; border: none; box-shadow: 0 4px 6px rgba(0,0,0,0.05);">
+                <div class="card-body text-center">
+                    <h5 class="fw-bold" style="color: #3b82f6;">Total Projects</h5>
+                    <h2 class="fw-bold" style="color: #374151;"><?= $totalProjects ?></h2>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="card" style="border-radius: 1rem; border: none; box-shadow: 0 4px 6px rgba(0,0,0,0.05);">
+                <div class="card-body text-center">
+                    <h5 class="fw-bold" style="color: #10b981;">Completed</h5>
+                    <h2 class="fw-bold" style="color: #374151;"><?= $statusCounts['Completed'] ?? 0 ?></h2>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="card" style="border-radius: 1rem; border: none; box-shadow: 0 4px 6px rgba(0,0,0,0.05);">
+                <div class="card-body text-center">
+                    <h5 class="fw-bold" style="color: #10b981;">Early/On Time</h5>
+                    <h2 class="fw-bold" style="color: #374151;"><?= $earlyProjects + $onTimeProjects ?></h2>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="card" style="border-radius: 1rem; border: none; box-shadow: 0 4px 6px rgba(0,0,0,0.05);">
+                <div class="card-body text-center">
+                    <h5 class="fw-bold" style="color: #ef4444;">Behind Schedule</h5>
+                    <h2 class="fw-bold" style="color: #374151;"><?= $lateProjects ?></h2>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="card mb-4" style="border-radius: 1rem; border: none; box-shadow: 0 4px 6px rgba(0,0,0,0.05);">
+        <div class="card-body">
+            <h5 class="fw-bold mb-3" style="color: #374151;">Project Status Distribution</h5>
+            <div style="height: 300px;">
+                <canvas id="statusChart"></canvas>
+            </div>
+        </div>
+    </div>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
+    
+    <!-- End statistics section -->
+
     <!-- Calendar View Widget -->
     <div class="row" style="margin-bottom: 2rem;">
         <div class="col-12">
@@ -74,251 +140,257 @@
 <!-- Link to events CSS file for consistent calendar styling -->
 <link rel="stylesheet" href="<?= base_url('assets/css/events.css') ?>">
 
-<script>
-document.addEventListener('DOMContentLoaded', function() {
-    // Initialize FullCalendar exactly like events index page
-    var calendarEl = document.getElementById('dashboardCalendar');
-    if (!calendarEl) return;
-    
-    var calendar = new FullCalendar.Calendar(calendarEl, {
-        initialView: 'dayGridMonth',
-        headerToolbar: {
-            left: 'prev,next today',
-            center: 'title',
-            right: 'dayGridMonth,timeGridWeek,timeGridDay'
-        },
-        eventTimeFormat: {
-            hour: 'numeric',
-            minute: '2-digit',
-            meridiem: 'short'
-        },
-        dayMaxEvents: 3,
-        moreLinkClick: 'popover',
-        height: 'auto',
-        allDaySlot: true,
-        slotMinTime: '06:00:00',
-        slotMaxTime: '22:00:00',
-        slotDuration: '01:00:00',
-        expandRows: true,
-        eventContent: function(arg) {
-            // Custom event content to display time above title
-            let timeText = '';
-            if (arg.event.start) {
-                timeText = arg.event.start.toLocaleTimeString([], {
-                    hour: 'numeric',
-                    minute: '2-digit',
-                    hour12: true
-                });
-            }
-            
-            return {
-                html: `
-                    <div style="padding: 2px 4px; line-height: 1.2; font-size: 0.7rem;">
-                        ${timeText ? `<div style="font-weight: 600; font-size: 0.65rem; margin-bottom: 1px; color: inherit;">${timeText}</div>` : ''}
-                        <div style="font-weight: bold; word-wrap: break-word; hyphens: auto;">${arg.event.title}</div>
-                    </div>
-                `
-            };
-        },
-        events: function(info, successCallback, failureCallback) {
-            fetch('<?= base_url("events/getCalendarEvents") ?>')
-                .then(response => response.json())
-                .then(data => {
-                    if (data.error) {
-                        console.error('Calendar events error:', data.error);
-                        failureCallback(data.error);
-                    } else {
-                        console.log('Dashboard events loaded:', data); // Debug logging
-                        // Ensure events have proper date format for all views
-                        const processedEvents = data.map(event => {
-                            const processedEvent = {
-                                ...event,
-                                start: event.start,
-                                end: event.end || event.start, // Ensure end date exists
-                                allDay: event.allDay || false
-                            };
-                            return processedEvent;
-                        });
-                        successCallback(processedEvents);
+<!-- Merge all dashboard JS into a single script block -->
+    <script>
+    document.addEventListener('DOMContentLoaded', function() {
+        // Chart.js status chart
+        var statusChartEl = document.getElementById('statusChart');
+        if (statusChartEl) {
+            var ctx = statusChartEl.getContext('2d');
+            var statusCounts = <?= json_encode($statusCounts ?? []) ?>;
+            new Chart(ctx, {
+                type: 'doughnut',
+                data: {
+                    labels: Object.keys(statusCounts),
+                    datasets: [{
+                        data: Object.values(statusCounts),
+                        backgroundColor: [
+                            '#10b981', // Completed
+                            '#3b82f6', // Active
+                            '#6b7280', // Planning
+                            '#f59e0b', // On Hold
+                            '#ef4444'  // Cancelled
+                        ],
+                        borderWidth: 2,
+                        borderColor: '#ffffff'
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        legend: {
+                            position: 'bottom',
+                            labels: {
+                                padding: 20,
+                                usePointStyle: true,
+                                font: {
+                                    size: 12
+                                }
+                            }
+                        }
                     }
-                })
-                .catch(error => {
-                    console.error('Dashboard calendar fetch error:', error);
-                    failureCallback(error);
-                });
-        },
-        eventClick: function(info) {
-            showEventDetails(info.event);
-        },
-        eventMouseEnter: function(info) {
-            // Add hover effects
-            info.el.style.transform = 'scale(1.02)';
-        },
-        eventMouseLeave: function(info) {
-            info.el.style.transform = 'scale(1)';
-        }
-    });
-
-    calendar.render();
-
-    // Hide the default toolbar since we have custom controls
-    document.querySelector('#dashboardCalendar .fc-toolbar').style.display = 'none';
-
-    // Calendar controls
-    document.getElementById('calendarToday').addEventListener('click', function() {
-        calendar.today();
-    });
-
-    document.getElementById('calendarPrev').addEventListener('click', function() {
-        calendar.prev();
-    });
-
-    document.getElementById('calendarNext').addEventListener('click', function() {
-        calendar.next();
-    });
-
-    function showEventDetails(event) {
-        document.getElementById('eventModalTitle').textContent = event.title;
-        
-        let details = `
-            <div class="event-detail-item">
-                <strong>Type:</strong> ${event.extendedProps.type}
-            </div>
-            <div class="event-detail-item">
-                <strong>Start:</strong> ${new Date(event.start).toLocaleString()}
-            </div>
-            <div class="event-detail-item">
-                <strong>End:</strong> ${new Date(event.end).toLocaleString()}
-            </div>
-        `;
-        
-        if (event.extendedProps.description) {
-            details += `
-                <div class="event-detail-item">
-                    <strong>Description:</strong> ${event.extendedProps.description}
-                </div>
-            `;
-        }
-        
-        if (event.extendedProps.location) {
-            details += `
-                <div class="event-detail-item">
-                    <strong>Location:</strong> ${event.extendedProps.location}
-                </div>
-            `;
-        }
-        
-        if (event.extendedProps.project) {
-            details += `
-                <div class="event-detail-item">
-                    <strong>Project:</strong> ${event.extendedProps.project}
-                </div>
-            `;
-        }
-        
-        document.getElementById('eventModalBody').innerHTML = details;
-        
-        // Only set href if edit button exists (user has permission)
-        const editBtn = document.getElementById('eventEditBtn');
-        if (editBtn) {
-            editBtn.href = `<?= base_url('events/edit/') ?>${event.id}`;
-        }
-        
-        new bootstrap.Modal(document.getElementById('eventModal')).show();
-    }
-
-    // Make showEventDetails globally available
-    window.showEventDetails = showEventDetails;
-});
-</script>
-
-<script>
-// Dashboard functionality
-let isRefreshing = false;
-
-function refreshDashboard() {
-    if (isRefreshing) return;
-    
-    isRefreshing = true;
-    const refreshBtn = document.getElementById('refresh-btn');
-    const refreshIcon = document.getElementById('refresh-icon');
-    const refreshText = document.getElementById('refresh-text');
-    
-    // Update button state
-    refreshBtn.disabled = true;
-    refreshIcon.classList.add('fa-spin');
-    refreshText.textContent = 'Refreshing...';
-    
-    // Simulate refresh (in a real app, this would make AJAX calls to refresh data)
-    setTimeout(() => {
-        // Reset button state
-        refreshBtn.disabled = false;
-        refreshIcon.classList.remove('fa-spin');
-        refreshText.textContent = 'Refresh';
-        isRefreshing = false;
-        
-        // Show success message
-        if (typeof Swal !== 'undefined') {
-            Swal.fire({
-                icon: 'success',
-                title: 'Dashboard Refreshed!',
-                text: 'Your dashboard has been updated with the latest data.',
-                timer: 2000,
-                showConfirmButton: false,
-                toast: true,
-                position: 'top-end'
+                }
             });
         }
-        
-        // Optionally reload the page to get fresh data
-        // window.location.reload();
-    }, 1500);
-}
 
-// Real-time refresh function (can be called via AJAX)
-function refreshDashboardData() {
-    fetch('<?= base_url('dashboard/refresh') ?>', {
-        method: 'POST',
-        headers: {
-            'Content-Type': 'application/json',
-            'X-Requested-With': 'XMLHttpRequest'
+        // FullCalendar initialization
+        var calendarEl = document.getElementById('dashboardCalendar');
+        if (calendarEl) {
+            var calendar = new FullCalendar.Calendar(calendarEl, {
+                initialView: 'dayGridMonth',
+                headerToolbar: {
+                    left: 'prev,next today',
+                    center: 'title',
+                    right: 'dayGridMonth,timeGridWeek,timeGridDay'
+                },
+                eventTimeFormat: {
+                    hour: 'numeric',
+                    minute: '2-digit',
+                    meridiem: 'short'
+                },
+                dayMaxEvents: 3,
+                moreLinkClick: 'popover',
+                height: 'auto',
+                allDaySlot: true,
+                slotMinTime: '06:00:00',
+                slotMaxTime: '22:00:00',
+                slotDuration: '01:00:00',
+                expandRows: true,
+                eventContent: function(arg) {
+                    let timeText = '';
+                    if (arg.event.start) {
+                        timeText = arg.event.start.toLocaleTimeString([], {
+                            hour: 'numeric',
+                            minute: '2-digit',
+                            hour12: true
+                        });
+                    }
+                    return {
+                        html: `
+                            <div style="padding: 2px 4px; line-height: 1.2; font-size: 0.7rem;">
+                                ${timeText ? `<div style="font-weight: 600; font-size: 0.65rem; margin-bottom: 1px; color: inherit;">${timeText}</div>` : ''}
+                                <div style="font-weight: bold; word-wrap: break-word; hyphens: auto;">${arg.event.title}</div>
+                            </div>
+                        `
+                    };
+                },
+                events: function(info, successCallback, failureCallback) {
+                    fetch('<?= base_url("events/getCalendarEvents") ?>')
+                        .then(response => response.json())
+                        .then(data => {
+                            if (data.error) {
+                                console.error('Calendar events error:', data.error);
+                                failureCallback(data.error);
+                            } else {
+                                // Ensure events have proper date format for all views
+                                const processedEvents = data.map(event => {
+                                    const processedEvent = {
+                                        ...event,
+                                        start: event.start,
+                                        end: event.end || event.start, // Ensure end date exists
+                                        allDay: event.allDay || false
+                                    };
+                                    return processedEvent;
+                                });
+                                successCallback(processedEvents);
+                            }
+                        })
+                        .catch(error => {
+                            console.error('Dashboard calendar fetch error:', error);
+                            failureCallback(error);
+                        });
+                },
+                eventClick: function(info) {
+                    showEventDetails(info.event);
+                },
+                eventMouseEnter: function(info) {
+                    info.el.style.transform = 'scale(1.02)';
+                },
+                eventMouseLeave: function(info) {
+                    info.el.style.transform = 'scale(1)';
+                }
+            });
+            calendar.render();
+            // Hide the default toolbar since we have custom controls
+            var fcToolbar = document.querySelector('#dashboardCalendar .fc-toolbar');
+            if (fcToolbar) fcToolbar.style.display = 'none';
+            // Calendar controls
+            document.getElementById('calendarToday').addEventListener('click', function() {
+                calendar.today();
+            });
+            document.getElementById('calendarPrev').addEventListener('click', function() {
+                calendar.prev();
+            });
+            document.getElementById('calendarNext').addEventListener('click', function() {
+                calendar.next();
+            });
         }
-    })
-    .then(response => response.json())
-    .then(data => {
-        if (data.success) {
-            console.log('Dashboard data refreshed successfully');
-        } else {
-            console.error('Failed to refresh dashboard data:', data.message);
+
+        // Event modal details
+        window.showEventDetails = function(event) {
+            document.getElementById('eventModalTitle').textContent = event.title;
+            let details = `
+                <div class="event-detail-item">
+                    <strong>Type:</strong> ${event.extendedProps.type}
+                </div>
+                <div class="event-detail-item">
+                    <strong>Start:</strong> ${new Date(event.start).toLocaleString()}
+                </div>
+                <div class="event-detail-item">
+                    <strong>End:</strong> ${new Date(event.end).toLocaleString()}
+                </div>
+            `;
+            if (event.extendedProps.description) {
+                details += `
+                    <div class="event-detail-item">
+                        <strong>Description:</strong> ${event.extendedProps.description}
+                    </div>
+                `;
+            }
+            if (event.extendedProps.location) {
+                details += `
+                    <div class="event-detail-item">
+                        <strong>Location:</strong> ${event.extendedProps.location}
+                    </div>
+                `;
+            }
+            if (event.extendedProps.project) {
+                details += `
+                    <div class="event-detail-item">
+                        <strong>Project:</strong> ${event.extendedProps.project}
+                    </div>
+                `;
+            }
+            document.getElementById('eventModalBody').innerHTML = details;
+            const editBtn = document.getElementById('eventEditBtn');
+            if (editBtn) {
+                editBtn.href = `<?= base_url('events/edit/') ?>${event.id}`;
+            }
+            new bootstrap.Modal(document.getElementById('eventModal')).show();
+        };
+
+        // Dashboard refresh and stat card hover
+        let isRefreshing = false;
+        window.refreshDashboard = function() {
+            if (isRefreshing) return;
+            isRefreshing = true;
+            const refreshBtn = document.getElementById('refresh-btn');
+            const refreshIcon = document.getElementById('refresh-icon');
+            const refreshText = document.getElementById('refresh-text');
+            if (refreshBtn && refreshIcon && refreshText) {
+                refreshBtn.disabled = true;
+                refreshIcon.classList.add('fa-spin');
+                refreshText.textContent = 'Refreshing...';
+            }
+            setTimeout(() => {
+                if (refreshBtn && refreshIcon && refreshText) {
+                    refreshBtn.disabled = false;
+                    refreshIcon.classList.remove('fa-spin');
+                    refreshText.textContent = 'Refresh';
+                }
+                isRefreshing = false;
+                if (typeof Swal !== 'undefined') {
+                    Swal.fire({
+                        icon: 'success',
+                        title: 'Dashboard Refreshed!',
+                        text: 'Your dashboard has been updated with the latest data.',
+                        timer: 2000,
+                        showConfirmButton: false,
+                        toast: true,
+                        position: 'top-end'
+                    });
+                }
+            }, 1500);
+        };
+
+        function refreshDashboardData() {
+            fetch('<?= base_url('dashboard/refresh') ?>', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'X-Requested-With': 'XMLHttpRequest'
+                }
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.success) {
+                    console.log('Dashboard data refreshed successfully');
+                } else {
+                    console.error('Failed to refresh dashboard data:', data.message);
+                }
+            })
+            .catch(error => {
+                console.error('Error refreshing dashboard:', error);
+            });
         }
-    })
-    .catch(error => {
-        console.error('Error refreshing dashboard:', error);
-    });
-}
+        setInterval(refreshDashboardData, 300000);
 
-// Auto-refresh dashboard every 5 minutes
-setInterval(refreshDashboardData, 300000);
-
-// Initialize on page load
-document.addEventListener('DOMContentLoaded', function() {
-    console.log('Dashboard loaded successfully');
-    
-    // Add loading animation to stat cards on hover
-    const statCards = document.querySelectorAll('.stat-card');
-    statCards.forEach(card => {
-        card.addEventListener('mouseenter', function() {
-            this.style.transform = 'translateY(-5px) scale(1.02)';
+        // Stat card hover effect
+        const statCards = document.querySelectorAll('.stat-card');
+        statCards.forEach(card => {
+            card.addEventListener('mouseenter', function() {
+                this.style.transform = 'translateY(-5px) scale(1.02)';
+            });
+            card.addEventListener('mouseleave', function() {
+                this.style.transform = 'translateY(0) scale(1)';
+            });
         });
-        
-        card.addEventListener('mouseleave', function() {
-            this.style.transform = 'translateY(0) scale(1)';
-        });
-    });
-});
 
-// Error handling for missing SweetAlert2
-if (typeof Swal === 'undefined') {
-    console.warn('SweetAlert2 not loaded. Using fallback alerts.');
-}
-</script>
+        // Error handling for missing SweetAlert2
+        if (typeof Swal === 'undefined') {
+            console.warn('SweetAlert2 not loaded. Using fallback alerts.');
+        }
+        console.log('Dashboard loaded successfully');
+    });
+    </script>

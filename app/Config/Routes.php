@@ -127,4 +127,10 @@ $routes->post('activity/add_custom_template_to_scope', 'Activity::add_custom_tem
 $routes->post('activity/create_component', 'Activity::create_component');
 $routes->post('activity/update_component_weightage', 'Activity::update_component_weightage');
 $routes->get('activity/get_project_templates', 'Activity::get_project_templates');
+$routes->get('activity/get_components_by_scope', 'Activity::get_components_by_scope');
+$routes->get('activity/get_available_scopes', 'Activity::get_available_scopes');
 $routes->get('activity/task_page/(:any)', 'Activity::activity_dynamic/$1');
+
+
+// Route for AJAX: get a single project member's data
+$routes->get('projects/get_project_member/(:num)', 'Projects::get_project_member/$1');

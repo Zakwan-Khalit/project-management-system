@@ -18,7 +18,7 @@
 <div>
     <!-- New Project Button -->
     <div style="display: flex; justify-content: flex-end; margin-bottom: 1.25rem;">
-        <?php $userData = session('userdata'); $roleId = $userData['role_id'] ?? null; if (in_array($roleId, [1,2,3,4])): ?>
+        <?php $userData = session('userdata'); $roleId = $userData['role_id'] ?? null; if (in_array($roleId, [1,2])): ?>
             <button onclick="createNewProject()" style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white; border: none; border-radius: 0.5rem; padding: 0.75rem 1.25rem; font-weight: 600; font-size: 0.9rem; cursor: pointer; transition: all 0.3s ease; box-shadow: 0 4px 12px rgba(102, 126, 234, 0.3);" onmouseover="this.style.transform='translateY(-1px)'; this.style.boxShadow='0 6px 18px rgba(102, 126, 234, 0.4)';" onmouseout="this.style.transform='translateY(0)'; this.style.boxShadow='0 4px 12px rgba(102, 126, 234, 0.3)';">
                 <i class="fas fa-plus" style="margin-right: 0.5rem;"></i>
                 New Project
@@ -98,13 +98,6 @@
                     <input type="text" id="searchInput" placeholder="Search projects..." style="background: #f8fafc; border: 1px solid #e2e8f0; border-radius: 0.4rem; padding: 0.4rem 2rem 0.4rem 0.75rem; color: #4a5568; font-size: 0.8rem; outline: none; transition: all 0.3s ease; width: 200px; font-weight: 500;" onfocus="this.style.borderColor='#667eea'; this.style.background='white';" onblur="this.style.borderColor='#e2e8f0'; this.style.background='#f8fafc';">
                     <i class="fas fa-search" style="position: absolute; right: 0.75rem; top: 50%; transform: translateY(-50%); color: #9ca3af; font-size: 0.8rem;"></i>
                 </div>
-            </div>
-
-            <!-- Additional Filters -->
-            <div style="display: flex; gap: 0.75rem; flex-wrap: wrap; align-items: center;">
-                <button onclick="clearFilters()" style="background: linear-gradient(135deg, #f56565, #e53e3e); color: white; border: none; border-radius: 0.4rem; padding: 0.4rem 0.75rem; font-weight: 600; font-size: 0.8rem; cursor: pointer; transition: all 0.3s ease;">
-                    <i class="fas fa-times" style="margin-right: 0.4rem;"></i>Clear
-                </button>
             </div>
         </div>
     </div>
@@ -210,7 +203,7 @@
             <h4 style="color: #6b7280; font-weight: 600; margin-bottom: 0.5rem; font-family: 'Poppins', sans-serif;">No Projects Found</h4>
             <p style="color: #9ca3af; font-size: 0.95rem; margin-bottom: 1.5rem;">Start your journey by creating your first project or adjust your search filters.</p>
             <?php if (in_array($roleId, [1,2,3,4])): ?>
-            <button onclick="createNewProject()" style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white; border: none; border-radius: 12px; padding: 0.7rem 1.4rem; font-weight: 600; font-size: 0.9rem; cursor: pointer; transition: all 0.3s ease; box-shadow: 0 4px 12px rgba(102, 126, 234, 0.3);" onmouseover="this.style.transform='translateY(-2px)'; this.style.boxShadow='0 6px 18px rgba(102, 126, 234, 0.4)';" onmouseout="this.style.transform='translateY(0)'; this.style.boxShadow='0 4px 12px rgba(102, 126, 234, 0.3)';">
+            <button onclick="createNewProject()" style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white; border: none; border-radius: 0.5rem; padding: 0.75rem 1.25rem; font-weight: 600; font-size: 0.9rem; cursor: pointer; transition: all 0.3s ease; box-shadow: 0 4px 12px rgba(102, 126, 234, 0.3);" onmouseover="this.style.transform='translateY(-1px)'; this.style.boxShadow='0 6px 18px rgba(102, 126, 234, 0.4)';" onmouseout="this.style.transform='translateY(0)'; this.style.boxShadow='0 4px 12px rgba(102, 126, 234, 0.3)';">
                 <i class="fas fa-plus" style="margin-right: 0.5rem;"></i>
                 Create Your First Project
             </button>
@@ -508,10 +501,13 @@ function renderTableView() {
 
 // Create compact horizontal project card HTML
 function createHorizontalProjectCard(project) {
-    const progressPercentage = project.total_tasks > 0 ? Math.round((project.completed_tasks / project.total_tasks) * 100) : 0;
+    // Use avg_progress if available, fallback to classic progress
+    let progressPercentage = (typeof project.avg_progress !== 'undefined' && project.avg_progress !== null)
+        ? Math.round(project.avg_progress)
+        : (project.total_tasks > 0 ? Math.round((project.completed_tasks / project.total_tasks) * 100) : 0);
     const statusBadge = getStatusBadge(project.status);
     const dueDate = project.end_date ? formatDate(project.end_date) : 'No due date';
-    
+
     return `
         <div class="horizontal-project-card" style="display: flex; align-items: center; padding: 1rem; gap: 1rem; margin-bottom: 1rem; border-bottom: 1px solid #f1f3f4; position: relative;">
                 
@@ -523,7 +519,6 @@ function createHorizontalProjectCard(project) {
                             ${statusBadge}
                         </div>
                     </div>
-                    <p style="margin: 0; color: #6b7280; font-size: 0.85rem; line-height: 1.4; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden;">${project.description || 'No description available'}</p>
                 </div>
                 
                 <!-- Stats Section -->
@@ -538,12 +533,6 @@ function createHorizontalProjectCard(project) {
                             <div style="position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); font-size: 0.7rem; font-weight: 600; color: #4a5568;">${progressPercentage}%</div>
                         </div>
                         <div style="font-size: 0.7rem; color: #6b7280;">Progress</div>
-                    </div>
-                    
-                    <!-- Tasks -->
-                    <div style="text-align: center; min-width: 50px;">
-                        <div style="font-size: 1.25rem; font-weight: 700; color: #4a5568; font-family: 'Poppins', sans-serif;">${project.total_tasks || 0}</div>
-                        <div style="color: #6b7280; font-size: 0.7rem;">Tasks</div>
                     </div>
                     
                     <!-- Team -->
@@ -564,11 +553,12 @@ function createHorizontalProjectCard(project) {
                 
                 <!-- Actions Section -->
                 <div style="display: flex; gap: 0.5rem; flex-shrink: 0;">
-                    <button onclick="viewProject(${project.id})" style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white; border: none; border-radius: 0.5rem; padding: 0.5rem; font-weight: 600; font-size: 0.8rem; cursor: pointer; transition: all 0.3s ease;" onmouseover="this.style.transform='translateY(-1px)';" onmouseout="this.style.transform='translateY(0)';" title="View Project">
+                    <button onclick="viewProject(${project.id})" style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white; border: none; border-radius: 0.5rem; padding: 0.5rem; font-weight: 600; font-size: 0.8rem; cursor: pointer; transition: all 0.2s ease;" onmouseover="this.style.transform='translateY(-1px)';" onmouseout="this.style.transform='translateY(0)';" title="View Project">
                         <i class="fas fa-eye"></i>
                     </button>
+                    <?php $userData = session('userdata'); $roleId = $userData['role_id'] ?? null; if (in_array($roleId, [1,2])): ?>
                     <div class="dropdown" style="position: relative;">
-                        <button style="background: #f8fafc; border: 1px solid #e2e8f0; border-radius: 0.5rem; padding: 0.5rem; color: #6b7280; cursor: pointer; transition: all 0.3s ease;" data-bs-toggle="dropdown" onmouseover="this.style.background='#e2e8f0';" onmouseout="this.style.background='#f8fafc';">
+                        <button style="background: #f8fafc; border: 1px solid #e2e8f0; border-radius: 0.5rem; padding: 0.5rem; color: #6b7280; cursor: pointer; transition: all 0.2s ease;" data-bs-toggle="dropdown" onmouseover="this.style.background='#e2e8f0';" onmouseout="this.style.background='#f8fafc';">
                             <i class="fas fa-ellipsis-v"></i>
                         </button>
                         <ul class="dropdown-menu shadow-lg"
@@ -585,6 +575,7 @@ function createHorizontalProjectCard(project) {
                             </a></li>
                         </ul>
                     </div>
+                    <?php endif; ?>
                 </div>
         </div>
     `;
@@ -603,7 +594,6 @@ function createProjectRow(project) {
                 <div style="display: flex; align-items: center;">
                     <div>
                         <div style="font-weight: 600; color: #1a202c; margin-bottom: 0.25rem;">${project.name}</div>
-                        <small style="color: #6b7280;">${project.description || 'No description'}</small>
                     </div>
                 </div>
             </td>
@@ -624,7 +614,7 @@ function createProjectRow(project) {
             </td>
             <td style="padding: 1rem;">
                 <div class="dropdown">
-                    <button style="background: #f8fafc; border: 1px solid #e2e8f0; border-radius: 0.5rem; padding: 0.5rem; color: #6b7280; cursor: pointer; transition: all 0.3s ease;" data-bs-toggle="dropdown" onmouseover="this.style.background='#e2e8f0';" onmouseout="this.style.background='#f8fafc';">
+                    <button style="background: #f8fafc; border: 1px solid #e2e8f0; border-radius: 0.5rem; padding: 0.5rem; color: #6b7280; cursor: pointer; transition: all 0.2s ease;" data-bs-toggle="dropdown" onmouseover="this.style.background='#e2e8f0';" onmouseout="this.style.background='#f8fafc';">
                         <i class="fas fa-ellipsis-v"></i>
                     </button>
                     <ul class="dropdown-menu shadow-lg" style="border-radius: 0.75rem; border: none; padding: 0.25rem;">

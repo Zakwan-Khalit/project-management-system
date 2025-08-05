@@ -74,11 +74,24 @@ INSERT INTO `user_rel` (`user_id`, `department_id`, `position_id`, `is_active`, 
 (1, 1, 1, 1, 0), -- Super Admin -> PMO -> Project Manager
 (2, 2, 3, 1, 0); -- Natasha -> Usability -> System Analyst
 
--- Insert sample project
 INSERT INTO `projects` (`name`, `cost`, `client`, `budget`, `start_date`, `end_date`) VALUES
 ('Project Management System', 50000.00, 'Internal Development', 50000.00, '2025-01-01', '2025-06-30');
 
--- Set project status to active
+-- Insert scope lookup data
+INSERT INTO `scope_lookup` (`id`, `name`, `description`) VALUES
+  (1, 'System Analysis', 'Business requirement analysis and system design'),
+  (2, 'Quality Assurance', 'Testing and quality assurance activities'),
+  (3, 'Development', 'Software development and implementation');
+
+-- Insert component lookup data (example components for each scope)
+INSERT INTO `component_lookup` (`id`, `scope_id`, `name`, `description`) VALUES
+  (1, 1, 'Requirements Gathering', 'Gathering business requirements'),
+  (2, 1, 'System Design', 'Designing the system architecture'),
+  (3, 2, 'Test Planning', 'Planning QA activities'),
+  (4, 2, 'Test Execution', 'Executing test cases'),
+  (5, 3, 'Frontend Development', 'Developing the frontend'),
+  (6, 3, 'Backend Development', 'Developing the backend');
+
 INSERT INTO `project_status` (`project_id`, `status_id`, `changed_by`, `notes`) VALUES
 (1, 2, 1, 'Project started and is now active');
 
@@ -96,10 +109,10 @@ INSERT INTO `project_client` (`project_id`, `client_name`, `client_email`, `clie
 (1, 'Tech Solutions Inc.', 'contact@techsolutions.com', '+1-555-123-4567', 'John Smith', 50000.00);
 
 -- Insert project scopes
-INSERT INTO `project_scopes` (`id`, `project_id`, `name`, `description`, `scope_order`) VALUES
-(1, 1, 'System Analysis', 'Business requirement analysis and system design', 1),
-(2, 1, 'Quality Assurance', 'Testing and quality assurance activities', 2),
-(3, 1, 'Development', 'Software development and implementation', 3);
+INSERT INTO `project_scopes` (`id`, `project_id`, `name`, `scope_order`) VALUES
+(1, 1, 'System Analysis', 1),
+(2, 1, 'Quality Assurance', 2),
+(3, 1, 'Development', 3);
 
 -- Insert task templates with scopes
 INSERT INTO `task_templates` (`id`, `project_id`, `scope_id`, `name`, `description`, `fields`, `component_order`, `weightage`) VALUES

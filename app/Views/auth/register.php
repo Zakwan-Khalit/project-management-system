@@ -186,7 +186,10 @@
             Swal.fire({
                 icon: 'error',
                 title: 'Password Mismatch',
-                text: 'Passwords do not match. Please try again.'
+                text: 'Passwords do not match. Please try again.',
+                showConfirmButton: true,
+                allowOutsideClick: false,
+                allowEscapeKey: false
             });
             return;
         }
@@ -212,7 +215,9 @@
                         icon: 'success',
                         title: 'Registration Successful!',
                         text: data.message,
-                        confirmButtonText: 'Go to Login'
+                        confirmButtonText: 'Go to Login',
+                        allowOutsideClick: false,
+                        allowEscapeKey: false
                     }).then(() => {
                         window.location.href = data.redirect || '<?= base_url('login') ?>';
                     });
@@ -224,7 +229,10 @@
                     Swal.fire({
                         icon: 'error',
                         title: 'Registration Failed',
-                        text: errorMessage
+                        text: errorMessage,
+                        showConfirmButton: true,
+                        allowOutsideClick: false,
+                        allowEscapeKey: false
                     });
                 }
             },
@@ -233,7 +241,10 @@
                 Swal.fire({
                     icon: 'error',
                     title: 'Error',
-                    text: 'Something went wrong. Please try again.'
+                    text: 'Something went wrong. Please try again.',
+                    showConfirmButton: true,
+                    allowOutsideClick: false,
+                    allowEscapeKey: false
                 });
             },
             complete: function() {

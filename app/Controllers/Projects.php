@@ -485,6 +485,33 @@ class Projects extends BaseController
         $project['total_tasks'] = $totalTasks;
         $project['completed_tasks'] = $completedTasks;
 
+        // --- Calculate average progress from JSON data in tasks (as in getUserProjects) ---
+        $taskDataBuilder = $this->db->table('tasks');
+        $taskDataBuilder->select('data');
+        $taskDataBuilder->where('project_id', $project['id']);
+        $taskDataBuilder->where('is_delete', 0);
+        $tasks = $taskDataBuilder->get()->getResultArray();
+
+        $progressSum = 0;
+        $progressCount = 0;
+        foreach ($tasks as $task) {
+            $data = json_decode($task['data'], true);
+            if (is_array($data)) {
+                foreach ($data as $value) {
+                    if (is_string($value) && strpos($value, '%') !== false) {
+                        $progressVal = trim($value);
+                        $progressVal = rtrim($progressVal, '%');
+                        if (is_numeric($progressVal)) {
+                            $progressSum += floatval($progressVal);
+                            $progressCount++;
+                            break; // Only count one progress value per task
+                        }
+                    }
+                }
+            }
+        }
+        $project['avg_progress'] = $progressCount > 0 ? ($progressSum / $progressCount) : 0;
+
         // Ensure all fields are set and never null/empty for frontend
         $project['name'] = $project['name'] ?? 'Untitled';
         $project['start_date'] = $project['start_date'] ?? 'N/A';
@@ -816,15 +843,15 @@ class Projects extends BaseController
         $departmentId = $this->request->getPost('department_id');
         $positionId = $this->request->getPost('position_id');
         $userIds = $this->request->getPost('user_ids');
+        $fte = $this->request->getPost('fte');
+        $endDateInvolvement = $this->request->getPost('end_date_involvement');
         if (!$projectId || !$userIds || !is_array($userIds)) {
             return $this->response->setJSON(['success' => false, 'message' => 'Missing data']);
         }
-        
         // Support both department_id and position_id for backwards compatibility
         $referenceId = $positionId ?? $departmentId;
         $referenceType = $positionId ? 'position' : 'department';
-        
-        $result = $this->projectModel->addProjectMembersBulk($projectId, $userIds, $referenceId, 'member', $assignedBy, $referenceType);
+        $result = $this->projectModel->addProjectMembersBulk($projectId, $userIds, $referenceId, 'member', $assignedBy, $referenceType, $fte, $endDateInvolvement);
         return $this->response->setJSON($result);
     }
 
@@ -969,5 +996,44 @@ class Projects extends BaseController
                 'message' => 'An error occurred while removing the team member'
             ]);
         }
+    }
+
+    /**
+     * AJAX: Update FTE and End Date Involvement for a project member
+     * POST: project_id, user_id, fte, end_date_involvement
+     * Returns: { success, message }
+     */
+    public function update_project_member()
+    {
+        if (!$this->request->isAJAX()) {
+            return $this->response->setJSON(['success' => false, 'message' => 'Invalid request']);
+        }
+        $projectId = $this->request->getPost('project_id');
+        $userId = $this->request->getPost('user_id');
+        $fte = $this->request->getPost('fte');
+        $endDateInvolvement = $this->request->getPost('end_date_involvement');
+        if (!$projectId || !$userId) {
+            return $this->response->setJSON(['success' => false, 'message' => 'Missing data']);
+        }
+        $result = $this->projectModel->updateProjectMember($projectId, $userId, $fte, $endDateInvolvement);
+        if ($result) {
+            return $this->response->setJSON(['success' => true, 'message' => 'Member updated']);
+        } else {
+            return $this->response->setJSON(['success' => false, 'message' => 'Failed to update member']);
+        }
+    }
+
+    // Get a single project member's data for AJAX edit modal
+    public function get_project_member($userId = null)
+    {
+        if (!$userId) {
+            return $this->response->setJSON(['error' => 'No user ID provided'])->setStatusCode(400);
+        }
+        $projectModel = new \App\Models\ProjectModel();
+        $member = $projectModel->getProjectMemberByUserId($userId);
+        if (!$member) {
+            return $this->response->setJSON(['error' => 'Member not found'])->setStatusCode(404);
+        }
+        return $this->response->setJSON($member);
     }
 }

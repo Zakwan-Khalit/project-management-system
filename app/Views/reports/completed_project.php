@@ -49,6 +49,11 @@
     <!-- Completed Projects Table -->
     <div style="background: white; border-radius: 1rem; box-shadow: 0 10px 30px rgba(0,0,0,0.08); border: 1px solid #f1f3f4; overflow: hidden;">
         <div style="padding: 2rem;">
+            <div id="projectNameHeader" style="margin-bottom: 1.5rem;">
+                <h4 style="margin: 0; font-size: 1.5rem; font-weight: 600; color: #1f2937; font-family: 'Poppins', sans-serif; text-align: center; padding: 1rem; background: linear-gradient(135deg, #f8fafc 0%, #f1f5f9 100%); border-radius: 0.75rem; border: 1px solid #e2e8f0;">
+                    <span id="projectNameDisplay"></span> Completed Project Progress Report
+                </h4>
+            </div>
             <div style="overflow-x: auto;">
                 <table class="table table-bordered mb-0" id="completedTable" style="min-width: 800px;">
                     <thead style="background: linear-gradient(135deg, #10b981 0%, #059669 100%); color: white;">

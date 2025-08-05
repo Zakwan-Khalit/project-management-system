@@ -259,7 +259,9 @@ $(document).ready(function() {
                         title: 'Success!',
                         text: response.message,
                         icon: 'success',
-                        confirmButtonText: 'OK'
+                        confirmButtonText: 'OK',
+                        allowOutsideClick: false,
+                        allowEscapeKey: false
                     }).then(() => {
                         window.location.href = '<?= base_url('users') ?>';
                     });
@@ -268,7 +270,9 @@ $(document).ready(function() {
                         title: 'Error!',
                         text: response.message || 'An error occurred.',
                         icon: 'error',
-                        confirmButtonText: 'OK'
+                        confirmButtonText: 'OK',
+                        allowOutsideClick: false,
+                        allowEscapeKey: false
                     });
                 }
             },
@@ -277,7 +281,9 @@ $(document).ready(function() {
                     title: 'Error!',
                     text: 'An unexpected error occurred. Please try again.',
                     icon: 'error',
-                    confirmButtonText: 'OK'
+                    confirmButtonText: 'OK',
+                    allowOutsideClick: false,
+                    allowEscapeKey: false
                 });
             },
             complete: function() {

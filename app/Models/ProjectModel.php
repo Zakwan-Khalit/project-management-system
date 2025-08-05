@@ -18,11 +18,11 @@ class ProjectModel extends Model
     public function getStatusOptions()
     {
         return [
-            ['code' => 'pending', 'name' => 'Pending'],
-            ['code' => 'in_progress', 'name' => 'In Progress'],
+            ['code' => 'planning', 'name' => 'Planning'],
+            ['code' => 'active', 'name' => 'Active'],
             ['code' => 'completed', 'name' => 'Completed'],
             ['code' => 'on_hold', 'name' => 'On Hold'],
-            ['code' => 'cancelled', 'name' => 'Cancelled']
+            ['code' => 'delayed', 'name' => 'Delayed']
         ];
     }
 
@@ -32,11 +32,11 @@ class ProjectModel extends Model
     public function getStatusColors()
     {
         return [
-            'pending' => 'secondary',
-            'in_progress' => 'primary',
+            'planning' => 'secondary',
+            'active' => 'primary',
             'completed' => 'success',
             'on_hold' => 'warning',
-            'cancelled' => 'danger'
+            'delayed' => 'danger'
         ];
     }
 
@@ -453,7 +453,7 @@ class ProjectModel extends Model
     }
 
     // Add a member to a project
-    public function addProjectMember($projectId, $userId, $role = 'member', $assignedBy = null)
+    public function addProjectMember($projectId, $userId, $role = 'member', $assignedBy = null, $fte = null, $endDateInvolvement = null)
     {
         // Check if already a member
         $exists = $this->db->table('project_members')
@@ -470,6 +470,8 @@ class ProjectModel extends Model
             'user_id' => $userId,
             'role' => $role,
             'assigned_by' => $assignedBy,
+            'fte' => $fte,
+            'end_date_involvement' => $endDateInvolvement,
             'joined_at' => date('Y-m-d H:i:s'),
             'is_active' => 1,
             'is_delete' => 0
@@ -497,7 +499,9 @@ class ProjectModel extends Model
             pm.user_id,
             u.email,
             up.full_name,
-            pl.name as role
+            pl.name as role,
+            pm.fte,
+            pm.end_date_involvement
         ');
         $builder->join('users u', 'u.id = pm.user_id AND u.is_delete = 0');
         $builder->join('user_profile up', 'up.user_id = u.id AND up.is_delete = 0', 'left');
@@ -947,14 +951,14 @@ class ProjectModel extends Model
         return $headers;
     }
 
-    public function addProjectMembersBulk($projectId, $userIds, $referenceId = null, $role = 'member', $assignedBy = null, $referenceType = 'department')
+    public function addProjectMembersBulk($projectId, $userIds, $referenceId = null, $role = 'member', $assignedBy = null, $referenceType = 'department', $fte = null, $endDateInvolvement = null)
     {
         $added = [];
         $failed = [];
         if (!is_array($userIds) || empty($userIds)) return ['success' => false, 'added' => [], 'failed' => []];
         foreach ($userIds as $userId) {
             // Optionally, check department/position match here if needed
-            $result = $this->addProjectMember($projectId, $userId, $role, $assignedBy);
+            $result = $this->addProjectMember($projectId, $userId, $role, $assignedBy, $fte, $endDateInvolvement);
             if ($result) {
                 $added[] = $userId;
             } else {
@@ -962,5 +966,41 @@ class ProjectModel extends Model
             }
         }
         return ['success' => count($added) > 0, 'added' => $added, 'failed' => $failed];
+    }
+
+    /**
+     * Update FTE and End Date Involvement for a project member
+     * @param int $projectId
+     * @param int $userId
+     * @param float $fte
+     * @param string $endDateInvolvement (Y-m-d)
+     * @return bool
+     */
+    public function updateProjectMember($projectId, $userId, $fte, $endDateInvolvement)
+    {
+        $data = [
+            'fte' => $fte,
+            'end_date_involvement' => $endDateInvolvement,
+            'date_modified' => date('Y-m-d H:i:s')
+        ];
+        return $this->db->table('project_members')
+            ->where('project_id', $projectId)
+            ->where('user_id', $userId)
+            ->where('is_active', 1)
+            ->where('is_delete', 0)
+            ->update($data);
+    }
+        
+    /**
+     * Get a single project member's data by user ID
+     */
+    public function getProjectMemberByUserId($userId)
+    {
+        $builder = $this->db->table('project_members');
+        $builder->select('user_id, fte, end_date_involvement');
+        $builder->where('user_id', $userId);
+        $builder->where('is_delete', 0);
+        $result = $builder->get()->getRowArray();
+        return $result;
     }
 }
