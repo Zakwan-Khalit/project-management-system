@@ -28,7 +28,7 @@
 </div>
 
 <!-- Stats Cards Section -->
-<div style="background: white; border-radius: 0.75rem; box-shadow: 0 8px 25px rgba(0,0,0,0.08); border: 1px solid #f1f3f4; margin-bottom: 1.5rem; overflow: hidden;">
+<div style="background: white; border-radius: 0.75rem; box-shadow: 0 8px 25px rgba(0,0,0,0.08); border: 1px solid #f1f3f4; margin-bottom: 1.5rem; overflow: visible;">
     <div style="padding: 1.25rem;">
         <div class="row" style="display: flex; gap: 1rem;">
             <!-- Total Projects Card -->
@@ -71,7 +71,7 @@
     </div>
 
     <!-- Filters and Controls -->
-    <div style="background: white; border-radius: 0.75rem; border: 1px solid #f1f3f4; margin-bottom: 1.5rem; overflow: hidden;">
+    <div style="background: white; border-radius: 0.75rem; border: 1px solid #f1f3f4; margin-bottom: 1.5rem; overflow: visible;">
         <div style="padding: 1.25rem;">
             <!-- Filter Tabs -->
             <div style="display: flex; flex-wrap: wrap; align-items: center; gap: 0.5rem; margin-bottom: 1rem;">
@@ -110,69 +110,9 @@
     <h4 style="color: #6b7280; font-weight: 600; font-family: 'Poppins', sans-serif; margin-bottom: 0.5rem; font-size: 1.1rem;">Loading projects...</h4>
     <p style="color: #9ca3af; margin: 0; font-size: 0.9rem;">Please wait</p>
 </div>
-
-<style>
-    @keyframes spin {
-        0% { transform: rotate(0deg); }
-        100% { transform: rotate(360deg); }
-    }
-    
-    @keyframes pulse {
-        0%, 100% { opacity: 1; }
-        50% { opacity: 0.6; }
-    }
-    
-    /* Dropdown menu positioning fix */
-    .horizontal-project-card .dropdown-menu {
-        position: absolute !important;
-        transform: translateY(0) !important;
-        inset: auto 0px auto auto !important;
-        margin: 0 !important;
-        top: 100% !important;
-        z-index: 9999 !important;
-    }
-    
-    .horizontal-project-card .dropdown {
-        position: relative !important;
-        overflow: visible !important;
-    }
-    
-    .horizontal-project-card {
-        overflow: visible !important;
-    }
-    
-    #gridView {
-        overflow: visible !important;
-    }
-    
-    .horizontal-project-card:hover {
-        transform: translateY(-2px);
-        box-shadow: 0 8px 20px rgba(0,0,0,0.12);
-    }
-    
-    @media (max-width: 768px) {
-        .horizontal-project-card > div {
-            flex-direction: column !important;
-        }
-        
-        .horizontal-project-card > div > div:first-child {
-            width: 100% !important;
-        }
-        
-        .horizontal-project-card .stats-grid {
-            grid-template-columns: 1fr !important;
-        }
-        
-        .horizontal-project-card .action-buttons {
-            flex-direction: column !important;
-            gap: 0.8rem !important;
-        }
-    }
-</style>
-
         <!-- Table View -->
         <div id="tableView" style="display: none;">
-            <div style="background: white; border-radius: 20px; box-shadow: 0 10px 30px rgba(0,0,0,0.08); overflow: hidden; border: 1px solid rgba(255,255,255,0.2);">
+            <div style="background: white; border-radius: 20px; box-shadow: 0 10px 30px rgba(0,0,0,0.08); overflow: visible; border: 1px solid rgba(255,255,255,0.2);">
                 <div class="table-responsive">
                     <table class="table table-hover mb-0">
                         <thead style="background: linear-gradient(135deg, #f8fafc 0%, #e2e8f0 100%); border-bottom: 2px solid #e2e8f0;">
@@ -501,16 +441,13 @@ function renderTableView() {
 
 // Create compact horizontal project card HTML
 function createHorizontalProjectCard(project) {
-    // Use avg_progress if available, fallback to classic progress
-    let progressPercentage = (typeof project.avg_progress !== 'undefined' && project.avg_progress !== null)
-        ? Math.round(project.avg_progress)
-        : (project.total_tasks > 0 ? Math.round((project.completed_tasks / project.total_tasks) * 100) : 0);
+    // Use progress field directly
+    let progressPercentage = project.progress ? Math.round(project.progress) : 0;
     const statusBadge = getStatusBadge(project.status);
     const dueDate = project.end_date ? formatDate(project.end_date) : 'No due date';
 
     return `
         <div class="horizontal-project-card" style="display: flex; align-items: center; padding: 1rem; gap: 1rem; margin-bottom: 1rem; border-bottom: 1px solid #f1f3f4; position: relative;">
-                
                 <!-- Project Info Section -->
                 <div style="flex: 1; min-width: 0;">
                     <div style="display: flex; align-items: start; justify-content: space-between; margin-bottom: 0.5rem;">
@@ -520,7 +457,6 @@ function createHorizontalProjectCard(project) {
                         </div>
                     </div>
                 </div>
-                
                 <!-- Stats Section -->
                 <div style="display: flex; gap: 1rem; align-items: center; flex-shrink: 0;">
                     <!-- Progress -->
@@ -528,19 +464,19 @@ function createHorizontalProjectCard(project) {
                         <div style="position: relative; width: 45px; height: 45px; margin: 0 auto 0.25rem;">
                             <svg width="45" height="45" style="transform: rotate(-90deg);">
                                 <circle cx="22.5" cy="22.5" r="18" stroke="#e2e8f0" stroke-width="3" fill="none"></circle>
-                                <circle cx="22.5" cy="22.5" r="18" stroke="#48bb78" stroke-width="3" fill="none" stroke-dasharray="${(progressPercentage / 100) * 113} 113" stroke-linecap="round"></circle>
+                                <circle cx="22.5" cy="22.5" r="18" stroke="#48bb78" stroke-width="3" fill="none" stroke-dasharray="${progressPercentage / 100 * 113} 113" stroke-linecap="round"></circle>
                             </svg>
-                            <div style="position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); font-size: 0.7rem; font-weight: 600; color: #4a5568;">${progressPercentage}%</div>
+                            <div style="position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); font-size: 0.7rem; font-weight: 600; color: #4a5568;">
+                                ${progressPercentage}%
+                            </div>
                         </div>
                         <div style="font-size: 0.7rem; color: #6b7280;">Progress</div>
                     </div>
-                    
                     <!-- Team -->
                     <div style="text-align: center; min-width: 50px;">
                         <div style="font-size: 1.25rem; font-weight: 700; color: #4a5568; font-family: 'Poppins', sans-serif;">${project.member_count || 0}</div>
                         <div style="color: #6b7280; font-size: 0.7rem;">Members</div>
                     </div>
-                    
                     <!-- Due Date -->
                     <div style="text-align: center; min-width: 80px;">
                         <div style="font-size: 0.8rem; font-weight: 600; color: #4a5568;">
@@ -550,7 +486,6 @@ function createHorizontalProjectCard(project) {
                         <div style="font-size: 0.7rem; color: #6b7280;">Due Date</div>
                     </div>
                 </div>
-                
                 <!-- Actions Section -->
                 <div style="display: flex; gap: 0.5rem; flex-shrink: 0;">
                     <button onclick="viewProject(${project.id})" style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white; border: none; border-radius: 0.5rem; padding: 0.5rem; font-weight: 600; font-size: 0.8rem; cursor: pointer; transition: all 0.2s ease;" onmouseover="this.style.transform='translateY(-1px)';" onmouseout="this.style.transform='translateY(0)';" title="View Project">
@@ -927,3 +862,61 @@ function initMasonryLayout() {
 </script>
 
 
+<style>
+    @keyframes spin {
+        0% { transform: rotate(0deg); }
+        100% { transform: rotate(360deg); }
+    }
+    
+    @keyframes pulse {
+        0%, 100% { opacity: 1; }
+        50% { opacity: 0.6; }
+    }
+    
+    /* Dropdown menu positioning fix */
+    .horizontal-project-card .dropdown-menu {
+        position: fixed !important;
+        z-index: 9999 !important;
+        transform: translateY(0) !important;
+        inset: auto 0px auto auto !important;
+        margin: 0 !important;
+        top: 100% !important;
+    }
+    
+    .horizontal-project-card .dropdown {
+        position: relative !important;
+        overflow: visible !important;
+    }
+    
+    .horizontal-project-card {
+        overflow: visible !important;
+    }
+    
+    #gridView {
+        overflow: visible !important;
+    }
+    
+    .horizontal-project-card:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 8px 20px rgba(0,0,0,0.12);
+    }
+    
+    @media (max-width: 768px) {
+        .horizontal-project-card > div {
+            flex-direction: column !important;
+        }
+        
+        .horizontal-project-card > div > div:first-child {
+            width: 100% !important;
+        }
+        
+        .horizontal-project-card .stats-grid {
+            grid-template-columns: 1fr !important;
+        }
+        
+        .horizontal-project-card .action-buttons {
+            flex-direction: column !important;
+            gap: 0.8rem !important;
+        }
+    }
+</style>

@@ -118,7 +118,7 @@ class ProjectModel extends Model
     {
         $insert = [
             'name'         => $data['name'] ?? null,
-            'cost'         => $data['cost'] ?? null,
+            'Budget'         => $data['cost'] ?? null,
             'client'       => $data['client'] ?? null,
             'start_date'   => $data['start_date'] ?? null,
             'end_date'     => $data['end_date'] ?? null,
@@ -153,7 +153,7 @@ class ProjectModel extends Model
         if (isset($data['end_date'])) $update['end_date'] = $data['end_date'];
         if (isset($data['budget'])) $update['budget'] = $data['budget'];
         if (isset($data['client'])) $update['client'] = $data['client'];
-        if (isset($data['cost'])) $update['cost'] = $data['cost'];
+        if (isset($data['cost'])) $update['budget'] = $data['cost'];
         
         return $this->db->table('projects')
             ->where('id', $projectId)
@@ -217,7 +217,6 @@ class ProjectModel extends Model
                 ->countAllResults();
             $progress = round(($completed / $total) * 100, 2);
         }
-        // (duplicate code removed)
     }
 
     public function updateTaskOrder($taskOrder)
@@ -604,18 +603,17 @@ class ProjectModel extends Model
         $builder->join('project_priority pp', 'pp.project_id = p.id AND pp.is_active = 1 AND pp.is_delete = 0', 'left');
         $builder->join('priority_lookup pl', 'pl.id = pp.priority_id AND pl.is_delete = 0', 'left');
         $builder->where('p.is_delete', 0);
-        $builder->where('p.is_active', 1);
-        
+
         // Filter by status
         if (!empty($filters['status']) && $filters['status'] !== 'all') {
             $builder->where('sl.code', $filters['status']);
         }
-        
+
         // Filter by priority
         if (!empty($filters['priority']) && $filters['priority'] !== 'all') {
             $builder->where('pl.code', $filters['priority']);
         }
-        
+
         // Filter by search
         if (!empty($filters['search'])) {
             $search = strtolower($filters['search']);
@@ -624,29 +622,40 @@ class ProjectModel extends Model
             $builder->orLike('LOWER(p.description)', $search);
             $builder->groupEnd();
         }
-        
+
         $builder->orderBy('p.date_created', 'DESC');
         $projects = $builder->get()->getResultArray();
-        
+
         // Add task statistics for each project
         foreach ($projects as &$project) {
             // Get task counts
             $taskBuilder = $this->db->table('tasks t');
-            $taskBuilder->select('COUNT(*) as total_tasks');
+            $taskBuilder->select('data');
             $taskBuilder->where('t.project_id', $project['id']);
             $taskBuilder->where('t.is_delete', 0);
-            $taskStats = $taskBuilder->get()->getRowArray();
+            $tasks = $taskBuilder->get()->getResultArray();
             
-            // Get completed task counts
-            $completedBuilder = $this->db->table('tasks t');
-            $completedBuilder->select('COUNT(*) as completed_tasks');
-            $completedBuilder->join('task_status ts', 'ts.task_id = t.id AND ts.is_active = 1 AND ts.is_delete = 0', 'left');
-            $completedBuilder->join('status_lookup sl', 'sl.id = ts.status_id AND sl.code = "completed" AND sl.is_delete = 0', 'left');
-            $completedBuilder->where('t.project_id', $project['id']);
-            $completedBuilder->where('t.is_delete', 0);
-            $completedBuilder->where('sl.id IS NOT NULL');
-            $completedStats = $completedBuilder->get()->getRowArray();
+            $progressSum = 0;
+            $progressCount = 0;
             
+            foreach ($tasks as $task) {
+                $data = json_decode($task['data'], true);
+                if (is_array($data)) {
+                    foreach ($data as $value) {
+                        if (is_string($value) && strpos($value, '%') !== false) {
+                            $progressVal = rtrim($value, '%');
+                            if (is_numeric($progressVal)) {
+                                $progressSum += floatval($progressVal);
+                                $progressCount++;
+                            }
+                        }
+                    }
+                }
+            }
+
+            // Calculate progress
+            $progress = $progressCount > 0 ? round($progressSum / $progressCount, 2) : 0;
+
             // Get member count
             $memberBuilder = $this->db->table('project_members');
             $memberBuilder->select('COUNT(*) as member_count');
@@ -654,16 +663,15 @@ class ProjectModel extends Model
             $memberBuilder->where('is_active', 1);
             $memberBuilder->where('is_delete', 0);
             $memberStats = $memberBuilder->get()->getRowArray();
-            
-            $project['total_tasks'] = (int)$taskStats['total_tasks'];
-            $project['completed_tasks'] = (int)$completedStats['completed_tasks'];
+
+            $project['progress'] = $progress;
             $project['member_count'] = (int)$memberStats['member_count'];
-            
+
             // Ensure we have the right field names for JavaScript
             $project['status'] = $project['status_code'] ?? 'planning';
             $project['priority'] = $project['priority_code'] ?? 'medium';
         }
-        
+
         return $projects;
     }
 
@@ -1002,5 +1010,13 @@ class ProjectModel extends Model
         $builder->where('is_delete', 0);
         $result = $builder->get()->getRowArray();
         return $result;
+    }
+
+    // Get projects with progress data
+    public function getProjectsWithProgress() {
+        $builder = $this->db->table('projects');
+        $builder->select('projects.*, (SELECT AVG(CAST(REPLACE(JSON_UNQUOTE(JSON_EXTRACT(data, "$.9")), "%", "") AS DECIMAL(5,2))) FROM tasks WHERE tasks.project_id = projects.id AND tasks.is_delete = 0) as avg_progress');
+        $builder->where('projects.is_delete', 0);
+        return $builder->get()->getResultArray();
     }
 }

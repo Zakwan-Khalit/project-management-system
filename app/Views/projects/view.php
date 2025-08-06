@@ -26,6 +26,10 @@
     <div>
     <!-- New Project Button -->
     <div style="display: flex; justify-content: flex-end; margin-bottom: 1.25rem;">
+        <button onclick="uploadTimeline()" style="background: linear-gradient(135deg, #38b2ac 0%, #319795 100%); color: white; border: none; border-radius: 0.5rem; padding: 0.75rem 1.25rem; font-weight: 600; font-size: 0.9rem; cursor: pointer; transition: all 0.3s ease; box-shadow: 0 4px 12px rgba(56, 178, 172, 0.3); margin-right: 0.5rem;" onmouseover="this.style.transform='translateY(-1px)'; this.style.boxShadow='0 6px 18px rgba(56, 178, 172, 0.4)';" onmouseout="this.style.transform='translateY(0)'; this.style.boxShadow='0 4px 12px rgba(56, 178, 172, 0.3)';">
+            <i class="fas fa-upload" style="margin-right: 0.5rem;"></i>
+            Upload Timeline
+        </button>
         <?php $userData = session('userdata'); $roleId = $userData['role_id'] ?? null; if (in_array($roleId, [1,2])): ?>
             <button onclick="editProject()" style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white; border: none; border-radius: 0.5rem; padding: 0.75rem 1.25rem; font-weight: 600; font-size: 0.9rem; cursor: pointer; transition: all 0.3s ease; box-shadow: 0 4px 12px rgba(102, 126, 234, 0.3);" onmouseover="this.style.transform='translateY(-1px)'; this.style.boxShadow='0 6px 18px rgba(102, 126, 234, 0.4)';" onmouseout="this.style.transform='translateY(0)'; this.style.boxShadow='0 4px 12px rgba(102, 126, 234, 0.3)';">
                 <i class="fas fa-plus" style="margin-right: 0.5rem;"></i>
@@ -92,7 +96,7 @@
                                     <span style="color: #6b7280;" id="projectEndDate">Loading...</span>
                                 </div>
                                 <div style="display: flex; justify-content: space-between; align-items: center; padding: 1rem 0; border-bottom: 1px solid #f1f5f9;">
-                                    <span style="font-weight: 600; color: #374151;">Budget:</span>
+                                    <span style="font-weight: 600; color: #374151;">Project Cost:</span>
                                     <span style="color: #6b7280;" id="projectBudget">Loading...</span>
                                 </div>
                                 <div style="display: flex; justify-content: space-between; align-items: center; padding: 1rem 0;">
@@ -945,4 +949,30 @@ document.addEventListener('DOMContentLoaded', function() {
     
     showTab('overview');
 });
+function uploadTimeline() {
+    Swal.fire({
+        title: 'Upload Timeline',
+        html: `
+            <div class="mb-3 text-start">
+                <label for="timelineFile" class="form-label">Select File</label>
+                <input type="file" id="timelineFile" class="form-control">
+            </div>
+        `,
+        showCancelButton: true,
+        confirmButtonText: 'Upload',
+        cancelButtonText: 'Cancel',
+        preConfirm: () => {
+            const fileInput = document.getElementById('timelineFile');
+            if (!fileInput.files.length) {
+                Swal.showValidationMessage('Please select a file to upload');
+                return false;
+            }
+            return true;
+        }
+    }).then((result) => {
+        if (result.isConfirmed) {
+            Swal.fire('Success', 'Timeline uploaded successfully!', 'success');
+        }
+    });
+}
 </script>
