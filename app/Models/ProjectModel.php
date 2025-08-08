@@ -240,11 +240,13 @@ class ProjectModel extends Model
         return $result !== null;
     // No protected properties or constructor
     }
+
     // Get a single project with current status and priority
     public function getProjectById($projectId)
     {
         // Always fetch the project base data first
         $project = $this->db->table('projects')
+            ->select('id, name, code, description, start_date, end_date, budget AS cost, client, is_active, is_delete, date_created, date_modified, budget')
             ->where('id', $projectId)
             ->where('is_delete', 0)
             ->get()->getRowArray();
@@ -1007,6 +1009,11 @@ class ProjectModel extends Model
         $builder = $this->db->table('project_members');
         $builder->select('user_id, fte, end_date_involvement');
         $builder->where('user_id', $userId);
+        if (func_num_args() > 1) {
+            $projectId = func_get_arg(1);
+            $builder->where('project_id', $projectId);
+        }
+        $builder->where('is_active', 1);
         $builder->where('is_delete', 0);
         $result = $builder->get()->getRowArray();
         return $result;

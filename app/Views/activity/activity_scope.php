@@ -79,9 +79,11 @@ $(document).ready(function() {
                             <p style="color: #64748b; font-size: 1.1rem; margin-bottom: 2rem; max-width: 500px; margin-left: auto; margin-right: auto;">
                                 Create project scopes to organize your activities and manage different aspects of your project.
                             </p>
+                            <?php $userData = session('userdata'); $roleId = $userData['role_id'] ?? null; if (in_array($roleId, [1,2])): ?>
                             <button id="createScopeBtn" style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white; border: none; border-radius: 0.5rem; padding: 0.75rem 1.25rem; font-weight: 600; font-size: 0.9rem; cursor: pointer; transition: all 0.3s ease; box-shadow: 0 4px 12px rgba(102, 126, 234, 0.3);" onmouseover="this.style.transform='translateY(-1px)'; this.style.boxShadow='0 6px 18px rgba(102, 126, 234, 0.4)';" onmouseout="this.style.transform='translateY(0)'; this.style.boxShadow='0 4px 12px rgba(102, 126, 234, 0.3)';">
                                 <i class="fas fa-plus me-2"></i>Create Scope
                             </button>
+                            <?php endif; ?>
                         </div>
                     `);
                 }
@@ -95,7 +97,7 @@ $(document).ready(function() {
     
     function renderScope(scope) {
         const scopeCard = `
-            <div class="scope-card mb-4" data-scope-id="${scope.id}" data-scope-name="${scope.name}" style="background: white; border-radius: 1rem; border: 1px solid #e2e8f0; padding: 2rem; box-shadow: 0 4px 6px rgba(0,0,0,0.05); transition: all 0.3s ease;" onmouseover="this.style.boxShadow='0 8px 15px rgba(0,0,0,0.1)'" onmouseout="this.style.boxShadow='0 4px 6px rgba(0,0,0,0.05)'">
+            <div class="scope-card mb-4" data-scope-id="${scope.id}" data-scope-name="${scope.name}" ${scope.scope_lookup_id ? `data-scope-lookup-id='${scope.scope_lookup_id}'` : ''} style="background: white; border-radius: 1rem; border: 1px solid #e2e8f0; padding: 2rem; box-shadow: 0 4px 6px rgba(0,0,0,0.05); transition: all 0.3s ease;" onmouseover="this.style.boxShadow='0 8px 15px rgba(0,0,0,0.1)'" onmouseout="this.style.boxShadow='0 4px 6px rgba(0,0,0,0.05)'">
                 <div class="scope-header d-flex justify-content-between align-items-center mb-4">
                     <div class="scope-info">
                         <h3 style="font-family: 'Poppins', sans-serif; font-weight: 600; color: #1f2937; margin: 0; font-size: 1.5rem; display: flex; align-items: center; gap: 0.5rem;">
@@ -103,7 +105,7 @@ $(document).ready(function() {
                             ${scope.name}
                         </h3>
                     </div>
-                    <?php $userData = session('userdata'); $roleId = $userData['role_id'] ?? null; if (in_array($roleId, [1,2])): ?>
+                    <?php $userData = session('userdata'); $roleId = $userData['role_id'] ?? null; if (in_array($roleId, [1,2,3])): ?>
                     <div class="scope-actions d-flex gap-2">
                         <button class="btn btn-sm btn-outline-primary add-components-btn" data-scope-id="${scope.id}" style="border-radius: 0.5rem; padding: 0.5rem 1rem; font-weight: 500;">
                             <i class="fas fa-plus me-1"></i>Add Components
@@ -301,69 +303,102 @@ $(document).ready(function() {
             data: { project_id: projectId },
             dataType: 'json',
             success: function(res) {
+                let options = '';
                 if (res.success && res.scopes && res.scopes.length > 0) {
-                    const options = res.scopes.map(s => `<option value="${s.id}">${s.name}</option>`).join('');
-                    Swal.fire({
-                        title: 'Add Project Scope',
-                        html: `
-                            <div style="text-align: left;">
-                                <label for="scopeLookupId" style="display: block; margin-bottom: 0.5rem; font-weight: 600;">Scope Name</label>
-                                <select id="scopeLookupId" class="form-select">
-                                    <option value="">Select a scope</option>
-                                    ${options}
-                                </select>
-                            </div>
-                        `,
-            showCancelButton: true,
-            confirmButtonText: 'Create Scope',
-            cancelButtonText: 'Cancel',
-            customClass: {
-                cancelButton: '',
-            },
-                        preConfirm: () => {
-                            const scope_lookup_id = document.getElementById('scopeLookupId').value;
-                            if (!scope_lookup_id) {
-                                Swal.showValidationMessage('Please select a scope');
-                                return false;
-                            }
-                            return { scope_lookup_id };
-                        }
-                    }).then((result) => {
-                        if (result.isConfirmed) {
-                            $.ajax({
-                                url: '<?= base_url('activity/create_scope') ?>',
-                                method: 'POST',
-                                data: {
-                                    project_id: projectId,
-                                    scope_lookup_id: result.value.scope_lookup_id
-                                },
-                                dataType: 'json',
-                                success: function(res) {
-                                    if (res.success) {
-                                        Swal.fire({
-                                            title: 'Created!',
-                                            text: 'Scope created successfully.',
-                                            icon: 'success',
-                                            allowOutsideClick: false,
-                                            allowEscapeKey: false,
-                                            confirmButtonText: 'OK'
-                                        }).then(() => {
-                                            loadScopes();
-                                        });
-                                    } else {
-                                        Swal.fire('Error', res.message || 'Failed to create scope.', 'error');
-                                    }
-                                },
-                                error: function(xhr, status, error) {
-                                    console.error('Error creating scope:', error);
-                                    Swal.fire('Error', 'Failed to create scope.', 'error');
-                                }
-                            });
-                        }
-                    });
-                } else {
-                    Swal.fire('No Available Scopes', 'All scopes have already been added to this project.', 'info');
+                    options = res.scopes.map(s => `<option value="${s.id}">${s.name}</option>`).join('');
                 }
+                Swal.fire({
+                    title: 'Add Project Scope',
+                    html: `
+                        <div style="text-align: left; min-height: 150px; height: 150px; display: flex; flex-direction: column; justify-content: center;">
+                            <label for="scopeSelect" style="display: block; margin-bottom: 0.5rem; font-weight: 600;">Scope Name</label>
+                            <select id="scopeSelect" class="form-select" style="width:100%; min-height: 48px;">
+                                <option value="">Select or type scope name</option>
+                                ${options}
+                            </select>
+                        </div>
+                    `,
+                    showCancelButton: true,
+                    confirmButtonText: 'Create Scope',
+                    cancelButtonText: 'Cancel',
+                    width: '500px',
+                    customClass: {
+                        cancelButton: '',
+                        popup: 'swal2-modal-tall'
+                    },
+                    didOpen: () => {
+                        $('#scopeSelect').select2({
+                            width: '100%',
+                            placeholder: 'Select or type scope name',
+                            allowClear: true,
+                            tags: true,
+                            dropdownParent: $('.swal2-popup'),
+                            dropdownCssClass: 'select2-dropdown-custom',
+                            createTag: function (params) {
+                                const term = $.trim(params.term);
+                                if (term === '') {
+                                    return null;
+                                }
+                                return {
+                                    id: term,
+                                    text: term,
+                                    newTag: true
+                                };
+                            }
+                        });
+                        if (!$('style#select2-dropdown-custom-style').length) {
+                            $('head').append('<style id="select2-dropdown-custom-style">.select2-dropdown-custom { max-height: 250px !important; overflow-y: auto !important; } </style>');
+                        }
+                    },
+                    preConfirm: () => {
+                        const scopeVal = $('#scopeSelect').val();
+                        const scopeText = $('#scopeSelect option:selected').text();
+                        if (!scopeVal) {
+                            Swal.showValidationMessage('Please select or type a scope name');
+                            return false;
+                        }
+                        // If the value is not a number, treat as custom
+                        const isCustom = isNaN(scopeVal);
+                        return { scopeVal, scopeText, isCustom };
+                    }
+                }).then((result) => {
+                    if (result.isConfirmed) {
+                        let postData = {
+                            project_id: projectId
+                        };
+                        if (result.value.isCustom) {
+                            postData.custom_scope_name = result.value.scopeVal;
+                        } else {
+                            postData.scope_lookup_id = result.value.scopeVal;
+                        }
+                        $.ajax({
+                            url: '<?= base_url('activity/create_scope') ?>',
+                            method: 'POST',
+                            data: postData,
+                            dataType: 'json',
+                            success: function(res) {
+                                if (res.success) {
+                                    Swal.fire({
+                                        title: 'Created!',
+                                        text: 'Scope created successfully.',
+                                        icon: 'success',
+                                        allowOutsideClick: false,
+                                        allowEscapeKey: false,
+                                        confirmButtonText: 'OK'
+                                    }).then(() => {
+                                        loadScopes();
+                                    });
+                                } else {
+                                    Swal.fire('Error', res.message || 'Failed to create scope.', 'error');
+                                }
+                            },
+                            error: function(xhr, status, error) {
+                                console.error('Error creating scope:', error);
+                                Swal.fire('Error', 'Failed to create scope.', 'error');
+                            }
+                        });
+                    }
+                });
             },
             error: function(xhr, status, error) {
                 console.error('Error loading available scopes:', error);
@@ -377,7 +412,9 @@ $(document).ready(function() {
         const scopeId = $(this).data('scope-id');
         const scopeCard = $(this).closest('.scope-card');
         const currentName = scopeCard.data('scope-name');
-        
+        // Check if scope is from scope_lookup (assume scope_lookup_id is set as data attribute if available)
+        const scopeLookupId = scopeCard.data('scope-lookup-id');
+
         // Get current scope components
         const currentComponents = [];
         scopeCard.find('.component-item').each(function() {
@@ -386,7 +423,7 @@ $(document).ready(function() {
             const weightage = $(this).find('.edit-weightage-btn').data('weightage') || 0;
             currentComponents.push({ id: templateId, name: templateName, weightage: weightage });
         });
-        
+
         // Build components list HTML
         const componentsListHtml = currentComponents.length > 0 
             ? currentComponents.map(comp => 
@@ -422,7 +459,7 @@ $(document).ready(function() {
                 </div>`
             ).join('')
             : '<div class="text-muted text-center p-3">No components in this scope</div>';
-        
+
         Swal.fire({
             title: 'Edit Scope',
             html: `
@@ -430,7 +467,7 @@ $(document).ready(function() {
                     <div class="mb-4">
                         <label for="editScopeName" style="display: block; margin-bottom: 0.75rem; font-weight: 600; color: #374151; font-size: 1rem;">Scope Name</label>
                         <input type="text" id="editScopeName" class="swal2-input" value="${currentName}" 
-                            style="margin: 0; border: 2px solid #e5e7eb; border-radius: 0.5rem; padding: 0.75rem; font-size: 1rem; width: 100%;">
+                            style="margin: 0; border: 2px solid #e5e7eb; border-radius: 0.5rem; padding: 0.75rem; font-size: 1rem; width: 100%;" ${scopeLookupId ? 'disabled' : ''}>
                     </div>
                     
                     <div class="mb-4">
@@ -488,12 +525,8 @@ $(document).ready(function() {
                                 dataType: 'json',
                                 success: function(res) {
                                     if (res.success) {
-                                        componentDiv.fadeOut(300, function() {
-                                            $(this).remove();
-                                            if ($('#editComponentsList .component-edit-row').length === 0) {
-                                                $('#editComponentsList').html('<div class="text-muted text-center p-3">No components in this scope</div>');
-                                            }
-                                        });
+                                        // Reload the page to ensure UI is updated
+                                        location.reload();
                                     } else {
                                         Swal.fire('Error', res.message || 'Failed to delete component.', 'error');
                                     }
@@ -604,7 +637,7 @@ $(document).ready(function() {
             if (result.isConfirmed) {
                 // Create array of all update promises
                 const updatePromises = [];
-                
+
                 // Update scope name
                 updatePromises.push(
                     $.ajax({
@@ -618,7 +651,7 @@ $(document).ready(function() {
                         dataType: 'json'
                     })
                 );
-                
+
                 // Update component weightages
                 result.value.componentChanges.forEach(function(change) {
                     updatePromises.push(
@@ -633,7 +666,7 @@ $(document).ready(function() {
                         })
                     );
                 });
-                
+
                 // Update component names
                 result.value.nameChanges.forEach(function(change) {
                     updatePromises.push(
@@ -649,20 +682,11 @@ $(document).ready(function() {
                         })
                     );
                 });
-                
-                // Show loading
-                Swal.fire({
-                    title: 'Updating Scope...',
-                    allowOutsideClick: false,
-                    didOpen: () => {
-                        Swal.showLoading();
-                    }
-                });
-                
+
                 // Execute all updates
                 Promise.all(updatePromises).then(function(responses) {
                     const allSuccess = responses.every(res => res.success);
-                    
+
                     if (allSuccess) {
                         Swal.fire('Updated!', 'Scope and components updated successfully.', 'success').then(() => {
                             loadScopes();
@@ -781,6 +805,7 @@ $(document).ready(function() {
                                 tags: true,
                                 tokenSeparators: [',', '\n'],
                                 dropdownParent: $('.swal2-popup'),
+                                dropdownCssClass: 'select2-dropdown-custom',
                                 createTag: function (params) {
                                     const term = $.trim(params.term);
                                     if (term === '') {
@@ -793,6 +818,9 @@ $(document).ready(function() {
                                     };
                                 }
                             });
+                            if (!$('style#select2-dropdown-custom-style').length) {
+                                $('head').append('<style id="select2-dropdown-custom-style">.select2-dropdown-custom { max-height: 250px !important; overflow-y: auto !important; } </style>');
+                            }
                         },
                         preConfirm: () => {
                             const selectedComponents = $('#componentSelect').val();

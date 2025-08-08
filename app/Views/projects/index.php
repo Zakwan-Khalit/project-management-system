@@ -158,7 +158,36 @@
 </div>
 
 <script>
-// Utility functions
+// Only allow interaction with the active card when dropdown is open
+function setDropdownCardActive(cardElem) {
+    document.querySelectorAll('.horizontal-project-card').forEach(function(card) {
+        if (card !== cardElem) {
+            card.style.pointerEvents = 'none';
+            card.style.opacity = '0.6';
+        } else {
+            card.style.zIndex = '9999';
+        }
+    });
+}
+
+function clearDropdownCardActive() {
+    document.querySelectorAll('.horizontal-project-card').forEach(function(card) {
+        card.style.pointerEvents = '';
+        card.style.opacity = '';
+        card.style.zIndex = '';
+    });
+}
+
+document.addEventListener('DOMContentLoaded', function() {
+    document.body.addEventListener('show.bs.dropdown', function(e) {
+        var cardElem = e.target.closest('.horizontal-project-card');
+        if (cardElem) setDropdownCardActive(cardElem);
+    });
+    document.body.addEventListener('hide.bs.dropdown', function(e) {
+        clearDropdownCardActive();
+    });
+});
+//  Utility functions
 function debounce(func, wait) {
     let timeout;
     return function executedFunction(...args) {
@@ -451,7 +480,7 @@ function createHorizontalProjectCard(project) {
                 <!-- Project Info Section -->
                 <div style="flex: 1; min-width: 0;">
                     <div style="display: flex; align-items: start; justify-content: space-between; margin-bottom: 0.5rem;">
-                        <h4 style="margin: 0; font-size: 1.1rem; font-weight: 600; color: #1a202c; font-family: 'Poppins', sans-serif; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; max-width: 400px;">${project.name}</h4>
+                        <h4 style="margin: 0; font-size: 1.1rem; font-weight: 600; color: #1a202c; font-family: 'Poppins', sans-serif; white-space: normal; overflow: hidden; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; max-width: 400px;">${project.name}</h4>
                         <div style="display: flex; gap: 0.5rem; align-items: center;">
                             ${statusBadge}
                         </div>
@@ -493,11 +522,11 @@ function createHorizontalProjectCard(project) {
                     </button>
                     <?php $userData = session('userdata'); $roleId = $userData['role_id'] ?? null; if (in_array($roleId, [1,2])): ?>
                     <div class="dropdown" style="position: relative;">
-                        <button style="background: #f8fafc; border: 1px solid #e2e8f0; border-radius: 0.5rem; padding: 0.5rem; color: #6b7280; cursor: pointer; transition: all 0.2s ease;" data-bs-toggle="dropdown" onmouseover="this.style.background='#e2e8f0';" onmouseout="this.style.background='#f8fafc';">
+                        <button style="background: #f8fafc; border: 1px solid #e2e8f0; border-radius: 0.5rem; padding: 0.5rem; color: #6b7280; cursor: pointer; transition: all 0.2s ease; position: relative; z-index: 10001;" data-bs-toggle="dropdown" onmouseover="this.style.background='#e2e8f0';" onmouseout="this.style.background='#f8fafc';">
                             <i class="fas fa-ellipsis-v"></i>
                         </button>
                         <ul class="dropdown-menu shadow-lg"
-                            style="border-radius: 0.75rem; border: none; padding: 0.25rem; min-width: 180px; position: absolute; right: 0; top: 100%; z-index: 9999; background: white; box-shadow: 0 10px 25px rgba(0,0,0,0.15); margin-top: 0.25rem;">
+                            style="border-radius: 0.75rem; border: none; padding: 0.25rem; min-width: 180px; position: absolute; right: 0; top: 110%; z-index: 99999; background: white; box-shadow: 0 10px 25px rgba(0,0,0,0.15); margin-top: 0.25rem;">
                             <li><a class="dropdown-item" href="#" onclick="editProject(${project.id})" style="border-radius: 0.5rem; padding: 0.5rem; margin: 0.1rem; font-size: 0.85rem;">
                                 <i class="fas fa-edit me-2 text-warning"></i>Edit
                             </a></li>
@@ -528,7 +557,7 @@ function createProjectRow(project) {
             <td style="padding: 1rem;">
                 <div style="display: flex; align-items: center;">
                     <div>
-                        <div style="font-weight: 600; color: #1a202c; margin-bottom: 0.25rem;">${project.name}</div>
+                        <div style="font-weight: 600; color: #1a202c; margin-bottom: 0.25rem; white-space: normal; overflow: hidden; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; max-width: 400px;">${project.name}</div>
                     </div>
                 </div>
             </td>

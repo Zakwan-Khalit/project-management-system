@@ -455,13 +455,20 @@ class Activity extends BaseController
 
         $projectId = $this->request->getPost('project_id');
         $scopeLookupId = $this->request->getPost('scope_lookup_id');
-        $description = $this->request->getPost('description');
-
-        if (!$projectId || !$scopeLookupId) {
-            return $this->response->setJSON(['success' => false, 'message' => 'Project ID and scope_lookup_id are required']);
+        // Treat both 0 and '0' (string) as null
+        if ($scopeLookupId === '0' || $scopeLookupId === 0 || empty($scopeLookupId)) {
+            $scopeLookupId = null;
         }
+        $customScopeName = $this->request->getPost('custom_scope_name');
 
-        $scopeId = $this->activityModel->createScope($projectId, $scopeLookupId, $description);
+        if (!$projectId) {
+            return $this->response->setJSON(['success' => false, 'message' => 'Project ID is required']);
+        }
+        // If custom, set to null
+        if (empty($scopeLookupId) || $scopeLookupId == 0) {
+            $scopeLookupId = null;
+        }
+        $scopeId = $this->activityModel->createScope($projectId, $scopeLookupId, $customScopeName);
 
         if ($scopeId) {
             return $this->response->setJSON([
@@ -485,13 +492,12 @@ class Activity extends BaseController
 
         $scopeId = $this->request->getPost('scope_id');
         $name = $this->request->getPost('name');
-        $description = $this->request->getPost('description');
 
         if (!$scopeId || !$name) {
             return $this->response->setJSON(['success' => false, 'message' => 'Scope ID and name are required']);
         }
 
-        $result = $this->activityModel->updateScope($scopeId, $name, $description);
+        $result = $this->activityModel->updateScope($scopeId, $name);
         
         if ($result) {
             return $this->response->setJSON([
@@ -981,7 +987,11 @@ class Activity extends BaseController
             return $this->response->setJSON(['success' => false, 'message' => 'Scope ID is required']);
         }
 
-        $components = $this->activityModel->getComponentsByScope($scopeId);
+        $scopeRow = $this->db->table('project_scopes')->where('id', $scopeId)->get()->getRowArray();
+        // pr($scopeRow);
+        $scopeLookupId = $scopeRow['scope_lookup_id'] ?? null;
+
+        $components = $this->activityModel->getComponentsByScope($scopeLookupId);
         return $this->response->setJSON([
             'success' => true,
             'components' => $components

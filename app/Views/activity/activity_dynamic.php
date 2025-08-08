@@ -139,10 +139,21 @@
                             <tr data-task-id="<?= esc($task['id']) ?>" class="task-row" style="transition:box-shadow 0.3s;">
                                 <?php foreach ($validFields as $headerId): ?>
                                 <?php $field = $headerMap[$headerId] ?? null; ?>
-                            <?php if (in_array($field, ['Tester Name','PIC'])): ?>
+                            <?php if (in_array($field, ['Tester Name'])): ?>
+                                <td contenteditable="true" class="editable-cell" tabindex="0" data-field-id="<?= esc($headerId) ?>" data-field="<?= esc($field) ?>" style="padding: 1rem; border-bottom: 1px solid #f1f5f9; vertical-align: middle;"><?= esc($taskData[$headerId] ?? '') ?></td>
+                            <?php elseif (in_array($field, ['PIC'])): ?>
                                 <td class="editable-cell user-dropdown-cell" tabindex="0" data-field-id="<?= esc($headerId) ?>" data-field="<?= esc($field) ?>" style="padding: 1rem; border-bottom: 1px solid #f1f5f9; vertical-align: middle;"><span class="user-display"><?= esc($taskData[$headerId] ?? '') ?></span></td>
-                            <?php elseif (in_array($field, ['Start Date','End Date','Progress','Status'])): ?>
-                                <td class="editable-cell" tabindex="0" data-field-id="<?= esc($headerId) ?>" data-field="<?= esc($field) ?>" style="padding: 1rem; border-bottom: 1px solid #f1f5f9; vertical-align: middle;"><?= esc($taskData[$headerId] ?? '') ?></td>
+                            <?php elseif (in_array($field, ['Start Date','End Date','Actual Start Date','Planned Start Date','Planned End Date','Actual End Date'])): ?>
+                            <?php 
+                                $dateVal = $taskData[$headerId] ?? '';
+                                if ($dateVal && preg_match('/^\d{4}-\d{2}-\d{2}$/', $dateVal)) {
+                                    $parts = explode('-', $dateVal);
+                                    if (count($parts) === 3) {
+                                        $dateVal = $parts[2] . '-' . $parts[1] . '-' . $parts[0];
+                                    }
+                                }
+                            ?>
+                            <td class="editable-cell" tabindex="0" data-field-id="<?= esc($headerId) ?>" data-field="<?= esc($field) ?>" style="padding: 1rem; border-bottom: 1px solid #f1f5f9; vertical-align: middle;"><?= esc($dateVal) ?></td>
                             <?php elseif ($field === 'Image'): ?>
                                 <td class="image-cell" data-field-id="<?= esc($headerId) ?>" data-field="Image" style="padding: 1rem; border-bottom: 1px solid #f1f5f9; min-width: 110px; max-width: 140px; text-align: center; vertical-align: middle;">
                                     <div class="task-image-list" data-task-id="<?= esc($task['id']) ?>"></div>
@@ -376,6 +387,7 @@ function showUserDropdown(cell, currentValue) {
     const cellOffset = cell.offset();
     const cellWidth = cell.outerWidth();
     const cellHeight = cell.outerHeight();
+    // Only used for PIC now
     let selectHtml = `<select class="cell-overlay-editor form-select form-select-sm" style="position:absolute;z-index:9999;left:${cellOffset.left}px;top:${cellOffset.top}px;width:${cellWidth}px;height:${cellHeight}px;">`;
     selectHtml += `<option value="">-- Select User --</option>`;
     projectUsers.forEach(u => {
@@ -463,7 +475,7 @@ $('#dynamicTaskTable').on('click', 'td.editable-cell', function(e) {
     let overlay;
 
     function removeOverlay(val, displayText) {
-        if (["Tester Name","PIC"].includes(field)) {
+        if (["PIC"].includes(field)) {
             cell.find('.user-display').text(displayText || val);
         } else {
             cell.text(displayText || val);
@@ -473,12 +485,54 @@ $('#dynamicTaskTable').on('click', 'td.editable-cell', function(e) {
         cell.trigger('blur');
     }
 
-    if (["Tester Name","PIC"].includes(field)) {
+    if (["PIC"].includes(field)) {
         const currentValue = cell.find('.user-display').text().trim() || cell.text().trim();
         showUserDropdown(cell, currentValue);
         return;
     }
-    if (field === 'Start Date' || field === 'End Date') {
+    if (["Priority Level"].includes(field)) {
+        const options = ["Low", "Medium", "High", "Critical"];
+        const currentValue = cell.text().trim();
+        let selectHtml = `<select class="cell-overlay-editor form-select form-select-sm" style="position:absolute;z-index:9999;left:${cellOffset.left}px;top:${cellOffset.top}px;width:${cellWidth}px;height:${cellHeight}px;">`;
+        options.forEach(opt => {
+            selectHtml += `<option value="${opt}"${currentValue === opt ? ' selected' : ''}>${opt}</option>`;
+        });
+        selectHtml += `</select>`;
+        overlay = $(selectHtml);
+        $('body').append(overlay);
+        overlay.focus();
+        overlay.on('blur change', function() {
+            removeOverlay(this.value);
+        });
+        overlay.on('keydown', function(ev) {
+            if (ev.key === 'Enter' || ev.key === 'Tab') {
+                this.blur();
+            }
+        });
+        return;
+    }
+    if (["Severity Level"].includes(field)) {
+        const options = ["Minor", "Moderate", "Major", "Serious"];
+        const currentValue = cell.text().trim();
+        let selectHtml = `<select class="cell-overlay-editor form-select form-select-sm" style="position:absolute;z-index:9999;left:${cellOffset.left}px;top:${cellOffset.top}px;width:${cellWidth}px;height:${cellHeight}px;">`;
+        options.forEach(opt => {
+            selectHtml += `<option value="${opt}"${currentValue === opt ? ' selected' : ''}>${opt}</option>`;
+        });
+        selectHtml += `</select>`;
+        overlay = $(selectHtml);
+        $('body').append(overlay);
+        overlay.focus();
+        overlay.on('blur change', function() {
+            removeOverlay(this.value);
+        });
+        overlay.on('keydown', function(ev) {
+            if (ev.key === 'Enter' || ev.key === 'Tab') {
+                this.blur();
+            }
+        });
+        return;
+    }
+    if (field === 'Start Date' || field === 'End Date' || field === 'Actual Start Date' || field === 'Planned Start Date' || field === 'Planned End Date' || field === 'Actual End Date') {
         const currentValue = cell.text().trim();
         overlay = $(`<input type="date" class="cell-overlay-editor form-control form-control-sm" value="${currentValue}" style="position:absolute;z-index:9999;left:${cellOffset.left}px;top:${cellOffset.top}px;width:${cellWidth}px;height:${cellHeight}px;">`);
         $('body').append(overlay);
@@ -595,7 +649,7 @@ $('#dynamicTaskTable').on('blur', 'td.editable-cell', function() {
         const field = $(this).data('field');
         const fieldId = $(this).data('field-id');
         let value;
-        if (["Tester Name","PIC"].includes(field)) {
+        if (["PIC"].includes(field)) {
             value = $(this).find('.user-display').text().trim();
         } else if (field === 'Start Date' || field === 'End Date') {
             value = $(this).find('input[type="date"]').val() || $(this).text();
@@ -683,7 +737,7 @@ $('#dynamicTaskTable').on('blur', 'td.editable-cell', function() {
     row.find('td.editable-cell').each(function() {
         const field = $(this).data('field');
         const fieldId = $(this).data('field-id');
-        if (["Tester Name","PIC"].includes(field)) {
+        if (["PIC"].includes(field)) {
             $(this).find('.user-display').text(data[fieldId]);
         } else if (field === 'Start Date' || field === 'End Date') {
             $(this).text(data[fieldId]);
@@ -708,7 +762,7 @@ $('#dynamicTaskTable').on('blur', 'td.editable-cell', function() {
                     console.error('Failed to create task:', res.message);
                     Swal.fire('Error', 'Failed to create new task.', 'error');
                 } else {
-                    if (res.id) row.attr('data-task-id', res.id);
+                    if (res.task_id) row.attr('data-task-id', res.task_id);
                 }
             },
             error: function(xhr, status, error) {
@@ -757,55 +811,64 @@ $('#addRowBtn').on('click', function() {
         return;
     }
     
-    const table = $('#dynamicTaskTable tbody');
-    const lastRow = table.find('tr.task-row:last');
-    let firstColValue = '';
-    if (lastRow.length) {
-        firstColValue = lastRow.find('td:first').text() || '';
-    }
-    // --- Refactored: Use JS for dynamic field handling ---
-    let rowHtml = '<tr class="task-row" style="transition:box-shadow 0.3s;">';
     let allHeaderOptions = <?php echo json_encode($all_headers ?? []); ?>;
     let headerMap = {};
-    
     // Safety check for variables
     if (!allHeaderOptions || !Array.isArray(allHeaderOptions)) {
         allHeaderOptions = [];
         console.warn('Header options not available');
         return;
     }
-    
     allHeaderOptions.forEach(h => { 
         if (h && h.id && h.column_name) {
             headerMap[h.id] = h.column_name; 
         }
     });
+
+    const table = $('#dynamicTaskTable tbody');
+    const lastRow = table.find('tr.task-row:last');
+    let moduleValue = '';
+    // Only duplicate the 'Module' column value from the last row
+    if (lastRow.length) {
+        // Find the index of the 'Module' column
+        let moduleIdx = -1;
+        headerIds.forEach(function(headerId, idx) {
+            if (headerMap[headerId] === 'Module') moduleIdx = idx;
+        });
+        if (moduleIdx !== -1) {
+            moduleValue = lastRow.find('td').eq(moduleIdx).text() || '';
+        }
+    }
+    // --- Refactored: Use JS for dynamic field handling ---
+    let rowHtml = '<tr class="task-row" style="transition:box-shadow 0.3s;">';
     // For each header, generate the correct cell type
     headerIds.forEach(function(headerId, idx) {
         let field = headerMap[headerId] || '';
         let dataFieldIdAttr = ' data-field-id="'+headerId+'"';
-        if (idx === 0) {
-            rowHtml += '<td contenteditable="true" class="editable-cell" tabindex="0" data-field="'+field+'"'+dataFieldIdAttr+' style="padding:1rem 1rem; font-size:1.05rem; border-bottom:1px solid #e2e8f0;">'+firstColValue+'</td>';
-        } else if (field === 'Last Modified') {
-            rowHtml += '<td'+dataFieldIdAttr+' style="color:#6b7280; padding:1rem 1rem; font-size:1.05rem; border-bottom:1px solid #e2e8f0;"></td>';
-        } else if (field === 'Image') {
-            rowHtml += '<td class="image-cell" data-field="Image"'+dataFieldIdAttr+' style="padding:1rem 1rem; font-size:1.05rem; border-bottom:1px solid #e2e8f0; min-width:110px; max-width:140px; text-align:center; vertical-align:middle;">';
-            rowHtml += '<div class="task-image-list" data-task-id=""></div>';
-            rowHtml += '<button class="btn btn-link p-0 upload-image-btn" title="Upload Image" data-task-id="" style="color:#667eea; font-size:1.5rem; display:inline-block;"><i class="fas fa-image"></i></button>';
-            rowHtml += '<input type="file" accept="image/*" class="d-none image-upload-input" data-task-id="" multiple>';
-            rowHtml += '</td>';
-        } else if (["Start Date","End Date","Progress","Status"].includes(field)) {
-            rowHtml += '<td class="editable-cell" tabindex="0" data-field="'+field+'"'+dataFieldIdAttr+' style="padding:1rem 1rem; font-size:1.05rem; border-bottom:1px solid #e2e8f0;"></td>';
-        } else if (["Tester Name","PIC"].includes(field)) {
-            rowHtml += '<td class="editable-cell user-dropdown-cell" tabindex="0" data-field="'+field+'"'+dataFieldIdAttr+'><span class="user-display"></span></td>';
-        } else {
-            rowHtml += '<td contenteditable="true" class="editable-cell" tabindex="0" data-field="'+field+'"'+dataFieldIdAttr+' style="padding:1rem 1rem; font-size:1.05rem; border-bottom:1px solid #e2e8f0;"></td>';
-        }
+            if (field === 'Module') {
+                rowHtml += '<td contenteditable="true" class="editable-cell" tabindex="0" data-field="'+field+'"'+dataFieldIdAttr+' style="padding:1rem 1rem; font-size:1.05rem; border-bottom:1px solid #e2e8f0;">'+moduleValue+'</td>';
+            } else if (field === 'Last Modified') {
+                rowHtml += '<td'+dataFieldIdAttr+' style="color:#6b7280; padding:1rem 1rem; font-size:1.05rem; border-bottom:1px solid #e2e8f0;"></td>';
+            } else if (field === 'Image') {
+                rowHtml += '<td class="image-cell" data-field="Image"'+dataFieldIdAttr+' style="padding:1rem 1rem; font-size:1.05rem; border-bottom:1px solid #e2e8f0; min-width:110px; max-width:140px; text-align:center; vertical-align:middle;">';
+                rowHtml += '<div class="task-image-list" data-task-id=""></div>';
+                rowHtml += '<button class="btn btn-link p-0 upload-image-btn" title="Upload Image" data-task-id="" style="color:#667eea; font-size:1.5rem; display:inline-block;"><i class="fas fa-image"></i></button>';
+                rowHtml += '<input type="file" accept="image/*" class="d-none image-upload-input" data-task-id="" multiple>';
+                rowHtml += '</td>';
+            } else if (["Start Date","End Date","Actual Start Date","Planned Start Date","Planned End Date","Actual End Date"].includes(field)) {
+                rowHtml += '<td class="editable-cell" tabindex="0" data-field="'+field+'"'+dataFieldIdAttr+' style="padding:1rem 1rem; font-size:1.05rem; border-bottom:1px solid #e2e8f0;"></td>';
+            } else if (["Progress","Status"].includes(field)) {
+                rowHtml += '<td class="editable-cell" tabindex="0" data-field="'+field+'"'+dataFieldIdAttr+' style="padding:1rem 1rem; font-size:1.05rem; border-bottom:1px solid #e2e8f0;"></td>';
+            } else if (["Tester Name","PIC"].includes(field)) {
+                rowHtml += '<td class="editable-cell user-dropdown-cell" tabindex="0" data-field="'+field+'"'+dataFieldIdAttr+'><span class="user-display"></span></td>';
+            } else {
+                rowHtml += '<td contenteditable="true" class="editable-cell" tabindex="0" data-field="'+field+'"'+dataFieldIdAttr+' style="padding:1rem 1rem; font-size:1.05rem; border-bottom:1px solid #e2e8f0;"></td>';
+            }
     });
     // Only the trash button in the row
     rowHtml += '<td class="text-center align-middle" style="width:72px;">';
     rowHtml += '<div style="display:flex;align-items:center;justify-content:center;gap:8px;">';
-    rowHtml += '<button type="button" class="btn btn-sm btn-link text-danger delete-row-btn" title="Delete Row" style="padding:0;border-radius:50%;width:32px;height:32px;display:flex;align-items:center;justify-content:center;"><i class="fas fa-trash"></i></button>';
+        rowHtml += '<button type="button" class="btn btn-sm btn-outline-danger delete-row-btn" title="Delete Row" style="padding:0;border-radius:50%;width:32px;height:32px;display:flex;align-items:center;justify-content:center;"><i class="fas fa-trash"></i></button>';
     rowHtml += '</div>';
     rowHtml += '</td>';
     rowHtml += '<td class="text-center drag-handle" style="cursor:move;width:32px;"><i class="fas fa-grip-vertical" style="color:#667eea;font-size:1.2rem;"></i></td>';
@@ -995,17 +1058,125 @@ $(document).ready(function() {
 // Upload image button click
 $('#dynamicTaskTable').on('click', '.upload-image-btn', function() {
     const btn = $(this);
-    const taskId = btn.data('task-id');
-    btn.siblings('.image-upload-input').trigger('click');
+    let taskId = btn.data('task-id');
+    const cell = btn.closest('.image-cell');
+    const row = btn.closest('tr');
+    // If no taskId, save the row first
+    if (!taskId) {
+        // Collect data from the row
+        const data = {};
+        row.find('td.editable-cell').each(function() {
+            const field = $(this).data('field');
+            const fieldId = $(this).data('field-id');
+            let value;
+            if (["PIC"].includes(field)) {
+                value = $(this).find('.user-display').text().trim();
+            } else {
+                value = $(this).text().trim();
+            }
+            data[fieldId] = value;
+        });
+        data['project_id'] = projectId;
+        data['template_id'] = templateId;
+        // Save the row first
+        $.ajax({
+            url: '<?= base_url('activity/save_task') ?>',
+            method: 'POST',
+            data: data,
+            dataType: 'json',
+            success: function(res) {
+                if (res.success && res.task_id) {
+                    row.attr('data-task-id', res.task_id);
+                    cell.find('.task-image-list').attr('data-task-id', res.task_id);
+                    cell.find('.upload-image-btn').attr('data-task-id', res.task_id);
+                    cell.find('.image-upload-input').attr('data-task-id', res.task_id);
+                    // Now trigger file input
+                    btn.siblings('.image-upload-input').trigger('click');
+                } else {
+                    Swal.fire('Error', 'Failed to create new task before uploading image.', 'error');
+                }
+            },
+            error: function(xhr, status, error) {
+                Swal.fire('Error', 'Failed to create new task before uploading image.', 'error');
+            }
+        });
+    } else {
+        btn.siblings('.image-upload-input').trigger('click');
+    }
 });
 
 // Handle file input change
 $('#dynamicTaskTable').on('change', '.image-upload-input', function() {
     const input = $(this)[0];
     const files = input.files;
-    const taskId = $(this).data('task-id');
-    if (!files.length) return;
+    let taskId = $(this).data('task-id');
     const cell = $(this).closest('.image-cell');
+    const row = cell.closest('tr');
+    // If no taskId, save the row first, then retry
+    if (!taskId) {
+        // Collect data from the row
+        const data = {};
+        row.find('td.editable-cell').each(function() {
+            const field = $(this).data('field');
+            const fieldId = $(this).data('field-id');
+            let value;
+            if (["PIC"].includes(field)) {
+                value = $(this).find('.user-display').text().trim();
+            } else {
+                value = $(this).text().trim();
+            }
+            data[fieldId] = value;
+        });
+        data['project_id'] = projectId;
+        data['template_id'] = templateId;
+        $.ajax({
+            url: '<?= base_url('activity/save_task') ?>',
+            method: 'POST',
+            data: data,
+            dataType: 'json',
+            success: function(res) {
+                if (res.success && res.task_id) {
+                    row.attr('data-task-id', res.task_id);
+                    cell.find('.task-image-list').attr('data-task-id', res.task_id);
+                    cell.find('.upload-image-btn').attr('data-task-id', res.task_id);
+                    cell.find('.image-upload-input').attr('data-task-id', res.task_id);
+                    taskId = res.task_id;
+                    // Now proceed with image upload
+                    for (let i = 0; i < files.length; i++) {
+                        const formData = new FormData();
+                        formData.append('task_id', taskId);
+                        formData.append('image', files[i]);
+                        $.ajax({
+                            url: '<?= base_url('task-images/upload') ?>',
+                            method: 'POST',
+                            data: formData,
+                            processData: false,
+                            contentType: false,
+                            dataType: 'json',
+                            success: function(res) {
+                                if (res.success) {
+                                    loadTaskImages(taskId, cell);
+                                } else {
+                                    Swal.fire('Upload Failed', res.message || 'Could not upload image.', 'error');
+                                }
+                            },
+                            error: function(xhr, status, error) {
+                                Swal.fire('Error', 'Failed to upload image.', 'error');
+                            }
+                        });
+                    }
+                    input.value = '';
+                } else {
+                    Swal.fire('Error', 'Failed to create new task before uploading image.', 'error');
+                }
+            },
+            error: function(xhr, status, error) {
+                Swal.fire('Error', 'Failed to create new task before uploading image.', 'error');
+            }
+        });
+        return;
+    }
+    if (!files.length) return;
     for (let i = 0; i < files.length; i++) {
         const formData = new FormData();
         formData.append('task_id', taskId);
@@ -1025,7 +1196,6 @@ $('#dynamicTaskTable').on('change', '.image-upload-input', function() {
                 }
             },
             error: function(xhr, status, error) {
-                console.error('Error uploading image:', error);
                 Swal.fire('Error', 'Failed to upload image.', 'error');
             }
         });

@@ -20,20 +20,19 @@
     // Always show statistics, even if $statusData is empty
     $statusCounts = array_count_values(array_column($statusData, 'status'));
     $totalProjects = count($statusData);
-    $onTimeProjects = 0;
     $lateProjects = 0;
-    $earlyProjects = 0;
+    $activeProjects = 0;
     foreach ($statusData as $project) {
-        if ($project['days_early'] !== '-') $earlyProjects++;
-        if ($project['days_late'] !== '-') $lateProjects++;
-        if ($project['days_early'] === '-' && $project['days_late'] === '-') $onTimeProjects++;
+    if (strtolower($project['status']) === 'active') $activeProjects++;
+    // Only count as delayed if not completed and days_late is set
+    if (strtolower($project['status']) !== 'completed' && $project['days_late'] !== '-') $lateProjects++;
     }
     ?>
     <div class="row mt-4 mb-4">
         <div class="col-md-3">
             <div class="card" style="border-radius: 1rem; border: none; box-shadow: 0 4px 6px rgba(0,0,0,0.05);">
                 <div class="card-body text-center">
-                    <h5 class="fw-bold" style="color: #3b82f6;">Total Projects</h5>
+                    <h5 class="fw-bold" style="color: #3b82f6;">Total</h5>
                     <h2 class="fw-bold" style="color: #374151;"><?= $totalProjects ?></h2>
                 </div>
             </div>
@@ -49,15 +48,15 @@
         <div class="col-md-3">
             <div class="card" style="border-radius: 1rem; border: none; box-shadow: 0 4px 6px rgba(0,0,0,0.05);">
                 <div class="card-body text-center">
-                    <h5 class="fw-bold" style="color: #10b981;">Early/On Time</h5>
-                    <h2 class="fw-bold" style="color: #374151;"><?= $earlyProjects + $onTimeProjects ?></h2>
+                    <h5 class="fw-bold" style="color: #3b82f6;">Active</h5>
+                    <h2 class="fw-bold" style="color: #374151;\"><?= $activeProjects ?></h2>
                 </div>
             </div>
         </div>
         <div class="col-md-3">
             <div class="card" style="border-radius: 1rem; border: none; box-shadow: 0 4px 6px rgba(0,0,0,0.05);">
                 <div class="card-body text-center">
-                    <h5 class="fw-bold" style="color: #ef4444;">Behind Schedule</h5>
+                    <h5 class="fw-bold" style="color: #ef4444;">Delayed</h5>
                     <h2 class="fw-bold" style="color: #374151;"><?= $lateProjects ?></h2>
                 </div>
             </div>

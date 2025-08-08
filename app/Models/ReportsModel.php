@@ -220,13 +220,18 @@ class ReportsModel extends Model
     /**
      * Get project completion status data
      */
-    public function getProjectCompletionStatusData()
+    public function getProjectCompletionStatusData($userId = null)
     {
-        $projects = $this->db->table('projects p')
+        $builder = $this->db->table('projects p')
             ->select('p.id, p.name, p.start_date, p.end_date')
             ->where('p.is_delete', 0)
-            ->get()
-            ->getResultArray();
+            ->where('p.is_active', 1);
+        if ($userId) {
+            $builder->join('project_members pm', 'pm.project_id = p.id', 'inner');
+            $builder->where('pm.user_id', $userId);
+            $builder->where('pm.is_delete', 0);
+        }
+        $projects = $builder->get()->getResultArray();
 
         $statusData = [];
 

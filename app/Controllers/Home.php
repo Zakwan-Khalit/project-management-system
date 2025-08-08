@@ -41,7 +41,7 @@ class Home extends BaseController
         $userData = session('userdata');
         $userId = $userData['id'] ?? null;
         
-        $statusData = $this->reportsModel->getProjectCompletionStatusData();
+        $statusData = $this->reportsModel->getProjectCompletionStatusData($userId);
         if (!$userId) {
             log_message('warning', 'Dashboard access attempted without valid user session');
             return redirect()->to(base_url('login'));
@@ -54,7 +54,7 @@ class Home extends BaseController
             // Get recent projects with error handling
             $projects = [];
             try {
-                $projects = $this->projectModel->getUserProjects($userId, 5) ?? [];
+                $projects = $this->projectModel->getUserProjects($userId) ?? [];
             } catch (\Exception $e) {
                 log_message('error', 'Failed to get user projects: ' . $e->getMessage());
                 $projects = [];
@@ -145,16 +145,51 @@ class Home extends BaseController
         $userId = (int)$userId;
         
         try {
-            // Use model methods instead of direct database queries
+            // Use model methods for base stats
             $projectStats = $this->projectModel->getDashboardProjectStats($userId);
             $taskStats = $this->taskModel->getDashboardTaskStats($userId);
-            
+
+            // --- Additional logic to check project_status and status_lookup ---
+            $db = \Config\Database::connect();
+            // Get status_lookup for 'Completed' and 'Delayed'
+            $statusRows = $db->table('status_lookup')->whereIn('name', ['Completed', 'Delayed'])->get()->getResultArray();
+            $statusMap = [];
+            foreach ($statusRows as $row) {
+                $statusMap[$row['name']] = $row['id'];
+            }
+
+            // Get all user's projects
+            $projects = $db->table('projects')->where('user_id', $userId)->get()->getResultArray();
+            $completedCount = 0;
+            $delayedCount = 0;
+            foreach ($projects as $project) {
+                // Get latest status for this project
+                $statusRow = $db->table('project_status')
+                    ->where('project_id', $project['id'])
+                    ->orderBy('date_modified', 'DESC')
+                    ->get(1)->getRowArray();
+                if ($statusRow) {
+                    if (isset($statusMap['Completed']) && $statusRow['status_id'] == $statusMap['Completed']) {
+                        $completedCount++;
+                    } elseif (isset($statusMap['Delayed']) && $statusRow['status_id'] == $statusMap['Delayed']) {
+                        $delayedCount++;
+                    }
+                }
+            }
+
+            // Overwrite completed_projects and delayed_projects if needed
+            if (is_array($projectStats)) {
+                $projectStats['completed_projects'] = $completedCount;
+                $projectStats['delayed_projects'] = $delayedCount;
+            }
+
             return [
                 'projects' => $projectStats ?: [
                     'total_projects' => 0,
                     'active_projects' => 0,
                     'completed_projects' => 0,
-                    'on_hold_projects' => 0
+                    'on_hold_projects' => 0,
+                    'delayed_projects' => 0
                 ],
                 'tasks' => $taskStats ?: [
                     'total_tasks' => 0,
@@ -171,7 +206,8 @@ class Home extends BaseController
                     'total_projects' => 0,
                     'active_projects' => 0,
                     'completed_projects' => 0,
-                    'on_hold_projects' => 0
+                    'on_hold_projects' => 0,
+                    'delayed_projects' => 0
                 ],
                 'tasks' => [
                     'total_tasks' => 0,
