@@ -146,10 +146,31 @@
                             <?php elseif (in_array($field, ['Start Date','End Date','Actual Start Date','Planned Start Date','Planned End Date','Actual End Date'])): ?>
                             <?php 
                                 $dateVal = $taskData[$headerId] ?? '';
-                                if ($dateVal && preg_match('/^\d{4}-\d{2}-\d{2}$/', $dateVal)) {
-                                    $parts = explode('-', $dateVal);
-                                    if (count($parts) === 3) {
-                                        $dateVal = $parts[2] . '-' . $parts[1] . '-' . $parts[0];
+                                // Always convert to dd/mm/yyyy
+                                if ($dateVal) {
+                                    if (preg_match('/^\d{4}-\d{2}-\d{2}$/', $dateVal)) {
+                                        $parts = explode('-', $dateVal);
+                                        if (count($parts) === 3) {
+                                            $dateVal = $parts[2] . '/' . $parts[1] . '/' . $parts[0];
+                                        }
+                                    } elseif (preg_match('/^\d{2}-\d{2}-\d{4}$/', $dateVal)) {
+                                        $parts = explode('-', $dateVal);
+                                        if (count($parts) === 3) {
+                                            $dateVal = $parts[0] . '/' . $parts[1] . '/' . $parts[2];
+                                        }
+                                    } elseif (preg_match('/^\d{2}\/\d{2}\/\d{4}$/', $dateVal)) {
+                                        // Already in dd/mm/yyyy
+                                    } elseif (preg_match('/^\d{4}\/\d{2}\/\d{2}$/', $dateVal)) {
+                                        $parts = explode('/', $dateVal);
+                                        if (count($parts) === 3) {
+                                            $dateVal = $parts[2] . '/' . $parts[1] . '/' . $parts[0];
+                                        }
+                                    } else {
+                                        // Try to parse with strtotime
+                                        $ts = strtotime($dateVal);
+                                        if ($ts) {
+                                            $dateVal = date('d/m/Y', $ts);
+                                        }
                                     }
                                 }
                             ?>
@@ -538,7 +559,32 @@ $('#dynamicTaskTable').on('click', 'td.editable-cell', function(e) {
         $('body').append(overlay);
         overlay.focus();
         overlay.on('blur', function() {
-            removeOverlay(this.value);
+            let val = this.value;
+            // Always convert to dd/mm/yyyy
+            if (val) {
+                if (/^\d{4}-\d{2}-\d{2}$/.test(val)) {
+                    var parts = val.split('-');
+                    val = parts[2] + '/' + parts[1] + '/' + parts[0];
+                } else if (/^\d{2}-\d{2}-\d{4}$/.test(val)) {
+                    var parts = val.split('-');
+                    val = parts[0] + '/' + parts[1] + '/' + parts[2];
+                } else if (/^\d{2}\/\d{2}\/\d{4}$/.test(val)) {
+                    // Already in dd/mm/yyyy
+                } else if (/^\d{4}\/\d{2}\/\d{2}$/.test(val)) {
+                    var parts = val.split('/');
+                    val = parts[2] + '/' + parts[1] + '/' + parts[0];
+                } else {
+                    // Try to parse with Date
+                    var d = new Date(val);
+                    if (!isNaN(d.getTime())) {
+                        var day = ('0' + d.getDate()).slice(-2);
+                        var month = ('0' + (d.getMonth() + 1)).slice(-2);
+                        var year = d.getFullYear();
+                        val = day + '/' + month + '/' + year;
+                    }
+                }
+            }
+            removeOverlay(val);
         });
         overlay.on('keydown', function(ev) {
             if (ev.key === 'Enter' || ev.key === 'Tab') {

@@ -64,8 +64,8 @@
         </div>
         <!-- Right: Illustration -->
         <div style="flex: 1 1 400px; min-width: 350px; background: #181c2a; display: flex; align-items: center; justify-content: center; position: relative; padding: 0;">
-            <div style="width: 100%; max-width: 420px; min-height: 420px; display: flex; align-items: center; justify-content: center;">
-                <img src="<?= base_url('assets/images/login_illustration.png') ?>" alt="Login Illustration" style="width: 100%; max-width: 420px; border-radius: 1.2rem; box-shadow: 0 8px 32px rgba(102,126,234,0.13); background: #181c2a;">
+            <div style="width: 100%; height: 100%; display: flex; align-items: center; justify-content: center;">
+                <img src="<?= base_url('assets/images/login_banner.jpeg') ?>" style="width: 100%; height: 100%; border-radius: 1.2rem; box-shadow: 0 8px 32px rgba(102,126,234,0.13); background: #181c2a;">
             </div>
         </div>
     </div>
