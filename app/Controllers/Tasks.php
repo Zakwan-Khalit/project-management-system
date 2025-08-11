@@ -65,6 +65,7 @@ class Tasks extends BaseController
                 $this->projectModel->updateProgress($projectId);
                 $this->activityLog->logActivity([
                     'user_id' => $userId,
+                    'project_id' => $projectId,
                     'action' => 'task_created',
                     'details' => json_encode([
                         'task_id' => $taskId,
@@ -142,6 +143,7 @@ class Tasks extends BaseController
             // Log activity
             $this->activityLog->logActivity([
                 'user_id' => $userId,
+                'project_id' => $task['project_id'],
                 'action' => 'task_updated',
                 'details' => json_encode([
                     'task_id' => $id,
@@ -212,6 +214,7 @@ class Tasks extends BaseController
             // Log activity
             $this->activityLog->logActivity([
                 'user_id' => $userId,
+                'project_id' => $task['project_id'],
                 'action' => 'task_deleted',
                 'details' => json_encode([
                     'task_id' => $id,
@@ -272,6 +275,7 @@ class Tasks extends BaseController
             $this->projectModel->updateProgress($task['project_id']);
             $this->activityLog->logActivity([
                 'user_id' => $userId,
+                'project_id' => $task['project_id'],
                 'action' => 'task_status_changed',
                 'details' => json_encode([
                     'task_id' => $taskId,
@@ -319,6 +323,7 @@ class Tasks extends BaseController
             // Log activity
             $this->activityLog->logActivity([
                 'user_id' => $userId,
+                'project_id' => $task['project_id'],
                 'action' => 'comment_added',
                 'details' => json_encode([
                     'task_id' => $taskId,
@@ -439,6 +444,7 @@ class Tasks extends BaseController
                 'action' => 'task_updated',
                 'details' => json_encode([
                     'task_id' => $id,
+                    'project_id' => $task['project_id'],
                     'old' => $oldData,
                     'new' => $taskData
                 ])

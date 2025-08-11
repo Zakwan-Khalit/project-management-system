@@ -19,6 +19,40 @@ class ReportsModel extends Model
      */
     public function getProjectProgressData($projectId)
     {
+        // Get all active headers for this project
+        $headerRows = $this->db->table('task_headers')
+            ->select('id, column_name')
+            ->where('is_active', 1)
+            ->where('is_delete', 0)
+            ->get()
+            ->getResultArray();
+
+        // Build a map: id => column_name
+        $headerMap = [];
+        foreach ($headerRows as $row) {
+            $headerMap[(string)$row['id']] = $row['column_name'];
+        }
+
+        // Identify which header IDs are for planned/actual start/end
+        $plannedStartIds = [];
+        $plannedEndIds = [];
+        $actualStartIds = [];
+        $actualEndIds = [];
+        foreach ($headerMap as $id => $name) {
+            if (stripos($name, 'planned start') !== false || stripos($name, 'start date') !== false) {
+                $plannedStartIds[] = $id;
+            }
+            if (stripos($name, 'planned end') !== false || stripos($name, 'end date') !== false) {
+                $plannedEndIds[] = $id;
+            }
+            if (stripos($name, 'actual start') !== false) {
+                $actualStartIds[] = $id;
+            }
+            if (stripos($name, 'actual end') !== false) {
+                $actualEndIds[] = $id;
+            }
+        }
+
         // Get project scopes with their templates
         $scopesQuery = $this->db->table('project_scopes ps')
             ->select('ps.id as scope_id, ps.name as scope_name, ps.scope_order')
@@ -108,29 +142,78 @@ class ReportsModel extends Model
                 $plannedEnd = null;
                 $actualStart = null;
                 $actualEnd = null;
+                $plannedStartDates = [];
+                $plannedEndDates = [];
+                $actualStartDates = [];
+                $actualEndDates = [];
                 $totalProgress = 0;
                 $taskCount = count($tasks);
 
                 foreach ($tasks as $task) {
                     $taskData = json_decode($task['data'], true) ?? [];
-                    
-                    // Extract dates (assuming field IDs 11=Start Date, 12=End Date)
-                    $startDate = $this->extractDateFromTask($taskData, ['11', 'start_date', 'Start Date']);
-                    $endDate = $this->extractDateFromTask($taskData, ['12', 'end_date', 'End Date']);
-                    
-                    if ($startDate) {
-                        $plannedStart = $plannedStart ? min($plannedStart, $startDate) : $startDate;
-                        $actualStart = $actualStart ? min($actualStart, $startDate) : $startDate;
-                    }
-                    
-                    if ($endDate) {
-                        $plannedEnd = $plannedEnd ? max($plannedEnd, $endDate) : $endDate;
-                        $actualEnd = $actualEnd ? max($actualEnd, $endDate) : $endDate;
-                    }
+
+                    // Helper to validate date string (dd/mm/yyyy or yyyy-mm-dd)
+                    $isValidDate = function($date) {
+                        if (!$date || !is_string($date)) return false;
+                        // Accept yyyy-mm-dd
+                        if (preg_match('/^\d{4}-\d{2}-\d{2}$/', $date)) return true;
+                        // Accept dd/mm/yyyy
+                        if (preg_match('/^\d{2}\/\d{2}\/\d{4}$/', $date)) return true;
+                        return false;
+                    };
+
+                    // Extract planned/actual dates using joined header IDs
+                    $plannedStartDate = $this->extractDateFromTask($taskData, $plannedStartIds);
+                    $plannedEndDate = $this->extractDateFromTask($taskData, $plannedEndIds);
+                    $actualStartDate = $this->extractDateFromTask($taskData, $actualStartIds);
+                    $actualEndDate = $this->extractDateFromTask($taskData, $actualEndIds);
+
+                    if ($isValidDate($plannedStartDate)) $plannedStartDates[] = $plannedStartDate;
+                    if ($isValidDate($plannedEndDate)) $plannedEndDates[] = $plannedEndDate;
+                    if ($isValidDate($actualStartDate)) $actualStartDates[] = $actualStartDate;
+                    if ($isValidDate($actualEndDate)) $actualEndDates[] = $actualEndDate;
 
                     // Extract progress (field ID 9=Progress %)
                     $progress = $this->extractProgressFromTask($taskData, ['9', 'progress', 'Progress']);
                     $totalProgress += $progress;
+                }
+
+                // Show date if at least one task has a non-empty value for that date
+                if (!empty($plannedStartDates)) {
+                    $plannedStart = min(array_map(function($d) use ($isValidDate) {
+                        if (preg_match('/^\d{2}\/\d{2}\/\d{4}$/', $d)) {
+                            $parts = explode('/', $d);
+                            return strtotime($parts[2] . '-' . $parts[1] . '-' . $parts[0]);
+                        }
+                        return strtotime($d);
+                    }, $plannedStartDates));
+                }
+                if (!empty($plannedEndDates)) {
+                    $plannedEnd = max(array_map(function($d) use ($isValidDate) {
+                        if (preg_match('/^\d{2}\/\d{2}\/\d{4}$/', $d)) {
+                            $parts = explode('/', $d);
+                            return strtotime($parts[2] . '-' . $parts[1] . '-' . $parts[0]);
+                        }
+                        return strtotime($d);
+                    }, $plannedEndDates));
+                }
+                if (!empty($actualStartDates)) {
+                    $actualStart = min(array_map(function($d) use ($isValidDate) {
+                        if (preg_match('/^\d{2}\/\d{2}\/\d{4}$/', $d)) {
+                            $parts = explode('/', $d);
+                            return strtotime($parts[2] . '-' . $parts[1] . '-' . $parts[0]);
+                        }
+                        return strtotime($d);
+                    }, $actualStartDates));
+                }
+                if (!empty($actualEndDates)) {
+                    $actualEnd = max(array_map(function($d) use ($isValidDate) {
+                        if (preg_match('/^\d{2}\/\d{2}\/\d{4}$/', $d)) {
+                            $parts = explode('/', $d);
+                            return strtotime($parts[2] . '-' . $parts[1] . '-' . $parts[0]);
+                        }
+                        return strtotime($d);
+                    }, $actualEndDates));
                 }
 
                 $plannedPercentage = $template['weightage'] ?? 0;
@@ -153,10 +236,10 @@ class ReportsModel extends Model
                     'type' => 'component',
                     'num' => $activityNumber,
                     'activity' => $template['template_name'],
-                    'planned_start' => $plannedStart ? date('d/m/Y', strtotime($plannedStart)) : '',
-                    'planned_end' => $plannedEnd ? date('d/m/Y', strtotime($plannedEnd)) : '',
-                    'actual_start' => $actualStart ? date('d/m/Y', strtotime($actualStart)) : '',
-                    'actual_end' => $actualEnd ? date('d/m/Y', strtotime($actualEnd)) : '',
+                    'planned_start' => $plannedStart ? date('d/m/Y', $plannedStart) : '',
+                    'planned_end' => $plannedEnd ? date('d/m/Y', $plannedEnd) : '',
+                    'actual_start' => $actualStart ? date('d/m/Y', $actualStart) : '',
+                    'actual_end' => $actualEnd ? date('d/m/Y', $actualEnd) : '',
                     'planned_percentage' => number_format($plannedPercentage, 2),
                     'actual_percentage' => number_format($actualPercentage, 2),
                     'variant' => number_format($variant, 2),

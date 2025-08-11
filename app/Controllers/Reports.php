@@ -100,7 +100,7 @@ class Reports extends BaseController
 
             // Get project progress data
             $progressData = $this->reportsModel->getProjectProgressData($projectId);
-
+            // pr($progressData);
             return $this->response->setJSON([
                 'success' => true,
                 'project' => $project,

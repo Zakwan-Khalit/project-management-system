@@ -70,7 +70,9 @@
             <!-- Overview Tab (Task-related charts removed) -->
             <div id="overview" style="display: block;">
                 <div style="margin-bottom: 2rem;">
-                    <h2 id="projectTitle" style="font-family: 'Poppins', sans-serif; font-size: 1.5rem; font-weight: 600; color: #374151; margin-bottom: 2rem; display: flex; align-items: center;">Loading...</h2>
+                    <h2 id="projectTitle" style="font-family: 'Poppins', sans-serif; font-size: 1.5rem; font-weight: 600; color: #374151; margin-bottom: 2rem; display: flex; align-items: center;">
+                        <?= isset($project['name']) ? esc($project['name']) : 'Project Title' ?>
+                    </h2>
                 </div>
                 <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 2rem;">
                     <div>

@@ -103,11 +103,9 @@ class Projects extends BaseController
                 // Log activity
                 $this->activityLog->logActivity([
                     'user_id' => $userId,
+                    'project_id' => $projectId,
                     'action' => 'project_created',
-                    'details' => json_encode([
-                        'project_id' => $projectId,
-                        'data' => $projectData
-                    ])
+                    'details' => "Created project '{$projectData['name']}' for client '{$projectData['client']}' from {$projectData['start_date']} to {$projectData['end_date']}. Budget: {$projectData['cost']}."
                 ]);
                 return $this->response->setJSON([
                     'success' => true,
@@ -188,15 +186,19 @@ class Projects extends BaseController
                         $this->projectModel->setProjectStatusById($id, $statusLookup['id'], $userId);
                     }
                 }
-                // Log activity
+                // Log activity with improved details structure
+                $changes = [];
+                foreach ($projectData as $k => $v) {
+                    if (isset($oldData[$k]) && $oldData[$k] != $v) {
+                        $changes[] = "$k: '{$oldData[$k]}' → '{$v}'";
+                    }
+                }
+                $changeStr = $changes ? implode(', ', $changes) : 'No changes.';
                 $this->activityLog->logActivity([
                     'user_id' => $userId,
+                    'project_id' => $id,
                     'action' => 'project_updated',
-                    'details' => json_encode([
-                        'project_id' => $id,
-                        'old' => $oldData,
-                        'new' => $projectData
-                    ])
+                    'details' => "Updated project '{$oldData['name']}' (ID: {$id}). Changes: $changeStr"
                 ]);
                 return $this->response->setJSON([
                     'success' => true,
@@ -236,11 +238,9 @@ class Projects extends BaseController
             // Log activity
             $this->activityLog->logActivity([
                 'user_id' => $userId,
+                'project_id' => $id,
                 'action' => 'project_deleted',
-                'details' => json_encode([
-                    'project_id' => $id,
-                    'old' => $project
-                ])
+                'details' => "Deleted project '{$project['name']}' (ID: {$id})."
             ]);
             
             return $this->response->setJSON([
@@ -285,14 +285,12 @@ class Projects extends BaseController
             $user = $this->userModel->getUserById($memberUserId);
             
             // Log activity
+            $user = $this->userModel->getUserById($memberUserId);
             $this->activityLog->logActivity([
                 'user_id' => $userId,
+                'project_id' => $projectId,
                 'action' => 'member_added',
-                'details' => json_encode([
-                    'project_id' => $projectId,
-                    'user_id' => $memberUserId,
-                    'role' => $role
-                ])
+                'details' => "Added member '{$user['full_name']}' (User ID: {$memberUserId}) as '{$role}' to project."
             ]);
             
             return $this->response->setJSON([
@@ -324,13 +322,12 @@ class Projects extends BaseController
             $user = $this->userModel->getUserById($memberUserId);
             
             // Log activity
+            $user = $this->userModel->getUserById($memberUserId);
             $this->activityLog->logActivity([
                 'user_id' => $userId,
+                'project_id' => $projectId,
                 'action' => 'member_removed',
-                'details' => json_encode([
-                    'project_id' => $projectId,
-                    'user_id' => $memberUserId
-                ])
+                'details' => "Removed member '{$user['full_name']}' (User ID: {$memberUserId}) from project."
             ]);
             
             return $this->response->setJSON([
