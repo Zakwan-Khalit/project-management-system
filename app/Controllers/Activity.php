@@ -15,7 +15,7 @@ class Activity extends BaseController
     protected $activityLog;
     protected $projectModel;
     protected $db;
-
+    
     public function __construct()
     {
         $this->activityModel = new ActivityModel();
@@ -452,6 +452,12 @@ class Activity extends BaseController
         if (!$userId) {
             return $this->response->setJSON(['success' => false, 'message' => 'Unauthorized']);
         }
+        $this->activityLog->logActivity([
+            'user_id' => session('userdata')['id'] ?? null,
+            'action' => 'create_scope',
+            'description' => 'Created a new scope',
+            'details' => json_encode($this->request->getPost()),
+        ]);
 
         $projectId = $this->request->getPost('project_id');
         $scopeLookupId = $this->request->getPost('scope_lookup_id');
@@ -489,6 +495,12 @@ class Activity extends BaseController
         if (!$userId) {
             return $this->response->setJSON(['success' => false, 'message' => 'Unauthorized']);
         }
+        $this->activityLog->logActivity([
+            'user_id' => session('userdata')['id'] ?? null,
+            'action' => 'update_scope',
+            'description' => 'Updated scope',
+            'details' => json_encode($this->request->getPost()),
+        ]);
 
         $scopeId = $this->request->getPost('scope_id');
         $name = $this->request->getPost('name');
@@ -517,6 +529,12 @@ class Activity extends BaseController
         if (!$userId) {
             return $this->response->setJSON(['success' => false, 'message' => 'Unauthorized']);
         }
+        $this->activityLog->logActivity([
+            'user_id' => session('userdata')['id'] ?? null,
+            'action' => 'delete_scope',
+            'description' => 'Deleted scope',
+            'details' => json_encode($this->request->getPost()),
+        ]);
 
         $scopeId = $this->request->getPost('scope_id');
 
@@ -774,6 +792,12 @@ class Activity extends BaseController
         if (!$userId) {
             return $this->response->setJSON(['success' => false, 'message' => 'Unauthorized']);
         }
+        $this->activityLog->logActivity([
+            'user_id' => session('userdata')['id'] ?? null,
+            'action' => 'create_component',
+            'description' => 'Created a new component',
+            'details' => json_encode($this->request->getPost()),
+        ]);
 
         $projectId = $this->request->getPost('project_id');
         $scopeId = $this->request->getPost('scope_id');
@@ -813,6 +837,12 @@ class Activity extends BaseController
         if (!$userId) {
             return $this->response->setJSON(['success' => false, 'message' => 'Unauthorized']);
         }
+        $this->activityLog->logActivity([
+            'user_id' => session('userdata')['id'] ?? null,
+            'action' => 'update_component_name',
+            'description' => 'Updated component name',
+            'details' => json_encode($this->request->getPost()),
+        ]);
 
         $templateId = $this->request->getPost('template_id');
         $weightage = $this->request->getPost('weightage') ?? 0.00;
@@ -848,6 +878,12 @@ class Activity extends BaseController
         if (!$userId) {
             return $this->response->setJSON(['success' => false, 'message' => 'Unauthorized']);
         }
+        $this->activityLog->logActivity([
+            'user_id' => session('userdata')['id'] ?? null,
+            'action' => 'soft_delete_component',
+            'description' => 'Soft deleted component',
+            'details' => json_encode($this->request->getPost()),
+        ]);
 
         $projectId = $this->request->getGet('project_id');
         $scopeId = $this->request->getGet('scope_id');

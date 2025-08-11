@@ -11,12 +11,14 @@ class Events extends BaseController
     protected $eventsModel;
     protected $projectsModel;
     protected $usersModel;
+        protected $activityLog;
 
     public function __construct()
     {
         $this->eventsModel = new EventsModel();
         $this->projectsModel = new ProjectModel();
         $this->usersModel = new UserModel();
+        $this->activityLog = new \App\Models\ActivityLogModel();
     }
 
     /**
@@ -84,6 +86,12 @@ class Events extends BaseController
         if (!$this->hasEditPermission()) {
             return redirect()->to('/events')->with('error', 'You do not have permission to create events.');
         }
+            $this->activityLog->logActivity([
+                'user_id' => session('userdata')['id'] ?? null,
+                'action' => 'create_event',
+                'description' => 'Created a new event',
+                'details' => json_encode($this->request->getPost()),
+            ]);
 
         $validation = \Config\Services::validation();
         
@@ -167,6 +175,12 @@ class Events extends BaseController
         if (!$this->hasEditPermission()) {
             return redirect()->to('/events')->with('error', 'You do not have permission to update events.');
         }
+            $this->activityLog->logActivity([
+                'user_id' => session('userdata')['id'] ?? null,
+                'action' => 'update_event',
+                'description' => 'Updated event',
+                'details' => json_encode($this->request->getPost()),
+            ]);
 
         $validation = \Config\Services::validation();
         
@@ -231,6 +245,12 @@ class Events extends BaseController
         if (!$this->hasEditPermission()) {
             return redirect()->to('/events')->with('error', 'You do not have permission to delete events.');
         }
+            $this->activityLog->logActivity([
+                'user_id' => session('userdata')['id'] ?? null,
+                'action' => 'delete_event',
+                'description' => 'Deleted event',
+                'details' => json_encode(['event_id' => $id]),
+            ]);
 
         try {
             $this->eventsModel->deleteEvent($id);

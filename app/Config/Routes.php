@@ -46,11 +46,6 @@ $routes->get('activity/get_preview_table_data', 'Activity::get_preview_table_dat
 $routes->get('tasks', 'Tasks::index');
 $routes->get('tasks/myTasks', 'Tasks::myTasks');
 
-// Specific kanban routes (must come before the generic route)
-$routes->get('tasks/kanban_select', 'Tasks::kanbanSelect');
-$routes->get('tasks/kanbanselect', 'Tasks::kanbanSelect'); // Legacy support
-$routes->get('tasks/kanban/(:num)', 'Tasks::kanban/$1');
-$routes->post('tasks/kanban/(:num)', 'Tasks::kanban/$1');
 
 // Generic task routes (must come after specific routes)
 $routes->get('tasks/(:any)', 'Tasks::$1');

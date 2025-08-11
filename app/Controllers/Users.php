@@ -7,10 +7,12 @@ use App\Models\UserModel;
 class Users extends BaseController
 {
     protected $userModel;
+        protected $activityLog;
 
     public function __construct()
     {
         $this->userModel = new UserModel();
+        $this->activityLog = new \App\Models\ActivityLogModel();
     }
 
     public function index()
@@ -69,6 +71,12 @@ class Users extends BaseController
             'position_id' => 'required|is_natural',
             'is_active' => 'permit_empty|in_list[0,1]'
         ];
+            $this->activityLog->logActivity([
+                'user_id' => session('userdata')['id'] ?? null,
+                'action' => 'create_user',
+                'description' => 'Created a new user',
+                'details' => json_encode($this->request->getPost()),
+            ]);
 
         if (!$this->validate($rules)) {
             return $this->response->setJSON([
@@ -165,6 +173,12 @@ class Users extends BaseController
             'position_id' => 'required|is_natural',
             'is_active' => 'permit_empty|in_list[0,1]'
         ];
+            $this->activityLog->logActivity([
+                'user_id' => session('userdata')['id'] ?? null,
+                'action' => 'update_user',
+                'description' => 'Updated user',
+                'details' => json_encode($this->request->getPost()),
+            ]);
 
         if (!$this->validate($rules)) {
             // Check if it's an AJAX request
@@ -228,6 +242,12 @@ class Users extends BaseController
     {
         try {
             $this->userModel->deleteUser($id);
+                $this->activityLog->logActivity([
+                    'user_id' => session('userdata')['id'] ?? null,
+                    'action' => 'delete_user',
+                    'description' => 'Deleted user',
+                    'details' => json_encode(['user_id' => $id]),
+                ]);
             return redirect()->to('/users')->with('success', 'User deleted successfully!');
         } catch (\Exception $e) {
             log_message('error', 'User deletion error: ' . $e->getMessage());
