@@ -127,6 +127,7 @@ class Projects extends BaseController
     public function view($id)
     {
         $project = $this->projectModel->getProjectById($id);
+        
         if (!$project) {
             throw \CodeIgniter\Exceptions\PageNotFoundException::forPageNotFound();
         }
@@ -435,99 +436,6 @@ class Projects extends BaseController
         ]);
     }
 
-    // Simple test method to verify controller is accessible
-    public function test()
-    {
-        echo "Projects controller is working!";
-        exit;
-    }
-
-    public function getProject($id)
-    {
-        $userData = session('userdata');
-        $userId = $userData['id'] ?? null;
-        if (!$userId) {
-            return $this->response->setJSON([
-                'success' => false,
-                'message' => 'User not authenticated'
-            ]);
-        }
-        $project = $this->projectModel->getProjectById($id);
-        if (!$project) {
-            return $this->response->setJSON([
-                'success' => false,
-                'message' => 'Project not found'
-            ]);
-        }
-        // Add owner name
-        $owner = $this->userModel->getUserById($project['owner_id'] ?? 0);
-        $project['owner_name'] = $owner ? ($owner['full_name'] ?? 'Unknown') : 'Unknown';
-
-        // Calculate progress as in project_list (index): (completed_tasks / total_tasks) * 100
-        $taskBuilder = $this->db->table('tasks t');
-        $taskBuilder->select('COUNT(*) as total_tasks');
-        $taskBuilder->where('t.project_id', $project['id']);
-        $taskBuilder->where('t.is_delete', 0);
-        $taskStats = $taskBuilder->get()->getRowArray();
-
-        $completedBuilder = $this->db->table('tasks t');
-        $completedBuilder->select('COUNT(*) as completed_tasks');
-        $completedBuilder->join('task_status ts', 'ts.task_id = t.id AND ts.is_active = 1 AND ts.is_delete = 0', 'left');
-        $completedBuilder->join('status_lookup sl', 'sl.id = ts.status_id AND sl.code = "completed" AND sl.is_delete = 0', 'left');
-        $completedBuilder->where('t.project_id', $project['id']);
-        $completedBuilder->where('t.is_delete', 0);
-        $completedBuilder->where('sl.id IS NOT NULL');
-        $completedStats = $completedBuilder->get()->getRowArray();
-
-        $totalTasks = (int)$taskStats['total_tasks'];
-        $completedTasks = (int)$completedStats['completed_tasks'];
-        $progress = $totalTasks > 0 ? round(($completedTasks / $totalTasks) * 100, 2) : 0;
-
-        $project['progress'] = $progress;
-        $project['total_tasks'] = $totalTasks;
-        $project['completed_tasks'] = $completedTasks;
-
-        // --- Calculate average progress from JSON data in tasks (as in getUserProjects) ---
-        $taskDataBuilder = $this->db->table('tasks');
-        $taskDataBuilder->select('data');
-        $taskDataBuilder->where('project_id', $project['id']);
-        $taskDataBuilder->where('is_delete', 0);
-        $tasks = $taskDataBuilder->get()->getResultArray();
-
-        $progressSum = 0;
-        $progressCount = 0;
-        foreach ($tasks as $task) {
-            $data = json_decode($task['data'], true);
-            if (is_array($data)) {
-                foreach ($data as $value) {
-                    if (is_string($value) && strpos($value, '%') !== false) {
-                        $progressVal = trim($value);
-                        $progressVal = rtrim($progressVal, '%');
-                        if (is_numeric($progressVal)) {
-                            $progressSum += floatval($progressVal);
-                            $progressCount++;
-                            break; // Only count one progress value per task
-                        }
-                    }
-                }
-            }
-        }
-        $project['avg_progress'] = $progressCount > 0 ? ($progressSum / $progressCount) : 0;
-
-        // Ensure all fields are set and never null/empty for frontend
-        $project['name'] = $project['name'] ?? 'Untitled';
-        $project['start_date'] = $project['start_date'] ?? 'N/A';
-        $project['end_date'] = $project['end_date'] ?? 'N/A';
-        $project['budget'] = $project['budget'] ?? 'N/A';
-        $project['client'] = $project['client'] ?? 'N/A';
-        $project['status'] = $project['status_name'] ?? 'Unknown';
-        $project['status_color'] = $project['status_color'] ?? '#e2e8f0';
-
-        return $this->response->setJSON([
-            'success' => true,
-            'project' => $project
-        ]);
-    }
 
     // AJAX: Get project stats for view page
     public function getStats($id)

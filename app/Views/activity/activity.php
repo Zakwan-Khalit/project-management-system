@@ -58,7 +58,7 @@
                     <h4 style="font-family: 'Poppins', sans-serif; font-weight: 600; color: #1f2937; margin: 0; font-size: 1.4rem;"><?= esc($project['title'] ?? $project['name'] ?? 'Untitled') ?></h4>
                     <div style="display: flex; align-items: center; gap: 1rem;">
                         <div style="font-size: 1rem; color: #4a5568;">
-                            <i class="fas fa-tasks me-1"></i> <?= esc($project['task_count'] ?? 0) ?> tasks
+                            <i class="fas fa-tasks me-1"></i> <?= esc($project['component_count'] ?? 0) ?> Components
                         </div>
                         <div style="font-size: 1rem; color: #4a5568;">
                             <i class="fas fa-user-friends me-1"></i> <?= is_array($project['team_members']) ? count($project['team_members']) : 0 ?> members

@@ -1,4 +1,3 @@
-
 <!-- Login Page Content - Redesigned -->
 <div style="min-height: 100vh; display: flex; align-items: center; justify-content: center; background: #fff; font-family: 'Roboto', sans-serif;">
     <div style="display: flex; flex-wrap: wrap; width: 100%; max-width: 1100px; min-height: 600px; box-shadow: 0 20px 60px rgba(0,0,0,0.10); border-radius: 2rem; overflow: hidden; background: #fff;">

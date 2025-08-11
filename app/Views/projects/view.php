@@ -81,27 +81,37 @@
                                 <div style="margin-bottom: 1.25rem;">
                                     <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 0.5rem;">
                                         <strong>Progress:</strong>
-                                        <small class="text-muted" id="projectProgressText">0%</small>
+                                        <small class="text-muted" id="projectProgressText">
+                                            <?= isset($project['avg_progress']) ? round($project['avg_progress']) . '%' : '0%' ?>
+                                        </small>
                                     </div>
                                     <div class="progress">
-                                        <div class="progress-bar" id="projectProgressBar" style="width: 0%"></div>
+                                        <div class="progress-bar" id="projectProgressBar" style="width: <?= isset($project['avg_progress']) ? round($project['avg_progress']) : 0 ?>%"></div>
                                     </div>
                                 </div>
                                 <div style="display: flex; justify-content: space-between; align-items: center; padding: 1rem 0; border-bottom: 1px solid #f1f5f9;">
                                     <span style="font-weight: 600; color: #374151;">Start Date:</span>
-                                    <span style="color: #6b7280;" id="projectStartDate">Loading...</span>
+                                    <span style="color: #6b7280;" id="projectStartDate">
+                                        <?= isset($project['start_date']) ? esc($project['start_date']) : 'N/A' ?>
+                                    </span>
                                 </div>
                                 <div style="display: flex; justify-content: space-between; align-items: center; padding: 1rem 0; border-bottom: 1px solid #f1f5f9;">
                                     <span style="font-weight: 600; color: #374151;">End Date:</span>
-                                    <span style="color: #6b7280;" id="projectEndDate">Loading...</span>
+                                    <span style="color: #6b7280;" id="projectEndDate">
+                                        <?= isset($project['end_date']) ? esc($project['end_date']) : 'N/A' ?>
+                                    </span>
                                 </div>
                                 <div style="display: flex; justify-content: space-between; align-items: center; padding: 1rem 0; border-bottom: 1px solid #f1f5f9;">
                                     <span style="font-weight: 600; color: #374151;">Project Cost:</span>
-                                    <span style="color: #6b7280;" id="projectBudget">Loading...</span>
+                                    <span style="color: #6b7280;" id="projectBudget">
+                                        <?= isset($project['budget']) ? esc($project['budget']) : 'N/A' ?>
+                                    </span>
                                 </div>
                                 <div style="display: flex; justify-content: space-between; align-items: center; padding: 1rem 0;">
                                     <span style="font-weight: 600; color: #374151;">Client:</span>
-                                    <span style="color: #6b7280;" id="projectClient">Loading...</span>
+                                    <span style="color: #6b7280;" id="projectClient">
+                                        <?= isset($project['client']) ? esc($project['client']) : 'N/A' ?>
+                                    </span>
                                 </div>
                             </div>
                         </div>
@@ -533,61 +543,7 @@ function editProject() {
 }
 // --- END OF GLOBAL UTILITY FUNCTIONS ---
 
-function loadProjectDetails() {
-    fetch(`${baseUrl}/projects/getProject/${projectId}`)
-        .then(res => res.json())
-        .then(data => {
-            const project = data.project || {};
-            console.log('Project Data:', data); // Debug output to console
-            // Use the exact field names from your backend debug output
-            const name = project.name || 'Untitled';
-            const status = project.status_name || 'Unknown';
-            const statusColor = project.status_color || '#e2e8f0';
-            const owner = (project.owner_name && project.owner_name.trim() !== '') ? project.owner_name : 'Unknown';
-            const description = project.description || '';
-            const startDate = project.start_date || 'N/A';
-            const endDate = project.end_date || 'N/A';
-            const budget = project.budget || 'N/A';
-            const client = project.client || 'N/A';
-            const totalTasks = typeof project.total_tasks !== 'undefined' ? project.total_tasks : 0;
-            const completedTasks = typeof project.completed_tasks !== 'undefined' ? project.completed_tasks : 0;
-            // Use avg_progress from backend if available, fallback to classic progress
-            let avgProgress = typeof project.avg_progress !== 'undefined' ? Math.round(project.avg_progress) : null;
-            if (avgProgress === null || isNaN(avgProgress)) {
-                avgProgress = totalTasks > 0 ? Math.round((completedTasks / totalTasks) * 100) : 0;
-            }
 
-            const elTitle = document.getElementById('projectTitle');
-            if (elTitle) elTitle.textContent = name;
-            const elStatus = document.getElementById('projectStatus');
-            if (elStatus) {
-                elStatus.textContent = status;
-                elStatus.style.background = statusColor;
-            }
-            // Removed project owner display
-            const elDesc = document.getElementById('projectDescription');
-            if (elDesc) elDesc.textContent = description;
-            const descDetail = document.getElementById('projectDescriptionDetail');
-            if (descDetail) descDetail.textContent = description;
-            const elStart = document.getElementById('projectStartDate');
-            if (elStart) elStart.textContent = startDate;
-            const elEnd = document.getElementById('projectEndDate');
-            if (elEnd) elEnd.textContent = endDate;
-            const elBudget = document.getElementById('projectBudget');
-            if (elBudget) elBudget.textContent = budget;
-            const elClient = document.getElementById('projectClient');
-            if (elClient) elClient.textContent = client;
-            const elBar = document.getElementById('projectProgressBar');
-            if (elBar) elBar.style.width = avgProgress + '%';
-            const elText = document.getElementById('projectProgressText');
-            if (elText) elText.textContent = `${avgProgress}%`;
-        })
-        .catch(error => {
-            console.error('Error loading project details:', error);
-            const elTitle = document.getElementById('projectTitle');
-            if (elTitle) elTitle.textContent = 'Error Loading Project';
-        });
-}
 function loadProjectStats() {
     // Removed: fetch and update for team members and days left cards
 }
@@ -981,7 +937,6 @@ if (typeof renderRecentActivity !== 'function') {
 // On page load
 document.addEventListener('DOMContentLoaded', function() {
     window.baseUrl = '<?= base_url() ?>'.replace(/\/$/, '');
-    loadProjectDetails();
     loadProjectStats();
     
     // Load project components for overview tab

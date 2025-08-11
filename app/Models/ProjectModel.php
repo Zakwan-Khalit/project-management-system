@@ -286,6 +286,52 @@ class ProjectModel extends Model
             $project['priority_level'] = null;
         }
 
+        // Calculate avg_progress for this project
+        $templateBuilder = $this->db->table('task_templates');
+        $templateBuilder->select('id');
+        $templateBuilder->where('project_id', $projectId);
+        $templateBuilder->where('is_active', 1);
+        $templateBuilder->where('is_delete', 0);
+        $templates = $templateBuilder->get()->getResultArray();
+
+        $componentProgressSum = 0;
+        $componentProgressCount = 0;
+        foreach ($templates as $template) {
+            $taskBuilder = $this->db->table('tasks');
+            $taskBuilder->select('data');
+            $taskBuilder->where('template_id', $template['id']);
+            $taskBuilder->where('project_id', $projectId);
+            $taskBuilder->where('is_delete', 0);
+            $tasks = $taskBuilder->get()->getResultArray();
+            $taskProgressSum = 0;
+            $taskProgressCount = 0;
+            foreach ($tasks as $task) {
+                $data = json_decode($task['data'], true);
+                $foundProgress = false;
+                if (is_array($data)) {
+                    foreach ($data as $value) {
+                        if (is_string($value) && strpos($value, '%') !== false) {
+                            $progress = trim($value);
+                            $progress = rtrim($progress, '%');
+                            if (is_numeric($progress)) {
+                                $taskProgressSum += floatval($progress);
+                                $taskProgressCount++;
+                                $foundProgress = true;
+                                break;
+                            }
+                        }
+                    }
+                }
+                // If no progress found in this task, treat as 0%
+                if (!$foundProgress) {
+                    $taskProgressCount++;
+                }
+            }
+            $templateAvgProgress = $taskProgressCount > 0 ? ($taskProgressSum / $taskProgressCount) : 0;
+            $componentProgressSum += $templateAvgProgress;
+            $componentProgressCount++;
+        }
+        $project['avg_progress'] = $componentProgressCount > 0 ? ($componentProgressSum / $componentProgressCount) : 0;
         return $project;
     }
 
@@ -349,40 +395,55 @@ class ProjectModel extends Model
         $builder->orderBy('p.date_created', 'DESC');
 
         $projects = $builder->get()->getResultArray();
-        // Ensure every project has a team_members array and calculate progress
         foreach ($projects as &$project) {
             $project['team_members'] = $this->getProjectMembers($project['id']) ?? [];
-            
-            // Calculate average progress from task data JSON
-            $taskBuilder = $this->db->table('tasks');
-            $taskBuilder->select('data');
-            $taskBuilder->where('project_id', $project['id']);
-            $taskBuilder->where('is_delete', 0);
-            $tasks = $taskBuilder->get()->getResultArray();
-            
-            $progressSum = 0;
-            $progressCount = 0;
-            
-            foreach ($tasks as $task) {
-                $data = json_decode($task['data'], true);
-                if (is_array($data)) {
-                    // Look for any field containing a percentage (%)
-                    foreach ($data as $value) {
-                        if (is_string($value) && strpos($value, '%') !== false) {
-                            $progress = trim($value);
-                            $progress = rtrim($progress, '%');
-                            if (is_numeric($progress)) {
-                                $progressSum += floatval($progress);
-                                $progressCount++;
-                                break; // Only count one progress value per task
+            // Get all components (templates) for this project
+            $templateBuilder = $this->db->table('task_templates');
+            $templateBuilder->select('id');
+            $templateBuilder->where('project_id', $project['id']);
+            $templateBuilder->where('is_active', 1);
+            $templateBuilder->where('is_delete', 0);
+            $templates = $templateBuilder->get()->getResultArray();
+            $project['component_count'] = count($templates);
+
+            $componentProgressSum = 0;
+            $componentProgressCount = 0;
+            foreach ($templates as $template) {
+                $taskBuilder = $this->db->table('tasks');
+                $taskBuilder->select('data');
+                $taskBuilder->where('template_id', $template['id']);
+                $taskBuilder->where('project_id', $project['id']);
+                $taskBuilder->where('is_delete', 0);
+                $tasks = $taskBuilder->get()->getResultArray();
+                $taskProgressSum = 0;
+                $taskProgressCount = 0;
+                foreach ($tasks as $task) {
+                    $data = json_decode($task['data'], true);
+                    $foundProgress = false;
+                    if (is_array($data)) {
+                        foreach ($data as $value) {
+                            if (is_string($value) && strpos($value, '%') !== false) {
+                                $progress = trim($value);
+                                $progress = rtrim($progress, '%');
+                                if (is_numeric($progress)) {
+                                    $taskProgressSum += floatval($progress);
+                                    $taskProgressCount++;
+                                    $foundProgress = true;
+                                    break;
+                                }
                             }
                         }
                     }
+                    // If no progress found in this task, treat as 0%
+                    if (!$foundProgress) {
+                        $taskProgressCount++;
+                    }
                 }
+                $templateAvgProgress = $taskProgressCount > 0 ? ($taskProgressSum / $taskProgressCount) : 0;
+                $componentProgressSum += $templateAvgProgress;
+                $componentProgressCount++;
             }
-            
-            // Set average progress
-            $project['avg_progress'] = $progressCount > 0 ? ($progressSum / $progressCount) : 0;
+            $project['avg_progress'] = $componentProgressCount > 0 ? ($componentProgressSum / $componentProgressCount) : 0;
         }
         unset($project);
         return $projects;
@@ -628,35 +689,54 @@ class ProjectModel extends Model
         $builder->orderBy('p.date_created', 'DESC');
         $projects = $builder->get()->getResultArray();
 
-        // Add task statistics for each project
+        // Add statistics for each project
         foreach ($projects as &$project) {
-            // Get task counts
-            $taskBuilder = $this->db->table('tasks t');
-            $taskBuilder->select('data');
-            $taskBuilder->where('t.project_id', $project['id']);
-            $taskBuilder->where('t.is_delete', 0);
-            $tasks = $taskBuilder->get()->getResultArray();
-            
-            $progressSum = 0;
-            $progressCount = 0;
-            
-            foreach ($tasks as $task) {
-                $data = json_decode($task['data'], true);
-                if (is_array($data)) {
-                    foreach ($data as $value) {
-                        if (is_string($value) && strpos($value, '%') !== false) {
-                            $progressVal = rtrim($value, '%');
-                            if (is_numeric($progressVal)) {
-                                $progressSum += floatval($progressVal);
-                                $progressCount++;
+            // Get all components (templates) for this project
+            $templateBuilder = $this->db->table('task_templates');
+            $templateBuilder->select('id');
+            $templateBuilder->where('project_id', $project['id']);
+            $templateBuilder->where('is_active', 1);
+            $templateBuilder->where('is_delete', 0);
+            $templates = $templateBuilder->get()->getResultArray();
+
+            $componentProgressSum = 0;
+            $componentProgressCount = 0;
+            foreach ($templates as $template) {
+                $taskBuilder = $this->db->table('tasks');
+                $taskBuilder->select('data');
+                $taskBuilder->where('template_id', $template['id']);
+                $taskBuilder->where('project_id', $project['id']);
+                $taskBuilder->where('is_delete', 0);
+                $tasks = $taskBuilder->get()->getResultArray();
+                $taskProgressSum = 0;
+                $taskProgressCount = 0;
+                foreach ($tasks as $task) {
+                    $data = json_decode($task['data'], true);
+                    $foundProgress = false;
+                    if (is_array($data)) {
+                        foreach ($data as $value) {
+                            if (is_string($value) && strpos($value, '%') !== false) {
+                                $progress = trim($value);
+                                $progress = rtrim($progress, '%');
+                                if (is_numeric($progress)) {
+                                    $taskProgressSum += floatval($progress);
+                                    $taskProgressCount++;
+                                    $foundProgress = true;
+                                    break;
+                                }
                             }
                         }
                     }
+                    // If no progress found in this task, treat as 0%
+                    if (!$foundProgress) {
+                        $taskProgressCount++;
+                    }
                 }
+                $templateAvgProgress = $taskProgressCount > 0 ? ($taskProgressSum / $taskProgressCount) : 0;
+                $componentProgressSum += $templateAvgProgress;
+                $componentProgressCount++;
             }
-
-            // Calculate progress
-            $progress = $progressCount > 0 ? round($progressSum / $progressCount, 2) : 0;
+            $project['avg_progress'] = $componentProgressCount > 0 ? ($componentProgressSum / $componentProgressCount) : 0;
 
             // Get member count
             $memberBuilder = $this->db->table('project_members');
@@ -666,7 +746,6 @@ class ProjectModel extends Model
             $memberBuilder->where('is_delete', 0);
             $memberStats = $memberBuilder->get()->getRowArray();
 
-            $project['progress'] = $progress;
             $project['member_count'] = (int)$memberStats['member_count'];
 
             // Ensure we have the right field names for JavaScript

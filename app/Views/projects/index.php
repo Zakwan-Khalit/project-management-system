@@ -471,7 +471,7 @@ function renderTableView() {
 // Create compact horizontal project card HTML
 function createHorizontalProjectCard(project) {
     // Use progress field directly
-    let progressPercentage = project.progress ? Math.round(project.progress) : 0;
+    let progressPercentage = project.avg_progress ? Math.round(project.avg_progress) : 0;
     const statusBadge = getStatusBadge(project.status);
     const dueDate = project.end_date ? formatDate(project.end_date) : 'No due date';
 
@@ -547,7 +547,7 @@ function createHorizontalProjectCard(project) {
 
 // Create project row HTML for table view
 function createProjectRow(project) {
-    const progressPercentage = project.total_tasks > 0 ? Math.round((project.completed_tasks / project.total_tasks) * 100) : 0;
+    const progressPercentage = project.avg_progress ? Math.round(project.avg_progress) : 0;
     const statusBadge = getStatusBadge(project.status);
     const dueDate = project.end_date ? formatDate(project.end_date) : 'No due date';
     
