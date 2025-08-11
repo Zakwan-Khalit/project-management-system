@@ -268,6 +268,8 @@ class Projects extends BaseController
 
         $memberUserId = $this->request->getPost('user_id');
         $role = $this->request->getPost('role') ?: 'member';
+        $fte = $this->request->getPost('fte');
+        $endDateInvolvement = $this->request->getPost('end_date_involvement');
         
         // Check if user is already a member using model method
         if ($this->projectModel->checkProjectMemberExists($projectId, $memberUserId)) {
@@ -277,8 +279,8 @@ class Projects extends BaseController
             ]);
         }
         
-        // Add member using model method
-        if ($this->projectModel->addProjectMember($projectId, $memberUserId, $role, $userId)) {
+    // Add member using model method
+    if ($this->projectModel->addProjectMember($projectId, $memberUserId, $role, $userId, $fte, $endDateInvolvement)) {
             $user = $this->userModel->getUserById($memberUserId);
             
             // Log activity
@@ -605,6 +607,8 @@ class Projects extends BaseController
                 'user_id' => $m['user_id'],
                 'full_name' => $m['full_name'],
                 'role' => $m['role'],
+                'fte' => $m['fte'],
+                'end_date_involvement' => $m['end_date_involvement'],
             ];
         }, $members);
         return $this->response->setJSON([
@@ -1029,8 +1033,9 @@ class Projects extends BaseController
         if (!$userId) {
             return $this->response->setJSON(['error' => 'No user ID provided'])->setStatusCode(400);
         }
+        $projectId = $this->request->getGet('project_id');
         $projectModel = new \App\Models\ProjectModel();
-        $member = $projectModel->getProjectMemberByUserId($userId);
+        $member = $projectModel->getProjectMemberByUserId($userId, $projectId);
         if (!$member) {
             return $this->response->setJSON(['error' => 'Member not found'])->setStatusCode(404);
         }

@@ -90,20 +90,20 @@
                 <table class="table table-bordered mb-0" id="progressTable" style="min-width: 1200px; border-collapse: collapse;">
                     <thead style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white;">
                         <tr>
-                            <th rowspan="2" style="padding: 1rem; font-weight: 600; text-align: center; border: 1px solid #d1d5db; vertical-align: middle;">NUM</th>
-                            <th rowspan="2" style="padding: 1rem; font-weight: 600; text-align: center; border: 1px solid #d1d5db; vertical-align: middle;">ACTIVITY</th>
-                            <th colspan="2" style="padding: 1rem; font-weight: 600; text-align: center; border: 1px solid #d1d5db; vertical-align: middle;">PLANNED DATE</th>
-                            <th colspan="2" style="padding: 1rem; font-weight: 600; text-align: center; border: 1px solid #d1d5db; vertical-align: middle;">ACTUAL DATE</th>
-                            <th rowspan="2" style="padding: 1rem; font-weight: 600; text-align: center; border: 1px solid #d1d5db; vertical-align: middle;">PLANNED<br>PERCENTAGE<br>(%)</th>
-                            <th rowspan="2" style="padding: 1rem; font-weight: 600; text-align: center; border: 1px solid #d1d5db; vertical-align: middle;">ACTUAL<br>PERCENTAGE<br>(%)</th>
-                            <th rowspan="2" style="padding: 1rem; font-weight: 600; text-align: center; border: 1px solid #d1d5db; vertical-align: middle;">VARIANT<br>(%)</th>
-                            <th rowspan="2" style="padding: 1rem; font-weight: 600; text-align: center; border: 1px solid #d1d5db; vertical-align: middle;">STATUS</th>
+                            <th rowspan="2" style="padding: 1rem; font-weight: 600; text-align: center; border: 1px solid #d1d5db; vertical-align: middle;">No</th>
+                            <th rowspan="2" style="padding: 1rem; font-weight: 600; text-align: center; border: 1px solid #d1d5db; vertical-align: middle;">Activity</th>
+                            <th colspan="2" style="padding: 1rem; font-weight: 600; text-align: center; border: 1px solid #d1d5db; vertical-align: middle;">Planned Date</th>
+                            <th colspan="2" style="padding: 1rem; font-weight: 600; text-align: center; border: 1px solid #d1d5db; vertical-align: middle;">Actual Date</th>
+                            <th rowspan="2" style="padding: 1rem; font-weight: 600; text-align: center; border: 1px solid #d1d5db; vertical-align: middle;">Planned<br>Percentage<br>(%)</th>
+                            <th rowspan="2" style="padding: 1rem; font-weight: 600; text-align: center; border: 1px solid #d1d5db; vertical-align: middle;">Actual<br>Percentage<br>(%)</th>
+                            <th rowspan="2" style="padding: 1rem; font-weight: 600; text-align: center; border: 1px solid #d1d5db; vertical-align: middle;">Variant<br>(%)</th>
+                            <th rowspan="2" style="padding: 1rem; font-weight: 600; text-align: center; border: 1px solid #d1d5db; vertical-align: middle;">Status</th>
                         </tr>
                         <tr style="background: rgba(255,255,255,0.1);">
-                            <th style="padding: 0.75rem; font-weight: 500; text-align: center; border: 1px solid #d1d5db;">START</th>
-                            <th style="padding: 0.75rem; font-weight: 500; text-align: center; border: 1px solid #d1d5db;">END</th>
-                            <th style="padding: 0.75rem; font-weight: 500; text-align: center; border: 1px solid #d1d5db;">START</th>
-                            <th style="padding: 0.75rem; font-weight: 500; text-align: center; border: 1px solid #d1d5db;">END</th>
+                            <th style="padding: 0.75rem; font-weight: 500; text-align: center; border: 1px solid #d1d5db;">Start</th>
+                            <th style="padding: 0.75rem; font-weight: 500; text-align: center; border: 1px solid #d1d5db;">End</th>
+                            <th style="padding: 0.75rem; font-weight: 500; text-align: center; border: 1px solid #d1d5db;">Start</th>
+                            <th style="padding: 0.75rem; font-weight: 500; text-align: center; border: 1px solid #d1d5db;">End</th>
                         </tr>
                     </thead>
                     <tbody id="progressTableBody">

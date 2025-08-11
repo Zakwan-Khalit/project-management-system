@@ -209,10 +209,23 @@ function editTeamMember(userId, fullName, fte, endDateInvolvement) {
     $.ajax({
         url: baseUrl + '/projects/get_project_member/' + userId,
         method: 'GET',
+        data: { project_id: projectId },
         dataType: 'json',
         success: function(data) {
-            let fteVal = (data.fte === undefined || data.fte === null || data.fte === 'null' || data.fte === '') ? '1.00' : data.fte;
-            let endDateVal = (data.end_date_involvement === undefined || data.end_date_involvement === null || data.end_date_involvement === 'null' || data.end_date_involvement === '') ? '' : data.end_date_involvement;
+            let fteVal = (data.fte !== undefined && data.fte !== null && data.fte !== 'null' && data.fte !== '') ? data.fte : '1.00';
+            let endDateVal = (data.end_date_involvement !== undefined && data.end_date_involvement !== null && data.end_date_involvement !== 'null' && data.end_date_involvement !== '') ? data.end_date_involvement : '';
+            // Format endDateVal for input type="date" (YYYY-MM-DD)
+            if (endDateVal && !/^[0-9]{4}-[0-9]{2}-[0-9]{2}$/.test(endDateVal)) {
+                const d = new Date(endDateVal);
+                if (!isNaN(d.getTime())) {
+                    const yyyy = d.getFullYear();
+                    const mm = String(d.getMonth() + 1).padStart(2, '0');
+                    const dd = String(d.getDate()).padStart(2, '0');
+                    endDateVal = `${yyyy}-${mm}-${dd}`;
+                } else {
+                    endDateVal = '';
+                }
+            }
             Swal.fire({
                 title: `Edit Member: ${fullName}`,
                 html: `
@@ -277,24 +290,24 @@ function addTeamMember() {
         title: 'Add Project Member',
         html: `
             <div class="mb-3 text-start">
-                <label for="positionDropdown" class="form-label">Role</label>
-                <select id="positionDropdown" class="form-select">
+                <label for="positionDropdown" class="form-label">Role <span style="color:red">*</span></label>
+                <select id="positionDropdown" class="form-select" required>
                     <option value="">-- Please Select --</option>
                 </select>
             </div>
             <div class="mb-3 text-start">
-                <label for="userDropdown" class="form-label">Users</label>
-                <select id="userDropdown" class="form-select" multiple disabled style="width:100%">
+                <label for="userDropdown" class="form-label">Users <span style="color:red">*</span></label>
+                <select id="userDropdown" class="form-select" multiple required disabled style="width:100%">
                     <option value="">-- Please Select --</option>
                 </select>
             </div>
             <div class="mb-3 text-start">
-                <label for="fteInput" class="form-label">FTE</label>
-                <input id="fteInput" type="number" class="form-control" min="0" max="1" step="0.01" placeholder="e.g. 1.00" value="1.00">
+                <label for="fteInput" class="form-label">FTE <span style="color:red">*</span></label>
+                <input id="fteInput" type="number" class="form-control" min="0" max="1" step="0.01" placeholder="e.g. 1.00" value="1.00" required>
             </div>
             <div class="mb-3 text-start">
-                <label for="endDateInvolvementInput" class="form-label">End Date Involvement</label>
-                <input id="endDateInvolvementInput" type="date" class="form-control">
+                <label for="endDateInvolvementInput" class="form-label">End Date Involvement <span style="color:red">*</span></label>
+                <input id="endDateInvolvementInput" type="date" class="form-control" required>
             </div>
         `,
         showCancelButton: true,
@@ -365,14 +378,41 @@ function addTeamMember() {
         preConfirm: () => {
             let posId = $('#positionDropdown').val();
             let userIds = $('#userDropdown').val();
-            let fte = parseFloat($('#fteInput').val());
+            // Ensure userIds is always an array
+            if (!Array.isArray(userIds)) {
+                userIds = userIds ? [userIds] : [];
+            }
+            let fte = $('#fteInput').val();
             let endDateInvolvement = $('#endDateInvolvementInput').val();
-            if (!posId || !userIds || userIds.length === 0) {
-                Swal.showValidationMessage('Please select a role and at least one user.');
+            // Ensure date is in YYYY-MM-DD format
+            if (endDateInvolvement) {
+                const d = new Date(endDateInvolvement);
+                if (!isNaN(d.getTime())) {
+                    // Pad month and day
+                    const yyyy = d.getFullYear();
+                    const mm = String(d.getMonth() + 1).padStart(2, '0');
+                    const dd = String(d.getDate()).padStart(2, '0');
+                    endDateInvolvement = `${yyyy}-${mm}-${dd}`;
+                }
+            }
+            // Role required
+            if (!posId || posId === '' || posId === null) {
+                Swal.showValidationMessage('Role is required.');
                 return false;
             }
-            if (isNaN(fte) || fte < 0 || fte > 1) {
-                Swal.showValidationMessage('FTE must be a number between 0.00 and 1.00');
+            // Users required
+            if (!userIds || userIds.length === 0) {
+                Swal.showValidationMessage('Please select at least one user.');
+                return false;
+            }
+            // FTE required and valid
+            if (fte === '' || fte === null || isNaN(parseFloat(fte)) || parseFloat(fte) < 0 || parseFloat(fte) > 1) {
+                Swal.showValidationMessage('FTE is required and must be a number between 0.00 and 1.00');
+                return false;
+            }
+            // End Date required
+            if (!endDateInvolvement || endDateInvolvement === '' || endDateInvolvement === null) {
+                Swal.showValidationMessage('End Date Involvement is required.');
                 return false;
             }
             // AJAX to add members to project
@@ -383,7 +423,7 @@ function addTeamMember() {
                     project_id: projectId,
                     position_id: posId,
                     user_ids: userIds,
-                    fte: fte.toFixed(2),
+                    fte: parseFloat(fte).toFixed(2),
                     end_date_involvement: endDateInvolvement
                 },
                 dataType: 'json'

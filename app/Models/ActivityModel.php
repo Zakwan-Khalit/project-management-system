@@ -307,7 +307,7 @@ class ActivityModel extends Model
     /**
      * Create a new scope
      */
-    public function createScope($projectId, $scopeLookupId, $description = null)
+    public function createScope($projectId, $scopeLookupId, $customScopeName = null)
     {
         // Get the next order number
         $builder = $this->db->table('project_scopes');
@@ -317,13 +317,21 @@ class ActivityModel extends Model
         $result = $builder->get()->getRowArray();
         $nextOrder = ($result['scope_order'] ?? 0) + 1;
 
-        // Get the name from scope_lookup
-        $lookup = $this->db->table('scope_lookup')->where('id', $scopeLookupId)->get()->getRowArray();
-        $name = $lookup ? $lookup['name'] : '';
+        // Get the name from scope_lookup, or use custom
+        $name = '';
+        if ($scopeLookupId) {
+            $lookup = $this->db->table('scope_lookup')->where('id', $scopeLookupId)->get()->getRowArray();
+            $name = $lookup ? $lookup['name'] : '';
+        }
+        if ($customScopeName) {
+            $name = $customScopeName;
+        }
 
+        if (empty($scopeLookupId) || $scopeLookupId == 0) {
+            $scopeLookupId = null;
+        }
         $data = [
             'project_id' => $projectId,
-            'scope_lookup_id' => $scopeLookupId,
             'name' => $name,
             'scope_order' => $nextOrder,
             'is_active' => 1,
@@ -331,6 +339,9 @@ class ActivityModel extends Model
             'date_created' => date('Y-m-d H:i:s'),
             'date_modified' => date('Y-m-d H:i:s')
         ];
+        if ($scopeLookupId !== null) {
+            $data['scope_lookup_id'] = $scopeLookupId;
+        }
 
         if ($this->db->table('project_scopes')->insert($data)) {
             return $this->db->insertID();
@@ -345,7 +356,6 @@ class ActivityModel extends Model
     {
         $data = [
             'name' => $name,
-            'description' => $description,
             'date_modified' => date('Y-m-d H:i:s')
         ];
 
@@ -382,12 +392,14 @@ class ActivityModel extends Model
     {
         if (!is_array($templateOrder)) return false;
         
-        foreach ($templateOrder as $index => $templateId) {
+        foreach ($templateOrder as $row) {
+            $templateId = $row['template_id'];
+            $order = $row['order'];
             $this->db->table('task_templates')
                 ->where('id', $templateId)
                 ->where('scope_id', $scopeId)
                 ->update([
-                    'component_order' => $index + 1,
+                    'component_order' => $order,
                     'date_modified' => date('Y-m-d H:i:s')
                 ]);
         }
@@ -411,7 +423,6 @@ class ActivityModel extends Model
             'project_id' => $projectId,
             'scope_id' => $scopeId,
             'name' => $name,
-            'description' => $description,
             'weightage' => $weightage,
             'component_order' => $nextOrder,
             'fields' => json_encode([1,2,3,4,5,6,7,8,9,10,11,12,13]), // Default fields
