@@ -1,10 +1,10 @@
 -- Database Schema: Table Creation Only
--- Create database for project management system
-CREATE DATABASE IF NOT EXISTS `project_management_system` 
+-- Create database for keratsk
+CREATE DATABASE IF NOT EXISTS `keratsk` 
 CHARACTER SET utf8mb4 COLLATE=utf8mb4_general_ci;
 
 -- Use the database
-USE `project_management_system`;
+USE `keratsk`;
 
 -- Lookup Tables for Dropdowns and References
 -- Status lookup table

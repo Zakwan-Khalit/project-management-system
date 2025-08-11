@@ -75,7 +75,7 @@ INSERT INTO `user_rel` (`user_id`, `department_id`, `position_id`, `is_active`, 
 (2, 2, 3, 1, 0); -- Natasha -> Usability -> System Analyst
 
 INSERT INTO `projects` (`name`, `cost`, `client`, `budget`, `start_date`, `end_date`) VALUES
-('Project Management System', 50000.00, 'Internal Development', 50000.00, '2025-01-01', '2025-06-30');
+('keratsk', 50000.00, 'Internal Development', 50000.00, '2025-01-01', '2025-06-30');
 
 -- Insert scope lookup data
 INSERT INTO `scope_lookup` (`id`, `name`, `description`) VALUES
@@ -177,7 +177,7 @@ UPDATE `task_templates` SET `fields` = '[1,2,3,4,5,6,7,8,9,10,11,12,13]' WHERE `
 
 -- Insert sample activity log data
 INSERT INTO `activity_logs` (`user_id`, `project_id`, `action`, `description`, `details`, `is_active`, `is_delete`, `date_created`, `date_modified`) VALUES
-(1, 1, 'created', 'Project created', 'New project "Project Management System" has been created', 1, 0, NOW() - INTERVAL 5 DAY, NOW() - INTERVAL 5 DAY),
+(1, 1, 'created', 'Project created', 'New project "keratsk" has been created', 1, 0, NOW() - INTERVAL 5 DAY, NOW() - INTERVAL 5 DAY),
 (1, 1, 'updated', 'Project updated', 'Project details have been modified', 1, 0, NOW() - INTERVAL 4 DAY, NOW() - INTERVAL 4 DAY),
 (1, 1, 'team_member_added', 'Team member added', 'Natasha Nazrin has been added to the project team', 1, 0, NOW() - INTERVAL 3 DAY, NOW() - INTERVAL 3 DAY),
 (1, 1, 'task_created', 'Task created', 'New task "User Acceptance Testing" has been created', 1, 0, NOW() - INTERVAL 2 DAY, NOW() - INTERVAL 2 DAY),

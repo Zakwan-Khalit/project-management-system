@@ -1,9 +1,9 @@
 <!-- Use this file to provide workspace-specific custom instructions to Copilot. For more details, visit https://code.visualstudio.com/docs/copilot/copilot-customization#_use-a-githubcopilotinstructionsmd-file -->
 
-# Project Management System - Copilot Instructions
+# keratsk - Copilot Instructions
 
 ## Project Overview
-This is a comprehensive project management system built with CodeIgniter 4 and modern frontend technologies. The system provides features for project tracking, task management, team collaboration, and progress monitoring.
+This is a comprehensive keratsk built with CodeIgniter 4 and modern frontend technologies. The system provides features for project tracking, task management, team collaboration, and progress monitoring.
 
 ## Technology Stack
 - **Backend Framework**: CodeIgniter 4 (PHP)
