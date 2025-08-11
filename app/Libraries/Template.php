@@ -51,7 +51,7 @@ class Template
         }
         
         // Set default values
-        $template_data['title'] = $template_data['title'] ?? 'keratsk';
+        $template_data['title'] = $template_data['title'] ?? 'kertask';
         $template_data['page_title'] = $template_data['page_title'] ?? '';
         $template_data['breadcrumbs'] = $template_data['breadcrumbs'] ?? [];
         $template_data['user'] = $template_data['user'] ?? session()->get();

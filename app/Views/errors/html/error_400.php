@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
     <meta charset="utf-8">
-    <title>Bad Request - keratsk</title>
+    <title>Bad Request - kertask</title>
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     
     <!-- Font Awesome -->

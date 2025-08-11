@@ -1,10 +1,10 @@
 -- Database Schema: Table Creation Only
--- Create database for keratsk
-CREATE DATABASE IF NOT EXISTS `keratsk` 
+-- Create database for kertask
+CREATE DATABASE IF NOT EXISTS `kertask` 
 CHARACTER SET utf8mb4 COLLATE=utf8mb4_general_ci;
 
 -- Use the database
-USE `keratsk`;
+USE `kertask`;
 
 -- Lookup Tables for Dropdowns and References
 -- Status lookup table

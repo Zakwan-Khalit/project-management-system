@@ -83,7 +83,7 @@ class Home extends BaseController
                 'projects' => $projects,
                 'recentActivities' => $recentActivities,
                 'teamCount' => $teamCount,
-                'title' => 'Dashboard - keratsk',
+                'title' => 'Dashboard - kertask',
                 'statusData' => $statusData
             ];
             
@@ -111,7 +111,7 @@ class Home extends BaseController
                 'projects' => [],
                 'recentActivities' => [],
                 'teamCount' => 0,
-                'title' => 'Dashboard - keratsk',
+                'title' => 'Dashboard - kertask',
                 'error_message' => 'Unable to load dashboard data. Please try again later.'
             ];
 
